@@ -1,0 +1,85 @@
+package com.mike.uniadmin
+
+import android.content.Context
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.mike.uniadmin.announcements.AnnouncementsScreen
+import com.mike.uniadmin.authentication.LoginScreen
+import com.mike.uniadmin.authentication.PasswordReset
+import com.mike.uniadmin.chat.ChatScreen
+import com.mike.uniadmin.chat.ParticipantsScreen
+import com.mike.uniadmin.chat.UserChatScreen
+import com.mike.uniadmin.settings.Settings
+import com.mike.uniadmin.ui.theme.Appearance
+
+@Composable
+fun NavigationGraph(context: Context, mainActivity: MainActivity){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "splashscreen"){
+        composable("splashscreen"){
+            SplashScreen(navController = navController, context)
+        }
+        composable("login"){
+            LoginScreen(navController = navController, context)
+        }
+        composable("dashboard"){
+            Dashboard(navController = navController, context)
+        }
+        composable("profile"){
+            ProfileScreen(navController = navController, context)
+        }
+        composable("settings"){
+            Settings(navController = navController, context, mainActivity)
+        }
+        composable("users"){
+            ParticipantsScreen(navController = navController, context)
+        }
+        composable("chat/{userId}", enterTransition = {
+            fadeIn(animationSpec = tween(1000)) + slideInVertically(animationSpec = tween(1000)) { initialState -> initialState }
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(1000)) + slideOutVertically(animationSpec = tween(1000)) { finalState -> finalState }
+        }, arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            UserChatScreen(
+                navController,
+                LocalContext.current,
+                backStackEntry.arguments?.getString("userId") ?: ""
+            )
+        }
+        composable("announcements"){
+            AnnouncementsScreen(navController = navController, context)
+        }
+        composable("timetable"){
+            TimetableScreen(navController = navController, context)
+        }
+        composable("assignments"){
+            AssignmentScreen(navController = navController, context)
+        }
+        composable("attendance"){
+            ManageAttendanceScreen(navController = navController, context)
+        }
+        composable("passwordreset"){
+            PasswordReset(navController = navController, context)
+        }
+        composable("courses"){
+            CoursesScreen(navController = navController, context)
+        }
+        composable("appearance"){
+            Appearance(navController = navController, context)
+        }
+        composable("discussion"){
+            ChatScreen(navController = navController, context)
+        }
+
+    }
+}
