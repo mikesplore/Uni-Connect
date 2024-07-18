@@ -38,6 +38,7 @@ import com.mike.uniadmin.CommonComponents as CC
 
 object CourseName {
     var name: MutableState<String> = mutableStateOf("")
+    var courseID: MutableState<String> = mutableStateOf("")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
