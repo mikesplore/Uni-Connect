@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.ui.theme.currentFontFamily
+import java.text.DateFormat
 import java.time.LocalTime
+import java.util.Date
+import java.util.Locale
 
 
 object CommonComponents {
@@ -73,6 +76,11 @@ object CommonComponents {
                 )
         )
     }
+
+
+    private val currentDate = Date()
+    private val formatter: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()) // Use default locale
+    val date: String = formatter.format(currentDate)
 
     @Composable
     fun getGreetingMessage(): String {
