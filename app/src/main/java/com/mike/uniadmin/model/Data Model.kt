@@ -1,5 +1,18 @@
 package com.mike.uniadmin.model
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.filled.AddAlert
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.AddAlert
+import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import java.util.UUID
 
 
@@ -147,3 +160,106 @@ data class UserPreferences(
     val notifications: String = "disabled"
 
 )
+
+//these are the Bottom icons of the Bottom Nav
+
+sealed class Screen(
+    val selectedIcon: ImageVector, val unselectedIcon: ImageVector, val name: String
+) {
+    data object Home : Screen(
+        Icons.Filled.Home, Icons.Outlined.Home, "Home"
+    )
+
+    data object Timetable :
+        Screen(Icons.Filled.CalendarToday, Icons.Outlined.CalendarToday, "Events")
+
+    data object Assignments : Screen(
+        Icons.AutoMirrored.Filled.Assignment, Icons.AutoMirrored.Outlined.Assignment, "Work"
+    )
+
+    data object Announcements : Screen(
+        Icons.Filled.AddAlert, Icons.Outlined.AddAlert, "Alerts"
+    )
+
+    data object Attendance : Screen(
+        Icons.Filled.Book, Icons.Outlined.Book, "Attendance"
+    )
+
+}
+
+//random color for the course contents
+val randomColor = listOf(
+    Color(0xff00A9FF),
+    Color(0xff4A249D),
+    Color(0xff009FBD),
+    Color(0xffA34343),
+    Color(0xff6C22A6),
+    Color(0xff83A2FF),
+    Color(0xff0C356A)
+
+)
+
+
+data class CourseAnnouncement(
+    val announcementID: String = "",
+    val date: String = "",
+    val title: String = "",
+    val description: String = "",
+    val author: String = ""
+)
+
+data class CourseAssignment(
+    val assignmentID: String = "",
+    val title: String = "",
+    val description: String = "",
+    val publishedDate: String = "",
+    val dueDate: String = ""
+)
+
+data class CourseTimetable(
+    val timetableID: String = "",
+    val startTime: String = "",
+    val endTime: String = "",
+    val venue: String = "",
+    val lecturer: String = "",
+)
+
+data class CourseDetails(
+    val detailsID: String = "",
+    val courseName: String = "",
+    val courseCode: String = "",
+    val lecturer: String = "",
+    val numberOfVisits: String = "",
+    val courseDepartment: String = "",
+    val overview: String = "",
+    val learningOutcomes: List<String> = emptyList(),
+    val schedule: String = "",
+    val requiredMaterials: String = ""
+)
+
+
+
+
+//upon course click, we will get the course code that
+// will navigate us to the Course Screen
+//using this course code, we will fetch the course details
+//in the Courses Node(Course name and visits)
+//using the same code, we will search the course content in the
+// courseData Node (all the fields in the CourseAnnouncement)
+//then display them in the UI
+
+//defining our Node
+//root directory will be CourseData
+//under CourseData, we will have the course code as the key
+//under this node we will have the course data contents as defined
+// in our data class (CourseAnnouncement)
+//CourseData -> Root Node
+//CourseCode -> Key
+//CourseAnnouncements -> Sub Node
+//AnnouncementID ->Key
+//Title
+//Description
+//Date
+//Author
+
+//the same logic applies to all other Sections of the Course
