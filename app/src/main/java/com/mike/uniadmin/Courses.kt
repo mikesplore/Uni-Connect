@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.Course
+import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +39,7 @@ fun CoursesScreen(navController: NavController, context: Context) {
     var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(loading) {
+        GlobalColors.loadColorScheme(context)
         MyDatabase.fetchCourses { fetchedCourses ->
             courses.clear()
             courses.addAll(fetchedCourses)
@@ -113,7 +115,7 @@ fun CoursesScreen(navController: NavController, context: Context) {
                 }
             } else {
                 courses.forEach { course ->
-                    CourseCard(course = course, context = context)
+                    CourseCard(course = course, context = context, navController)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
@@ -128,7 +130,7 @@ fun CoursesScreenPreview() {
 }
 
 @Composable
-fun CourseCard(course: Course, context: Context) {
+fun CourseCard(course: Course, context: Context, navController: NavController) {
     var isFlipped by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if (isFlipped) 180f else 0f,
@@ -136,6 +138,13 @@ fun CourseCard(course: Course, context: Context) {
         label = ""
     )
 
+    Column {
+        Text("Click here", style = CC.descriptionTextStyle(context),
+            modifier = Modifier.clickable {
+                CourseName.courseID.value = course.courseCode
+                CourseName.name.value = course.courseName
+                navController.navigate("courseContent/${course.courseCode}")
+            })
     Box(
         modifier = Modifier
             .height(150.dp)
@@ -154,7 +163,7 @@ fun CourseCard(course: Course, context: Context) {
         } else {
             BackCardContent(course.courseCode, course.visits.toString(), context)
         }
-    }
+    }}
 }
 
 @Composable
