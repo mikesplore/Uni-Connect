@@ -7,25 +7,35 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.PasswordReset
 import com.mike.uniadmin.chat.ChatScreen
 import com.mike.uniadmin.chat.ParticipantsScreen
 import com.mike.uniadmin.chat.UserChatScreen
+import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "splashscreen"){
+    val pagerState = rememberPagerState()
+    val coroutineScope = rememberCoroutineScope()
+    val screens = listOf(
+        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
+    )
+    NavHost(navController = navController, startDestination = "courses"){
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
         }
@@ -80,6 +90,18 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity){
         composable("discussion"){
             ChatScreen(navController = navController, context)
         }
+        composable("homescreen"){
+            HomeScreen(navController,context,pagerState,mainActivity,screens,coroutineScope)
+        }
 
+        composable("courseContent/{courseId}",
+            arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            CourseContent(
+                navController,
+                context,
+                backStackEntry.arguments?.getString("courseId") ?: ""
+            )
+        }
     }
 }
