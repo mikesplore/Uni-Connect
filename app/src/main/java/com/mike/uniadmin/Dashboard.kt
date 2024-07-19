@@ -58,17 +58,14 @@ fun Dashboard(navController: NavController, context: Context) {
         }
     }
 
-    fun getGreetingMessage(): String {
-        val currentTime = LocalTime.now()
-        return when (currentTime.hour) {
-            in 5..11 -> "Good Morning"
-            in 12..17 -> "Good Afternoon"
-            in 18..21 -> "Good Evening"
-            else -> "Good Night"
-        }
-    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBarContent(profileImageUrl, signedInUser, context)
+        YouTubePlayerScreen(
+            context = LocalContext.current,
+            videoId = "T6u0TDvC1cw",  // Replace with actual video ID
+            modifier = Modifier.fillMaxSize()
+        )
         Column(modifier = Modifier.weight(1f)) { }
     }
 }
