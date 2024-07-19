@@ -12,6 +12,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
@@ -37,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             sharedPreferences = getSharedPreferences("NotificationPrefs", Context.MODE_PRIVATE)
             NavigationGraph(this, this)
+
         }
         createNotificationChannel(this)
     }
