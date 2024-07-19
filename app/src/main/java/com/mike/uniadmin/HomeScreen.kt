@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -224,8 +225,8 @@ fun TopAppBarContent(profileImageUrl: String, signedInUser: User, context: Conte
                     .weight(1f),
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Text("Hello", style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(alpha = 0.5f)))
-                    Text(signedInUser.firstName, style = CC.titleTextStyle(context))
+                    Text(CC.getGreetingMessage(), style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(alpha = 0.5f)))
+                    Text(signedInUser.firstName, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold))
 
                 }
             }
