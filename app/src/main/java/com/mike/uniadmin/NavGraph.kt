@@ -25,6 +25,7 @@ import com.mike.uniadmin.chat.UserChatScreen
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
+import com.mike.uniadmin.youtubeVideos.Videos
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -35,9 +36,12 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity){
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
-    NavHost(navController = navController, startDestination = "course/CCI 4301"){
+    NavHost(navController = navController, startDestination = "videos"){
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
+        }
+        composable("videos"){
+            Videos(navController = navController, context)
         }
         composable("login"){
             LoginScreen(navController = navController, context)

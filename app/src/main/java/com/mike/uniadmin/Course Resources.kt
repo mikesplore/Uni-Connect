@@ -118,7 +118,7 @@ fun CourseScreen(courseCode: String, context: Context) {
                     context = context
                 )
 
-                VideoCard(context)
+                VideoCard("https://www.youtube.com/watch?v=uLDcOCZhZII",context)
 
             }
         }
@@ -393,22 +393,18 @@ fun InputDialogTextField(
 }
 
 @Composable
-fun VideoCard(context: Context){
-    Column(modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .background(CC.secondary(), RoundedCornerShape(10.dp))
-                .height(300.dp)
-                .fillMaxWidth(0.9f),
-            contentAlignment = Alignment.Center
-        ){
-            YouTubePlayerScreen(
-                context = context,
-                videoId = "dQw4w9WgXcQ",
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+fun VideoCard(link: String, context: Context) {
+    var fullScreen by remember { mutableStateOf(false) }
+    val myVideoId = extractVideoId(link)
+    if (myVideoId == null) {
+        Toast.makeText(context, "Invalid YouTube link", Toast.LENGTH_SHORT).show()
+        return
     }
+}
 
+fun extractVideoId(youtubeLink: String): String? {
+    val pattern = "(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\u200C\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?]*"
+    val compiledPattern = Regex(pattern)
+    val match = compiledPattern.find(youtubeLink)
+    return match?.value
 }

@@ -61,11 +61,6 @@ fun Dashboard(navController: NavController, context: Context) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBarContent(profileImageUrl, signedInUser, context)
-        YouTubePlayerScreen(
-            context = LocalContext.current,
-            videoId = "T6u0TDvC1cw",  // Replace with actual video ID
-            modifier = Modifier.fillMaxSize()
-        )
         Column(modifier = Modifier.weight(1f)) { }
     }
 }
