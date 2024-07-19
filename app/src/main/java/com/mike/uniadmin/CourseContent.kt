@@ -68,7 +68,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.mike.uniadmin.model.Course
 import com.mike.uniadmin.model.CourseAnnouncement
 import com.mike.uniadmin.model.CourseAssignment
@@ -89,8 +88,20 @@ val background = randomColor.random()
 @Composable
 fun CourseContent(navController: NavController, context: Context, targetCourseID: String) {
     val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
+    var courseInfo by remember { mutableStateOf(Course()) }
+
+    LaunchedEffect(targetCourseID) {
         GlobalColors.loadColorScheme(context)
+        MyDatabase.getCourseDetailsByCourseID(targetCourseID) { fetchedDetails ->
+            Log.d("Course Details", "The fetched course info for the course: $targetCourseID is: $fetchedDetails ")
+            if (fetchedDetails != null) {
+                courseInfo = fetchedDetails
+            }
+            else {
+                Log.e("Error", "Failed to fetch course details or empty database")
+            }
+        }
+
     }
 
     Scaffold(
@@ -100,21 +111,22 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
-                .background(CC.primary())
+                .background(CC.primary()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier
-                    .background(background)
+                    .background(background, RoundedCornerShape(10.dp))
                     .padding(start = 10.dp, end = 10.dp)
                     .requiredHeight(200.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth(0.9f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val gradientColors = listOf(CC.extraColor2(), CC.textColor(), CC.extraColor1())
 
                 Text(
-                    text = "Advanced Database Management Systems",
+                    text = courseInfo.courseName,
                     style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.ExtraBold,
                         textAlign = TextAlign.Center,
@@ -129,7 +141,7 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
             //the tabs column starts here
             Column(
                 modifier = Modifier
-                    .background(background.copy(0.2f))
+                    .background(CC.primary())
                     .fillMaxWidth()
                     .weight(1f),
             ) {
@@ -214,7 +226,6 @@ fun AnnouncementsItem(courseID: String, navController: NavController, context: C
 
     Column(
         modifier = Modifier
-            .fillMaxHeight()
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -265,7 +276,7 @@ fun AnnouncementCard(
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = background.copy(alpha = 0.6f)
+            containerColor = CC.secondary()
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -295,7 +306,7 @@ fun AnnouncementCard(
                     text = courseAnnouncement.author,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = CC.extraColor2()
+                    color = CC.textColor().copy(0.7f)
                 )
                 Text(
                     text = courseAnnouncement.date, fontSize = 12.sp, color = Color.LightGray
@@ -484,7 +495,7 @@ fun AssignmentCard(
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = background.copy(0.5f)
+            containerColor = CC.secondary()
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -669,7 +680,7 @@ fun TimetableCard(
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = background.copy(alpha = 0.5f)
+            containerColor = CC.secondary()
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -832,6 +843,7 @@ fun DetailsItem(courseID: String, navController: NavController, context: Context
     var details by remember { mutableStateOf<CourseDetails?>(null) }
     LaunchedEffect(courseID) {
         MyDatabase.getCourseDetails(courseID) { fetchedDetails ->
+            Log.d("Course Details", "The fetched course info for the course: $courseID is: $fetchedDetails ")
             if (fetchedDetails != null) {
                 details = fetchedDetails
             }
@@ -867,10 +879,10 @@ fun DetailsItem(courseID: String, navController: NavController, context: Context
                     expanded,
                     onExpandedChange = { expanded = !expanded })
             }
-            if (details != null){
-            DetailsItemCard(details!!, context)
-            }
-            else {
+            //card here
+            details?.let {
+                DetailsItemCard(it, context)
+            } ?: run {
                 Text("No details found", style = CC.descriptionTextStyle(context))
             }
         }
@@ -884,7 +896,7 @@ fun DetailsItemCard(courseDetails: CourseDetails, context: Context) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = background.copy(0.5f)
+            containerColor = CC.secondary()
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -1013,12 +1025,15 @@ fun AddDetailsItem(
     var courseInfo by remember { mutableStateOf(Course())  }
 
     LaunchedEffect(courseID) {
+
         MyDatabase.getCourseDetailsByCourseID(courseID) { fetchedDetails ->
+            Log.d("Course Details", "The fetched course info for the course: $courseID is: $fetchedDetails ")
             if (fetchedDetails != null) {
                 courseInfo = fetchedDetails
-                courseName = fetchedDetails.courseName
-                courseCode = fetchedDetails.courseCode
-                numberOfVisits = fetchedDetails.visits.toString()
+                courseName = courseInfo.courseName
+                courseCode = courseInfo.courseCode
+                numberOfVisits = courseInfo.visits.toString()
+
             }
             else {
                 Log.e("Error", "Failed to fetch course details or empty database")
@@ -1034,7 +1049,6 @@ fun AddDetailsItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1084,6 +1098,9 @@ fun AddDetailsItem(
                 onClick = {
                     onExpandedChange(!expanded)
                     val newDetails = CourseDetails(
+                        courseName = courseName,
+                        courseCode = courseCode,
+                        numberOfVisits = numberOfVisits,
                         detailsID = "2024$courseID",
                         lecturer = lecturer,
                         courseDepartment = courseDepartment,
@@ -1092,7 +1109,9 @@ fun AddDetailsItem(
                         schedule = schedule,
                         requiredMaterials = requiredMaterials
                     )
-                    MyDatabase.writeCourseDetails(courseID = courseID,
+                    Log.d("Course Details", "The new course info for the course: $courseID is: $newDetails ")
+                    MyDatabase.writeCourseDetails(
+                        courseID = courseID,
                         courseDetails = newDetails,
                         onResult = { success ->
                             if (success) {
