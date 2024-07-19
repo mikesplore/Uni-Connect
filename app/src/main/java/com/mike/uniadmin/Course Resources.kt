@@ -34,6 +34,7 @@ import com.mike.uniadmin.model.MyDatabase.deleteItem
 import com.mike.uniadmin.model.MyDatabase.readItems
 import com.mike.uniadmin.model.MyDatabase.writeItem
 import com.mike.uniadmin.model.Section
+import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.CommonComponents as CC
 
 object CourseName {
@@ -47,24 +48,25 @@ fun CourseScreen(courseCode: String, context: Context) {
     val notes = remember { mutableStateListOf<GridItem>() }
     val pastPapers = remember { mutableStateListOf<GridItem>() }
     val resources = remember { mutableStateListOf<GridItem>() }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
     var addItemToSection by remember { mutableStateOf<Section?>(null) }
 
     LaunchedEffect(courseCode) {
-        isLoading = true
-        readItems(courseCode, Section.NOTES) { fetchedNotes ->
-            notes.addAll(fetchedNotes)
-            isLoading = false
-        }
-        readItems(courseCode, Section.PAST_PAPERS) { fetchedPastPapers ->
-            pastPapers.addAll(fetchedPastPapers)
-            isLoading = false
-        }
-        readItems(courseCode, Section.RESOURCES) { fetchedResources ->
-            resources.addAll(fetchedResources)
-            isLoading = false
-        }
+        GlobalColors.loadColorScheme(context)
+//        isLoading = true
+//        readItems(courseCode, Section.NOTES) { fetchedNotes ->
+//            notes.addAll(fetchedNotes)
+//            isLoading = false
+//        }
+//        readItems(courseCode, Section.PAST_PAPERS) { fetchedPastPapers ->
+//            pastPapers.addAll(fetchedPastPapers)
+//            isLoading = false
+//        }
+//        readItems(courseCode, Section.RESOURCES) { fetchedResources ->
+//            resources.addAll(fetchedResources)
+//            isLoading = false
+//        }
     }
 
     Scaffold(
@@ -115,6 +117,9 @@ fun CourseScreen(courseCode: String, context: Context) {
                     onDelete = { resources.remove(it); deleteItem(courseCode, Section.RESOURCES, it) },
                     context = context
                 )
+
+                VideoCard(context)
+
             }
         }
     }
@@ -385,4 +390,25 @@ fun InputDialogTextField(
             unfocusedContainerColor = CC.secondary()
         )
     )
+}
+
+@Composable
+fun VideoCard(context: Context){
+    Column(modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .background(CC.secondary(), RoundedCornerShape(10.dp))
+                .height(300.dp)
+                .fillMaxWidth(0.9f),
+            contentAlignment = Alignment.Center
+        ){
+            YouTubePlayerScreen(
+                context = context,
+                videoId = "dQw4w9WgXcQ",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+
 }
