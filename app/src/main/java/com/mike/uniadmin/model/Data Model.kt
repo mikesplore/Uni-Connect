@@ -36,7 +36,7 @@ data class GridItem(
 )
 
 enum class Section {
-    NOTES, PAST_PAPERS, RESOURCES
+    NOTES, PAST_PAPERS, RESOURCES,
 }
 
 data class AccountDeletion(
@@ -190,12 +190,11 @@ sealed class Screen(
 //random color for the course contents
 val randomColor = listOf(
     Color(0xff00A9FF),
-    Color(0xff4A249D),
+    Color(0xffE68369),
     Color(0xff009FBD),
     Color(0xffA34343),
-    Color(0xff6C22A6),
     Color(0xff83A2FF),
-    Color(0xff0C356A)
+    Color(0xff399918)
 
 )
 
