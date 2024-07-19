@@ -52,6 +52,7 @@ android {
 
 dependencies {
     //these are my added dependencies
+    implementation (libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation (libs.google.accompanist.pager)
