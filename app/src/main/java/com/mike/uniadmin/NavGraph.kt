@@ -35,7 +35,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity){
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
-    NavHost(navController = navController, startDestination = "courses"){
+    NavHost(navController = navController, startDestination = "course/CCI 4301"){
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
         }
@@ -82,7 +82,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity){
             PasswordReset(navController = navController, context)
         }
         composable("courses"){
-            CoursesScreen(navController = navController, context)
+            ManageCoursesScreen(navController = navController, context)
         }
         composable("appearance"){
             Appearance(navController = navController, context)
@@ -92,6 +92,15 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity){
         }
         composable("homescreen"){
             HomeScreen(navController,context,pagerState,mainActivity,screens,coroutineScope)
+        }
+
+        composable("course/{courseCode}",
+            arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            CourseScreen(
+                backStackEntry.arguments?.getString("courseCode") ?: "",
+                context
+            )
         }
 
         composable("courseContent/{courseId}",
