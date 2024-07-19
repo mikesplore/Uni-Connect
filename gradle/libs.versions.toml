@@ -6,6 +6,7 @@ appcompat = "1.7.0"
 biometric = "1.1.0"
 biometricKtx = "1.4.0-alpha01"
 coilCompose = "2.4.0"
+core = "12.0.0"
 coreSplashscreen = "1.0.1"
 firebaseAuth = "22.1.2"
 firebaseBom = "33.1.2"
@@ -38,6 +39,7 @@ androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
 firebase-auth = { module = "firebase-auth:firebase-auth", version.ref = "firebaseAuth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
