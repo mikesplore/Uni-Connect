@@ -34,7 +34,7 @@ import com.mike.uniadmin.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoursesScreen(navController: NavController, context: Context) {
+fun ManageCoursesScreen(navController: NavController, context: Context) {
     val courses = remember { mutableStateListOf<Course>() }
     var loading by remember { mutableStateOf(true) }
 
@@ -126,7 +126,7 @@ fun CoursesScreen(navController: NavController, context: Context) {
 @Preview
 @Composable
 fun CoursesScreenPreview() {
-    CoursesScreen(rememberNavController(), LocalContext.current)
+    ManageCoursesScreen(rememberNavController(), LocalContext.current)
 }
 
 @Composable
@@ -143,7 +143,7 @@ fun CourseCard(course: Course, context: Context, navController: NavController) {
             modifier = Modifier.clickable {
                 CourseName.courseID.value = course.courseCode
                 CourseName.name.value = course.courseName
-                navController.navigate("courseContent/${course.courseCode}")
+                navController.navigate("course/${course.courseCode}")
             })
     Box(
         modifier = Modifier
