@@ -936,12 +936,16 @@ object MyDatabase {
 
 
     fun getCourseDetails(courseID: String, onResult: (CourseDetails?) -> Unit) {
-        val courseDetailsRef = database.child("CourseContent").child(courseID) // Directly access the course node
+        val courseDetailsRef = database.child("CourseContent")
+            .child(courseID)
+            .child("courseDetails")
+            .child(courseID)// Directly access the course node
 
         courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val courseDetails = snapshot.getValue(CourseDetails::class.java)
                 onResult(courseDetails) // Return the single CourseDetails object
+                Log.d("Course Details", "Course details fetched: $courseDetails")
             }
 
             override fun onCancelled(error: DatabaseError) {
