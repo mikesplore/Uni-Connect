@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,20 +57,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.model.MyDatabase.fetchUserDataByEmail
+import com.mike.uniadmin.dataModel.users.AccountDeletion
+import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserPreferences
+import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase.generateAccountDeletionID
-import com.mike.uniadmin.model.MyDatabase.writeAccountDeletionData
-import com.mike.uniadmin.model.AccountDeletion
-import com.mike.uniadmin.model.MyDatabase.fetchPreferences
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
-import com.mike.uniadmin.model.MyDatabase.writePreferences
-import com.mike.uniadmin.model.MyDatabase.writeUsers
 import kotlin.random.Random
-import com.mike.uniadmin.model.User
-import com.mike.uniadmin.model.UserPreferences
 import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.CommonComponents as CC
 
@@ -77,16 +77,14 @@ import com.mike.uniadmin.CommonComponents as CC
 @Composable
 fun ProfileScreen(navController: NavController, context: Context) {
     val auth = FirebaseAuth.getInstance()
-    var currentUser by remember { mutableStateOf(User()) }
+    val user = auth.currentUser
+    val userRepository = remember { UserRepository() }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val currentUser by userViewModel.user.observeAsState()
 
-    LaunchedEffect(auth.currentUser?.email) {
-        auth.currentUser?.email?.let {
-            fetchUserDataByEmail(it) { fetchedUser ->
-                fetchedUser?.let {
-                    currentUser = it
-                }
-            }
-        }
+    LaunchedEffect(user) {
+        userViewModel.findUserByEmail(user?.email!!) {}
+
     }
 
     Scaffold(
@@ -124,13 +122,13 @@ fun ProfileScreen(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            DisplayImage(context)
+            DisplayImage(context, userViewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            ProfileDetails(navController, context)
+            ProfileDetails(navController, context, userViewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            GenderRow(context)
+            currentUser?.let { it1 -> GenderRow(it1, context, userViewModel) }
             Spacer(modifier = Modifier.height(50.dp))
-            DangerZone(context)
+            DangerZone(context, userViewModel)
 
 
         }
@@ -139,9 +137,9 @@ fun ProfileScreen(navController: NavController, context: Context) {
 }
 
 @Composable
-fun DisplayImage(context: Context) {
+fun DisplayImage(context: Context, viewModel: UserViewModel) {
     val auth = FirebaseAuth.getInstance()
-    var currentUser by remember { mutableStateOf(User()) }
+    val currentUser by viewModel.user.observeAsState()
     val user = auth.currentUser
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var signInMethod by remember { mutableStateOf("") }
@@ -172,22 +170,6 @@ fun DisplayImage(context: Context) {
                         signInMethod = "github.com"
                         Log.d("Auth", "User signed in with GitHub")
                     }
-                }
-            }
-        }
-    }
-
-    LaunchedEffect(user?.email) {
-        user?.email?.let {
-            fetchUserDataByEmail(it) { fetchedUser ->
-                fetchedUser?.let {
-                    currentUser = it
-                    fetchPreferences(currentUser.id) { preferences ->
-                        preferences?.let {
-                            selectedImageUri = Uri.parse(preferences.profileImageLink)
-                        }
-                    }
-
                 }
             }
         }
@@ -249,11 +231,15 @@ fun DisplayImage(context: Context) {
     LaunchedEffect(selectedImageUri) {
         selectedImageUri?.let {
             generateSharedPreferencesID { id ->
-                val preferences = UserPreferences(
-                    studentID = currentUser.id, id = id, profileImageLink = it.toString()
-                )
-                writePreferences(preferences) {
-                    Log.d("Shared Preferences", "Image URI stored in SharedPreferences")
+                val preferences = currentUser?.id?.let { it1 ->
+                    UserPreferences(
+                        studentID = it1, id = id, profileImageLink = it.toString()
+                    )
+                }
+                if (preferences != null) {
+                    viewModel.writePreferences(preferences) {
+                        Log.d("Shared Preferences", "Image URI stored in SharedPreferences")
+                    }
                 }
             }
         }
@@ -262,44 +248,22 @@ fun DisplayImage(context: Context) {
 
 
 @Composable
-fun ProfileDetails(navController: NavController, context: Context) {
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-    var currentFirstName by remember { mutableStateOf("") }
-    var currentLastName by remember { mutableStateOf("") }
-    var currentPhone by remember { mutableStateOf("") }
+fun ProfileDetails(navController: NavController, context: Context, viewModel: UserViewModel) {
+    val user = FirebaseAuth.getInstance().currentUser
+    val currentUser by viewModel.user.observeAsState()
     var isEditing by remember { mutableStateOf(false) }
-    var currentGender by remember { mutableStateOf("") }
-    var currentEmail by remember { mutableStateOf("") }
-    var currentAdmissionNumber by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        fetchUserDataByEmail(user?.email!!) { fetchedUser ->
-            fetchedUser?.let {
-                currentEmail = it.email
-                currentPhone = it.phoneNumber
-                currentFirstName = it.firstName
-                currentLastName = it.lastName
-                currentGender = it.gender
-                currentAdmissionNumber = it.id
-                Log.d("Phone number:", currentPhone)
-            }
+    LaunchedEffect(user?.email) {
+        user?.email?.let { email ->
+            viewModel.findUserByEmail(email) {}
         }
     }
 
-
     fun saveUserData() {
-        writeUsers(
-            user = User(
-                id = currentAdmissionNumber,
-                firstName = currentFirstName,
-                lastName = currentLastName,
-                phoneNumber = currentPhone,
-                gender = currentGender,
-                email = currentEmail,
-            )
-        ) {
-            Toast.makeText(context, "Profile Updated", Toast.LENGTH_SHORT).show()
+        currentUser?.let { user ->
+            viewModel.writeUser(user, onSuccess = {
+                isEditing = false
+            })
         }
     }
 
@@ -327,46 +291,49 @@ fun ProfileDetails(navController: NavController, context: Context) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        MyDetails(
-            title = "First Name",
-            value = currentFirstName,
-            onValueChange = { currentFirstName = it },
-            context = context,
-            isEditing = isEditing
-        )
+        currentUser?.let { user ->
+            MyDetails(
+                title = "First Name",
+                value = user.firstName,
+                onValueChange = { viewModel.updateUser(user.copy(firstName = it)) },
+                context = context,
+                isEditing = isEditing
+            )
 
-        Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-        MyDetails(
-            title = "Last Name",
-            value = currentLastName,
-            onValueChange = { currentLastName = it },
-            context = context,
-            isEditing = isEditing
-        )
+            MyDetails(
+                title = "Last Name",
+                value = user.lastName,
+                onValueChange = { viewModel.updateUser(user.copy(lastName = it)) },
+                context = context,
+                isEditing = isEditing
+            )
 
-        Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-        MyDetails(
-            title = "Email",
-            value = currentEmail,
-            onValueChange = {},
-            context = context,
-            isEditing = isEditing,
-            fontSize = 15.sp
-        )
+            MyDetails(
+                title = "Email",
+                value = user.email,
+                onValueChange = {},
+                context = context,
+                isEditing = false, // Email is not editable
+                fontSize = 15.sp
+            )
 
-        Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-        MyDetails(
-            title = "Phone Number",
-            value = currentPhone,
-            onValueChange = { currentPhone = it },
-            context = context,
-            isEditing = isEditing
-        )
+            MyDetails(
+                title = "Phone Number",
+                value = user.phoneNumber,
+                onValueChange = { viewModel.updateUser(user.copy(phoneNumber = it)) },
+                context = context,
+                isEditing = isEditing
+            )
+        }
     }
 }
+
 
 
 @Composable
@@ -413,13 +380,10 @@ fun MyDetails(
 
 
 @Composable
-fun GenderRow(context: Context) {
+fun GenderRow(currentUser: User, context: Context, viewModel: UserViewModel) {
     var selectedMale by remember { mutableStateOf(false) }
     var selectedFemale by remember { mutableStateOf(false) }
-    var currentUser by remember { mutableStateOf(User()) }
     var save by remember { mutableStateOf(false) }
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
     var gender by remember { mutableStateOf(currentUser.gender ) }
 
     gender = if (!selectedFemale && !selectedMale) {
@@ -435,27 +399,19 @@ fun GenderRow(context: Context) {
         selectedFemale = true
     }
 
-    LaunchedEffect(user?.email) {
-        user?.email?.let { it ->
-            fetchUserDataByEmail(it) { fetchedUser ->
-                fetchedUser?.let {
-                    currentUser = it
-                    gender = currentUser.gender
-
-                }
-            }
-        }
-
-    }
     if (save) {
-        writeUsers(user = User(
+        viewModel.writeUser(user = User(
             id = currentUser.id,
             firstName = currentUser.firstName,
             lastName = currentUser.lastName,
             phoneNumber = currentUser.phoneNumber,
             gender = gender,
             email = currentUser.email,
-        ), {})
+        )
+        ) {
+            save = false
+
+        }
     }
     Row(
         modifier = Modifier
@@ -513,28 +469,17 @@ fun GenderRow(context: Context) {
 }
 
 @Composable
-fun DangerZone(context: Context) {
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
+fun DangerZone(context: Context, viewModel: UserViewModel) {
     var showPuzzle by remember { mutableStateOf(false) }
     var puzzleWords by remember { mutableStateOf(generateRandomNonsenseWord()) }
     var userInput by remember { mutableStateOf("") }
     var showWarning by remember { mutableStateOf(false) }
     var deleteConfirmed by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
-    var currentAdmissionNumber by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
-    var currentEmail by remember { mutableStateOf("") }
-    LaunchedEffect(user?.email) {
-        user?.email?.let {
-            fetchUserDataByEmail(it) { fetchedUser ->
-                fetchedUser?.let {
-                    currentAdmissionNumber = it.id
-                    currentEmail = it.email
-                }
-            }
-        }
-    }
+    val  currentUser by viewModel.user.observeAsState()
+
+
 
     Spacer(modifier = Modifier.height(20.dp))
     Column(modifier = Modifier.fillMaxWidth(0.9f),
@@ -702,15 +647,25 @@ fun DangerZone(context: Context) {
         if (deleteConfirmed) {
             loading = true
             generateAccountDeletionID { id ->
-                val account = AccountDeletion(
-                    id = id, admissionNumber = currentAdmissionNumber, email = currentEmail
+                val account = currentUser?.let {
+                    AccountDeletion(
+                        id = id, admissionNumber = it.id, email = currentUser!!.email
 
-                )
-                writeAccountDeletionData(account) {
-                    loading = false
-                    showWarning = false
-                    showPuzzle = false
-                    Log.d("Account Deletion Request", "Request sent Successfully!")
+                    )
+                }
+                if (account != null) {
+                    viewModel.writeAccountDeletionData(account, onSuccess = {
+                        success ->
+                        if (success) {
+                            loading = false
+                            showWarning = false
+                            showPuzzle = false
+                        }
+                        else{
+                            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
+                        }
+
+                    })
                 }
             }
         }

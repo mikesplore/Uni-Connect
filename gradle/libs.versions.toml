@@ -26,6 +26,7 @@ googleGmsGoogleServices = "4.4.2"
 firebaseAuthVersion = "23.0.0"
 firebaseDatabase = "21.0.0"
 firebaseMessaging = "24.0.0"
+runtimeLivedata = "1.6.8"
 
 [libraries]
 accompanist-pager = { module = "accompanist:accompanist-pager", version.ref = "accompanistPagerIndicators" }
@@ -61,6 +62,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 google-firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuthVersion" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

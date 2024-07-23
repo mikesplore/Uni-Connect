@@ -58,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,29 +74,29 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
+import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserPreferences
+import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Feedback
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
-import com.mike.uniadmin.model.MyDatabase.fetchPreferences
-import com.mike.uniadmin.model.MyDatabase.fetchUserDataByEmail
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
 import com.mike.uniadmin.model.MyDatabase.updatePassword
-import com.mike.uniadmin.model.User
-import com.mike.uniadmin.model.UserPreferences
 import com.mike.uniadmin.ui.theme.FontPreferences
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
@@ -106,17 +107,20 @@ import com.mike.uniadmin.CommonComponents as CC
 fun Settings(navController: NavController, context: Context, mainActivity: MainActivity) {
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
-    var currentUser by remember { mutableStateOf(User()) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var signInMethod by remember { mutableStateOf("") }
     val fontPrefs = remember { FontPreferences(context) }
     val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var timeSpent by remember { mutableLongStateOf(0L) }
     var savedFont by remember { mutableStateOf("system") }
+    val userRepository = remember { UserRepository() }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val currentUser by userViewModel.user.observeAsState()
     val screenID = "SC8"
     LaunchedEffect(Unit) {
         GlobalColors.loadColorScheme(context)
         savedFont = fontPrefs.getSelectedFont().toString()
+        userViewModel.findUserByEmail(user?.email!!) {}
         while (true) {
             timeSpent = System.currentTimeMillis() - startTime
             delay(1000)
@@ -136,17 +140,11 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     // Fetch user data when the composable is launched
     LaunchedEffect(auth.currentUser?.email) {
         auth.currentUser?.email?.let {
-            fetchUserDataByEmail(it) { fetchedUser ->
-                fetchedUser?.let {
-                    currentUser = fetchedUser
-                    fetchPreferences(currentUser.id) { preferences ->
-                        // Log.d("Shared Preferences", "Retrieved preferences for student ID: ${currentUser.id}: $preferences")
-                        preferences?.let {
-                            selectedImageUri = Uri.parse(preferences.profileImageLink)
-                        }
-                    }
-                }
-                Log.e("ProfileCard", "Fetched user: $user")
+            userViewModel.findUserByEmail(it) {}
+            currentUser?.let { me ->
+                userViewModel.fetchPreferences(me.id, onPreferencesFetched = { userPreferences ->
+                    selectedImageUri = Uri.parse(userPreferences?.profileImageLink)
+                })
             }
         }
     }
@@ -179,7 +177,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     Scaffold(
         topBar = {
             TopAppBar(title = {}, navigationIcon = {
-                IconButton(onClick = { navController.navigate("dashboard") }) {
+                IconButton(onClick = { navController.navigate("homescreen") }) {
                     Icon(
                         Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
                     )
@@ -265,7 +263,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            currentUser.firstName + " " + currentUser.lastName,
+                            currentUser?.firstName + " " + currentUser?.lastName,
                             style = CC.descriptionTextStyle(context),
                             fontSize = 20.sp
                         )
@@ -289,13 +287,13 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
             Spacer(modifier = Modifier.height(20.dp))
             DarkMode(context)
             Spacer(modifier = Modifier.height(20.dp))
-            Notifications(context)
+            Notifications(context, userViewModel)
             Spacer(modifier = Modifier.height(40.dp))
             Row(modifier = Modifier.fillMaxWidth(0.9f)) {
                 Text("Security", style = CC.titleTextStyle(context))
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Biometrics(context, mainActivity)
+            //Biometrics(context, mainActivity, userViewModel)
             Spacer(modifier = Modifier.height(20.dp))
             PasswordUpdateSection(context)
             Spacer(modifier = Modifier.height(20.dp))
@@ -342,12 +340,6 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
 
 }
 
-@Preview
-@Composable
-fun NewSettingsPreview() {
-    // NewSettings(rememberNavController(), LocalContext.current)
-    Notifications(LocalContext.current)
-}
 
 @Composable
 fun MyIconButton(icon: ImageVector, navController: NavController, route: String) {
@@ -405,41 +397,39 @@ fun DarkMode(context: Context) {
 }
 
 @Composable
-fun Notifications(context: Context) {
+fun Notifications(context: Context, viewModel: UserViewModel) {
     var isNotificationEnabled by remember { mutableStateOf(false) }
     val icon =
         if (isNotificationEnabled) Icons.Filled.Notifications else Icons.Filled.NotificationsOff
     val iconDescription =
         if (isNotificationEnabled) "Enable Notifications" else "Disable Notifications"
-    val auth = FirebaseAuth.getInstance()
-    var currentUser by remember { mutableStateOf(User()) }
+    val currentUser by viewModel.user.observeAsState()
 
-    LaunchedEffect(auth.currentUser?.email) {
-        auth.currentUser?.email?.let { email ->
-            fetchUserDataByEmail(email) { fetchedUser ->
-                fetchedUser?.let {
-                    currentUser = it
-                    Log.d("Current User", "Fetched user name: ${currentUser.firstName}")
-                    fetchPreferences(currentUser.id) { preferences ->
-                        preferences?.let {
-                            isNotificationEnabled = preferences.notifications == "enabled"
-                        }
-                    }
-                }
-            }
+    LaunchedEffect(Unit) {
+        currentUser?.id?.let { userId -> // Use safe call and let
+            viewModel.fetchPreferences(userId, onPreferencesFetched = { userPreferences ->
+                isNotificationEnabled = userPreferences?.notifications == "enabled"
+            })
         }
     }
 
+
+
     fun updatePreferences(isEnabled: Boolean) {
-        generateSharedPreferencesID { id ->
-            val myPreferences = UserPreferences(
-                studentID = currentUser.id,
-                id = id,
-                notifications = if (isEnabled) "enabled" else "disabled"
-            )
-            MyDatabase.writePreferences(myPreferences) {
-                Log.d("Preferences", "Preferences successfully updated: $myPreferences")
+        if (currentUser != null) { // Check if currentUser is not null
+            generateSharedPreferencesID { id ->
+                val myPreferences = UserPreferences(
+                    studentID = currentUser!!.id, // Now safe to access currentUser.id
+                    id = id,
+                    notifications = if (isEnabled) "enabled" else "disabled"
+                )
+                viewModel.writePreferences(myPreferences) {
+                    Log.d("Preferences", "Preferences successfully updated: $myPreferences")
+                }
             }
+        } else {
+            // Handle the case where currentUser is null (e.g., show an error message)
+            Log.e("Preferences", "Cannot update preferences: currentUser is null")
         }
     }
     Row(
@@ -484,43 +474,36 @@ fun Notifications(context: Context) {
 
 
 @Composable
-fun Biometrics(context: Context, mainActivity: MainActivity) {
+fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserViewModel) {
     var isBiometricsEnabled by remember { mutableStateOf(false) }
     val icon = if (isBiometricsEnabled) Icons.Filled.Security else Icons.Filled.Security
     val iconDescription = if (isBiometricsEnabled) "Biometrics enabled" else "Biometrics disabled"
     val promptManager = mainActivity.promptManager
-    val auth = FirebaseAuth.getInstance()
-    var currentUser by remember { mutableStateOf(User()) }
+    val currentUser by viewModel.user.observeAsState()
 
-    LaunchedEffect(auth.currentUser?.email) {
-        auth.currentUser?.email?.let { email ->
-            fetchUserDataByEmail(email) { fetchedUser ->
-                fetchedUser?.let {
-                    currentUser = it
-                    Log.d("Current User", "Fetched user name: ${currentUser.firstName}")
-                    fetchPreferences(currentUser.id) { preferences ->
-                        preferences?.let {
-                            isBiometricsEnabled = preferences.biometrics == "enabled"
-                        } ?: Log.e(
-                            "Shared Preferences",
-                            "Preferences not found for student ID: ${currentUser.id}"
-                        )
-                    }
-                }
-            }
+    LaunchedEffect(Unit) {
+        currentUser?.id?.let { userId -> // Use safe call and let
+            viewModel.fetchPreferences(userId, onPreferencesFetched = { userPreferences ->
+                isBiometricsEnabled = userPreferences?.biometrics == "enabled"
+            })
         }
     }
 
     fun updatePreferences(isEnabled: Boolean) {
-        MyDatabase.generateSharedPreferencesID { id ->
-            val myPreferences = UserPreferences(
-                studentID = currentUser.id,
-                id = id,
-                biometrics = if (isEnabled) "enabled" else "disabled"
-            )
-            MyDatabase.writePreferences(myPreferences) {
-                Log.d("Preferences", "Preferences successfully updated: $myPreferences")
+        if (currentUser != null) { // Check if currentUser is not null
+            generateSharedPreferencesID { id ->
+                val myPreferences = UserPreferences(
+                    studentID = currentUser!!.id, // Now safe to access currentUser.id
+                    id = id,
+                    notifications = if (isEnabled) "enabled" else "disabled"
+                ) 
+                viewModel.writePreferences(myPreferences) {
+                    Log.d("Preferences", "Preferences successfully updated: $myPreferences")
+                }
             }
+        } else {
+            // Handle the case where currentUser is null (e.g., show an error message)
+            Log.e("Preferences", "Cannot update preferences: currentUser is null")
         }
     }
 
@@ -624,7 +607,7 @@ fun PasswordUpdateSection(context: Context) {
             Text(
                 "This section only applies to users who signed in using Email and Password",
                 style = CC.descriptionTextStyle(context),
-                color = CC.tertiary(),
+                color = CC.textColor().copy(0.5f),
                 textAlign = TextAlign.Center
             )
 
@@ -667,8 +650,8 @@ fun PasswordUpdateSection(context: Context) {
                         currentUser?.let { user ->
                             val credential =
                                 EmailAuthProvider.getCredential(user.email!!, currentPassword)
-                            user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
-                                if (reauthTask.isSuccessful) {
+                            user.reauthenticate(credential).addOnCompleteListener { reAuthTask ->
+                                if (reAuthTask.isSuccessful) {
                                     updatePassword(newPassword, onSuccess = {
                                         // Handle success (e.g., show a success message)
                                         loading = false
@@ -695,7 +678,7 @@ fun PasswordUpdateSection(context: Context) {
                                     loading = false
                                     Toast.makeText(
                                         context,
-                                        "Authentication failed: ${reauthTask.exception?.message}",
+                                        "Authentication failed: ${reAuthTask.exception?.message}",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -816,7 +799,6 @@ fun MyAbout(context: Context) {
 fun StarRating(
     currentRating: Int,
     onRatingChanged: (Int) -> Unit,
-    context: Context,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -913,7 +895,7 @@ fun RatingAndFeedbackScreen(context: Context) {
             currentRating = currentRating, onRatingChanged = { rating ->
                 currentRating = rating
                 showFeedbackForm = true
-            }, context = context
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))

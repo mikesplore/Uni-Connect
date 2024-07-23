@@ -2,7 +2,6 @@ package com.mike.uniadmin.chat
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,14 +14,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -31,70 +31,83 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.Background
 import com.mike.uniadmin.R
-import com.mike.uniadmin.model.Message
+import com.mike.uniadmin.dataModel.groupchat.generateConversationId
+import com.mike.uniadmin.dataModel.userchat.Message
+import com.mike.uniadmin.dataModel.userchat.MessageViewModel
+import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
+import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
-import com.mike.uniadmin.model.MyDatabase.fetchUserDataByAdmissionNumber
-import com.mike.uniadmin.model.MyDatabase.fetchUserDataByEmail
-import com.mike.uniadmin.model.MyDatabase.fetchUserToUserMessages
-import com.mike.uniadmin.model.MyDatabase.sendUserToUserMessage
-import com.mike.uniadmin.model.User
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.material.icons.filled.Call
+import com.mike.uniadmin.dataModel.userchat.MessageRepository
+import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.CommonComponents as CC
 
 
 @Composable
 fun UserChatScreen(navController: NavController, context: Context, targetUserId: String) {
-    var user by remember { mutableStateOf(User()) }
-    var user2 by remember { mutableStateOf(User()) }
-    var name by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
-    var messages by remember { mutableStateOf(emptyList<Message>()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    var currentName by remember { mutableStateOf("") }
-    var currentAdmissionNumber by remember { mutableStateOf("") }
-    val auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
-    val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var timeSpent by remember { mutableLongStateOf(0L) }
-    val screenID = "SC5"
+    val messageRepository = remember { MessageRepository() }
+    val userRepository = remember { UserRepository() }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val messageViewModel: MessageViewModel = viewModel(factory = MessageViewModelFactory(messageRepository))
+
+    val messages by messageViewModel.messages.observeAsState(emptyList())
+    val user by userViewModel.user.observeAsState()
+    val user2 by userViewModel.user2.observeAsState()
+    val userState by userViewModel.userState.observeAsState()
+
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
     var isSearchVisible by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf("") }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val startTime = remember { System.currentTimeMillis() }
+    var timeSpent by remember { mutableLongStateOf(0L) }
+    val screenID = "SC5"
+    val scrollState = rememberLazyListState()
+
+    var myUserState  by remember { mutableStateOf("") }
+    if(userState != null){
+        if(userState!!.online == "online"){
+            myUserState = "Online"
+        }else{
+            myUserState = "Last seen ${userState!!.lastTime}"
+        }
+    }
 
     LaunchedEffect(targetUserId) {
         GlobalColors.loadColorScheme(context)
         currentUser?.email?.let { email ->
-            fetchUserDataByEmail(email) { fetchedUser ->
-                fetchedUser?.let {
-                    user = it
-                    currentName = it.firstName
-                    currentAdmissionNumber = it.id
-                }
-            }
+            userViewModel.findUserByEmail(email) {}
         }
-        fetchUserDataByAdmissionNumber(targetUserId) { fetchedUser ->
-            fetchedUser?.let {
-                user2 = it
-                name = user2.firstName
-            }
-        }
+        userViewModel.findUserByAdmissionNumber(targetUserId)
+        userViewModel.checkUserStateByID(targetUserId)
         while (true) {
             timeSpent = System.currentTimeMillis() - startTime
-            delay(1000) // Update every second (adjust as needed)
+            delay(1000)
         }
     }
+
     DisposableEffect(Unit) {
         onDispose {
             ExitScreen(
@@ -105,35 +118,24 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
         }
     }
 
-
-    //functions for sending and retrieving messages
-    // Generate a unique conversation ID for the current user and the target user
-    val conversationId =
-        "Direct Messages/${generateConversationId(currentAdmissionNumber, targetUserId)}"
-
-    fun fetchMessages(conversationId: String) {
-        try {
-            fetchUserToUserMessages(conversationId) { fetchedMessages ->
-                messages = fetchedMessages
-            }
-        } catch (e: Exception) {
-            errorMessage = e.message
-            scope.launch {
-                snackbarHostState.showSnackbar("Failed to fetch messages: ${e.message}")
-                Log.e(
-                    "UserChatScreen",
-                    "Failed to fetch messages from $conversationId: ${e.message}",
-                    e
-                )
-            }
+    // Generate a unique conversation ID only if user and user2 are not null
+    val conversationId = remember(user, user2) {
+        if (user != null && user2 != null) {
+            "Direct Messages/${generateConversationId(user!!.id, targetUserId)}"
+        } else {
+            ""
         }
     }
 
     LaunchedEffect(conversationId) {
-        GlobalColors.loadColorScheme(context)
-        while (true) {
-            fetchMessages(conversationId)
-            delay(100) // Adjust the delay as needed
+        if (conversationId.isNotEmpty()) {
+            messageViewModel.fetchMessages(conversationId)
+        }
+    }
+
+    LaunchedEffect(messages) {
+        if (messages.isNotEmpty()) {
+            scrollState.animateScrollToItem(messages.size - 1)
         }
     }
 
@@ -143,17 +145,15 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 val newMessage = Message(
                     id = chatId,
                     message = messageContent,
-                    senderName = user.firstName,
-                    senderID = currentAdmissionNumber,
+                    senderName = user?.firstName.orEmpty(),
+                    senderID = user?.id.orEmpty(),
                     recipientID = targetUserId,
                     time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date()),
                     date = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()),
-                    profileImageLink = ""
+                    profileImageLink = user?.profileImageLink.orEmpty()
                 )
-                sendUserToUserMessage(newMessage, conversationId) { success ->
-                    if (success) {
-                        fetchMessages(conversationId)
-                    } else {
+                messageViewModel.saveMessage(newMessage, conversationId) { success ->
+                    if (!success) {
                         scope.launch {
                             snackbarHostState.showSnackbar("Failed to send message")
                         }
@@ -161,7 +161,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 }
             }
         } catch (e: Exception) {
-            errorMessage = e.message
             scope.launch {
                 snackbarHostState.showSnackbar("Failed to send message: ${e.message}")
             }
@@ -169,27 +168,40 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     }
 
 
-        Box{
+    Scaffold(
+        topBar = {
+            if (user2 != null) {
+                TopAppBarComponent(
+                    name = user2!!.firstName,
+                    navController = navController,
+                    context = context,
+                    user = user2!!,
+                    userState = myUserState,
+                    onValueChange = {
+                        isSearchVisible = !isSearchVisible
+                    }
+                )
+            }
+        },
+        containerColor = CC.primary()
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding()
+        ) {
             Background(context)
-            val scrollState = rememberLazyListState()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-
+                    .padding(16.dp)
+                    .imePadding(),
             ) {
-                TopAppBarComponent(
-                    name,
-                    navController,
-                    context,
-                    user,
-                    onValueChange = {isSearchVisible = !isSearchVisible}
-                )
                 if (isSearchVisible) {
                     SearchTextField(
                         searchQuery = searchQuery,
                         onValueChange = { searchQuery = it },
-                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 LazyColumn(
@@ -200,11 +212,10 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
                     groupedMessages.forEach { (date, chatsForDate) ->
                         item {
-                            // Display date header
+                            RowMessage(context)
+                            Spacer(modifier = Modifier.height(8.dp))
                             RowDate(date, context)
                             Spacer(modifier = Modifier.height(8.dp))
-                            RowMessage(context)
-                            Spacer(modifier = Modifier.height(10.dp))
                         }
 
                         items(chatsForDate.filter {
@@ -212,9 +223,10 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                         }) { chat ->
                             MessageBubble(
                                 message = chat,
-                                isUser = chat.senderID == currentAdmissionNumber,
+                                isUser = chat.senderID == user?.id,
                                 context = context
                             )
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
@@ -222,12 +234,14 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     modifier = Modifier.fillMaxWidth(),
                     onMessageChange = { message = it },
                     sendMessage = { sendMessage(message) },
-                    context
+                    context = context
                 )
             }
-
+        }
     }
 }
+
+
 
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -280,7 +294,6 @@ fun MessageBubble(
 fun SearchTextField(
     searchQuery: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
 ){
     TextField(value = searchQuery,
         onValueChange = { onValueChange(searchQuery) },
@@ -311,6 +324,7 @@ fun TopAppBarComponent(
     navController: NavController,
     context: Context,
     user: User,
+    userState: String,
     isSearchVisible: Boolean = false,
     onValueChange: (Boolean) -> Unit
 ) {
@@ -320,25 +334,34 @@ fun TopAppBarComponent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(start = 8.dp)
             ) {
-                if (user.profileImageLink.isNotBlank()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(user.profileImageLink),
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.student), // Replace with your profile icon
-                        contentDescription = "Profile Icon",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                    )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    if (user.profileImageLink.isNotBlank()) {
+                        Image(
+                            painter = rememberAsyncImagePainter(user.profileImageLink),
+                            contentDescription = "Profile Image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.student), // Replace with your profile icon
+                            contentDescription = "Profile Icon",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
+                Column {
                 Text(name, style = CC.titleTextStyle(context))
+                Text(userState, style = CC.descriptionTextStyle(context))}
             }
         },
         actions = {
@@ -349,11 +372,19 @@ fun TopAppBarComponent(
                     tint = Color.White
                 )
             }
-            IconButton(onClick = { /* TODO: Handle more options click */ }) {
+            val intent = Intent(Intent.ACTION_DIAL)
+            IconButton(onClick = {
+                if (user.phoneNumber != "") {
+                    intent.data = Uri.parse("tel:${user.phoneNumber}")
+                    context.startActivity(intent)
+                }
+
+                context.startActivity(intent)
+            }) {
                 Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options",
-                    tint = Color.White
+                    imageVector = Icons.Default.Call, // Replace with call icon
+                    contentDescription = "Call",
+                    tint = CC.textColor(),
                 )
             }
         },
@@ -361,14 +392,18 @@ fun TopAppBarComponent(
             IconButton(
                 onClick = { navController.popBackStack() }
             ) {
-                Icon(Icons.Default.ArrowBackIosNew,"",
-                    tint = CC.textColor())
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "",
+                    tint = CC.textColor()
+                )
             }
         },
         modifier = Modifier.height(70.dp),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
     )
 }
+
 
 @Composable
 fun ChatInput(modifier: Modifier = Modifier, onMessageChange: (String) -> Unit, sendMessage: (String) -> Unit, context: Context) {
@@ -445,15 +480,22 @@ fun ChatTextField(
 @Composable
 fun MyChatPreview()
 {
-    ChatInput(
-        modifier = Modifier
-            .width(300.dp)
-            .height(48.dp)
-        ,
-        onMessageChange = {},
-        sendMessage = {},
-        LocalContext.current
-
+    TopAppBarComponent(
+        name = "Student",
+        navController = NavController(LocalContext.current),
+        context = LocalContext.current,
+        user = User(
+            id = "123456789",
+            firstName = "Student",
+            lastName = "Name",
+            email = "",
+            phoneNumber = "",
+            gender = "",
+            profileImageLink = ""
+        ),
+        isSearchVisible = false,
+        onValueChange = {},
+        userState = "Online"
     )
 }
 
@@ -521,11 +563,4 @@ fun RowDate(date: String, context: Context){
     }
 }
 
-fun generateConversationId(userId1: String, userId2: String): String {
-    return if (userId1 < userId2) {
-        "$userId1$userId2"
-    } else {
-        "$userId2$userId1"
-    }
-}
 

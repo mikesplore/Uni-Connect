@@ -50,7 +50,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     )
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
-    val destination = if (currentUser != null) "dashboard" else "login"
+    val destination = if (currentUser != null) "homescreen" else "login"
 
     LaunchedEffect(Unit) {
         GlobalColors.loadColorScheme(context)

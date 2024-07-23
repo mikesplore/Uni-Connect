@@ -22,10 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.AccessTime
@@ -51,6 +49,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,21 +57,38 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
+import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementRepository
+import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementViewModel
+import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementViewModelFactory
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentRepository
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModel
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModelFactory
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailRepository
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailViewModel
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailViewModelFactory
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableRepository
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModel
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModelFactory
+import com.mike.uniadmin.dataModel.courses.CourseRepository
+import com.mike.uniadmin.dataModel.courses.CourseViewModel
+import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.model.Course
-import com.mike.uniadmin.model.CourseAnnouncement
-import com.mike.uniadmin.model.CourseAssignment
-import com.mike.uniadmin.model.CourseDetails
-import com.mike.uniadmin.model.CourseTimetable
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.GlobalColors
@@ -82,27 +98,32 @@ import java.util.Date
 import java.util.Locale
 import com.mike.uniadmin.CommonComponents as CC
 
-val background = randomColor.random()
+var background = randomColor.random()
 
 
 @Composable
 fun CourseContent(navController: NavController, context: Context, targetCourseID: String) {
+    val courseRepository = remember { CourseRepository() }
+    val courseViewModel: CourseViewModel = viewModel(factory = CourseViewModelFactory(courseRepository))
     val coroutineScope = rememberCoroutineScope()
-    var courseInfo by remember { mutableStateOf(Course()) }
+    val courseInfo by courseViewModel.fetchedCourse.observeAsState(initial = null)
+    val announcementRepository = remember { CourseAnnouncementRepository() }
+    val assignmentRepository = remember { CourseAssignmentRepository() }
+    val timetableRepository = remember { CourseTimetableRepository() }
+    val detailsRepository = remember { CourseDetailRepository() }
+    val courseDetailsViewModel: CourseDetailViewModel = viewModel(factory = CourseDetailViewModelFactory(detailsRepository))
+    val courseTimetableViewModel: CourseTimetableViewModel = viewModel(factory = CourseTimetableViewModelFactory(timetableRepository))
+    val courseAssignmentViewModel: CourseAssignmentViewModel = viewModel(factory = CourseAssignmentViewModelFactory(assignmentRepository))
+    val courseAnnouncementViewModel: CourseAnnouncementViewModel = viewModel(factory = CourseAnnouncementViewModelFactory(announcementRepository))
 
     LaunchedEffect(targetCourseID) {
+        background = randomColor.random()
+        courseAnnouncementViewModel.getCourseAnnouncements(targetCourseID)
+        courseViewModel.getCourseDetailsByCourseID(targetCourseID)
         GlobalColors.loadColorScheme(context)
-        MyDatabase.getCourseDetailsByCourseID(targetCourseID) { fetchedDetails ->
-            Log.d("Course Details", "The fetched course info for the course: $targetCourseID is: $fetchedDetails ")
-            if (fetchedDetails != null) {
-                courseInfo = fetchedDetails
-            }
-            else {
-                Log.e("Error", "Failed to fetch course details or empty database")
-            }
-        }
-
+        courseAssignmentViewModel.getCourseAssignments(targetCourseID)
     }
+
 
     Scaffold(
         containerColor = CC.primary(),
@@ -114,28 +135,36 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
                 .background(CC.primary()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
+            Box(
                 modifier = Modifier
-                    .background(background, RoundedCornerShape(10.dp))
-                    .padding(start = 10.dp, end = 10.dp)
                     .requiredHeight(200.dp)
                     .fillMaxWidth(0.9f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                contentAlignment = Alignment.Center
             ) {
                 val gradientColors = listOf(CC.extraColor2(), CC.textColor(), CC.extraColor1())
 
-                Text(
-                    text = courseInfo.courseName,
-                    style = CC.titleTextStyle(context).copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        textAlign = TextAlign.Center,
-                        brush = Brush.linearGradient(
-                            colors = gradientColors
-                        ),
-                        fontSize = 30.sp
+                courseInfo?.courseName?.let { it1 ->
+                    AsyncImage(
+                        model = courseInfo?.courseImageLink,
+                        contentDescription = null,
+                        modifier = Modifier
+
+                            .clip(RoundedCornerShape(10.dp))
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Crop,
                     )
-                )
+                    Text(
+                        text = it1,
+                        style = CC.titleTextStyle(context).copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center,
+                            brush = Brush.linearGradient(
+                                colors = gradientColors
+                            ),
+                            fontSize = 30.sp
+                        )
+                    )
+                }
 
             }
             //the tabs column starts here
@@ -201,10 +230,10 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
                 }
 
                 when (selectedTabIndex) {
-                    0 -> AnnouncementsItem(targetCourseID, navController, context)
-                    1 -> AssignmentsItem(targetCourseID, navController, context)
-                    2 -> TimetableItem(targetCourseID, navController, context)
-                    3 -> DetailsItem(targetCourseID, navController, context)
+                    0 -> AnnouncementsItem(targetCourseID, courseAnnouncementViewModel, navController, context)
+                    1 -> AssignmentsItem(targetCourseID, courseAssignmentViewModel, navController, context)
+                    2 -> TimetableItem(targetCourseID, courseTimetableViewModel, navController, context)
+                    3 -> DetailsItem(targetCourseID, courseDetailsViewModel, navController,  context)
                     else -> {}
                 }
             }
@@ -214,15 +243,9 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
 
 
 @Composable
-fun AnnouncementsItem(courseID: String, navController: NavController, context: Context) {
+fun AnnouncementsItem(courseID: String, courseAnnouncementViewModel: CourseAnnouncementViewModel, navController: NavController, context: Context) {
     var visible by remember { mutableStateOf(false) }
-    var announcements by remember { mutableStateOf<List<CourseAnnouncement>?>(null) }
-
-    LaunchedEffect(courseID) {
-        MyDatabase.getCourseAnnouncements(courseID) { fetchedAnnouncements ->
-            announcements = fetchedAnnouncements
-        }
-    }
+    val announcements = courseAnnouncementViewModel.announcements.observeAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
@@ -255,14 +278,10 @@ fun AnnouncementsItem(courseID: String, navController: NavController, context: C
                     visible,
                     onExpandedChange = { visible = !visible })
             }
-            announcements?.let {
-                LazyColumn {
-                    items(it) { announcement ->
-                        AnnouncementCard(announcement, context)
-                    }
+            LazyColumn {
+                items(announcements.value) { announcement ->
+                    AnnouncementCard(announcement, context)
                 }
-            } ?: run {
-                Text("No announcements found", style = CC.descriptionTextStyle(context))
             }
         }
     }
@@ -426,14 +445,12 @@ fun AddTextField(
 }
 
 @Composable
-fun AssignmentsItem(courseID: String, navController: NavController, context: Context) {
+fun AssignmentsItem(courseID: String, assignmentViewModel: CourseAssignmentViewModel, navController: NavController, context: Context) {
     var expanded by remember { mutableStateOf(false) }
-    var assignments by remember { mutableStateOf<List<CourseAssignment>?>(null) }
+    val assignment = assignmentViewModel.assignments.observeAsState(initial = emptyList())
 
     LaunchedEffect(courseID) {
-        MyDatabase.getCourseAssignments(courseID) { fetchedAssignments ->
-            assignments = fetchedAssignments
-        }
+        GlobalColors.loadColorScheme(context)
     }
     Column(
         modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
@@ -469,24 +486,18 @@ fun AssignmentsItem(courseID: String, navController: NavController, context: Con
                     onExpandedChange = { expanded = !expanded })
             }
             //assignmentCard
-            assignments?.let {
-                LazyColumn {
-                    items(it) { assignment ->
-                        AssignmentCard(assignment, context)
-                    }
+            LazyColumn {
+                items(assignment.value) { assignment ->
+                    AssignmentCard(assignment, context)
                 }
-            } ?: run {
-                Text("No announcements found", style = CC.descriptionTextStyle(context))
             }
-
         }
     }
 }
 
 
 @Composable
-fun AssignmentCard(
-    assignment: CourseAssignment, context: Context
+fun AssignmentCard(assignment: CourseAssignment, context: Context
 ) {
     val currentDate = Date()
     val formatter =
@@ -619,17 +630,13 @@ fun AddAssignmentItem(
 }
 
 @Composable
-fun TimetableItem(courseID: String, navController: NavController, context: Context) {
-    var loading by remember { mutableStateOf(false) }
+fun TimetableItem(courseID: String, timetableViewModel: CourseTimetableViewModel, navController: NavController, context: Context) {
     var expanded by remember { mutableStateOf(false) }
-    var timetables by remember { mutableStateOf<List<CourseTimetable>?>(null) }
+    val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
 
     LaunchedEffect(courseID) {
-        loading = true
-        MyDatabase.getCourseTimetable(courseID) { fetchedTimetables ->
-            timetables = fetchedTimetables
-            loading = false
-        }
+        GlobalColors.loadColorScheme(context)
+        timetableViewModel.getCourseTimetables(courseID)
     }
 
     Column(
@@ -660,14 +667,10 @@ fun TimetableItem(courseID: String, navController: NavController, context: Conte
                     onExpandedChange = { expanded = !expanded })
             }
             //timetable card
-            timetables?.let {
-                LazyColumn {
-                    items(it) { timetable ->
-                        TimetableCard(timetable, context)
-                    }
+            LazyColumn {
+                items(timetables.value) { timetable ->
+                    TimetableCard(timetable, context)
                 }
-            } ?: run {
-                Text("No timetable found", style = CC.descriptionTextStyle(context))
             }
         }
     }
@@ -838,21 +841,16 @@ fun AddTimetableItem(
 }
 
 @Composable
-fun DetailsItem(courseID: String, navController: NavController, context: Context) {
+fun DetailsItem(courseID: String, detailsViewModel: CourseDetailViewModel, navController: NavController, context: Context) {
     var expanded by remember { mutableStateOf(false) }
-    var details by remember { mutableStateOf<CourseDetails?>(null) }
+    val details = detailsViewModel.details.observeAsState(initial = emptyList())
     LaunchedEffect(courseID) {
-        MyDatabase.getCourseDetails(courseID) { fetchedDetails ->
-            Log.d("Course Details", "The fetched course info for the course: $courseID is: $fetchedDetails ")
-            if (fetchedDetails != null) {
-                details = fetchedDetails
-            }
-        }
+        GlobalColors.loadColorScheme(context)
+        detailsViewModel.getCourseDetails(courseID)
     }
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .verticalScroll(rememberScrollState())
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -877,14 +875,16 @@ fun DetailsItem(courseID: String, navController: NavController, context: Context
                     courseID,
                     context,
                     expanded,
-                    onExpandedChange = { expanded = !expanded })
+                    onExpandedChange = { expanded = !expanded }
+                )
             }
             //card here
-            details?.let {
-                DetailsItemCard(it, context)
-            } ?: run {
-                Text("No details found", style = CC.descriptionTextStyle(context))
+            LazyColumn {
+                items(details.value) { detail ->
+                    DetailsItemCard(detail, context)
+                }
             }
+
         }
     }
 
@@ -1024,6 +1024,7 @@ fun AddDetailsItem(
     var loading by remember { mutableStateOf(false) }
     var courseInfo by remember { mutableStateOf(Course())  }
 
+
     LaunchedEffect(courseID) {
 
         MyDatabase.getCourseDetailsByCourseID(courseID) { fetchedDetails ->
@@ -1136,27 +1137,4 @@ fun AddDetailsItem(
     }
 }
 
-@Preview
-@Composable
-fun CourseContentPreview() {
-    val courseDetails = CourseDetails(
-        courseName = CourseName.name.value,
-        courseCode = "JC101",
-        lecturer = "Dr. John Doe",
-        numberOfVisits = "25",
-        courseDepartment = "Computer Science",
-        overview = "This course provides a comprehensive introduction to web development, covering HTML, CSS, and JavaScript. Students will learn how to build interactive websites and web applications.",
-        learningOutcomes = listOf(
-            "Write JavaScript code to add interactivity to websites.",
-            "Understand the principles of web development and best practices.",
-            "Design and implement web pages using HTML and CSS."
-        ),
-        schedule = "Mondays and Wednesdays, 10:00 AM - 11:30 AM, Room 101",
-        requiredMaterials = "\"Web Development for Beginners\" textbook"
-    )
 
-    DetailsItemCard(
-        courseDetails = courseDetails,
-        context = LocalContext.current
-    )
-}

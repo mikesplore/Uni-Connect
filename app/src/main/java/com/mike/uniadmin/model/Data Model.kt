@@ -17,15 +17,6 @@ import java.util.UUID
 
 
 
-data class User(
-    var id: String = "", // Use a mutable 'var'
-    val firstName: String = "",
-    val lastName: String = "",
-    val email: String = "",
-    val phoneNumber: String = "",
-    val gender: String = "",
-    val profileImageLink: String = ""
-)
 
 data class GridItem(
     val title: String = "",
@@ -39,21 +30,8 @@ enum class Section {
     NOTES, PAST_PAPERS, RESOURCES,
 }
 
-data class AccountDeletion(
-    val id: String = "", val admissionNumber: String = "", val email: String = ""
-)
 
-data class Message(
-    var id: String = "",
-    var message: String = "",
-    var senderName: String = "",
-    var senderID: String = "",
-    var time: String = "",
-    var date: String = "",
-    var recipientID: String = "",
-    var profileImageLink: String = ""
 
-)
 
 data class Timetable(
     val id: String = "",
@@ -105,13 +83,7 @@ data class Day(
     val name: String = ""
 )
 
-data class Announcement(
-    val id: String = "",
-    val date: String = "",
-    val title: String = "",
-    val description: String = "",
-    val author: String = ""
-)
+
 
 data class Fcm(
     val id: String = "",
@@ -135,31 +107,14 @@ data class Screens(
 
     )
 
-data class Chat(
-    var id: String = "",
-    var message: String = "",
-    var senderName: String = "",
-    var senderID: String = "",
-    var time: String = "",
-    var date: String = "",
-    var profileImageLink: String = ""
 
-)
 
 data class MyCode(
     val id: String = UUID.randomUUID().toString(),
     var code: Int = 0
 )
 
-data class UserPreferences(
-    val studentID: String = "",
-    val id: String = "",
-    val profileImageLink: String = "",
-    val biometrics: String = "disabled",
-    val darkMode: String = "disabled",
-    val notifications: String = "disabled"
 
-)
 
 //these are the Bottom icons of the Bottom Nav
 
@@ -199,45 +154,6 @@ val randomColor = listOf(
 )
 
 
-data class CourseAnnouncement(
-    val announcementID: String = "",
-    val date: String = "",
-    val title: String = "",
-    val description: String = "",
-    val author: String = ""
-)
-
-data class CourseAssignment(
-    val assignmentID: String = "",
-    val title: String = "",
-    val description: String = "",
-    val publishedDate: String = "",
-    val dueDate: String = ""
-)
-
-data class CourseTimetable(
-    val timetableID: String = "",
-    val startTime: String = "",
-    val endTime: String = "",
-    val venue: String = "",
-    val lecturer: String = "",
-)
-
-data class CourseDetails(
-    val detailsID: String = "",
-    val courseName: String = "",
-    val courseCode: String = "",
-    val lecturer: String = "",
-    val numberOfVisits: String = "",
-    val courseDepartment: String = "",
-    val overview: String = "",
-    val learningOutcomes: List<String> = emptyList(),
-    val schedule: String = "",
-    val requiredMaterials: String = ""
-)
-
-
-
 
 //upon course click, we will get the course code that
 // will navigate us to the Course Screen
@@ -260,5 +176,9 @@ data class CourseDetails(
 //Description
 //Date
 //Author
+
+// Data structure employed here is Hierarchical🌲 data structure
+//So the path to the courseAnnouncements data will be
+//CourseContent -> CourseCode -> CourseAnnouncements  -> AnnouncementID -> Announcement Content
 
 //the same logic applies to all other Sections of the Course

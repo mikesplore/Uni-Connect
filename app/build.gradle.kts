@@ -52,6 +52,7 @@ android {
 
 dependencies {
     //these are my added dependencies
+    implementation("androidx.room:room-runtime:2.6.1")
     implementation (libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
@@ -75,6 +76,10 @@ dependencies {
     implementation(libs.google.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
+    implementation(libs.androidx.runtime.livedata)
+
+
+    testImplementation("androidx.room:room-testing:2.6.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
