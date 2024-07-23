@@ -57,9 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.dataModel.groupchat.ChatRepository
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.Group
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.User
@@ -71,8 +69,8 @@ import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.CommonComponents as CC
 
 object GroupDetails {
-    var groupName: MutableState<String> = mutableStateOf("")
-    var groupImageLink: MutableState<String> = mutableStateOf("")
+    var groupName: MutableState<String?> = mutableStateOf("")
+    var groupImageLink: MutableState<String?> = mutableStateOf("")
 }
 
 @Composable
@@ -104,7 +102,7 @@ fun UniGroups(context: Context, navController: NavController) {
         chatViewModel.fetchGroups()
     }
 
-    val userGroups = groups.filter { it.members.contains(signedInUser.id) }
+    val userGroups = groups.filter { it.members?.contains(signedInUser.id) == true }
 
     Column(
         modifier = Modifier
@@ -157,7 +155,7 @@ fun UniGroups(context: Context, navController: NavController) {
                 modifier = Modifier.animateContentSize()
             ) {
                 items(userGroups) { group ->
-                    if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
+                    if (group.name?.isNotEmpty() == true && group.description?.isNotEmpty() == true) {
                         GroupItem(
                             group,
                             context,
@@ -318,38 +316,44 @@ fun EditGroupSection(
 ) {
     var groupName by remember { mutableStateOf(group.name) }
     var groupDescription by remember { mutableStateOf(group.description) }
-    var selectedMembers by remember { mutableStateOf(group.members.toSet()) }
+    var selectedMembers by remember { mutableStateOf(group.members?.toSet()) }
     var expanded by remember { mutableStateOf(false) }
     var imageLink by remember { mutableStateOf(group.groupImageLink) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        CC.SingleLinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = groupName,
-            onValueChange = { groupName = it },
-            label = "Group Name",
-            enabled = true,
-            singleLine = true,
-            context = context
-        )
-        CC.SingleLinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = groupDescription,
-            onValueChange = { groupDescription = it },
-            label = "Description",
-            enabled = true,
-            singleLine = true,
-            context = context
-        )
-        CC.SingleLinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = imageLink,
-            onValueChange = { imageLink = it },
-            label = "Image link",
-            enabled = true,
-            singleLine = true,
-            context = context
-        )
+        groupName?.let {
+            CC.SingleLinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = it,
+                onValueChange = { groupName = it },
+                label = "Group Name",
+                enabled = true,
+                singleLine = true,
+                context = context
+            )
+        }
+        groupDescription?.let {
+            CC.SingleLinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = it,
+                onValueChange = { groupDescription = it },
+                label = "Description",
+                enabled = true,
+                singleLine = true,
+                context = context
+            )
+        }
+        imageLink?.let {
+            CC.SingleLinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = it,
+                onValueChange = { imageLink = it },
+                label = "Image link",
+                enabled = true,
+                singleLine = true,
+                context = context
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { expanded = !expanded }, colors = ButtonDefaults.buttonColors(
@@ -371,10 +375,10 @@ fun EditGroupSection(
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            selectedMembers = if (selectedMembers.contains(user.id)) {
-                                selectedMembers - user.id
+                            selectedMembers = if (selectedMembers?.contains(user.id) == true) {
+                                selectedMembers?.minus(user.id)
                             } else {
-                                selectedMembers + user.id
+                                selectedMembers?.plus(user.id)
                             }
                         }
                         .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -401,13 +405,15 @@ fun EditGroupSection(
                             style = CC.descriptionTextStyle(context),
                             modifier = Modifier.padding(start = 8.dp)
                         )
-                        Checkbox(checked = selectedMembers.contains(user.id), onCheckedChange = {
-                            selectedMembers = if (it) {
-                                selectedMembers + user.id
-                            } else {
-                                selectedMembers - user.id
-                            }
-                        })
+                        selectedMembers?.let {
+                            Checkbox(checked = it.contains(user.id), onCheckedChange = {
+                                selectedMembers = if (it) {
+                                    selectedMembers?.plus(user.id)
+                                } else {
+                                    selectedMembers?.minus(user.id)
+                                }
+                            })
+                        }
                     }
                 }
             }
@@ -421,7 +427,7 @@ fun EditGroupSection(
                     name = groupName,
                     description = groupDescription,
                     groupImageLink = imageLink,
-                    members = selectedMembers.toList()
+                    members = selectedMembers?.toList()
                 )
                 chatViewModel.saveGroup(updatedGroup, onSuccess = {
                     if (it) {
@@ -470,7 +476,7 @@ fun GroupItem(
                     .background(CC.secondary(), CircleShape)
                     .size(50.dp)
             ) {
-                if (group.groupImageLink.isNotBlank()) {
+                if (group.groupImageLink?.isNotBlank() == true) {
                     AsyncImage(
                         model = group.groupImageLink,
                         contentDescription = "Group Image",
@@ -500,12 +506,16 @@ fun GroupItem(
             Column(
                 modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
             ) {
-                Text(
-                    text = group.name, style = CC.titleTextStyle(context)
-                )
-                Text(
-                    text = group.description, style = CC.descriptionTextStyle(context)
-                )
+                group.name?.let {
+                    Text(
+                        text = it, style = CC.titleTextStyle(context)
+                    )
+                }
+                group.description?.let {
+                    Text(
+                        text = it, style = CC.descriptionTextStyle(context)
+                    )
+                }
             }
         }
     }

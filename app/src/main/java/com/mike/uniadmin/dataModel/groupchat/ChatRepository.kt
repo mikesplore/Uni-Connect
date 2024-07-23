@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.IO)
+val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDao) {
 val database = FirebaseDatabase.getInstance().getReference()

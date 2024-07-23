@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -51,8 +52,9 @@ android {
 }
 
 dependencies {
-    //these are my added dependencies
     implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
     implementation (libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
@@ -64,7 +66,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.material.icons.extended.android)
 
-    //these dependencies come as default
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

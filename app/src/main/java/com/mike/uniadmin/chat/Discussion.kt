@@ -84,11 +84,8 @@ import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
 import com.mike.uniadmin.UserItem
-import com.mike.uniadmin.dataModel.groupchat.Chat
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
-import com.mike.uniadmin.dataModel.groupchat.ChatRepository
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.Group
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.User
@@ -111,10 +108,10 @@ import com.mike.uniadmin.CommonComponents as CC
 fun DiscussionScreen(
     navController: NavController, context: Context, targetGroupID: String
 ) {
-    val application = context.applicationContext as UniAdmin
-    val chatRepository = remember { application.chatRepository }
+    val uniAdmin = context.applicationContext as? UniAdmin
+    val chatRepository = remember { uniAdmin?.chatRepository }
     val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
+        factory = ChatViewModel.ChatViewModelFactory(chatRepository ?: throw IllegalStateException("ChatRepository is null"))
     )
     val userRepository = remember { UserRepository() }
     val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
@@ -173,12 +170,16 @@ fun DiscussionScreen(
 
 
     Scaffold(topBar = {
-        ChatTopAppBar(navController = navController,
-            name = GroupDetails.groupName.value,
-            link = GroupDetails.groupImageLink.value,
-            context = context,
-            onSearchClick = { isSearchVisible = !isSearchVisible },
-            onShowUsersClick = { showUsers = !showUsers })
+        GroupDetails.groupName.value?.let {
+            GroupDetails.groupImageLink.value?.let { it1 ->
+                ChatTopAppBar(navController = navController,
+                    name = it,
+                    link = it1,
+                    context = context,
+                    onSearchClick = { isSearchVisible = !isSearchVisible },
+                    onShowUsersClick = { showUsers = !showUsers })
+            }
+        }
     }, snackbarHost = { SnackbarHost(snackbarHostState) }, content = { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             Background(context)
@@ -217,10 +218,10 @@ fun DiscussionScreen(
                             }
 
                             items(chatsForDate.filter {
-                                it.message.contains(
+                                it.message?.contains(
                                     searchQuery.text,
                                     ignoreCase = true
-                                )
+                                ) ?: false
                             }) { chat ->
                                 ChatBubble(
                                     chat = chat,
@@ -350,7 +351,7 @@ fun GroupUsersList(
     group: GroupEntity
 ) {
     val filteredUsers = users.filter { user ->
-        group.members.contains(user.id)  // Filter users based on membership
+        group.members?.contains(user.id) ?: false  // Filter users based on membership
     }
 
     AnimatedVisibility(visible = isVisible,
@@ -522,12 +523,14 @@ fun ChatBubble(
                     Row(
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        Text(
-                            text = chat.senderName,
-                            style = CC.descriptionTextStyle(context),
-                            fontWeight = FontWeight.Bold,
-                            color = GlobalColors.primaryColor
-                        )
+                        chat.senderName?.let {
+                            Text(
+                                text = it,
+                                style = CC.descriptionTextStyle(context),
+                                fontWeight = FontWeight.Bold,
+                                color = GlobalColors.primaryColor
+                            )
+                        }
                     }
                 }
                 SelectionContainer {
@@ -538,16 +541,18 @@ fun ChatBubble(
                         append(chat.message)
                         // Use a regex or any other method to detect links and apply linkStyle
                         val regex = Regex("(https?://[\\w./?=#]+)")
-                        regex.findAll(chat.message).forEach { result ->
-                            val start = result.range.first
-                            val end = result.range.last + 1
-                            addStyle(linkStyle, start, end)
-                            addStringAnnotation(
-                                tag = "URL", annotation = result.value, start = start, end = end
-                            )
+                        chat.message?.let {
+                            regex.findAll(it).forEach { result ->
+                                val start = result.range.first
+                                val end = result.range.last + 1
+                                addStyle(linkStyle, start, end)
+                                addStringAnnotation(
+                                    tag = "URL", annotation = result.value, start = start, end = end
+                                )
+                            }
                         }
                     }, onClick = { offset ->
-                        val annotations = chat.message.substring(offset)
+                        val annotations = chat.message?.substring(offset)
                         annotations.let {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotations))
                             context.startActivity(intent)
@@ -555,15 +560,17 @@ fun ChatBubble(
                     }, style = CC.descriptionTextStyle(context)
                     )
                 }
-                Text(
-                    text = chat.time,
-                    style = CC.descriptionTextStyle(context),
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(top = 4.dp)
-                )
+                chat.time?.let {
+                    Text(
+                        text = it,
+                        style = CC.descriptionTextStyle(context),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(top = 4.dp)
+                    )
+                }
             }
         }
         if (!isUser) {
@@ -578,7 +585,7 @@ fun ChatBubble(
                 .background(GlobalColors.primaryColor, CircleShape)
                 .padding(4.dp),
                 contentAlignment = Alignment.Center) {
-                if (chat.profileImageLink.isNotBlank()) {
+                if (chat.profileImageLink?.isNotBlank() == true) {
                     AsyncImage(
                         model = chat.profileImageLink,
                         contentDescription = "Profile Image",
@@ -590,10 +597,12 @@ fun ChatBubble(
                         error = painterResource(id = R.drawable.logo)
                     )
                 } else {
-                    Text(
-                        text = chat.senderName[0].toString(),
-                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
-                    )
+                    chat.senderName?.get(0)?.let {
+                        Text(
+                            text = it.toString(),
+                            style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
+                        )
+                    }
                 }
             }
         }

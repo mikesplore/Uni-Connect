@@ -16,27 +16,45 @@ fun generateConversationId(userId1: String, userId2: String): String {
 @Entity(tableName = "chats")
 data class ChatEntity(
     @PrimaryKey val id: String,
-    var message: String = "",
-    var senderName: String = "",
-    var senderID: String = "",
-    var time: String = "",
-    var date: String = "",
-    var profileImageLink: String = ""
-)
+    var message: String? = null,
+    var senderName: String? = null,
+    var senderID: String? = null,
+    var time: String? = null,
+    var date: String? = null,
+    var profileImageLink: String? = null
+){
+    constructor() : this(
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    )
+}
 
 @Entity(tableName = "groups")
 data class GroupEntity(
     @PrimaryKey val id: String,
-    val admin: String = "",
-    var name: String = "",
-    var description: String = "",
-    var groupImageLink: String = "",
-    var members: List<String> = emptyList()
-)
+    val admin: String? = null,
+    var name: String? = null,
+    var description: String? = null,
+    var groupImageLink: String? = null,
+    var members: List<String>? = null
+) {
+    constructor() : this(
+        "",
+        null,
+        null,
+        null,
+        null,
+        null
+    )
+}
 
 
 class UniAdmin : Application() {
     val database by lazy { AppDatabase.getDatabase(this) }
     val chatRepository by lazy { ChatRepository(database.chatDao(), database.groupDao()) }
 }
-

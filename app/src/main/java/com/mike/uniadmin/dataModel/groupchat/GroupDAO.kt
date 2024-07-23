@@ -7,8 +7,8 @@ import androidx.room.Query
 
 @Dao
 interface ChatDao {
-    @Query("SELECT * FROM chats WHERE senderID = :senderID")
-    suspend fun getChats(senderID: String): List<ChatEntity>
+    @Query("SELECT * FROM chats WHERE id LIKE '%' || :path || '%'")
+    suspend fun getChats(path: String): List<ChatEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChats(chats: List<ChatEntity>)

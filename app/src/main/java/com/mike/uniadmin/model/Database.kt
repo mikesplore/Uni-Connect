@@ -13,7 +13,6 @@ import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnou
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
-import com.mike.uniadmin.dataModel.groupchat.Chat
 import com.mike.uniadmin.dataModel.userchat.Message
 import com.mike.uniadmin.dataModel.users.UserState
 import com.mike.uniadmin.ui.theme.GlobalColors

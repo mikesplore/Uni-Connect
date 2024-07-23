@@ -173,7 +173,7 @@ fun HomeScreen(
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     var update by remember { mutableStateOf(Update()) }
-    val userGroups = groups.filter { it.members.contains(signedInUser.value?.id) }
+    val userGroups = groups.filter { it.members?.contains(signedInUser.value?.id) ?: false }
 
     LaunchedEffect(currentPerson?.email) {
         GlobalColors.loadColorScheme(context)
@@ -577,7 +577,7 @@ fun ModalDrawerItem(
                 modifier = Modifier.animateContentSize()
             ) {
                 items(userGroups) { group ->
-                    if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
+                    if ((group.name?.isNotEmpty() == true) && (group.description?.isNotEmpty() == true)) {
                         GroupItem(
                             group,
                             context,
