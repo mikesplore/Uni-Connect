@@ -37,7 +37,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
-import com.mike.uniadmin.dataModel.userchat.Message
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
 import com.mike.uniadmin.dataModel.users.User
@@ -55,6 +54,9 @@ import java.util.Locale
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Call
+import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.userchat.MessageRepository
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.CommonComponents as CC
@@ -62,10 +64,15 @@ import com.mike.uniadmin.CommonComponents as CC
 
 @Composable
 fun UserChatScreen(navController: NavController, context: Context, targetUserId: String) {
-    val messageRepository = remember { MessageRepository() }
+    val uniAdmin = context.applicationContext as? UniAdmin
+    val messageRepository = remember { uniAdmin?.messageRepository }
+    val messageViewModel: MessageViewModel = viewModel(
+        factory = MessageViewModelFactory(messageRepository ?: throw IllegalStateException("ChatRepository is null"))
+    )
+
+
     val userRepository = remember { UserRepository() }
     val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
-    val messageViewModel: MessageViewModel = viewModel(factory = MessageViewModelFactory(messageRepository))
 
     val messages by messageViewModel.messages.observeAsState(emptyList())
     val user by userViewModel.user.observeAsState()
@@ -100,6 +107,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
         currentUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
+
         userViewModel.findUserByAdmissionNumber(targetUserId)
         userViewModel.checkUserStateByID(targetUserId)
         while (true) {
@@ -142,7 +150,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     fun sendMessage(messageContent: String) {
         try {
             MyDatabase.generateChatID { chatId ->
-                val newMessage = Message(
+                val newMessage = MessageEntity(
                     id = chatId,
                     message = messageContent,
                     senderName = user?.firstName.orEmpty(),
@@ -214,12 +222,14 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                         item {
                             RowMessage(context)
                             Spacer(modifier = Modifier.height(8.dp))
-                            RowDate(date, context)
+                            if (date != null) {
+                                RowDate(date, context)
+                            }
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         items(chatsForDate.filter {
-                            it.message.contains(searchQuery, ignoreCase = true)
+                            it.message?.contains(searchQuery, ignoreCase = true) ?: false
                         }) { chat ->
                             MessageBubble(
                                 message = chat,
@@ -247,7 +257,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MessageBubble(
-    message: Message,
+    message: MessageEntity,
     isUser: Boolean,
     context: Context,
 ) {
@@ -273,18 +283,22 @@ fun MessageBubble(
                 .align(alignment)
         ) {
             Column {
-                Text(
-                    text = message.message, style = CC.descriptionTextStyle(context)
-                )
-                Text(
-                    text = message.time,
-                    style = CC.descriptionTextStyle(context),
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(top = 4.dp)
-                )
+                message.message?.let {
+                    Text(
+                        text = it, style = CC.descriptionTextStyle(context)
+                    )
+                }
+                message.time?.let {
+                    Text(
+                        text = it,
+                        style = CC.descriptionTextStyle(context),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(top = 4.dp)
+                    )
+                }
             }
         }
     }
