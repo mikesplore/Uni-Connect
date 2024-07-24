@@ -4,20 +4,47 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class MessageViewModel(private val repository: MessageRepository) : ViewModel() {
-    private val _messages = MutableLiveData<List<Message>>()
-    val messages: LiveData<List<Message>> = _messages
+    private val _messages = MutableLiveData<List<MessageEntity>>()
+    val messages: LiveData<List<MessageEntity>> = _messages
 
-     fun fetchMessages(path: String) {
-        repository.fetchMessages(path) { messages ->
-            _messages.value = messages
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _messagesMap = MutableLiveData<Map<String, List<MessageEntity>>>()
+    val messagesMap: LiveData<Map<String, List<MessageEntity>>> get() = _messagesMap
+
+    init {
+        _messagesMap.value = emptyMap()
+    }
+
+    fun fetchCardMessages(conversationId: String) {
+        viewModelScope.launch {
+            repository.fetchMessages(conversationId) { messages -> // Use the callback
+                _messagesMap.value = _messagesMap.value?.toMutableMap()?.apply {
+                    this[conversationId] = messages
+                }
+            }
         }
     }
 
-    fun saveMessage(message: Message, path: String, onSuccess: (Boolean) -> Unit) {
+    fun getCardMessages(conversationId: String): LiveData<List<MessageEntity>> {
+        return messagesMap.map { it[conversationId] ?: emptyList() }
+    }
+
+     fun fetchMessages(path: String) {
+         _isLoading.value = true
+        repository.fetchMessages(path) { messages ->
+            _messages.value = messages
+            _isLoading.value = false
+        }
+    }
+
+    fun saveMessage(message: MessageEntity, path: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.saveMessage(message, path) { success ->
                 if (success) {
