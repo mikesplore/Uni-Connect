@@ -1,5 +1,6 @@
 package com.mike.uniadmin.chat
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -22,23 +23,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +46,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,24 +57,30 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
-import com.mike.uniadmin.dataModel.userchat.Message
+import com.mike.uniadmin.dataModel.userchat.MessageViewModel
+import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
 import com.mike.uniadmin.dataModel.users.User
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.model.MyDatabase.fetchUserToUserMessages
 import com.mike.uniadmin.ui.theme.GlobalColors
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import com.mike.uniadmin.CommonComponents as CC
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ParticipantsScreen(navController: NavController, context: Context) {
     val userRepository = remember { UserRepository() }
     val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val uniAdmin = context.applicationContext as? UniAdmin
+    val messageRepository = remember { uniAdmin?.messageRepository }
+    val messageViewModel: MessageViewModel = viewModel(
+        factory = MessageViewModelFactory(
+            messageRepository ?: throw IllegalStateException("ChatRepository is null")
+        )
+    )
     val auth = FirebaseAuth.getInstance()
     val users by userViewModel.users.observeAsState(initial = emptyList())
     val errorMessage by remember { mutableStateOf<String?>(null) }
@@ -94,97 +95,79 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
     }
 
     // Filter and sort users
-    val filteredUsers = users
-        .filter { user ->
-            user.firstName.contains(searchQuery, ignoreCase = true) ||
-                    user.lastName.contains(searchQuery, ignoreCase = true)
-        }
-        .sortedByDescending { it.id }
+    val filteredUsers = users.filter { user ->
+            user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
+                searchQuery,
+                ignoreCase = true
+            )
+        }.sortedByDescending { it.id }
 
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Uni Chat", style = CC.titleTextStyle(context)) },
-                actions = {
-                    IconButton(onClick = { searchVisible = !searchVisible }) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = CC.textColor()
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
-            )
-        },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+        content = {
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    AnimatedVisibility(visible = searchVisible) {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            label = { Text("Search Participants") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = GlobalColors.primaryColor,
-                                unfocusedIndicatorColor = CC.textColor(),
-                                focusedIndicatorColor = GlobalColors.secondaryColor,
-                                unfocusedContainerColor = GlobalColors.primaryColor,
-                                focusedTextColor = CC.textColor(),
-                                unfocusedTextColor = GlobalColors.textColor,
-                                focusedLabelColor = GlobalColors.secondaryColor,
-                                unfocusedLabelColor = GlobalColors.textColor
-                            ),
-                            shape = RoundedCornerShape(10.dp)
+                AnimatedVisibility(visible = searchVisible) {
+                    TextField(value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Search Participants") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = GlobalColors.primaryColor,
+                            unfocusedIndicatorColor = CC.textColor(),
+                            focusedIndicatorColor = GlobalColors.secondaryColor,
+                            unfocusedContainerColor = GlobalColors.primaryColor,
+                            focusedTextColor = CC.textColor(),
+                            unfocusedTextColor = GlobalColors.textColor,
+                            focusedLabelColor = GlobalColors.secondaryColor,
+                            unfocusedLabelColor = GlobalColors.textColor
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                }
+                when {
+                    errorMessage != null -> {
+                        Text(
+                            text = errorMessage!!,
+                            color = Color.Red,
+                            style = CC.descriptionTextStyle(context)
                         )
                     }
-                    when {
-                        errorMessage != null -> {
-                            Text(
-                                text = errorMessage!!,
-                                color = Color.Red,
-                                style = CC.descriptionTextStyle(context)
-                            )
-                        }
-                        filteredUsers.isEmpty() -> {
-                            Text(
-                                text = "No participants found.",
-                                style = CC.descriptionTextStyle(context)
-                            )
-                        }
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxSize()
-                            ) {
-                                items(filteredUsers) { user ->
-                                    ProfileCard(user, navController, context, userViewModel)
-                                }
+
+                    filteredUsers.isEmpty() -> {
+                        Text(
+                            text = "No participants found.",
+                            style = CC.descriptionTextStyle(context)
+                        )
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxSize()
+                        ) {
+                            items(filteredUsers) { user ->
+                                ProfileCard(
+                                    user,
+                                    navController,
+                                    context,
+                                    userViewModel,
+                                    messageViewModel
+                                )
                             }
                         }
                     }
                 }
             }
-        },
-        containerColor = CC.primary()
+
+        }, containerColor = CC.primary()
     )
 
-    ModalNavigationDrawer(
-        modifier = Modifier.fillMaxWidth(0.5f),
+    ModalNavigationDrawer(modifier = Modifier.fillMaxWidth(0.5f),
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
@@ -203,32 +186,34 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
         },
         content = {
 
-        }
-    )
+        })
 }
 
 @Composable
 fun UserListItem(user: User, navController: NavController) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { navController.navigate("chat/${user.id}") }
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(40.dp)){
-        Image(
-            painter = if (user.profileImageLink.isNotBlank()) rememberAsyncImagePainter(user.profileImageLink) else painterResource(id = R.drawable.student),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(CircleShape)
-                .background(Color.Gray),
-            contentScale = ContentScale.Crop
-        )}
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { navController.navigate("chat/${user.id}") }
+        .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(40.dp)) {
+            Image(
+                painter = if (user.profileImageLink.isNotBlank()) rememberAsyncImagePainter(user.profileImageLink) else painterResource(
+                    id = R.drawable.student
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(Color.Gray),
+                contentScale = ContentScale.Crop
+            )
+        }
         Spacer(modifier = Modifier.width(8.dp))
         Column {
-            Text(text = "${user.firstName} ${user.lastName}", style = CC.titleTextStyle(navController.context).copy(fontSize = 16.sp))
+            Text(
+                text = "${user.firstName} ${user.lastName}",
+                style = CC.titleTextStyle(navController.context).copy(fontSize = 16.sp)
+            )
         }
     }
 }
@@ -238,55 +223,26 @@ fun ProfileCard(
     user: User,
     navController: NavController,
     context: Context,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    messageViewModel: MessageViewModel
 ) {
-    val auth = FirebaseAuth.getInstance()
     val currentMe by viewModel.user.observeAsState()
-    val admissionNumber by remember { mutableStateOf(currentMe?.id) }
-    var messages by remember { mutableStateOf(emptyList<Message>()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val admissionNumber = currentMe?.id
     val userStates by viewModel.userStates.observeAsState(emptyMap())
-
     val userState = userStates[user.id]
-
-    LaunchedEffect(Unit) {
-        auth.currentUser?.email?.let { email ->
-            viewModel.findUserByEmail(email) {}
-            viewModel.checkAllUserStatuses()
-        }
-    }
 
     val conversationId =
         "Direct Messages/${admissionNumber?.let { generateConversationId(it, user.id) }}"
 
-    fun fetchMessages(conversationId: String) {
-        try {
-            fetchUserToUserMessages(conversationId) { fetchedMessages ->
-                messages = fetchedMessages
-            }
-        } catch (e: Exception) {
-            errorMessage = e.message
-            scope.launch {
-                snackbarHostState.showSnackbar("Failed to fetch messages: ${e.message}")
-                Log.e(
-                    "UserChatScreen",
-                    "Failed to fetch messages from $conversationId: ${e.message}",
-                    e
-                )
-            }
-        }
+    val messages by messageViewModel.getCardMessages(conversationId).observeAsState()
+
+    LaunchedEffect(conversationId) {
+        viewModel.checkAllUserStatuses()
+        messageViewModel.fetchCardMessages(conversationId)
+        Log.d("ProfileCard", "Fetching messages for $conversationId")
     }
 
-    LaunchedEffect(key1 = conversationId) {
-        while (true) {
-            fetchMessages(conversationId)
-            delay(1000) // Adjust the delay as needed
-        }
-    }
-
-    val latestMessage = messages.lastOrNull()
+    val latestMessage = messages?.lastOrNull()
 
     Card(modifier = Modifier
         .clickable { navController.navigate("chat/${user.id}") }
@@ -309,7 +265,7 @@ fun ProfileCard(
                     )
                 } else {
                     Image(
-                        painter = painterResource(id = R.drawable.student), // Replace with your profile icon
+                        painter = painterResource(id = R.drawable.student),
                         contentDescription = "Profile Icon",
                         modifier = Modifier
                             .size(50.dp)
@@ -330,10 +286,10 @@ fun ProfileCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val displayName =
-                        if (user.id == currentMe?.id) "${user.firstName}(You)" else user.firstName + " " + user.lastName
+                        if (user.id == currentMe?.id) "${user.firstName} (You)" else "${user.firstName} ${user.lastName}"
                     Text(
                         text = displayName,
-                        style = CC.titleTextStyle(navController.context).copy(fontSize = 18.sp),
+                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp),
                         color = CC.textColor()
                     )
                     Column(
@@ -341,12 +297,10 @@ fun ProfileCard(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.SpaceAround
                     ) {
-                        val textColor = if (userState == null) {
-                            CC.textColor().copy(alpha = 0.5f)
-                        } else if (userState.online == "online") {
-                            Color.Green
-                        } else {
-                            Color.Red
+                        val textColor = when {
+                            userState == null -> CC.textColor().copy(alpha = 0.5f)
+                            userState.online == "online" -> Color.Green
+                            else -> Color.Red
                         }
                         Text(
                             text = when {
@@ -354,15 +308,14 @@ fun ProfileCard(
                                 userState.online == "online" -> "Online"
                                 else -> "Last seen ${userState.lastTime}"
                             },
-                            style = CC.descriptionTextStyle(navController.context).copy(
-                                fontSize = 12.sp
-                            ),
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
                             color = textColor
                         )
                         Text(
                             text = latestMessage?.time ?: "",
-                            style = CC.descriptionTextStyle(navController.context).copy(fontSize = 12.sp),
-                        )}
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -373,18 +326,59 @@ fun ProfileCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = latestMessage?.message ?: "",
-                        style = CC.descriptionTextStyle(navController.context),
+                        text = createAnnotatedMessage(
+                            latestMessage?.message ?: ""
+                        ), // Use the function
+                        style = CC.descriptionTextStyle(context),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = CC.textColor().copy(alpha = 0.5f),
                         modifier = Modifier.weight(1f)
                     )
+                    Log.d(
+                        "Message Content",
+                        "The last message for $conversationId is ${latestMessage?.message}"
+                    )
                 }
+
+                // Function to create AnnotatedString
+
             }
         }
     }
 }
+
+
+@Composable
+fun createAnnotatedMessage(message: String): AnnotatedString {
+    val emojiRegex = Regex("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]")
+
+    return buildAnnotatedString {
+        var startIndex = 0
+        emojiRegex.findAll(message).forEach { matchResult ->
+            val emoji = matchResult.value
+            val emojiIndex = matchResult.range.first
+
+            append(message.substring(startIndex, emojiIndex))
+            addStyle(
+                SpanStyle(color = CC.textColor().copy(alpha = 0.5f)),
+                startIndex,
+                emojiIndex
+            ) // Apply color to non-emoji text
+
+            append(emoji)
+
+            startIndex = matchResult.range.last + 1
+        }
+
+        append(message.substring(startIndex))
+        addStyle(
+            SpanStyle(color = CC.textColor().copy(alpha = 0.5f)),
+            startIndex,
+            message.length
+        ) // Apply color to non-emoji text
+    }
+}
+
 
 
 
