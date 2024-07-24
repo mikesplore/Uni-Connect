@@ -13,7 +13,6 @@ import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnou
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
-import com.mike.uniadmin.dataModel.userchat.Message
 import com.mike.uniadmin.dataModel.users.UserState
 import com.mike.uniadmin.ui.theme.GlobalColors
 import java.util.Calendar
@@ -165,20 +164,6 @@ object MyDatabase {
             }
         })
     }
-
-    fun fetchUserToUserMessages(path: String, onMessagesFetched: (List<Message>) -> Unit) {
-        database.child(path).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val messages = snapshot.children.mapNotNull { it.getValue(Message::class.java) }
-                onMessagesFetched(messages)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-            }
-        })
-    }
-
 
 
 
