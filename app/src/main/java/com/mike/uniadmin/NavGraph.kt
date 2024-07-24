@@ -13,19 +13,34 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
+import com.mike.uniadmin.chat.AddGroupSection
 import com.mike.uniadmin.chat.DiscussionScreen
 import com.mike.uniadmin.chat.ParticipantsScreen
+import com.mike.uniadmin.chat.UniChat
 import com.mike.uniadmin.chat.UniGroups
+import com.mike.uniadmin.chat.UniScreen
 import com.mike.uniadmin.chat.UserChatScreen
 import com.mike.uniadmin.dataModel.courses.CourseRepository
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
+import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
@@ -36,11 +51,27 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val navController = rememberNavController()
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
+    val application = context.applicationContext as UniAdmin
+    val chatRepository = remember { application.chatRepository }
+    val chatViewModel: ChatViewModel = viewModel(
+        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
+    )
+    val userRepository = remember { UserRepository() }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val groups by chatViewModel.groups.observeAsState(emptyList())
+    val users by userViewModel.users.observeAsState(emptyList())
+    val user by userViewModel.user.observeAsState(initial = null)
+    var showAddGroup by remember { mutableStateOf(false) }
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    var signedInUser by remember { mutableStateOf(User()) }
 
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
-    NavHost(navController = navController, startDestination = "splashscreen"){
+    val uniChatScreens = listOf(
+        UniScreen.Chats, UniScreen.Groups, UniScreen.Status
+    )
+    NavHost(navController = navController, startDestination = "addgroup"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
@@ -51,6 +82,11 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
         composable("login"){
             LoginScreen(navController = navController, context)
         }
+        composable("addgroup"){
+            AddGroupSection(signedInUser,context,chatViewModel,users)
+
+        }
+
         composable("dashboard"){
             Dashboard(navController = navController, context)
         }
@@ -120,6 +156,9 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
 
         composable("homescreen"){
             HomeScreen(navController,context,pagerState,mainActivity,screens,coroutineScope)
+        }
+        composable("unichat"){
+            UniChat(navController,context,pagerState, mainActivity,uniChatScreens, coroutineScope  )
         }
 
 //        composable("course/{courseCode}",
