@@ -266,14 +266,8 @@ fun HomeScreen(
                         scope.launch {
                             drawerState.close()
                         }
-                        navController.navigate("users")
+                        navController.navigate("unichat")
                     })
-                SideBarItem(icon = Icons.Default.Groups, text = "Groups", context, onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    navController.navigate("groups")
-                })
                 SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
                     scope.launch {
                         drawerState.close()

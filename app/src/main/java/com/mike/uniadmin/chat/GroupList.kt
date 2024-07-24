@@ -185,7 +185,7 @@ fun AddGroupSection(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New Group", style = CC.titleTextStyle(context)) },
+                title = { Text("New Group", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CC.primary(), titleContentColor = CC.textColor()
                 )

@@ -109,6 +109,7 @@ fun UniChat(
         user?.let {
             signedInUser.value = it
             userViewModel.checkAllUserStatuses()
+            userViewModel.fetchUsers()
             chatViewModel.fetchGroups()
             userViewModel.checkUserStateByID(it.id)
         }
@@ -133,7 +134,9 @@ fun UniChat(
                             text = "New group",
                             context = context,
                             expanded = expanded,
-                            onClick = { expanded = it }
+                            onClick = {
+                                navController.navigate("addgroup")
+                                expanded = it }
                         )
                         MyDropDownMenuItem(
                             icon = Icons.Default.GroupAdd,

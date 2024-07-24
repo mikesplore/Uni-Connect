@@ -55,31 +55,23 @@ val database = FirebaseDatabase.getInstance().getReference()
     }
 
     fun fetchGroups(onResult: (List<GroupEntity>) -> Unit) {
-        viewModelScope.launch {
-            val cachedGroups = groupDao.getGroups()
-            if (cachedGroups.isNotEmpty()) {
-                onResult(cachedGroups)
-            } else {
-                database.child("Groups").addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val groups = mutableListOf<GroupEntity>()
-                        for (childSnapshot in snapshot.children) {
-                            val group = childSnapshot.getValue(GroupEntity::class.java)
-                            group?.let { groups.add(it) }
-                        }
-                        viewModelScope.launch {
-                            groupDao.insertGroups(groups)
-                            onResult(groups)
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        // Handle the read error (e.g., log the error)
-                        println("Error reading groups: ${error.message}")
-                    }
-                })
+        database.child("Groups").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val groups = mutableListOf<GroupEntity>()
+                for (childSnapshot in snapshot.children) {
+                    val group = childSnapshot.getValue(GroupEntity::class.java)
+                    group?.let { groups.add(it) }
+                }
+                viewModelScope.launch {
+                    groupDao.insertGroups(groups) // Update the cache
+                    onResult(groups)
+                }
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Error reading groups: ${error.message}")
+            }
+        })
     }
 
     fun fetchGroupByID(groupID: String, onResult: (GroupEntity?) -> Unit) {

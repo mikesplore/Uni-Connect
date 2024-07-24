@@ -9,13 +9,16 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mike.uniadmin.dataModel.userchat.MessageDao
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
+import com.mike.uniadmin.dataModel.users.UserDao
+import com.mike.uniadmin.dataModel.users.UserEntity
 
-@Database(entities = [ChatEntity::class, GroupEntity::class, MessageEntity::class], version = 2, exportSchema = false)
+@Database(entities = [ChatEntity::class, GroupEntity::class, MessageEntity::class, UserEntity::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
     abstract fun groupDao(): GroupDao
     abstract fun messageDao(): MessageDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
