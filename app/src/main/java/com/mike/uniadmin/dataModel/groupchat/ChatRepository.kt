@@ -12,6 +12,7 @@ val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDao) {
 val database = FirebaseDatabase.getInstance().getReference()
+
     fun fetchChats(path: String, onResult: (List<ChatEntity>) -> Unit) {
         viewModelScope.launch {
             val cachedChats = chatDao.getChats(path)
