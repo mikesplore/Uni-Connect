@@ -1,13 +1,29 @@
 package com.mike.uniadmin.dataModel.userchat
 
-data class Message(
-    var id: String = "",
-    var message: String = "",
-    var senderName: String = "",
-    var senderID: String = "",
-    var time: String = "",
-    var date: String = "",
-    var recipientID: String = "",
-    var profileImageLink: String = ""
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "messages")
+data class MessageEntity(
+    @PrimaryKey var id: String,
+    var message: String? = null,
+    var senderName: String? = null,
+    var senderID: String? = null,
+    var time: String? = null,
+    var date: String? = null,
+    var recipientID: String? = null,
+    var profileImageLink: String? = null
 
 )
+{
+    constructor() : this(
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    )
+}
