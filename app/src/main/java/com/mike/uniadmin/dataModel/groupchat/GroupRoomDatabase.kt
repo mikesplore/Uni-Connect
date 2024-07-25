@@ -9,16 +9,25 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mike.uniadmin.dataModel.userchat.MessageDao
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
+import com.mike.uniadmin.dataModel.users.AccountDeletionDao
+import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
 import com.mike.uniadmin.dataModel.users.UserDao
 import com.mike.uniadmin.dataModel.users.UserEntity
+import com.mike.uniadmin.dataModel.users.UserPreferencesDao
+import com.mike.uniadmin.dataModel.users.UserPreferencesEntity
+import com.mike.uniadmin.dataModel.users.UserStateDao
+import com.mike.uniadmin.dataModel.users.UserStateEntity
 
-@Database(entities = [ChatEntity::class, GroupEntity::class, MessageEntity::class, UserEntity::class], version = 2, exportSchema = false)
+@Database(entities = [ChatEntity::class, GroupEntity::class, MessageEntity::class, UserEntity::class, AccountDeletionEntity::class, UserPreferencesEntity::class, UserStateEntity::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
     abstract fun groupDao(): GroupDao
     abstract fun messageDao(): MessageDao
     abstract fun userDao(): UserDao
+    abstract fun accountDeletionDao(): AccountDeletionDao
+    abstract fun userPreferencesDao(): UserPreferencesDao
+    abstract fun userStateDao(): UserStateDao
 
     companion object {
         @Volatile
@@ -29,7 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "uni_admin_database"
+                    "UniAdminDatabase"
                 ).addMigrations(MIGRATION_1_2) // Add this line
                     .build()
                 INSTANCE = instance
