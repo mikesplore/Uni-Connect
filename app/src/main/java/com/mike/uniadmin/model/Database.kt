@@ -13,7 +13,7 @@ import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnou
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
-import com.mike.uniadmin.dataModel.users.UserState
+import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.ui.theme.GlobalColors
 import java.util.Calendar
 import java.util.Locale
@@ -773,25 +773,17 @@ object MyDatabase {
         })
     }
 
-    fun writeUserActivity(userState: UserState, onSuccess: (Boolean) -> Unit) {
-        database.child("UsersState").child(userState.userID).setValue(userState)
-            .addOnSuccessListener {
-                onSuccess(true)
-            }.addOnFailureListener {
-                onSuccess(false)
-            }
+    fun writeUserActivity(userState: UserStateEntity, onSuccess: (Boolean) -> Unit) {
+        userState.userID?.let {
+            database.child("Users Online Status").child(it).setValue(userState)
+                .addOnSuccessListener {
+                    onSuccess(true)
+                }.addOnFailureListener {
+                    onSuccess(false)
+                }
+        }
     }
 
-    fun fetchUserActivity(userId: String, onUserStateFetched: (UserState?) -> Unit) {
-        database.child("UsersState").child(userId).get()
-            .addOnSuccessListener { snapshot ->
-                val userState = snapshot.getValue(UserState::class.java)
-                onUserStateFetched(userState)
-            }
-            .addOnFailureListener {
-                onUserStateFetched(null) // Handle failure, e.g., by returning null
-            }
-    }
 }
 
 
