@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,35 +15,32 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
-import com.mike.uniadmin.dataModel.users.User
-import com.mike.uniadmin.dataModel.users.UserState
+import com.mike.uniadmin.dataModel.users.UserEntity
+import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.model.Global
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var auth: FirebaseAuth
-    private var currentUser: User? = null
+    private var currentUser: UserEntity? = null
     val promptManager by lazy {
         BiometricPromptManager(this)
     }
+    private val database = FirebaseDatabase.getInstance()
 
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         val user = firebaseAuth.currentUser
@@ -98,35 +97,39 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupLifecycleObservers(userId: String) {
         lifecycle.addObserver(lifecycleObserver)
+        registerConnectivityListener(this, userId)
     }
 
     private fun writeUserOnlineStatus(userId: String) {
-        val userState = UserState(
+        val userStatusRef = database.getReference().child("Users Online Status").child(userId)
+        val userState = UserStateEntity(
             userID = userId,
             id = "${userId}2024",
             online = "online",
             lastTime = getCurrentTimeInAmPm()
         )
+        userStatusRef.setValue(userState) // Set the whole UserStateEntity object
+        userStatusRef.onDisconnect().setValue(userState.copy(online = "offline")) // Set offline on disconnect
         Log.d("User status", "Online: $userState")
         writeUserActivity(userState) { success ->
             if (!success) {
-                // Handle failure to write online status
                 Log.e("MainActivity", "Failed to write user online status")
             }
         }
     }
 
     private fun writeUserOfflineStatus(userId: String) {
-        val userState = UserState(
+        val userStatusRef = database.getReference().child("Users Online Status").child(userId)
+        val userState = UserStateEntity(
             userID = userId,
             id = "${userId}2024",
             online = "offline",
             lastTime = getCurrentTimeInAmPm()
         )
+        userStatusRef.setValue(userState) // Set the whole UserStateEntity object
         Log.d("User status", "Offline: $userState")
         writeUserActivity(userState) { success ->
             if (!success) {
-                // Handle failure to write offline status
                 Log.e("MainActivity", "Failed to write user offline status")
             }
         }
@@ -160,18 +163,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private fun fetchUserDataByEmail(email: String, onUserFetched: (User?) -> Unit) {
+    private fun fetchUserDataByEmail(email: String, onUserFetched: (UserEntity?) -> Unit) {
         MyDatabase.database.child("Users").orderByChild("email").equalTo(email)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val userSnapshot = snapshot.children.firstOrNull()
-                    val user = userSnapshot?.getValue(User::class.java)
+                    val user = userSnapshot?.getValue(UserEntity::class.java)
                     onUserFetched(user) // Call the trailing lambda with the fetched user
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     onUserFetched(null) // Handle error by passing null to the callback
                 }
             })
+    }
+
+    private fun registerConnectivityListener(context: Context, userId: String) {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+                writeUserOnlineStatus(userId)
+            }
+
+            override fun onLost(network: Network) {
+                super.onLost(network)
+                writeUserOfflineStatus(userId)
+            }
+        })
     }
 }
