@@ -87,8 +87,9 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
-import com.mike.uniadmin.dataModel.users.User
-import com.mike.uniadmin.dataModel.users.UserPreferences
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.UserEntity
+import com.mike.uniadmin.dataModel.users.UserPreferencesEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -113,14 +114,22 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var timeSpent by remember { mutableLongStateOf(0L) }
     var savedFont by remember { mutableStateOf("system") }
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
+
     val currentUser by userViewModel.user.observeAsState()
     val screenID = "SC8"
     LaunchedEffect(Unit) {
         GlobalColors.loadColorScheme(context)
         savedFont = fontPrefs.getSelectedFont().toString()
         userViewModel.findUserByEmail(user?.email!!) {}
+
         while (true) {
             timeSpent = System.currentTimeMillis() - startTime
             delay(1000)
@@ -139,40 +148,9 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
 
     // Fetch user data when the composable is launched
     LaunchedEffect(auth.currentUser?.email) {
-        auth.currentUser?.email?.let {
-            userViewModel.findUserByEmail(it) {}
-            currentUser?.let { me ->
-                userViewModel.fetchPreferences(me.id, onPreferencesFetched = { userPreferences ->
-                    selectedImageUri = Uri.parse(userPreferences?.profileImageLink)
-                })
-            }
-        }
-    }
-    LaunchedEffect(key1 = Unit) {
-        if (user != null) {
-            for (userInfo in user.providerData) {
-                when (userInfo.providerId) {
-                    "password" -> {
-                        // User signed in with email and password
-                        signInMethod = "password"
-                        Log.d("Auth", "User signed in with email/password")
-                    }
 
-                    "google.com" -> {
-                        // User signed in with Google
-                        signInMethod = "google.com"
-                        Log.d("Auth", "User signed in with Google")
-                    }
-
-                    "github.com" -> {
-                        // User signed in with GitHub
-                        signInMethod = "github.com"
-                        Log.d("Auth", "User signed in with GitHub")
-                    }
-                }
-            }
-        }
     }
+
     Log.d("Authenticated User", "The user is: $user")
     Scaffold(
         topBar = {
@@ -230,33 +208,32 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    if (user?.photoUrl != null && user.photoUrl.toString().isNotEmpty()) {
-                        AsyncImage(
-                            model = user.photoUrl,
-                            contentDescription = "Profile Picture",
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else if (selectedImageUri != null && signInMethod == "password") {
-                        AsyncImage(
-                            model = selectedImageUri,
-                            contentDescription = "Profile Picture",
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profile Picture",
-                            tint = Color.Gray, // Or your preferred color
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                        )
+                    Box(
+                        modifier = Modifier
+                            .border(
+                                1.dp, CC.textColor(), CircleShape
+                            )
+                            .clip(CircleShape)
+                            .background(CC.secondary(), CircleShape)
+                            .size(70.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (currentUser?.profileImageLink?.isNotEmpty() == true) {
+                            AsyncImage(model = currentUser?.profileImageLink,
+                                contentDescription = "Profile Image",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                                onError = { R.drawable.notification },
+                                onLoading = { R.drawable.logo }
+
+                            )
+                        } else {
+                            Text(
+                                "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
+                                style = CC.titleTextStyle(context)
+                                    .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
+                            )
+                        }
                     }
                     Column(
                         modifier = Modifier.fillMaxHeight(0.9f),
@@ -293,7 +270,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 Text("Security", style = CC.titleTextStyle(context))
             }
             Spacer(modifier = Modifier.height(20.dp))
-            //Biometrics(context, mainActivity, userViewModel)
+            Biometrics(context, mainActivity, userViewModel)
             Spacer(modifier = Modifier.height(20.dp))
             PasswordUpdateSection(context)
             Spacer(modifier = Modifier.height(20.dp))
@@ -418,7 +395,7 @@ fun Notifications(context: Context, viewModel: UserViewModel) {
     fun updatePreferences(isEnabled: Boolean) {
         if (currentUser != null) { // Check if currentUser is not null
             generateSharedPreferencesID { id ->
-                val myPreferences = UserPreferences(
+                val myPreferences = UserPreferencesEntity(
                     studentID = currentUser!!.id, // Now safe to access currentUser.id
                     id = id,
                     notifications = if (isEnabled) "enabled" else "disabled"
@@ -492,7 +469,7 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
     fun updatePreferences(isEnabled: Boolean) {
         if (currentUser != null) { // Check if currentUser is not null
             generateSharedPreferencesID { id ->
-                val myPreferences = UserPreferences(
+                val myPreferences = UserPreferencesEntity(
                     studentID = currentUser!!.id, // Now safe to access currentUser.id
                     id = id,
                     notifications = if (isEnabled) "enabled" else "disabled"
@@ -868,7 +845,7 @@ fun RatingAndFeedbackScreen(context: Context) {
     var currentRating by remember { mutableIntStateOf(0) }
     var feedbackText by remember { mutableStateOf("") }
     var averageRatings by remember { mutableStateOf("") }
-    val user by remember { mutableStateOf(User()) }
+    val user by remember { mutableStateOf(UserEntity("")) }
     var showFeedbackForm by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
 
