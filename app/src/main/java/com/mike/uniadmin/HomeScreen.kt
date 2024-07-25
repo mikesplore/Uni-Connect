@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,6 +26,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -92,6 +94,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -114,7 +117,7 @@ import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -147,12 +150,19 @@ fun HomeScreen(
 ) {
     val currentPerson = FirebaseAuth.getInstance().currentUser
     val courseRepository = remember { CourseRepository() }
-    val userRepository = remember { UserRepository() }
 
     val uniAdmin = context.applicationContext as? UniAdmin
     val chatRepository = uniAdmin?.chatRepository ?: throw IllegalStateException("ChatRepository not initialized")
     val chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.ChatViewModelFactory(chatRepository)
+    )
+
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
     )
 
 
@@ -161,12 +171,11 @@ fun HomeScreen(
         viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
     val courseViewModel: CourseViewModel =
         viewModel(factory = CourseViewModelFactory(courseRepository))
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
     val user by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
-    val signedInUser = remember { mutableStateOf<User?>(null) }
+    val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
     val announcement by remember { mutableStateOf(Announcement()) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -187,6 +196,7 @@ fun HomeScreen(
             signedInUser.value = it
             userViewModel.checkAllUserStatuses()
             chatViewModel.fetchGroups()
+            userViewModel.fetchUsers()
             userViewModel.checkUserStateByID(it.id)
         }
         getUpdate { fetched ->
@@ -425,7 +435,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun SideProfile(user: User, context: Context) {
+fun SideProfile(user: UserEntity, context: Context) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -434,13 +444,18 @@ fun SideProfile(user: User, context: Context) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(15.dp))
         Box(
             modifier = Modifier
+                .border(
+                    1.dp, CC.textColor(), CircleShape
+                )
                 .clip(CircleShape)
                 .background(CC.secondary(), CircleShape)
-                .size(100.dp)
+                .size(100.dp),
+            contentAlignment = Alignment.Center
         ) {
-            if (user.profileImageLink.isNotEmpty()) {
+            if (user.profileImageLink?.isNotEmpty() == true) {
                 AsyncImage(
                     model = user.profileImageLink,
                     contentDescription = "Profile Image",
@@ -449,15 +464,15 @@ fun SideProfile(user: User, context: Context) {
                 )
             } else {
                 Text(
-                    "${user.firstName[0]}${user.lastName[0]}",
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    "${user.firstName?.get(0)}${user.lastName?.get(0)}",
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
                 )
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             user.firstName + " " + user.lastName,
-            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 18.sp), maxLines = 2
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(user.id, style = CC.descriptionTextStyle(context))
@@ -467,12 +482,12 @@ fun SideProfile(user: User, context: Context) {
 
 @Composable
 fun ModalDrawerItem(
-    signedInUser: User,
-    user: User,
+    signedInUser: UserEntity,
+    user: UserEntity,
     context: Context,
     navController: NavController,
     announcement: Announcement,
-    users: List<User>,
+    users: List<UserEntity>,
     userViewModel: UserViewModel,
     chatViewModel: ChatViewModel,
     userGroups: List<GroupEntity>
@@ -495,11 +510,15 @@ fun ModalDrawerItem(
         ) {
             Box(
                 modifier = Modifier
+                    .border(
+                        1.dp, CC.textColor(), CircleShape
+                    )
                     .clip(CircleShape)
                     .background(CC.secondary(), CircleShape)
-                    .size(50.dp)
+                    .size(70.dp),
+                contentAlignment = Alignment.Center
             ) {
-                if (user.profileImageLink.isNotEmpty()) {
+                if (user.profileImageLink?.isNotEmpty() == true) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = "Profile Image",
@@ -508,8 +527,8 @@ fun ModalDrawerItem(
                     )
                 } else {
                     Text(
-                        "${user.firstName[0]}${user.lastName[0]}",
-                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                        "${user.firstName?.get(0)}${user.lastName?.get(0)}",
+                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
                     )
                 }
             }
@@ -519,25 +538,17 @@ fun ModalDrawerItem(
             ) {
                 Text(
                     user.firstName + " " + user.lastName,
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold), maxLines = 2
                 )
-                Text(user.email, style = CC.descriptionTextStyle(context))
+                user.email?.let { Text(it, style = CC.descriptionTextStyle(context)) }
                 Text(user.id, style = CC.descriptionTextStyle(context))
             }
 
 
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text("Users", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
+        Text("Chat", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            "Select a user to start a chat with them",
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text("Long press to view their details", style = CC.descriptionTextStyle(context))
-        Spacer(modifier = Modifier.height(20.dp))
-
         LazyRow(
             modifier = Modifier.animateContentSize()
         ) {
@@ -648,7 +659,7 @@ fun QuickSettings(navController: NavController, context: Context) {
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun UserItem(user: User, context: Context, navController: NavController, viewModel: UserViewModel) {
+fun UserItem(user: UserEntity, context: Context, navController: NavController, viewModel: UserViewModel) {
     var visible by remember { mutableStateOf(false) }
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
@@ -663,6 +674,9 @@ fun UserItem(user: User, context: Context, navController: NavController, viewMod
         ) {
             val size = 50.dp
             Box(modifier = Modifier
+                .border(
+                    1.dp, CC.textColor(), CircleShape
+                )
                 .background(CC.tertiary(), CircleShape)
                 .clip(CircleShape)
                 .combinedClickable(onClick = {
@@ -671,7 +685,7 @@ fun UserItem(user: User, context: Context, navController: NavController, viewMod
                     visible = !visible
                 })
                 .size(size), contentAlignment = Alignment.Center) {
-                if (user.profileImageLink.isNotEmpty()) {
+                if (user.profileImageLink?.isNotEmpty() == true) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = user.firstName,
@@ -682,16 +696,25 @@ fun UserItem(user: User, context: Context, navController: NavController, viewMod
                     )
                 } else {
                     Text(
-                        "${user.firstName[0]}${user.lastName[0]}",
+                        "${user.firstName?.get(0)}${user.lastName?.get(0)}",
                         style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
+
+            val onlineStatus by animateColorAsState(
+                animationSpec = tween(500, easing = LinearEasing),
+                targetValue = if (userState?.online == "online") Color.Green else if(userState?.online == "offline") Color.DarkGray else Color.Red,
+                label = ""
+            )
             Box(
                 modifier = Modifier
+                    .border(
+                        1.dp, CC.extraColor1(), CircleShape
+                    )
                     .size(12.dp)
                     .background(
-                        if (userState?.online == "online") Color.Green else if(userState?.online == "offline") Color.DarkGray else Color.Red,
+                        onlineStatus,
                         CircleShape
                     )
                     .align(Alignment.BottomEnd)
@@ -699,13 +722,15 @@ fun UserItem(user: User, context: Context, navController: NavController, viewMod
             )
         }
         Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            text = if (user.firstName.length > 10) {
-                user.firstName.substring(0, 10) + "..."
-            } else {
-                user.firstName
-            }, style = CC.descriptionTextStyle(context), maxLines = 1
-        )
+        (if (user.firstName?.length!! > 10) {
+            user.firstName.substring(0, 10) + "..."
+        } else {
+            user.firstName
+        }).let {
+            Text(
+                text = it, style = CC.descriptionTextStyle(context), maxLines = 1
+            )
+        }
         val state = when (userState?.online) {
             "online" -> "Online"
             "offline" -> "Last Seen ${userState.lastTime}"
@@ -719,7 +744,7 @@ fun UserItem(user: User, context: Context, navController: NavController, viewMod
 }
 
 @Composable
-fun UserInfo(user: User, userState: String, context: Context) {
+fun UserInfo(user: UserEntity, userState: String, context: Context) {
     Column(
         modifier = Modifier.fillMaxWidth(0.9f),
         verticalArrangement = Arrangement.Center,
