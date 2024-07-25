@@ -2,9 +2,23 @@ package com.mike.uniadmin.chat
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,21 +28,40 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,43 +69,43 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
+import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
-import com.mike.uniadmin.dataModel.users.User
-import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
+import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.material.icons.filled.Call
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.userchat.MessageEntity
-import com.mike.uniadmin.dataModel.userchat.MessageRepository
-import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.CommonComponents as CC
 
 
 @Composable
 fun UserChatScreen(navController: NavController, context: Context, targetUserId: String) {
-    val uniAdmin = context.applicationContext as? UniAdmin
-    val messageRepository = remember { uniAdmin?.messageRepository }
+    val messageAdmin = context.applicationContext as? UniAdmin
+    val messageRepository = remember { messageAdmin?.messageRepository }
     val messageViewModel: MessageViewModel = viewModel(
-        factory = MessageViewModelFactory(messageRepository ?: throw IllegalStateException("ChatRepository is null"))
+        factory = MessageViewModelFactory(
+            messageRepository ?: throw IllegalStateException("ChatRepository is null")
+        )
     )
 
-
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
 
     val messages by messageViewModel.messages.observeAsState(emptyList())
     val user by userViewModel.user.observeAsState()
@@ -93,11 +126,11 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     val screenID = "SC5"
     val scrollState = rememberLazyListState()
 
-    var myUserState  by remember { mutableStateOf("") }
-    if(userState != null){
-        if(userState!!.online == "online"){
+    var myUserState by remember { mutableStateOf("") }
+    if (userState != null) {
+        if (userState!!.online == "online") {
             myUserState = "Online"
-        }else{
+        } else {
             myUserState = "Last seen ${userState!!.lastTime}"
         }
     }
@@ -119,9 +152,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     DisposableEffect(Unit) {
         onDispose {
             ExitScreen(
-                context = context,
-                screenID = screenID,
-                timeSpent = timeSpent
+                context = context, screenID = screenID, timeSpent = timeSpent
             )
         }
     }
@@ -179,19 +210,18 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     Scaffold(
         topBar = {
             if (user2 != null) {
-                TopAppBarComponent(
-                    name = user2!!.firstName,
-                    navController = navController,
-                    context = context,
-                    user = user2!!,
-                    userState = myUserState,
-                    onValueChange = {
-                        isSearchVisible = !isSearchVisible
-                    }
-                )
+                user2!!.firstName?.let {
+                    TopAppBarComponent(name = it,
+                        navController = navController,
+                        context = context,
+                        user = user2!!,
+                        userState = myUserState,
+                        onValueChange = {
+                            isSearchVisible = !isSearchVisible
+                        })
+                }
             }
-        },
-        containerColor = CC.primary()
+        }, containerColor = CC.primary()
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -213,8 +243,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     )
                 }
                 LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    state = scrollState
+                    modifier = Modifier.weight(1f), state = scrollState
                 ) {
                     val groupedMessages = messages.groupBy { it.date }
 
@@ -240,8 +269,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                         }
                     }
                 }
-                ChatInput(
-                    modifier = Modifier.fillMaxWidth(),
+                ChatInput(modifier = Modifier.fillMaxWidth(),
                     onMessageChange = { message = it },
                     sendMessage = { sendMessage(message) },
                     context = context
@@ -250,8 +278,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
         }
     }
 }
-
-
 
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -308,7 +334,7 @@ fun MessageBubble(
 fun SearchTextField(
     searchQuery: String,
     onValueChange: (String) -> Unit,
-){
+) {
     TextField(value = searchQuery,
         onValueChange = { onValueChange(searchQuery) },
         label = { Text("Search Chats") },
@@ -337,47 +363,46 @@ fun TopAppBarComponent(
     name: String,
     navController: NavController,
     context: Context,
-    user: User,
+    user: UserEntity,
     userState: String,
     isSearchVisible: Boolean = false,
     onValueChange: (Boolean) -> Unit
 ) {
-    TopAppBar(
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 8.dp)
+    TopAppBar(title = {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    if (user.profileImageLink.isNotBlank()) {
-                        Image(
-                            painter = rememberAsyncImagePainter(user.profileImageLink),
-                            contentDescription = "Profile Image",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = R.drawable.student), // Replace with your profile icon
-                            contentDescription = "Profile Icon",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                if (user.profileImageLink?.isNotBlank() == true) {
+                    Image(
+                        painter = rememberAsyncImagePainter(user.profileImageLink),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.student), // Replace with your profile icon
+                        contentDescription = "Profile Icon",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                Text(name, style = CC.titleTextStyle(context))
-                Text(userState, style = CC.descriptionTextStyle(context))}
             }
-        },
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Text(name, style = CC.titleTextStyle(context))
+                Text(userState, style = CC.descriptionTextStyle(context))
+            }
+        }
+    },
         actions = {
             IconButton(onClick = { onValueChange(!isSearchVisible) }) {
                 Icon(
@@ -403,9 +428,7 @@ fun TopAppBarComponent(
             }
         },
         navigationIcon = {
-            IconButton(
-                onClick = { navController.popBackStack() }
-            ) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBackIosNew,
                     contentDescription = "",
@@ -420,10 +443,16 @@ fun TopAppBarComponent(
 
 
 @Composable
-fun ChatInput(modifier: Modifier = Modifier, onMessageChange: (String) -> Unit, sendMessage: (String) -> Unit, context: Context) {
+fun ChatInput(
+    modifier: Modifier = Modifier,
+    onMessageChange: (String) -> Unit,
+    sendMessage: (String) -> Unit,
+    context: Context
+) {
 
     var input by remember { mutableStateOf(TextFieldValue("")) }
-    val textEmpty by remember { derivedStateOf { input.text.isEmpty() }
+    val textEmpty by remember {
+        derivedStateOf { input.text.isEmpty() }
     }
 
     Row(
@@ -433,13 +462,14 @@ fun ChatInput(modifier: Modifier = Modifier, onMessageChange: (String) -> Unit, 
         verticalAlignment = Alignment.Bottom
     ) {
 
-        ChatTextField(modifier = modifier.weight(1f),
+        ChatTextField(
+            modifier = modifier.weight(1f),
             context,
             input = input,
             onValueChange = {
                 input = it
             },
-            )
+        )
 
         Spacer(modifier = Modifier.width(6.dp))
 
@@ -453,7 +483,9 @@ fun ChatInput(modifier: Modifier = Modifier, onMessageChange: (String) -> Unit, 
                 }
             }) {
             androidx.compose.material.Icon(
-                tint = CC.textColor(), imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null
+                tint = CC.textColor(),
+                imageVector = Icons.AutoMirrored.Filled.Send,
+                contentDescription = null
             )
         }
     }
@@ -484,49 +516,24 @@ fun ChatTextField(
             unfocusedTextColor = CC.textColor(),
             unfocusedContainerColor = CC.primary(),
 
-        ),
+            ),
         shape = RoundedCornerShape(24.dp),
         singleLine = true
     )
 }
 
-@Preview
-@Composable
-fun MyChatPreview()
-{
-    TopAppBarComponent(
-        name = "Student",
-        navController = NavController(LocalContext.current),
-        context = LocalContext.current,
-        user = User(
-            id = "123456789",
-            firstName = "Student",
-            lastName = "Name",
-            email = "",
-            phoneNumber = "",
-            gender = "",
-            profileImageLink = ""
-        ),
-        isSearchVisible = false,
-        onValueChange = {},
-        userState = "Online"
-    )
-}
-
 
 @Composable
-fun RowMessage(context: Context){
+fun RowMessage(context: Context) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
                 .background(
                     CC.secondary(), RoundedCornerShape(10.dp)
                 )
-                .clip(RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center
+                .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Chats are end-to-end encrypted",
@@ -540,12 +547,11 @@ fun RowMessage(context: Context){
 }
 
 @Composable
-fun RowDate(date: String, context: Context){
+fun RowDate(date: String, context: Context) {
     fun formatDate(dateString: String): String {
         val today = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
         val yesterday = SimpleDateFormat(
-            "dd-MM-yyyy",
-            Locale.getDefault()
+            "dd-MM-yyyy", Locale.getDefault()
         ).format(Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)) // Yesterday's date
 
         return when (dateString) {
@@ -555,16 +561,14 @@ fun RowDate(date: String, context: Context){
         }
     }
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
                 .background(
                     CC.secondary(), RoundedCornerShape(10.dp)
                 )
-                .clip(RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center
+                .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
         ) {
             Text(
                 text = formatDate(date),
