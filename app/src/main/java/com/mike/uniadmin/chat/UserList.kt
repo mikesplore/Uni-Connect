@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -49,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,7 +63,7 @@ import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
-import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -72,8 +74,7 @@ import com.mike.uniadmin.CommonComponents as CC
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ParticipantsScreen(navController: NavController, context: Context) {
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+
     val uniAdmin = context.applicationContext as? UniAdmin
     val messageRepository = remember { uniAdmin?.messageRepository }
     val messageViewModel: MessageViewModel = viewModel(
@@ -81,6 +82,14 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
             messageRepository ?: throw IllegalStateException("ChatRepository is null")
         )
     )
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
+
     val auth = FirebaseAuth.getInstance()
     val users by userViewModel.users.observeAsState(initial = emptyList())
     val errorMessage by remember { mutableStateOf<String?>(null) }
@@ -96,10 +105,10 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
 
     // Filter and sort users
     val filteredUsers = users.filter { user ->
-            user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
+            user.firstName?.contains(searchQuery, ignoreCase = true) == true || user.lastName?.contains(
                 searchQuery,
                 ignoreCase = true
-            )
+            ) ?: false
         }.sortedByDescending { it.id }
 
 
@@ -190,14 +199,14 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
 }
 
 @Composable
-fun UserListItem(user: User, navController: NavController) {
+fun UserListItem(user: UserEntity, navController: NavController) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .clickable { navController.navigate("chat/${user.id}") }
         .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(40.dp)) {
             Image(
-                painter = if (user.profileImageLink.isNotBlank()) rememberAsyncImagePainter(user.profileImageLink) else painterResource(
+                painter = if (user.profileImageLink?.isNotBlank() == true) rememberAsyncImagePainter(user.profileImageLink) else painterResource(
                     id = R.drawable.student
                 ),
                 contentDescription = null,
@@ -220,7 +229,7 @@ fun UserListItem(user: User, navController: NavController) {
 
 @Composable
 fun ProfileCard(
-    user: User,
+    user: UserEntity,
     navController: NavController,
     context: Context,
     viewModel: UserViewModel,
@@ -243,17 +252,20 @@ fun ProfileCard(
     }
 
     val latestMessage = messages?.lastOrNull()
+    val messageCount = messages?.size ?: 0
 
-    Card(modifier = Modifier
-        .clickable { navController.navigate("chat/${user.id}") }
-        .fillMaxWidth(),
+    Card(
+        modifier = Modifier
+            .clickable { navController.navigate("chat/${user.id}") }
+            .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = CC.primary())) {
+        colors = CardDefaults.cardColors(containerColor = CC.primary())
+    ) {
         Row(
             modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top
         ) {
             Box(modifier = Modifier.size(50.dp)) {
-                if (user.profileImageLink.isNotBlank()) {
+                if (user.profileImageLink?.isNotBlank() == true) {
                     Image(
                         painter = rememberAsyncImagePainter(user.profileImageLink),
                         contentDescription = "Profile Image",
@@ -278,7 +290,8 @@ fun ProfileCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -325,10 +338,12 @@ fun ProfileCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val messageText = latestMessage?.let {
+                        val senderName = if (it.senderID == currentMe?.id) "You" else it.senderName
+                        "$senderName: ${it.message}"
+                    } ?: ""
                     Text(
-                        text = createAnnotatedMessage(
-                            latestMessage?.message ?: ""
-                        ), // Use the function
+                        text = createAnnotatedMessage(createAnnotatedText(messageText).toString()),
                         style = CC.descriptionTextStyle(context),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -338,14 +353,33 @@ fun ProfileCard(
                         "Message Content",
                         "The last message for $conversationId is ${latestMessage?.message}"
                     )
+                    if (messageCount >=1) {
+                    Box(modifier = Modifier
+                        .widthIn(min = 20.dp)
+                        .clip(CircleShape)
+                        .background(CC.extraColor2(), CircleShape),
+                        contentAlignment = Alignment.Center){
+                    Text(
+                        text = messageCount.toString(),
+                        style = CC.descriptionTextStyle(context),
+                        modifier = Modifier.padding(2.dp),
+                        color = CC.textColor()
+                    )}}
                 }
 
-                // Function to create AnnotatedString
-
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
 }
+
+// Function to create AnnotatedString
+fun createAnnotatedText(message: String): AnnotatedString {
+    return AnnotatedString.Builder().apply {
+        append(message)
+    }.toAnnotatedString()
+}
+
 
 
 @Composable
