@@ -59,7 +59,7 @@ import com.mike.uniadmin.CommonComponents
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -84,17 +84,22 @@ fun UniChat(
     coroutineScope: CoroutineScope,
 ) {
     val currentPerson = FirebaseAuth.getInstance().currentUser
-    val userRepository = remember { UserRepository() }
     val uniAdmin = context.applicationContext as? UniAdmin
     val chatRepository =
         uniAdmin?.chatRepository ?: throw IllegalStateException("ChatRepository not initialized")
     val chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.ChatViewModelFactory(chatRepository)
     )
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
 
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
     val user by userViewModel.user.observeAsState()
-    val signedInUser = remember { mutableStateOf<User?>(null) }
+    val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
 
