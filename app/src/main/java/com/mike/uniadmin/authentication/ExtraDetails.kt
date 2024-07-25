@@ -1,15 +1,36 @@
 package com.mike.uniadmin.authentication
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absolutePadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -22,9 +43,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import com.mike.uniadmin.dataModel.users.User
-import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
@@ -35,21 +55,26 @@ import com.mike.uniadmin.CommonComponents as CC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreDetails(context: Context, navController: NavController) {
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
 
     var addloading by remember { mutableStateOf(false) }
     val loggedInUser = FirebaseAuth.getInstance().currentUser
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    val email  = loggedInUser?.email
+    val email = loggedInUser?.email
     val imageLink = loggedInUser?.photoUrl
 
 
-    val brush  = Brush.verticalGradient(
+    val brush = Brush.verticalGradient(
         colors = listOf(
-            CC.primary(),
-            CC.secondary()
+            CC.primary(), CC.secondary()
         )
     )
 
@@ -57,24 +82,21 @@ fun MoreDetails(context: Context, navController: NavController) {
         GlobalColors.loadColorScheme(context)
         userViewModel.findUserByEmail(loggedInUser?.email!!) {}
 
-        }
+    }
 
     Scaffold(topBar = {
-        TopAppBar(
-            title = {},
-            navigationIcon = {
-                IconButton(
-                    onClick = { navController.navigate("login") },
-                    modifier = Modifier.absolutePadding(left = 10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Back",
-                        tint = CC.textColor(),
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
+        TopAppBar(title = {}, navigationIcon = {
+            IconButton(
+                onClick = { navController.navigate("login") },
+                modifier = Modifier.absolutePadding(left = 10.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Back",
+                    tint = CC.textColor(),
+                )
+            }
+        }, colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
         )
     }, containerColor = CC.primary()) {
         // main content
@@ -85,17 +107,24 @@ fun MoreDetails(context: Context, navController: NavController) {
                 .padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-                Row(modifier = Modifier
+            Row(
+                modifier = Modifier
                     .padding(start = 20.dp)
                     .height(100.dp)
                     .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start) {
-                    Text("Details", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold, fontSize = 30.sp))
-                }
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    "Details",
+                    style = CC.titleTextStyle(context)
+                        .copy(fontWeight = FontWeight.ExtraBold, fontSize = 30.sp)
+                )
+            }
 
-                Column(modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center) {
+            Column(
+                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center
+            ) {
                 CC.SingleLinedTextField(
                     value = firstName,
                     onValueChange = { first ->
@@ -123,41 +152,37 @@ fun MoreDetails(context: Context, navController: NavController) {
                     onClick = {
                         addloading = true
                         MyDatabase.generateIndexNumber { id ->
-                            val newUser = User(
+                            val newUser = UserEntity(
                                 id = id,
                                 email = email.toString(),
                                 firstName = firstName,
                                 lastName = lastName,
                                 profileImageLink = imageLink.toString()
                             )
-                            userViewModel.writeUser(
-                                newUser,
-                                onSuccess = {
-                                    addloading = false
-                                    navController.navigate("homescreen")
-                                }
-                            )
+                            userViewModel.writeUser(newUser, onSuccess = {
+                                addloading = false
+                                navController.navigate("homescreen")
+                            })
                         }
 
-                    }, modifier = Modifier
-                        .width(275.dp),
+                    },
+                    modifier = Modifier.width(275.dp),
                     colors = ButtonDefaults.buttonColors(CC.extraColor2()),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier, verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (addloading) {
                             CircularProgressIndicator(
-                                color = CC.secondary(),
-                                trackColor = CC.textColor()
+                                color = CC.secondary(), trackColor = CC.textColor()
                             )
                         } else {
                             Text("Save details")
                         }
                     }
-                }}
+                }
+            }
 
         }
 
