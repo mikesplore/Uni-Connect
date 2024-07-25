@@ -69,7 +69,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -89,14 +89,20 @@ fun UniGroups(context: Context, navController: NavController) {
     val chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.ChatViewModelFactory(chatRepository)
     )
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
+
     val groups by chatViewModel.groups.observeAsState(emptyList())
     val users by userViewModel.users.observeAsState(emptyList())
     val user by userViewModel.user.observeAsState(initial = null)
     var showAddGroup by remember { mutableStateOf(false) }
     val currentUser = FirebaseAuth.getInstance().currentUser
-    var signedInUser by remember { mutableStateOf(User()) }
+    var signedInUser by remember { mutableStateOf(UserEntity()) }
     LaunchedEffect(currentUser) {
         currentUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
@@ -160,10 +166,10 @@ fun UniGroups(context: Context, navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGroupSection(
-    user: User,
+    user: UserEntity,
     context: Context,
     chatViewModel: ChatViewModel,
-    users: List<User>
+    users: List<UserEntity>
 ) {
     var groupName by remember { mutableStateOf("") }
     var groupDescription by remember { mutableStateOf("") }
@@ -277,7 +283,7 @@ fun AddGroupSection(
                                         .clip(CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    if (user.profileImageLink.isNotBlank()) {
+                                    if (user.profileImageLink?.isNotBlank() == true) {
                                         AsyncImage(
                                             model = user.profileImageLink,
                                             contentDescription = "Profile Image",
@@ -285,7 +291,7 @@ fun AddGroupSection(
                                             contentScale = ContentScale.Crop
                                         )
                                     } else {
-                                        Text("${user.firstName[0]}${user.lastName[0]}")
+                                        Text("${user.firstName?.get(0)}${user.lastName?.get(0)}")
                                     }
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -372,7 +378,7 @@ fun EditGroupSection(
     group: GroupEntity,
     context: Context,
     chatViewModel: ChatViewModel,
-    users: List<User>,
+    users: List<UserEntity>,
     onDismiss: () -> Unit
 ) {
     var groupName by remember { mutableStateOf(group.name) }
@@ -449,7 +455,7 @@ fun EditGroupSection(
                                 .size(50.dp)
                                 .clip(CircleShape), contentAlignment = Alignment.Center
                         ) {
-                            if (user.profileImageLink.isNotBlank()) {
+                            if (user.profileImageLink?.isNotBlank() == true) {
                                 AsyncImage(
                                     model = user.profileImageLink,
                                     contentDescription = "Profile Image",
@@ -457,7 +463,7 @@ fun EditGroupSection(
                                     contentScale = ContentScale.Crop
                                 )
                             } else {
-                                Text("${user.firstName[0]}${user.lastName[0]}")
+                                Text("${user.firstName?.get(0)}${user.lastName?.get(0)}")
                             }
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -512,7 +518,7 @@ fun GroupItem(
     navController: NavController,
     chatViewModel: ChatViewModel,
     userViewModel: UserViewModel,
-    user: User
+    user: UserEntity
 ) {
     var showEditGroup by remember { mutableStateOf(false) }
 
