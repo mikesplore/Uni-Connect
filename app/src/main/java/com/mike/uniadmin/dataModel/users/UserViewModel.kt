@@ -9,17 +9,17 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
-    private val _users = MutableLiveData<List<User>>()
-    val users: LiveData<List<User>> = _users
-    private val _user = MutableLiveData<User?>()
-    var user: MutableLiveData<User?> = _user
-    private val _user2 = MutableLiveData<User>()
-    var user2: MutableLiveData<User> = _user2
-    private val _userStates = MutableLiveData<Map<String, UserState>>()
-    val userStates: LiveData<Map<String, UserState>> = _userStates
+    private val _users = MutableLiveData<List<UserEntity>>()
+    val users: LiveData<List<UserEntity>> = _users
+    private val _user = MutableLiveData<UserEntity?>()
+    var user: MutableLiveData<UserEntity?> = _user
+    private val _user2 = MutableLiveData<UserEntity?>()
+    var user2: MutableLiveData<UserEntity?> = _user2
+    private val _userStates = MutableLiveData<Map<String, UserStateEntity>>()
+    val userStates: LiveData<Map<String, UserStateEntity>> = _userStates
 
-    private val _userState = MutableLiveData<UserState?>()
-    var userState: LiveData<UserState?> = _userState
+    private val _userState = MutableLiveData<UserStateEntity?>()
+    var userState: LiveData<UserStateEntity?> = _userState
 
     override fun onCleared() {
         super.onCleared()
@@ -36,7 +36,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun checkAllUserStatuses() {
         repository.fetchAllUserStatuses { userStates ->
-            _userStates.value = userStates.associateBy { it.userID }
+            _userStates.value = userStates.associateBy { it.userID!! }
         }
     }
 
@@ -46,7 +46,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         fetchUsers()
     }
 
-    private fun fetchUsers() {
+     fun fetchUsers() {
         repository.fetchUsers { users ->
             _users.value = users
         }
@@ -54,7 +54,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
 
 
-    fun findUserByEmail(email: String, onUserFetched: (User?) -> Unit) {
+    fun findUserByEmail(email: String, onUserFetched: (UserEntity?) -> Unit) {
         repository.fetchUserDataByEmail(email) { user ->
             _user.postValue(user)
             onUserFetched(user)
@@ -68,11 +68,14 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun updateUser(user: User) {
-        _user.value = user
+    fun updateUser(user: UserEntity) {
+        repository.saveUser(user, onComplete = {
+            _user.value = user
+        })
+
     }
 
-    fun writeUser(user: User, onSuccess: (Boolean) -> Unit) {
+    fun writeUser(user: UserEntity, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.saveUser(user) { success ->
                 if (success) {
@@ -86,7 +89,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun writeAccountDeletionData(accountDeletion: AccountDeletion, onSuccess: (Boolean) -> Unit) {
+    fun writeAccountDeletionData(accountDeletion: AccountDeletionEntity, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.writeAccountDeletionData(accountDeletion, onSuccess = { success ->
                 if (success) {
@@ -102,13 +105,22 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
             })
         }
     }
-    fun fetchPreferences(userID: String, onPreferencesFetched: (UserPreferences?) -> Unit){
+
+    fun fetchAccountDeletionStatus(userID: String, onAccountDeletionStatusFetched: (AccountDeletionEntity) -> Unit){
+        viewModelScope.launch {
+            repository.checkAccountDeletionData(userID, onComplete = {
+                onAccountDeletionStatusFetched(it)
+            })
+        }
+    }
+
+    fun fetchPreferences(userID: String, onPreferencesFetched: (UserPreferencesEntity?) -> Unit){
         viewModelScope.launch {
             repository.fetchPreferences(userID, onPreferencesFetched)
         }
     }
 
-    fun writePreferences(preferences: UserPreferences, onSuccess: (Boolean) -> Unit){
+    fun writePreferences(preferences: UserPreferencesEntity, onSuccess: (Boolean) -> Unit){
         viewModelScope.launch {
             repository.writePreferences(preferences, onSuccess = { success ->
                 if (success) {
