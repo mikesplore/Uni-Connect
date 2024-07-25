@@ -37,7 +37,7 @@ import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -56,15 +56,20 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.ChatViewModelFactory(chatRepository)
     )
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
+
     val groups by chatViewModel.groups.observeAsState(emptyList())
     val users by userViewModel.users.observeAsState(emptyList())
     val user by userViewModel.user.observeAsState(initial = null)
     var showAddGroup by remember { mutableStateOf(false) }
     val currentUser = FirebaseAuth.getInstance().currentUser
-    var signedInUser by remember { mutableStateOf(User()) }
-
+    val signedInUser by remember { mutableStateOf(UserEntity())}
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
