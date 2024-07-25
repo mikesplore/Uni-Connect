@@ -1,34 +1,71 @@
 package com.mike.uniadmin.dataModel.users
 
-data class User(
-    var id: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
-    val email: String = "",
-    val phoneNumber: String = "",
-    val gender: String = "",
-    val profileImageLink: String = ""
-)
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-data class AccountDeletion(
-    val id: String = "",
-    val admissionNumber: String = "",
-    val email: String = ""
-)
 
-data class UserPreferences(
-    val studentID: String = "",
-    val id: String = "",
-    val profileImageLink: String = "",
-    val biometrics: String = "disabled",
-    val darkMode: String = "disabled",
-    val notifications: String = "disabled"
-
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey val id: String,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val gender: String? = null,
+    val profileImageLink: String? = null
 )
+{
+    constructor() : this(
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    )
+}
 
-data class UserState(
-    val userID: String = "",
-    val id: String = "",
-    val online: String = "",
-    val lastTime: String = "",
+@Entity(tableName = "accountDeletion")
+data class AccountDeletionEntity(
+    @PrimaryKey val id: String,
+    val admissionNumber: String? = null,
+    val email: String? = null
 )
+@Entity(tableName = "userPreferences")
+data class UserPreferencesEntity(
+    @PrimaryKey val id: String,
+    val studentID: String? = null,
+    val profileImageLink: String? = null,
+    val biometrics: String? = null,
+    val darkMode: String? = null,
+    val notifications: String? = null
+
+){
+    constructor() : this(
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+
+    )
+}
+
+
+@Entity(tableName = "userState")
+data class UserStateEntity(
+    @PrimaryKey val id: String,
+    val userID: String? = null,
+    val online: String? = null,
+    val lastTime: String? = null,
+){
+    constructor() : this(
+        "",
+        null,
+        null,
+        null,
+
+    )
+}
