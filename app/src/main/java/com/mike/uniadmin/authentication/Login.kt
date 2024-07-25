@@ -57,7 +57,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
-import com.mike.uniadmin.dataModel.users.User
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -85,8 +86,14 @@ fun LoginScreen(navController: NavController, context: Context) {
     var visible by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
     val user = firebaseAuth.currentUser
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
 
     val brush = Brush.verticalGradient(
         colors = listOf(
@@ -316,7 +323,7 @@ fun handleAuthSuccess(navController: NavController) {
         .addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val userSnapshot = snapshot.children.firstOrNull()
-                val user = userSnapshot?.getValue(User::class.java)
+                val user = userSnapshot?.getValue(UserEntity::class.java)
                 if (user != null) {
                     // User details found, navigate to HomeScreen
                     navController.navigate("homeScreen")
@@ -346,24 +353,31 @@ fun handleSignUp(
     email: String,
     password: String,
     userViewModel: UserViewModel,
-    onComplete: () -> Unit
+    onComplete: (Boolean) -> Unit
 ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
                     generateIndexNumber { userID ->
-                        val newUser = User(
-                            id = userID, email = email, firstName = firstName, lastName = lastName
+                        val newUser = UserEntity(
+                            id = userID,
+                            email = email,
+                            firstName = firstName,
+                            lastName = lastName,
+                            profileImageLink = "",
+                            phoneNumber = "",
+                            gender = ""
                         )
                         userViewModel.writeUser(newUser) {
                             Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    onComplete()
+                    onComplete(true)
+
                 } else {
                     Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
-                    onComplete()
+                    onComplete(false)
                 }
             }
     } else {
