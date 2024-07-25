@@ -88,8 +88,7 @@ import com.mike.uniadmin.dataModel.groupchat.ChatEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.User
-import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
@@ -113,8 +112,13 @@ fun DiscussionScreen(
     val chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.ChatViewModelFactory(chatRepository ?: throw IllegalStateException("ChatRepository is null"))
     )
-    val userRepository = remember { UserRepository() }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val userAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { userAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
 
 
     val chats by chatViewModel.chats.observeAsState(listOf())
@@ -235,7 +239,7 @@ fun DiscussionScreen(
                     MessageInputRow(message = messagetext,
                         onMessageChange = { messagetext = it },
                         onSendClick = {
-                            if (messagetext.isNotBlank() && currentUser.firstName.isNotBlank()) {
+                            if (messagetext.isNotBlank() && currentUser.firstName?.isNotBlank() == true) {
                                 MyDatabase.generateChatID { chatID ->
                                     val chat = ChatEntity(
                                         message = messagetext,
@@ -344,7 +348,7 @@ fun ChatTopAppBar(
 @Composable
 fun GroupUsersList(
     isVisible: Boolean,
-    users: List<User>,
+    users: List<UserEntity>,
     navController: NavController,
     context: Context,
     viewModel: UserViewModel,
