@@ -2,8 +2,11 @@ package com.mike.uniadmin.dataModel.groupchat
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import android.app.Application
+import com.mike.uniadmin.dataModel.announcements.AnnouncementRepository
+import com.mike.uniadmin.dataModel.notifications.NotificationRepository
 import com.mike.uniadmin.dataModel.userchat.MessageRepository
 import com.mike.uniadmin.dataModel.users.UserRepository
+import com.mike.uniadmin.localDatabase.AppDatabase
 
 fun generateConversationId(userId1: String, userId2: String): String {
     return if (userId1 < userId2) {
@@ -61,4 +64,6 @@ class UniAdmin : Application() {
     val chatRepository by lazy { ChatRepository(database.chatDao(), database.groupDao()) }
     val messageRepository by lazy { MessageRepository(database.messageDao()) }
     val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao()) }
+    val announcementRepository by lazy { AnnouncementRepository(database.announcementsDao()) }
+    val notificationRepository by lazy { NotificationRepository(database.notificationDao()) }
 }
