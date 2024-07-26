@@ -1,9 +1,21 @@
 package com.mike.uniadmin.dataModel.courses
 
-data class Course(
-    val courseCode: String = "",
-    val courseName: String = "",
-    var visits: Int = 0,
-    var courseImageLink: String = ""
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-)
+
+@Entity(tableName = "courses")
+data class CourseEntity(
+    @PrimaryKey val courseCode: String,
+    val courseName: String? = null,
+    var visits: Int? = null,
+    var courseImageLink: String? = null
+
+){
+    constructor(): this(
+        "",
+        "",
+        0,
+        ""
+    )
+}
