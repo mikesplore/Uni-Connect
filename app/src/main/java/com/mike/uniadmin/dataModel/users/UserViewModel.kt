@@ -11,15 +11,21 @@ import kotlinx.coroutines.launch
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
     private val _users = MutableLiveData<List<UserEntity>>()
     val users: LiveData<List<UserEntity>> = _users
+
     private val _user = MutableLiveData<UserEntity?>()
     var user: MutableLiveData<UserEntity?> = _user
+
     private val _user2 = MutableLiveData<UserEntity?>()
     var user2: MutableLiveData<UserEntity?> = _user2
+
     private val _userStates = MutableLiveData<Map<String, UserStateEntity>>()
     val userStates: LiveData<Map<String, UserStateEntity>> = _userStates
 
     private val _userState = MutableLiveData<UserStateEntity?>()
     var userState: LiveData<UserStateEntity?> = _userState
+
+    private val _accountStatus = MutableLiveData<AccountDeletionEntity?>()
+    var accountStatus: LiveData<AccountDeletionEntity?> = _accountStatus
 
     override fun onCleared() {
         super.onCleared()
@@ -106,10 +112,23 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun fetchAccountDeletionStatus(userID: String, onAccountDeletionStatusFetched: (AccountDeletionEntity) -> Unit){
+    fun fetchAccountDeletionStatus(userID: String) {
         viewModelScope.launch {
-            repository.checkAccountDeletionData(userID, onComplete = {
-                onAccountDeletionStatusFetched(it)
+            repository.checkAccountDeletionData(userID, onComplete = { fetchedAccountStatus ->
+                _accountStatus.value = fetchedAccountStatus
+
+            })
+        }
+    }
+
+    fun deleteAccount(userId: String, onSuccess: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            repository.deleteUser(userId, onSuccess = { success ->
+                if (success) {
+                    onSuccess(true)
+                } else {
+                    onSuccess(false)
+                }
             })
         }
     }
