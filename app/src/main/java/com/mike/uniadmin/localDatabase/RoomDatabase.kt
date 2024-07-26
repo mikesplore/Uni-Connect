@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.groupchat
+package com.mike.uniadmin.localDatabase
 
 import android.content.Context
 import androidx.room.Database
@@ -7,6 +7,15 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
+import com.mike.uniadmin.dataModel.announcements.AnnouncementsDao
+import com.mike.uniadmin.dataModel.groupchat.ChatDao
+import com.mike.uniadmin.dataModel.groupchat.ChatEntity
+import com.mike.uniadmin.dataModel.groupchat.Converters
+import com.mike.uniadmin.dataModel.groupchat.GroupDao
+import com.mike.uniadmin.dataModel.groupchat.GroupEntity
+import com.mike.uniadmin.dataModel.notifications.NotificationDao
+import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.userchat.MessageDao
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.users.AccountDeletionDao
@@ -18,7 +27,20 @@ import com.mike.uniadmin.dataModel.users.UserPreferencesEntity
 import com.mike.uniadmin.dataModel.users.UserStateDao
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 
-@Database(entities = [ChatEntity::class, GroupEntity::class, MessageEntity::class, UserEntity::class, AccountDeletionEntity::class, UserPreferencesEntity::class, UserStateEntity::class], version = 2, exportSchema = false)
+@Database(
+    entities =
+    [
+        ChatEntity::class,
+        GroupEntity::class,
+        MessageEntity::class,
+        UserEntity::class,
+        AccountDeletionEntity::class,
+        UserPreferencesEntity::class,
+        UserStateEntity::class,
+        AnnouncementEntity::class,
+        NotificationEntity::class
+    ],
+    version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
@@ -28,7 +50,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDeletionDao(): AccountDeletionDao
     abstract fun userPreferencesDao(): UserPreferencesDao
     abstract fun userStateDao(): UserStateDao
-
+    abstract fun announcementsDao(): AnnouncementsDao
+    abstract fun notificationDao(): NotificationDao
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
