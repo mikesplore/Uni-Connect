@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
@@ -37,6 +38,7 @@ import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.ManageUsers
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
@@ -76,7 +78,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "splashscreen"){
+    NavHost(navController = navController, startDestination = "homescreen"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
@@ -138,9 +140,13 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
 
         }
 
-//        composable("announcements"){
-//            AnnouncementsScreen(navController = navController, context)
-//        }
+        composable("announcements"){
+            AnnouncementsScreen(context)
+        }
+
+        composable("manageusers"){
+            ManageUsers(navController, context)
+        }
 
 //        composable("timetable"){
 //            TimetableScreen(navController = navController, context)
