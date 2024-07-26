@@ -5,11 +5,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,23 +24,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -51,24 +57,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.dataModel.announcements.Announcement
-import com.mike.uniadmin.dataModel.announcements.AnnouncementRepository
+import com.mike.uniadmin.chat.TopAppBarComponent
+import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
 import com.mike.uniadmin.dataModel.courses.Course
@@ -77,11 +82,15 @@ import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.notifications.NotificationEntity
+import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
+import kotlin.math.max
 import com.mike.uniadmin.CommonComponents as CC
 
 
@@ -103,22 +112,23 @@ fun Dashboard(navController: NavController, context: Context) {
         )
     )
 
-    val announcementRepository = remember { AnnouncementRepository() }
-    val announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
+    val announcementAdmin = context.applicationContext as? UniAdmin
+    val announcementRepository = remember { announcementAdmin?.announcementRepository }
+    val announcementViewModel: AnnouncementViewModel = viewModel(
+        factory = AnnouncementViewModelFactory(
+            announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
+        )
+    )
+    val announcements by announcementViewModel.announcements.observeAsState()
 
     val courseViewModel: CourseViewModel =
         viewModel(factory = CourseViewModelFactory(courseRepository))
     val user by userViewModel.user.observeAsState()
-    val users by userViewModel.users.observeAsState(emptyList())
-    val groups by chatViewModel.groups.observeAsState(emptyList())
-    val announcements by announcementViewModel.announcements.observeAsState(emptyList())
+
+
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
-    val announcement by remember { mutableStateOf(Announcement()) }
 
-    //this user state will return the state of a user based on their userID
-    //it is defined as val userStates: Map<String, UserState>
 
 
     LaunchedEffect(currentPerson?.email) {
@@ -142,7 +152,7 @@ fun Dashboard(navController: NavController, context: Context) {
             .fillMaxSize()
     ) {
         signedInUser.value?.let { user ->
-            TopAppBarContent(user,context)
+            TopAppBarContent(user, context, navController)
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
@@ -195,15 +205,15 @@ fun Dashboard(navController: NavController, context: Context) {
                     modifier = Modifier.padding(start = 15.dp)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                announcements.firstOrNull()?.let { announcement ->
-                    AnnouncementCard(announcement, context, navController)
+                announcements?.firstOrNull()?.let { announcement ->
+                    AnnouncementCard(announcement, context)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }
         } ?: run {
             // Show a loading indicator while user details are loading
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = CC.extraColor2())
             }
         }
     }
@@ -224,19 +234,20 @@ fun CourseItem(course: Course, context: Context, navController: NavController) {
             .clickable { navController.navigate("courseContent/${course.courseCode}") }
             .size(70.dp),
             contentAlignment = Alignment.Center) {
-            if (course.courseImageLink.isNotEmpty()){
-            AsyncImage(
-                model = course.courseImageLink,
-                contentDescription = course.courseName,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )}
-            else{
-            Icon(
-                Icons.Default.School, "Icon", tint = CC.textColor()
-            )}
+            if (course.courseImageLink.isNotEmpty()) {
+                AsyncImage(
+                    model = course.courseImageLink,
+                    contentDescription = course.courseName,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    Icons.Default.School, "Icon", tint = CC.textColor()
+                )
+            }
         }
         Spacer(modifier = Modifier.height(5.dp))
         Text(
@@ -341,71 +352,106 @@ fun CourseBox(
 
 
 @Composable
-fun AnnouncementCard(announcement: Announcement, context: Context, navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
+    Card(
+        modifier = Modifier
+            .heightIn(min = 200.dp)
+            .fillMaxWidth()
+            .padding(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = CC.extraColor1()
+        ),
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
-        Card(
+        Column(
             modifier = Modifier
-                .heightIn(min = 100.dp, max = 250.dp)
-                .fillMaxWidth(0.9f)
-                .padding(8.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = CC.extraColor1()
-            ),
-            shape = RoundedCornerShape(10.dp),
-            elevation = CardDefaults.elevatedCardElevation(4.dp)
+                .background(CC.extraColor1())
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .background(CC.extraColor1())
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+            // Title Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                // Title Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier
+                        .border(
+                            1.dp, CC.textColor(), CircleShape
+                        )
+                        .clip(CircleShape)
+                        .background(CC.secondary(), CircleShape)
+                        .size(40.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.notification),
-                        "",
-                        tint = CC.textColor(),
-                        modifier = Modifier.size(30.dp)
-                    )
+                    if (announcement.imageLink?.isNotEmpty() == true) {
+                        AsyncImage(
+                            model = announcement.imageLink,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            "${announcement.authorName?.get(0)}",
+                            style = CC.descriptionTextStyle(context)
+                                .copy(fontWeight = FontWeight.Bold),
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                announcement.title?.let {
+                    Row(modifier = Modifier.fillMaxWidth(1f)) {
+                        Text(
+                            text = it,
+                            style = CC.titleTextStyle(context),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Description
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                announcement.description?.let {
                     Text(
-                        text = announcement.title,
-                        style = CC.titleTextStyle(context),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = it,
+                        style = CC.descriptionTextStyle(context),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+            }
 
-                // Description
-                Text(
-                    text = announcement.description, style = CC.descriptionTextStyle(context)
-                )
 
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                // Bottom Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+            // Bottom Row
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                announcement.date?.let {
                     Text(
-                        text = announcement.date,
+                        text = it,
                         style = CC.descriptionTextStyle(context)
                             .copy(color = CC.textColor().copy(alpha = 0.7f))
                     )
+                }
 
+                announcement.authorName?.let {
                     Text(
-                        text = announcement.author,
+                        text = it,
                         style = CC.descriptionTextStyle(context)
                             .copy(color = CC.textColor().copy(alpha = 0.7f))
                     )
@@ -422,8 +468,16 @@ fun AnnouncementCard(announcement: Announcement, context: Context, navController
 fun TopAppBarContent(
     signedInUser: UserEntity,
     context: Context,
+    navController: NavController
 ) {
+    val notificationAdmin = context.applicationContext as UniAdmin
+    val notificationRepository = remember { notificationAdmin.notificationRepository }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
+    )
+    val notifications by notificationViewModel.notifications.observeAsState()
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
+    var expanded by remember { mutableStateOf(false) }
 
     // Optionally, you can periodically check the network status
     LaunchedEffect(Unit) {
@@ -436,20 +490,39 @@ fun TopAppBarContent(
     TopAppBar(
         title = {
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 BoxWithConstraints(
                     modifier = Modifier.padding(end = 10.dp)
                 ) {
                     val size = 50.dp
-                    Box(modifier = Modifier
-                        .border(
-                            1.dp, CC.textColor(), CircleShape
-                        )
-                        .background(CC.tertiary(), CircleShape)
-                        .clip(CircleShape)
-                        .size(size), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                MyDatabase.generateNotificationID { id ->
+                                    notificationViewModel.writeNotification(
+                                        notificationEntity = NotificationEntity(
+                                            id = id,
+                                            title = "Mike has Joined your Group!",
+                                            description = "You clicked the Icon",
+                                            date = "12/12/2023",
+                                            time = "12:00"
+                                        )
+                                    )
+                                    notificationViewModel.fetchNotifications()
+                                }
+                            }
+                            .border(
+                                1.dp, CC.textColor(), CircleShape
+                            )
+                            .background(CC.tertiary(), CircleShape)
+                            .clip(CircleShape)
+                            .size(size),
+                        contentAlignment = Alignment.Center
+                    ) {
                         if (signedInUser.profileImageLink?.isNotEmpty() == true) {
                             AsyncImage(
                                 model = signedInUser.profileImageLink,
@@ -462,12 +535,18 @@ fun TopAppBarContent(
                         } else {
                             Text(
                                 "${signedInUser.firstName?.get(0)}${signedInUser.lastName?.get(0)}",
-                                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                                style = CC.titleTextStyle(context)
+                                    .copy(fontWeight = FontWeight.Bold)
                             )
                         }
                     }
 
-                    //the small dot
+                    val onlineStatus by animateColorAsState(
+                        animationSpec = tween(500, easing = LinearEasing),
+                        targetValue = if (isOnline.value) Color.Green else Color.Red,
+                        label = ""
+                    )
+                    // the small dot
                     Box(
                         modifier = Modifier
                             .border(
@@ -475,8 +554,7 @@ fun TopAppBarContent(
                             )
                             .size(12.dp)
                             .background(
-                                if (isOnline.value) Color.Green else Color.Red,
-                                CircleShape
+                                onlineStatus, CircleShape
                             )
                             .align(Alignment.TopEnd)
                             .offset(x = (-6).dp, y = (-6).dp)
@@ -501,31 +579,61 @@ fun TopAppBarContent(
                         )
                     }
                 }
-                IconButton(onClick = {}) {
-                    BoxWithConstraints(modifier = Modifier.padding(end = 5.dp)) {
-                        IconButton(
-                            onClick = {},
-                            modifier = Modifier
-                            .size(50.dp)) {
-                            Icon(Icons.Default.Notifications,"",
-                                tint = CC.textColor(),
-                                modifier = Modifier.fillMaxSize())
-                            Box(
-                                modifier = Modifier
-                                    .border(
-                                        1.dp, CC.secondary(), CircleShape
-                                    )
-                                    .size(10.dp)
-                                    .background(
-                                        if (isOnline.value) Color.Green else Color.Red,
-                                        CircleShape
-                                    )
-                                    .align(Alignment.TopCenter)
-                                    .offset(y=((10).dp), x = (8).dp)
+            }
+        },
+        actions = {
+            BoxWithConstraints(modifier = Modifier.padding(end = 5.dp)) {
+                IconButton(onClick = {
+                    notificationViewModel.fetchNotifications()
+                    expanded = !expanded
+                }, modifier = Modifier.size(50.dp)) {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        tint = CC.textColor(),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .border(
+                                1.dp, CC.secondary(), CircleShape
                             )
-
+                            .size(10.dp)
+                            .background(
+                                if (notifications?.isNotEmpty() == true) Color.Green else Color.Red, CircleShape
+                            )
+                            .align(Alignment.TopCenter)
+                            .offset(y = (10).dp, x = (8).dp)
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .heightIn(max = 500.dp)
+                        .width(150.dp)
+                        .background(CC.extraColor1())
+                ) {
+                    Column(
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        if (notifications != null && notifications!!.isNotEmpty()) {
+                            notifications!!.take(5).forEach { notification ->
+                                NotificationTitleContent(notification, context, navController)
+                            }
+                            HorizontalDivider()
+                            TextButton(
+                                onClick = {
+                                    navController.navigate("notifications") // Adjust the navigation as needed
+                                    expanded = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("View More", style = CC.descriptionTextStyle(context))
+                            }
+                        } else {
+                            Text("No new notifications", style = CC.descriptionTextStyle(context))
                         }
-
                     }
                 }
             }
@@ -538,24 +646,49 @@ fun TopAppBarContent(
 
 
 
+
+@Composable
+fun NotificationTitleContent(
+    notification: NotificationEntity,
+    context: Context,
+    navController: NavController
+) {
+    Row(modifier = Modifier
+        .height(30.dp)
+        .clickable { navController.navigate("notifications") }
+        .padding(5.dp)
+        .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center) {
+        notification.title?.let {
+            Text(
+                text = it,
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+
 fun isDeviceOnline(context: Context): Boolean {
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val network = connectivityManager.activeNetwork ?: return false
     val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
     return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
-@Preview
-@Composable
-fun GreetingPreview() {
-    TopAppBarContent(signedInUser = UserEntity(
-        id = "",
-        firstName = "William",
-        lastName = "Johnson",
-        profileImageLink ="",
 
-    ),
-        context = LocalContext.current
-    )
-}
-
+//@Composable
+//fun getViewModel(context: Context, type: String): ViewModel {
+//    val admin = context.applicationContext as UniAdmin
+//    return when (type) {
+//        "chat" -> viewModel(factory = ChatViewModel.ChatViewModelFactory(admin.chatRepository))
+//        "notification" -> viewModel(factory = NotificationViewModel.NotificationViewModelFactory(admin.notificationRepository))
+//        "user" -> viewModel(factory = UserViewModelFactory(admin.userRepository))
+//        "announcement" -> viewModel(factory = AnnouncementViewModelFactory(admin.announcementRepository))
+//        "course" -> viewModel(factory = CourseViewModelFactory(CourseRepository())) // Assuming CourseRepository doesn't need UniAdmin
+//        else -> throw IllegalArgumentException("Unknown ViewModel type")
+//    }
+//}
