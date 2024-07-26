@@ -8,10 +8,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
-    private val _courses = MutableLiveData<List<Course>>()
-    private val _fetchedCourse = MutableLiveData<Course?>()
-    val courses: LiveData<List<Course>> = _courses
-    val fetchedCourse: LiveData<Course?> = _fetchedCourse
+    private val _courses = MutableLiveData<List<CourseEntity>>()
+    private val _fetchedCourse = MutableLiveData<CourseEntity?>()
+    val courses: LiveData<List<CourseEntity>> = _courses
+    val fetchedCourse: LiveData<CourseEntity?> = _fetchedCourse
 
     init {
         fetchCourses()
@@ -29,7 +29,7 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
         }
     }
 
-    fun saveCourse(course: Course) {
+    fun saveCourse(course: CourseEntity) {
         viewModelScope.launch {
             repository.saveCourse(course) { success ->
                 if (success) {
