@@ -8,28 +8,42 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class AnnouncementViewModel(private val repository: AnnouncementRepository) : ViewModel() {
-    private val _announcements = MutableLiveData<List<Announcement>>()
-    val announcements: LiveData<List<Announcement>> = _announcements
+    private val _announcements = MutableLiveData<List<AnnouncementEntity>>()
+    val announcements: LiveData<List<AnnouncementEntity>> = _announcements
 
     init {
         fetchAnnouncements()
     }
 
-    private fun fetchAnnouncements() {
+    fun fetchAnnouncements() {
         repository.fetchAnnouncements { announcements ->
             _announcements.value = announcements
         }
     }
 
-    fun saveAnnouncement(announcement: Announcement) {
+    fun saveAnnouncement(announcement: AnnouncementEntity, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.saveAnnouncement(announcement) { success ->
                 if (success) {
+                    onComplete(true)
                     fetchAnnouncements() // Refresh the announcement list after saving
                 } else {
+                    onComplete(false)
                     // Handle save failure if needed
                 }
             }
+        }
+    }
+
+    fun deleteAnnouncement(announcementId: String, onComplete: (Boolean) -> Unit){
+        viewModelScope.launch {
+            repository.deleteAnnouncement(announcementId, onSuccess = {
+                onComplete(true)
+                fetchAnnouncements() // Refresh the announcement list after deleting
+            }, onFailure = { exception ->
+                onComplete(false)
+                // Handle delete failure if needed
+            })
         }
     }
 }
