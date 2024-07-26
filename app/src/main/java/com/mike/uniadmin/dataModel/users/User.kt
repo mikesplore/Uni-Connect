@@ -30,7 +30,9 @@ data class UserEntity(
 data class AccountDeletionEntity(
     @PrimaryKey val id: String,
     val admissionNumber: String? = null,
-    val email: String? = null
+    val email: String? = null,
+    val date: String? = null,
+    val status: String? = null
 )
 @Entity(tableName = "userPreferences")
 data class UserPreferencesEntity(
