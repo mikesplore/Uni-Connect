@@ -8,7 +8,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.announcements.Announcement
+import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
@@ -102,6 +102,14 @@ object MyDatabase {
             onIndexNumberGenerated(indexNumber)
         }
     }
+
+    fun generateNotificationID(onIndexNumberGenerated: (String) -> Unit) {
+        updateAndGetCode { newCode ->
+            val indexNumber = "NT$newCode$year"
+            onIndexNumberGenerated(indexNumber)
+        }
+    }
+
 
     fun generateAssignmentID(onIndexNumberGenerated: (String) -> Unit) {
         updateAndGetCode { newCode ->
@@ -469,23 +477,9 @@ object MyDatabase {
     }
 
 
-    fun writeAnnouncement(announcement: Announcement) {
-        database.child("Announcements").child(announcement.id).setValue(announcement)
-    }
 
-    fun getAnnouncements(onUsersFetched: (List<Announcement>?) -> Unit) {
-        database.child("Announcements").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val announcements =
-                    snapshot.children.mapNotNull { it.getValue(Announcement::class.java) }
-                onUsersFetched(announcements)
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                onUsersFetched(null)
-            }
-        })
-    }
+
 
     fun deleteAnnouncement(announcementId: String) {
         database.child("Announcements").child(announcementId.toString()).removeValue()
