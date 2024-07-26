@@ -53,7 +53,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Settings
@@ -105,9 +104,10 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerDefaults
 import com.google.accompanist.pager.PagerState
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
-import com.mike.uniadmin.dataModel.announcements.Announcement
+import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementRepository
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
@@ -118,7 +118,6 @@ import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
@@ -164,11 +163,15 @@ fun HomeScreen(
             userRepository ?: throw IllegalStateException("UserRepository is null")
         )
     )
+    val announcementAdmin = context.applicationContext as? UniAdmin
+    val announcementRepository = remember { announcementAdmin?.announcementRepository }
+    val announcementViewModel: AnnouncementViewModel = viewModel(
+        factory = AnnouncementViewModelFactory(
+            announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
+        )
+    )
+    val announcements by announcementViewModel.announcements.observeAsState()
 
-
-    val announcementRepository = remember { AnnouncementRepository() }
-    val announcementViewModel: AnnouncementViewModel =
-        viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
     val courseViewModel: CourseViewModel =
         viewModel(factory = CourseViewModelFactory(courseRepository))
     val user by userViewModel.user.observeAsState()
@@ -176,7 +179,7 @@ fun HomeScreen(
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
     val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
-    val announcement by remember { mutableStateOf(Announcement()) }
+    val announcement by remember { mutableStateOf(AnnouncementEntity()) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -239,7 +242,7 @@ fun HomeScreen(
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         Column(
             modifier = Modifier
-                .background(CC.secondary())
+                .background(CC.secondary(), RoundedCornerShape(0.dp,0.dp,10.dp,10.dp))
                 .fillMaxHeight(0.7f)
                 .fillMaxWidth(0.5f),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -425,7 +428,7 @@ fun HomeScreen(
                 when (screens[page]) {
                     Screen.Home -> Dashboard(navController, context)
                     Screen.Assignments -> AssignmentScreen(navController, context)
-                    Screen.Announcements -> AnnouncementsScreen(navController, context)
+                    Screen.Announcements -> AnnouncementsScreen(context)
                     Screen.Timetable -> TimetableScreen(navController, context)
                     Screen.Attendance -> ManageAttendanceScreen(navController, context)
                 }
@@ -440,7 +443,7 @@ fun SideProfile(user: UserEntity, context: Context) {
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .background(CC.extraColor1()),
+            .background(CC.extraColor2()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -486,7 +489,7 @@ fun ModalDrawerItem(
     user: UserEntity,
     context: Context,
     navController: NavController,
-    announcement: Announcement,
+    announcement: AnnouncementEntity,
     users: List<UserEntity>,
     userViewModel: UserViewModel,
     chatViewModel: ChatViewModel,
