@@ -33,14 +33,11 @@ import com.mike.uniadmin.chat.UniChat
 import com.mike.uniadmin.chat.UniGroups
 import com.mike.uniadmin.chat.UniScreen
 import com.mike.uniadmin.chat.UserChatScreen
-import com.mike.uniadmin.dataModel.courses.CourseRepository
-import com.mike.uniadmin.dataModel.courses.CourseViewModel
-import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
+import com.mike.uniadmin.courseContent.CourseContent
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.ManageUsers
 import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Screen
