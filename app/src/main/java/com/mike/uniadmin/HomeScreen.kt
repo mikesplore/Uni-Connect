@@ -148,7 +148,7 @@ fun HomeScreen(
     coroutineScope: CoroutineScope,
 ) {
     val currentPerson = FirebaseAuth.getInstance().currentUser
-    val courseRepository = remember { CourseRepository() }
+
 
     val uniAdmin = context.applicationContext as? UniAdmin
     val chatRepository = uniAdmin?.chatRepository ?: throw IllegalStateException("ChatRepository not initialized")
@@ -172,8 +172,7 @@ fun HomeScreen(
     )
     val announcements by announcementViewModel.announcements.observeAsState()
 
-    val courseViewModel: CourseViewModel =
-        viewModel(factory = CourseViewModelFactory(courseRepository))
+
     val user by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
