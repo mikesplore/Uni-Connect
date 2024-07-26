@@ -9,6 +9,10 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementsDao
+import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
+import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementDao
+import com.mike.uniadmin.dataModel.courses.CourseDao
+import com.mike.uniadmin.dataModel.courses.CourseEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatDao
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
 import com.mike.uniadmin.dataModel.groupchat.Converters
@@ -38,7 +42,9 @@ import com.mike.uniadmin.dataModel.users.UserStateEntity
         UserPreferencesEntity::class,
         UserStateEntity::class,
         AnnouncementEntity::class,
-        NotificationEntity::class
+        NotificationEntity::class,
+        CourseEntity::class,
+        CourseAnnouncement::class
     ],
     version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
@@ -52,6 +58,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userStateDao(): UserStateDao
     abstract fun announcementsDao(): AnnouncementsDao
     abstract fun notificationDao(): NotificationDao
+    abstract fun courseDao(): CourseDao
+    abstract fun courseAnnouncementDao(): CourseAnnouncementDao
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
