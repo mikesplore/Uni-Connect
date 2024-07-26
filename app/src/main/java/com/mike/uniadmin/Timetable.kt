@@ -9,10 +9,6 @@ fun AssignmentScreen(navController: NavController,context: Context){
 
 }
 
-@Composable
-fun AnnouncementsScreen(navController: NavController,context: Context){
-
-}
 
 @Composable
 fun TimetableScreen(navController: NavController,context: Context){
