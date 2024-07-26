@@ -1,7 +1,6 @@
 package com.mike.uniadmin.dataModel.users
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -20,8 +19,6 @@ class UserRepository
     private val userPreferencesDao: UserPreferencesDao
 ) {
     private val database = FirebaseDatabase.getInstance().reference
-
-
 
     init {
         startUserListener()
@@ -133,22 +130,21 @@ class UserRepository
     }
 
 
-    fun deleteUser(userId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
+    fun deleteUser(userId: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             userDao.deleteUser(userId)
-            database.child("Users").child(userId)
-                .removeValue() // Use the consistent database reference
-                .addOnSuccessListener {
-                    onSuccess()
+            database.child("Users").child(userId).removeValue().addOnSuccessListener {
+                    onSuccess(true)
                 }.addOnFailureListener { exception ->
-                    onFailure(exception)
+                    onSuccess(false)
+                    Log.e("Error", "$exception")
                 }
         }
     }
 
+
     fun writeAccountDeletionData(
-        accountDeletion: AccountDeletionEntity,
-        onSuccess: (Boolean) -> Unit
+        accountDeletion: AccountDeletionEntity, onSuccess: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
             accountDeletionDao.insertAccountDeletion(accountDeletion)
@@ -161,20 +157,21 @@ class UserRepository
         }
     }
 
-    fun checkAccountDeletionData(userId: String, onComplete: (AccountDeletionEntity) -> Unit){
+    fun checkAccountDeletionData(userId: String, onComplete: (AccountDeletionEntity?) -> Unit) {
         viewModelScope.launch {
             val cachedData = accountDeletionDao.getAccountDeletion(userId)
             if (cachedData != null) {
                 onComplete(cachedData)
-            }else{
+            } else {
                 database.child("Account Deletion").child(userId).get()
                     .addOnSuccessListener { snapshot ->
                         val accountDeletion = snapshot.getValue(AccountDeletionEntity::class.java)
                         accountDeletion?.let { onComplete(it) }
-                        }.addOnFailureListener {
+                    }.addOnFailureListener {
                         println("Error reading account deletion: ${it.message}")
                     }
-            }            }
+            }
+        }
     }
 
     fun writePreferences(preferences: UserPreferencesEntity, onSuccess: (Boolean) -> Unit) {
@@ -232,19 +229,20 @@ class UserRepository
     }
 
     fun fetchUserStateByUserId(userId: String, onUserStateFetched: (UserStateEntity?) -> Unit) {
-        database.child("Users Online Status").child(userId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val userState = snapshot.getValue(UserStateEntity::class.java)
-                onUserStateFetched(userState)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Firebase connection failed, fetch from local database
-                viewModelScope.launch {
-                    val cachedUserState = userStateDao.getUserState(userId)
-                    onUserStateFetched(cachedUserState)
+        database.child("Users Online Status").child(userId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val userState = snapshot.getValue(UserStateEntity::class.java)
+                    onUserStateFetched(userState)
                 }
-            }
-        })
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Firebase connection failed, fetch from local database
+                    viewModelScope.launch {
+                        val cachedUserState = userStateDao.getUserState(userId)
+                        onUserStateFetched(cachedUserState)
+                    }
+                }
+            })
     }
 }
