@@ -471,7 +471,12 @@ fun GenderRow(currentUser: UserEntity, context: Context, viewModel: UserViewMode
 @Composable
 fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavController) {
     val accountStatus by viewModel.accountStatus.observeAsState()
+    val currentUser by viewModel.user.observeAsState()
+    LaunchedEffect(Unit) {
+        currentUser?.id?.let { viewModel.fetchAccountDeletionStatus(it) }
 
+    }
+    
     if (accountStatus?.status == "pending") {
         AccountDeletionRequests(userViewModel = viewModel, context = context, navController, auth = FirebaseAuth.getInstance())
     } else {
@@ -482,7 +487,10 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
         var deleteConfirmed by remember { mutableStateOf(false) }
         var loading by remember { mutableStateOf(false) }
         var isError by remember { mutableStateOf(false) }
-        val currentUser by viewModel.user.observeAsState()
+
+
+
+
 
         Spacer(modifier = Modifier.height(20.dp))
         Column(
