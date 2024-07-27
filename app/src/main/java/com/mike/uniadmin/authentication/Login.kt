@@ -57,7 +57,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
+import com.mike.uniadmin.chat.getCurrentDate
+import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.notifications.NotificationEntity
+import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
@@ -86,6 +90,12 @@ fun LoginScreen(navController: NavController, context: Context) {
     var visible by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
     val user = firebaseAuth.currentUser
+
+    val notificationAdmin = context.applicationContext as UniAdmin
+    val notificationRepository = remember { notificationAdmin.notificationRepository }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
+    )
 
     val userAdmin = context.applicationContext as? UniAdmin
     val userRepository = remember { userAdmin?.userRepository }
@@ -245,14 +255,18 @@ fun LoginScreen(navController: NavController, context: Context) {
             ) {
                 Button(
                     onClick = {
+                        loading = true
                         if (isSigningUp) handleSignUp(
+                            notificationViewModel,
                             context,
                             firebaseAuth,
                             firstName,
                             lastName,
                             email,
                             password,
-                            userViewModel
+                            userViewModel,
+
+
                         ) {
                             loading = false
                         } else handleSignIn(
@@ -346,6 +360,7 @@ fun handleAuthSuccess(navController: NavController) {
 
 
 fun handleSignUp(
+    notificationViewModel: NotificationViewModel,
     context: Context,
     firebaseAuth: FirebaseAuth,
     firstName: String,
@@ -353,11 +368,13 @@ fun handleSignUp(
     email: String,
     password: String,
     userViewModel: UserViewModel,
-    onComplete: (Boolean) -> Unit
+    onComplete: (Boolean) -> Unit,
+
 ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+
                     Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
                     generateIndexNumber { userID ->
                         val newUser = UserEntity(
@@ -371,6 +388,20 @@ fun handleSignUp(
                         )
                         userViewModel.writeUser(newUser) {
                             Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
+                        }
+                        MyDatabase.generateNotificationID { id ->
+                            notificationViewModel.writeNotification(
+                                notificationEntity = NotificationEntity(
+                                    name = firstName,
+                                    userId = userID ,
+                                    id = id,
+                                    title = "$firstName $lastName has Joined Uni Admin!",
+                                    description = "Start a conversation by sending  a 👋",
+                                    date = getCurrentDate(),
+                                    time = getCurrentTimeInAmPm()
+                                )
+                            )
+                            notificationViewModel.fetchNotifications()
                         }
                     }
                     onComplete(true)
@@ -420,7 +451,10 @@ fun handleSignIn(
                             return@OnCompleteListener
                         }
                         val token = task.result
-                        writeFcmToken(token = Fcm(token = token))
+                        generateFCMID { id ->
+                            val fcmToken = Fcm(id = id, token = token)
+                            writeFcmToken(token = fcmToken)
+                        }
                     })
                     onComplete()
                 } else {
