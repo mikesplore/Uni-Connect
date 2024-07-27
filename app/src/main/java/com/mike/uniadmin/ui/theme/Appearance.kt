@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -34,6 +35,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -252,6 +255,9 @@ fun currentFontFamily(context: Context): FontFamily {
     }
 }
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
     val fontPrefs = remember { FontPreferences(context) }
@@ -307,13 +313,21 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
                     )
                     .fillMaxWidth()
                     .height(60.dp)
-                    .clickable {
-                        selectedFontFamily = fontFamily
-                    }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Start
             ) {
+                RadioButton(
+                    selected = isSelected,
+                    onClick = {
+                        selectedFontFamily = fontFamily
+                    },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = CC.secondary(),
+                        unselectedColor = CC.textColor()
+                    )
+                )
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = fontName,
                     fontFamily = fontFamily,
@@ -374,6 +388,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
         }
     }
 }
+
 
 
 
