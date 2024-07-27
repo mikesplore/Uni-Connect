@@ -17,11 +17,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
@@ -41,6 +39,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Screen
+import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
@@ -63,11 +62,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
         )
     )
 
-    val groups by chatViewModel.groups.observeAsState(emptyList())
     val users by userViewModel.users.observeAsState(emptyList())
-    val user by userViewModel.user.observeAsState(initial = null)
-    var showAddGroup by remember { mutableStateOf(false) }
-    val currentUser = FirebaseAuth.getInstance().currentUser
     val signedInUser by remember { mutableStateOf(UserEntity())}
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
@@ -89,6 +84,10 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
         composable("addgroup"){
             AddGroupSection(signedInUser,context,chatViewModel,users)
 
+        }
+
+        composable("manageattendance"){
+            ManageAttendanceScreen(context)
         }
 
         composable("dashboard"){
@@ -145,15 +144,21 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             ManageUsers(navController, context)
         }
 
+        composable("notifications"){
+            PhoneNotifications(navController, context)
+        }
+
+        composable("statistics"){
+            Statistics(navController, context)
+        }
+
 //        composable("timetable"){
 //            TimetableScreen(navController = navController, context)
 //        }
 //        composable("assignments"){
 //            AssignmentScreen(navController = navController, context)
 //        }
-//        composable("attendance"){
-//            ManageAttendanceScreen(navController = navController, context)
-//        }
+
         composable("passwordreset"){
             PasswordReset(navController = navController, context)
         }
@@ -169,15 +174,15 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             UniChat(navController,context,pagerState, mainActivity,uniChatScreens, coroutineScope  )
         }
 
-//        composable("course/{courseCode}",
-//            arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
-//        ) { backStackEntry ->
-//            CourseScreen(
-//                backStackEntry.arguments?.getString("courseCode") ?: "",
-//                context
-//            )
-//        }
-//
+        composable("courseResource/{courseCode}",
+            arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            CourseResources(
+                backStackEntry.arguments?.getString("courseCode") ?: "",
+                context
+            )
+        }
+
         composable("courseContent/{courseId}",
             arguments = listOf(navArgument("courseId") { type = NavType.StringType })
         ) { backStackEntry ->
