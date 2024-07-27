@@ -6,13 +6,16 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface CourseDao{
+interface CourseDao {
 
     @Query("SELECT * FROM courses")
     suspend fun getCourses(): List<CourseEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourse(courses: List<CourseEntity>)
+    suspend fun insertCourses(courses: List<CourseEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCourse(course: CourseEntity)
 
     @Query("DELETE FROM courses WHERE courseCode = :courseCode")
     suspend fun deleteCourse(courseCode: String)
@@ -21,4 +24,16 @@ interface CourseDao{
     suspend fun getCourse(courseCode: String): CourseEntity?
 
 
+}
+
+@Dao
+interface  AttendanceStateDao{
+    @Query("SELECT * FROM attendanceStates")
+    suspend fun getAttendanceStates(): List<AttendanceState>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttendanceStates(attendanceStates: List<AttendanceState>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttendanceState(attendanceState: AttendanceState)
 }
