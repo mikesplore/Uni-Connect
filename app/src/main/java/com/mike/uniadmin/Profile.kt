@@ -653,7 +653,8 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                     val account = currentUser?.let {
                         AccountDeletionEntity(
                             id = id, admissionNumber = it.id, email = currentUser!!.email,
-                            status = "pending"
+                            status = "pending",
+
                         )
                     }
                     if (account != null) {
