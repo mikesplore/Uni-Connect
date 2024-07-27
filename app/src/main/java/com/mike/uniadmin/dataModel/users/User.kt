@@ -22,7 +22,7 @@ data class UserEntity(
         null,
         null,
         null,
-        null
+        ""
     )
 }
 
