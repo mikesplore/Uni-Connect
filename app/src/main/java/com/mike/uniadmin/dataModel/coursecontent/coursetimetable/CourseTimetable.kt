@@ -1,9 +1,24 @@
 package com.mike.uniadmin.dataModel.coursecontent.coursetimetable
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "courseTimetable")
 data class CourseTimetable(
-    val timetableID: String = "",
-    val startTime: String = "",
-    val endTime: String = "",
-    val venue: String = "",
-    val lecturer: String = "",
+   @PrimaryKey val timetableID: String,
+    val day: String? = null,
+    val courseID: String? = null,
+    val startTime: String? = null,
+    val endTime: String? = null,
+    val venue: String? = null,
+    val lecturer: String? = null,
 )
+{
+    constructor(): this(
+        "",
+        null,
+        null,
+        null,
+        null
+    )
+}
