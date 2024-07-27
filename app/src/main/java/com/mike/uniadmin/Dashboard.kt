@@ -222,7 +222,6 @@ fun Dashboard(navController: NavController, context: Context) {
             }
         }
     }
-
 }
 
 @Composable
@@ -236,7 +235,9 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
             )
             .background(CC.tertiary(), CircleShape)
             .clip(CircleShape)
-            .clickable { navController.navigate("courseContent/${course.courseCode}") }
+            .clickable {
+                CourseName.name.value = course.courseName.toString()
+                navController.navigate("courseResource/${course.courseCode}") }
             .size(70.dp),
             contentAlignment = Alignment.Center) {
             if (course.courseImageLink?.isNotEmpty() == true) {
@@ -509,20 +510,6 @@ fun TopAppBarContent(
             ) {
                 val size = 50.dp
                 Box(modifier = Modifier
-                    .clickable {
-                        MyDatabase.generateNotificationID { id ->
-                            notificationViewModel.writeNotification(
-                                notificationEntity = NotificationEntity(
-                                    id = id,
-                                    title = "Mike has Joined your Group!",
-                                    description = "You clicked the Icon",
-                                    date = "12/12/2023",
-                                    time = "12:00"
-                                )
-                            )
-                            notificationViewModel.fetchNotifications()
-                        }
-                    }
                     .border(
                         1.dp, CC.textColor(), CircleShape
                     )
@@ -629,7 +616,7 @@ fun TopAppBarContent(
                         HorizontalDivider()
                         TextButton(
                             onClick = {
-                                navController.navigate("notifications") // Adjust the navigation as needed
+
                                 expanded = false
                             }, modifier = Modifier.fillMaxWidth()
                         ) {
