@@ -1,7 +1,7 @@
 [versions]
 accompanistPager = "0.28.0"
 accompanistPagerIndicators = "0.28.0"
-agp = "8.6.0-alpha04"
+agp = "8.7.0-alpha03"
 appcompat = "1.7.0"
 biometric = "1.1.0"
 biometricKtx = "1.4.0-alpha01"
