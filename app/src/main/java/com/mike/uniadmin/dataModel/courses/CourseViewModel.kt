@@ -13,11 +13,24 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
     val courses: LiveData<List<CourseEntity>> = _courses
     val fetchedCourse: LiveData<CourseEntity?> = _fetchedCourse
 
+    private val _attendanceStates = MutableLiveData<Map<String, AttendanceState>>()
+    val attendanceStates: LiveData<Map<String, AttendanceState>> = _attendanceStates
+
+
     init {
         fetchCourses()
+        fetchAttendanceStates()
     }
 
-    private fun fetchCourses() {
+    fun fetchAttendanceStates() {
+        repository.fetchAttendanceStates { fetchedStates ->
+            val statesMap = fetchedStates.associateBy { it.courseID }
+            _attendanceStates.value = statesMap
+        }
+    }
+
+
+    fun fetchCourses() {
         repository.fetchCourses { courses ->
             _courses.value = courses
         }
@@ -35,6 +48,18 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
                 if (success) {
                     fetchCourses() // Refresh the course list after saving
                     getCourseDetailsByCourseID(course.courseCode)
+                } else {
+                    // Handle save failure if needed
+                }
+            }
+        }
+    }
+
+    fun saveAttendanceState(attendanceState: AttendanceState) {
+        viewModelScope.launch {
+            repository.saveAttendanceState(attendanceState) { success ->
+                if (success) {
+                    fetchAttendanceStates() // Refresh the course list after saving
                 } else {
                     // Handle save failure if needed
                 }
