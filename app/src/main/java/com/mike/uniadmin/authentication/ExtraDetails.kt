@@ -43,7 +43,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.chat.getCurrentDate
+import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.notifications.NotificationEntity
+import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -76,6 +80,12 @@ fun MoreDetails(context: Context, navController: NavController) {
         colors = listOf(
             CC.primary(), CC.secondary()
         )
+    )
+
+    val notificationAdmin = context.applicationContext as UniAdmin
+    val notificationRepository = remember { notificationAdmin.notificationRepository }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
     )
 
     LaunchedEffect(Unit) {
@@ -151,9 +161,9 @@ fun MoreDetails(context: Context, navController: NavController) {
                 Button(
                     onClick = {
                         addloading = true
-                        MyDatabase.generateIndexNumber { id ->
+                        MyDatabase.generateIndexNumber { userId ->
                             val newUser = UserEntity(
-                                id = id,
+                                id = userId,
                                 email = email.toString(),
                                 firstName = firstName,
                                 lastName = lastName,
@@ -161,6 +171,20 @@ fun MoreDetails(context: Context, navController: NavController) {
                             )
                             userViewModel.writeUser(newUser, onSuccess = {
                                 addloading = false
+                                MyDatabase.generateNotificationID { id ->
+                                    notificationViewModel.writeNotification(
+                                        notificationEntity = NotificationEntity(
+                                            name = firstName,
+                                            userId = userId ,
+                                            id = id,
+                                            title = "$firstName $lastName has Joined Uni Admin!",
+                                            description = "Start a conversation by sending  a 👋",
+                                            date = getCurrentDate(),
+                                            time = getCurrentTimeInAmPm()
+                                        )
+                                    )
+                                    notificationViewModel.fetchNotifications()
+                                }
                                 navController.navigate("homescreen")
                             })
                         }
@@ -183,9 +207,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                     }
                 }
             }
-
         }
-
     }
 }
 
