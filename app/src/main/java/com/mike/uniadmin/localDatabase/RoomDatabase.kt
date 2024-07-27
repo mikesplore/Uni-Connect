@@ -11,6 +11,14 @@ import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementsDao
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementDao
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentDao
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetail
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailDao
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableDao
+import com.mike.uniadmin.dataModel.courses.AttendanceState
+import com.mike.uniadmin.dataModel.courses.AttendanceStateDao
 import com.mike.uniadmin.dataModel.courses.CourseDao
 import com.mike.uniadmin.dataModel.courses.CourseEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatDao
@@ -44,7 +52,11 @@ import com.mike.uniadmin.dataModel.users.UserStateEntity
         AnnouncementEntity::class,
         NotificationEntity::class,
         CourseEntity::class,
-        CourseAnnouncement::class
+        CourseAnnouncement::class,
+        CourseAssignment::class,
+        CourseDetail::class,
+        CourseTimetable::class,
+        AttendanceState::class
     ],
     version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
@@ -60,6 +72,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun notificationDao(): NotificationDao
     abstract fun courseDao(): CourseDao
     abstract fun courseAnnouncementDao(): CourseAnnouncementDao
+    abstract fun courseAssignmentDao(): CourseAssignmentDao
+    abstract fun courseDetailsDao(): CourseDetailDao
+    abstract fun courseTimetableDao(): CourseTimetableDao
+    abstract fun attendanceStateDao(): AttendanceStateDao
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
