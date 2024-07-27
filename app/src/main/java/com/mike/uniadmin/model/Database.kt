@@ -8,10 +8,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
-import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.ui.theme.GlobalColors
@@ -440,116 +437,17 @@ object MyDatabase {
         })
     }
 
-    fun writeAssignment(assignment: Assignment, onComplete: (Boolean) -> Unit) {
-        database.child("Assignments").child(assignment.id).setValue(assignment)
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-    }
 
-    fun getAssignments(courseCode: String, onAssignmentsFetched: (List<Assignment>?) -> Unit) {
-        database.child("Assignments").orderByChild("courseCode").equalTo(courseCode)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val assignments =
-                        snapshot.children.mapNotNull { it.getValue(Assignment::class.java) }
-                    onAssignmentsFetched(assignments)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onAssignmentsFetched(null)
-                }
-            })
-    }
-
-    fun deleteAssignment(assignmentId: String, onComplete: (Boolean) -> Unit) {
-        database.child("Assignments").child(assignmentId).removeValue()
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-    }
-
-    fun editAssignment(assignment: Assignment, onComplete: (Boolean) -> Unit) {
-        database.child("Assignments").child(assignment.id).setValue(assignment)
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-    }
-
-
-
-
-
-
-    fun deleteAnnouncement(announcementId: String) {
-        database.child("Announcements").child(announcementId.toString()).removeValue()
-    }
-
-    fun loadCourseAndAssignments(callback: (List<Course>?) -> Unit) {
-        database.child("Courses").get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val courseList = task.result.children.mapNotNull { dataSnapshot ->
-                    val course = dataSnapshot.getValue(Course::class.java)
-                    if (course?.courseName.isNullOrEmpty()) {
-                        Log.e("DataFetch", "Course with missing name: $dataSnapshot")
-                        null
-                    } else {
-                        course
-                    }
-                }
-                callback(courseList)
-            } else {
-                Log.e("DataFetch", "Error fetching courses: ${task.exception?.message}")
-                callback(null)
-            }
+    fun loadAttendanceRecords(onAttendanceRecordsLoaded: (List<AttendanceRecord>?) -> Unit) {
+        database.child("attendanceRecords").get().addOnSuccessListener { snapshot ->
+            val attendanceRecords = snapshot.children.mapNotNull { it.getValue(AttendanceRecord::class.java) }
+            onAttendanceRecordsLoaded(attendanceRecords)
+        }.addOnFailureListener {
+            onAttendanceRecordsLoaded(null)
         }
     }
 
 
-    fun loadAttendanceRecords(onAttendanceRecordsLoaded: (List<AttendanceRecord>?) -> Unit) {
-        database.child("attendanceRecords")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val attendanceRecords = snapshot.children.mapNotNull {
-                        val studentId = it.child("studentId").getValue(String::class.java)
-                        val dayOfWeek = it.child("dayOfWeek").getValue(String::class.java)
-                        val isPresent = it.child("isPresent").getValue(Boolean::class.java)
-                        val lesson = it.child("lesson").getValue(String::class.java)
-                        if (studentId != null && dayOfWeek != null && isPresent != null && lesson != null) {
-                            AttendanceRecord(studentId, dayOfWeek, isPresent, lesson)
-                        } else null
-                    }
-                    onAttendanceRecordsLoaded(attendanceRecords)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onAttendanceRecordsLoaded(null)
-                }
-            }
-            )
-    }
-
-    fun saveAttendanceState(attendanceState: AttendanceState) {
-        val database = FirebaseDatabase.getInstance().reference
-        database.child("AttendanceStates").child(attendanceState.courseID).setValue(attendanceState)
-    }
-
-
-    fun fetchAttendanceState(courseCode: String, onStateFetched: (AttendanceState?) -> Unit) {
-        val database = FirebaseDatabase.getInstance().reference
-        database.child("AttendanceStates").child(courseCode).addListenerForSingleValueEvent(object :
-            ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val attendanceState = snapshot.getValue(AttendanceState::class.java)
-                onStateFetched(attendanceState) // Pass the fetched state or null if not found
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the error, maybe pass null to indicate failure
-                onStateFetched(null)
-            }
-        })
-    }
 
     //fetch the day id using the day name
     fun getDayIdByName(dayName: String, onDayIdFetched: (String?) -> Unit) {
@@ -579,7 +477,7 @@ object MyDatabase {
 
         GlobalColors.loadColorScheme(context)
         // Fetch the screen details
-        MyDatabase.getScreenDetails(screenID) { screenDetails ->
+        getScreenDetails(screenID) { screenDetails ->
             if (screenDetails != null) {
                 MyDatabase.writeScren(courseScreen = screenDetails) {}
                 // Fetch existing screen time
@@ -612,46 +510,6 @@ object MyDatabase {
         }
     }
 
-
-    //Course Content database
-    fun writeCourseAnnouncement(courseID: String, courseAnnouncement: CourseAnnouncement, onResult: (Boolean) -> Unit) {
-        val courseAnnouncementRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseAnnouncements")
-
-        courseAnnouncementRef.child(courseAnnouncement.announcementID).setValue(courseAnnouncement)
-            .addOnSuccessListener {
-                onResult(true) // Indicate success
-            }
-            .addOnFailureListener { exception ->
-                println("Error writing announcement: ${exception.message}")
-                onResult(false) // Indicate failure
-            }
-    }
-
-
-    fun getCourseAnnouncements(courseID: String, onResult: (List<CourseAnnouncement>) -> Unit) {
-        val courseAnnouncementRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseAnnouncements")
-
-        courseAnnouncementRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val announcements = mutableListOf<CourseAnnouncement>()
-                for (childSnapshot in snapshot.children) {
-                    val announcement = childSnapshot.getValue(CourseAnnouncement::class.java)
-                    announcement?.let { announcements.add(it) }
-                }
-                onResult(announcements)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the read error (e.g., log the error)
-                println("Error reading announcements: ${error.message}")
-            }
-        })
-    }
-
     //Course Assignments database
     fun writeCourseAssignments(courseID: String, courseAssignment: CourseAssignment, onResult: (Boolean) -> Unit) {
         val courseAnnouncementRef = database.child("CourseContent")
@@ -668,28 +526,6 @@ object MyDatabase {
             }
     }
 
-
-    fun getCourseAssignments(courseID: String, onResult: (List<CourseAssignment>) -> Unit) {
-        val courseAssignmentRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseAssignments")
-
-        courseAssignmentRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val assignments = mutableListOf<CourseAssignment>()
-                for (childSnapshot in snapshot.children) {
-                    val assignment = childSnapshot.getValue(CourseAssignment::class.java)
-                    assignment?.let { assignments.add(it) }
-                }
-                onResult(assignments)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the read error (e.g., log the error)
-                println("Error reading assignment: ${error.message}")
-            }
-        })
-    }
 
     //Course Timetable database
     fun writeCourseTimetable(courseID: String, courseTimetable: CourseTimetable, onResult: (Boolean) -> Unit) {
@@ -708,64 +544,6 @@ object MyDatabase {
     }
 
 
-    fun getCourseTimetable(courseID: String, onResult: (List<CourseTimetable>) -> Unit) {
-        val courseAnnouncementRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseTimetable")
-
-        courseAnnouncementRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val timetables = mutableListOf<CourseTimetable>()
-                for (childSnapshot in snapshot.children) {
-                    val timetable = childSnapshot.getValue(CourseTimetable::class.java)
-                    timetable?.let { timetables.add(it) }
-                }
-                onResult(timetables)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the read error (e.g., log the error)
-                println("Error reading timetable: ${error.message}")
-            }
-        })
-    }
-
-    //Course Details database
-    fun writeCourseDetails(courseID: String, courseDetails: CourseDetails, onResult: (Boolean) -> Unit) {
-        val courseTimetableRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseDetails")
-
-        courseTimetableRef.child(courseDetails.detailsID).setValue(courseDetails)
-            .addOnSuccessListener {
-                onResult(true) // Indicate success
-            }
-            .addOnFailureListener { exception ->
-                println("Error writing details: ${exception.message}")
-                onResult(false) // Indicate failure
-            }
-    }
-
-
-    fun getCourseDetails(courseID: String, onResult: (CourseDetails?) -> Unit) {
-        val courseDetailsRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseDetails")
-            .child(courseID)// Directly access the course node
-
-        courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val courseDetails = snapshot.getValue(CourseDetails::class.java)
-                onResult(courseDetails) // Return the single CourseDetails object
-                Log.d("Course Details", "Course details fetched: $courseDetails")
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                println("Error fetching course details: ${error.message}")
-                onResult(null) // Indicate failure by returning null
-            }
-        })
-    }
 
     fun writeUserActivity(userState: UserStateEntity, onSuccess: (Boolean) -> Unit) {
         userState.userID?.let {
