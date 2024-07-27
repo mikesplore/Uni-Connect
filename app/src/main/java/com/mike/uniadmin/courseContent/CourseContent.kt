@@ -73,13 +73,12 @@ import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnou
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementViewModel
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementViewModelFactory
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentRepository
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModel
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModelFactory
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetail
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailRepository
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailViewModel
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailViewModelFactory
-import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetails
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableRepository
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModel
@@ -121,17 +120,35 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
         )
     )
 
+    val courseAssignmentRepository = remember { announcementAdmin?.courseAssignmentRepository }
+    val courseAssignmentViewModel: CourseAssignmentViewModel = viewModel(
+        factory = CourseAssignmentViewModelFactory(
+            courseAssignmentRepository
+                ?: throw IllegalStateException("CourseAssignmentRepository is null")
+        )
+    )
+
+    val courseDetailRepository = remember { announcementAdmin?.courseDetailRepository }
+    val courseDetailViewModel: CourseDetailViewModel = viewModel(
+        factory = CourseDetailViewModelFactory(
+            courseDetailRepository
+                ?: throw IllegalStateException("CourseDetailsRepository is null")
+        )
+    )
+
+    val courseTimetableRepository = remember { announcementAdmin?.courseTimetableRepository }
+    val courseTimetableViewModel: CourseTimetableViewModel = viewModel(
+        factory = CourseTimetableViewModelFactory(
+            courseTimetableRepository
+                ?: throw IllegalStateException("CourseTimetableRepository is null")
+        )
+    )
+
+
+
+
     val coroutineScope = rememberCoroutineScope()
     val courseInfo by courseViewModel.fetchedCourse.observeAsState(initial = null)
-    val assignmentRepository = remember { CourseAssignmentRepository() }
-    val timetableRepository = remember { CourseTimetableRepository() }
-    val detailsRepository = remember { CourseDetailRepository() }
-    val courseDetailsViewModel: CourseDetailViewModel =
-        viewModel(factory = CourseDetailViewModelFactory(detailsRepository))
-    val courseTimetableViewModel: CourseTimetableViewModel =
-        viewModel(factory = CourseTimetableViewModelFactory(timetableRepository))
-    val courseAssignmentViewModel: CourseAssignmentViewModel =
-        viewModel(factory = CourseAssignmentViewModelFactory(assignmentRepository))
 
     LaunchedEffect(targetCourseID) {
         background = randomColor.random()
@@ -263,11 +280,10 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
                     2 -> TimetableItem(
                         targetCourseID,
                         courseTimetableViewModel,
-                        navController,
                         context
                     )
 
-                    3 -> DetailsItem(targetCourseID, courseDetailsViewModel, navController, context)
+                    3 -> DetailsItem(targetCourseID, courseDetailViewModel,  context)
                     else -> {}
                 }
             }
@@ -313,7 +329,8 @@ fun AnnouncementsItem(
                     "Admin",
                     context,
                     visible,
-                    onExpandedChange = { visible = !visible })
+                    onExpandedChange = { visible = !visible },
+                    courseAnnouncementViewModel)
             }
             LazyColumn {
                 items(announcements.value) { announcement ->
@@ -386,7 +403,8 @@ fun AddAnnouncementItem(
     senderName: String,
     context: Context,
     expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit
+    onExpandedChange: (Boolean) -> Unit,
+    viewModel: CourseAnnouncementViewModel
 ) {
     var title by remember { mutableStateOf("") }
     val currentDate = Date()
@@ -418,25 +436,18 @@ fun AddAnnouncementItem(
                     loading = true
                     MyDatabase.generateAnnouncementID { iD ->
                         val newAnnouncement = CourseAnnouncement(
+                            courseID = courseID,
                             announcementID = iD,
                             title = title,
                             description = description,
                             author = senderName,
                             date = date
                         )
-                        MyDatabase.writeCourseAnnouncement(courseID = courseID,
-                            courseAnnouncement = newAnnouncement,
-                            onResult = { success ->
-                                if (success) {
-                                    loading = false
-                                    onExpandedChange(expanded)
-                                } else {
-                                    loading = false
-                                    onExpandedChange(expanded)
-                                    Log.e("Error", "Failed to write announcement")
-                                    Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
-                                }
-                            })
+                        viewModel.saveCourseAnnouncement(courseID = courseID, announcement = newAnnouncement)
+                        loading = false
+                        onExpandedChange(expanded)
+
+
                     }
 
                 }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(
@@ -567,9 +578,11 @@ fun AssignmentCard(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = assignment.title, style = CC.titleTextStyle(context)
-            )
+            assignment.title?.let {
+                Text(
+                    text = it, style = CC.titleTextStyle(context)
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -581,14 +594,16 @@ fun AssignmentCard(
                         .copy(fontSize = 12.sp, color = CC.secondary())
                 )
                 Text(
-                    text = if (assignment.dueDate < formattedDate) "Past Due" else if (assignment.dueDate == formattedDate) "Due Today" else "Due: ${assignment.dueDate}",
+                    text = if (assignment.dueDate!! < formattedDate) "Past Due" else if (assignment.dueDate == formattedDate) "Due Today" else "Due: ${assignment.dueDate}",
                     fontSize = 12.sp,
                     color = if (assignment.dueDate < formattedDate) Color.Red else CC.textColor()
                 )
             }
-            Text(
-                text = assignment.description, fontSize = 14.sp, color = Color.Black
-            )
+            assignment.description?.let {
+                Text(
+                    text = it, fontSize = 14.sp, color = Color.Black
+                )
+            }
         }
     }
 }
@@ -629,6 +644,7 @@ fun AddAssignmentItem(
                     loading = true
                     MyDatabase.generateAssignmentID { iD ->
                         val newAssignment = CourseAssignment(
+                            courseCode = courseID,
                             assignmentID = iD,
                             title = title,
                             description = description,
@@ -680,7 +696,6 @@ fun AddAssignmentItem(
 fun TimetableItem(
     courseID: String,
     timetableViewModel: CourseTimetableViewModel,
-    navController: NavController,
     context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -706,7 +721,6 @@ fun TimetableItem(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text("Every Monday", style = CC.titleTextStyle(context))
         Column(
             modifier = Modifier.fillMaxWidth(0.9f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -720,6 +734,8 @@ fun TimetableItem(
             //timetable card
             LazyColumn {
                 items(timetables.value) { timetable ->
+                    Text("${timetable.day}s")
+                    Spacer(modifier = Modifier.height(20.dp))
                     TimetableCard(timetable, context)
                 }
             }
@@ -816,8 +832,13 @@ fun AddTimetableItem(
     var venue by remember { mutableStateOf("") }
     var lecturer by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
+    var day by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+        AddTextField(
+            label = "Day", value = day, onValueChange = { day = it }, context
+        )
+        Spacer(modifier = Modifier.height(10.dp))
         AddTextField(
             label = "Start", value = startTime, onValueChange = { startTime = it }, context
         )
@@ -840,6 +861,7 @@ fun AddTimetableItem(
                     loading = true
                     MyDatabase.generateTimetableID { iD ->
                         val timetable = CourseTimetable(
+                            courseID = courseID,
                             timetableID = iD,
                             startTime = startTime,
                             endTime = endTime,
@@ -893,11 +915,10 @@ fun AddTimetableItem(
 fun DetailsItem(
     courseID: String,
     detailsViewModel: CourseDetailViewModel,
-    navController: NavController,
     context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val details = detailsViewModel.details.observeAsState(initial = emptyList())
+    val details = detailsViewModel.details.observeAsState()
     LaunchedEffect(courseID) {
         GlobalColors.loadColorScheme(context)
         detailsViewModel.getCourseDetails(courseID)
@@ -928,13 +949,13 @@ fun DetailsItem(
                 AddDetailsItem(courseID,
                     context,
                     expanded,
-                    onExpandedChange = { expanded = !expanded })
+                    onExpandedChange = { expanded = !expanded },
+                    detailsViewModel = detailsViewModel)
             }
             //card here
-            LazyColumn {
-                items(details.value) { detail ->
-                    DetailsItemCard(detail, context)
-                }
+
+            details.value?.let {
+                DetailsItemCard(it, context)
             }
 
         }
@@ -944,7 +965,7 @@ fun DetailsItem(
 
 
 @Composable
-fun DetailsItemCard(courseDetails: CourseDetails, context: Context) {
+fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
@@ -960,10 +981,12 @@ fun DetailsItemCard(courseDetails: CourseDetails, context: Context) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = courseDetails.courseName,
-                style = CC.titleTextStyle(context).copy(fontSize = 20.sp)
-            )
+            courseDetails.courseName?.let {
+                Text(
+                    text = it,
+                    style = CC.titleTextStyle(context).copy(fontSize = 20.sp)
+                )
+            }
             Text(
                 text = "Course Code: ${courseDetails.courseCode}",
                 style = CC.descriptionTextStyle(context)
@@ -978,10 +1001,12 @@ fun DetailsItemCard(courseDetails: CourseDetails, context: Context) {
                     tint = CC.textColor(),
                     modifier = Modifier.size(20.dp)
                 )
-                Text(
-                    text = courseDetails.lecturer,
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Medium)
-                )
+                courseDetails.lecturer?.let {
+                    Text(
+                        text = it,
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Medium)
+                    )
+                }
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1019,11 +1044,13 @@ fun DetailsItemCard(courseDetails: CourseDetails, context: Context) {
                 style = CC.descriptionTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.primary())
             )
-            Text(
-                text = courseDetails.overview, style = CC.descriptionTextStyle(context).copy(
-                    fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
+            courseDetails.overview?.let {
+                Text(
+                    text = it, style = CC.descriptionTextStyle(context).copy(
+                        fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
+                    )
                 )
-            )
+            }
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = "Learning Outcomes",
@@ -1043,30 +1070,34 @@ fun DetailsItemCard(courseDetails: CourseDetails, context: Context) {
                 style = CC.descriptionTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.primary())
             )
-            Text(
-                text = courseDetails.schedule, style = CC.descriptionTextStyle(context).copy(
-                    fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
+            courseDetails.schedule?.let {
+                Text(
+                    text = it, style = CC.descriptionTextStyle(context).copy(
+                        fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
+                    )
                 )
-            )
+            }
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = "Required Materials",
                 style = CC.descriptionTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.primary())
             )
-            Text(
-                text = courseDetails.requiredMaterials,
-                style = CC.descriptionTextStyle(context).copy(
-                    fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
+            courseDetails.requiredMaterials?.let {
+                Text(
+                    text = it,
+                    style = CC.descriptionTextStyle(context).copy(
+                        fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
+                    )
                 )
-            )
+            }
         }
     }
 }
 
 @Composable
 fun AddDetailsItem(
-    courseID: String, context: Context, expanded: Boolean, onExpandedChange: (Boolean) -> Unit
+    courseID: String, context: Context, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, detailsViewModel: CourseDetailViewModel
 ) {
     var courseName by remember { mutableStateOf("") }
     var courseCode by remember { mutableStateOf("") }
@@ -1157,11 +1188,11 @@ fun AddDetailsItem(
             Button(
                 onClick = {
                     onExpandedChange(!expanded)
-                    val newDetails = CourseDetails(
+                    val newDetails = CourseDetail(
                         courseName = courseName,
                         courseCode = courseCode,
                         numberOfVisits = numberOfVisits,
-                        detailsID = "2024$courseID",
+                        detailID = "2024$courseID",
                         lecturer = lecturer,
                         courseDepartment = courseDepartment,
                         overview = overview,
@@ -1169,27 +1200,12 @@ fun AddDetailsItem(
                         schedule = schedule,
                         requiredMaterials = requiredMaterials
                     )
+                    detailsViewModel.saveCourseDetail(courseID = courseID, detail = newDetails)
                     Log.d(
                         "Course Details",
                         "The new course info for the course: $courseID is: $newDetails "
                     )
-                    MyDatabase.writeCourseDetails(courseID = courseID,
-                        courseDetails = newDetails,
-                        onResult = { success ->
-                            if (success) {
-                                loading = false
-                                onExpandedChange(!expanded)
-                                courseName = ""
-                                courseCode = ""
 
-                            } else {
-                                loading = false
-                                onExpandedChange(!expanded)
-                                Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-
-                    )
                 }, modifier = Modifier.align(Alignment.End)
             ) {
                 Text(text = if (expanded) "Save" else "Edit")
