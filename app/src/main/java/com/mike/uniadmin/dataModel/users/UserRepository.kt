@@ -8,6 +8,9 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
@@ -45,6 +48,41 @@ class UserRepository
         })
     }
 
+
+
+    fun fetchUsers(onResult: (List<UserEntity>) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val remoteUsers = fetchUsersFromRemoteDatabase()
+                userDao.insertUsers(remoteUsers) // Update local database
+                onResult(remoteUsers)
+            } catch (e: Exception) {
+                println("Error fetching users from remote database: ${e.message}")
+                val localUsers = userDao.getUsers()
+                onResult(localUsers)
+            }
+        }
+    }
+
+    private suspend fun fetchUsersFromRemoteDatabase(): List<UserEntity> {
+        return suspendCoroutine { continuation ->
+            database.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val users = mutableListOf<UserEntity>()
+                    for (childSnapshot in snapshot.children) {
+                        val user = childSnapshot.getValue(UserEntity::class.java)
+                        user?.let { users.add(it) }
+                    }
+                    continuation.resume(users)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    continuation.resumeWithException(Exception("Error reading users: ${error.message}"))
+                }
+            })
+        }
+    }
+
     private fun startUserStateListener() {
         database.child("Users Online Status").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -63,15 +101,6 @@ class UserRepository
                 println("Error reading user states: ${error.message}")
             }
         })
-    }
-
-    fun fetchUsers(onResult: (List<UserEntity>) -> Unit) {
-        viewModelScope.launch {
-            val cachedData = userDao.getUsers()
-            if (cachedData.isNotEmpty()) {
-                onResult(cachedData)
-            }
-        }
     }
 
     fun saveUser(user: UserEntity, onComplete: (Boolean) -> Unit) {
