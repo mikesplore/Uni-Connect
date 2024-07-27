@@ -53,6 +53,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Settings
@@ -108,12 +109,8 @@ import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
-import com.mike.uniadmin.dataModel.announcements.AnnouncementRepository
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
-import com.mike.uniadmin.dataModel.courses.CourseRepository
-import com.mike.uniadmin.dataModel.courses.CourseViewModel
-import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -171,6 +168,7 @@ fun HomeScreen(
         )
     )
     val announcements by announcementViewModel.announcements.observeAsState()
+
 
 
     val user by userViewModel.user.observeAsState()
@@ -278,7 +276,20 @@ fun HomeScreen(
                         scope.launch {
                             drawerState.close()
                         }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
                         navController.navigate("unichat")
+                    })
+                SideBarItem(icon = Icons.Default.BarChart,
+                    text = "Statistics",
+                    context,
+                    onClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
+                        navController.navigate("statistics")
                     })
                 SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
                     scope.launch {
@@ -308,6 +319,8 @@ fun HomeScreen(
                         scope.launch {
                             drawerState.close()
                         }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
                         showBottomSheet = true
                     })
             }
@@ -396,6 +409,8 @@ fun HomeScreen(
                                             drawerState.open()
                                         }
                                     }, onDoubleClick = {
+                                        userViewModel.fetchUsers()
+                                        chatViewModel.fetchGroups()
                                         showBottomSheet = true
                                     }) {
                                         coroutineScope.launch {
@@ -429,7 +444,7 @@ fun HomeScreen(
                     Screen.Assignments -> AssignmentScreen(navController, context)
                     Screen.Announcements -> AnnouncementsScreen(context)
                     Screen.Timetable -> TimetableScreen(navController, context)
-                    Screen.Attendance -> ManageAttendanceScreen(navController, context)
+                    Screen.Attendance -> ManageAttendanceScreen(context)
                 }
             }
         }
