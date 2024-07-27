@@ -13,7 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
 
-const val CHANNEL_ID = "classportal_channel_id"
+const val CHANNEL_ID = "class portal_channel_id"
 private var notificationIdCounter = 0
 
 fun createNotificationChannel(context: Context) {
