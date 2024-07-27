@@ -1,6 +1,5 @@
 package com.mike.uniadmin.dataModel.coursecontent.coursedetails
 
-
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,11 +7,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-
 class CourseDetailViewModel(private val repository: CourseDetailRepository) : ViewModel() {
 
-    private val _details = MutableLiveData<List<CourseDetails>>()
-    val details: LiveData<List<CourseDetails>> = _details
+    private val _details = MutableLiveData<CourseDetail?>()
+    val details: MutableLiveData<CourseDetail?> = _details
 
     // Fetch details for a specific course
     fun getCourseDetails(courseID: String) {
@@ -22,7 +20,7 @@ class CourseDetailViewModel(private val repository: CourseDetailRepository) : Vi
     }
 
     // Save a new detail
-    fun saveCourseDetail(courseID: String, detail: CourseDetails) {
+    fun saveCourseDetail(courseID: String, detail: CourseDetail) {
         viewModelScope.launch {
             repository.writeCourseDetail(courseID, detail) { success ->
                 if (success) {
