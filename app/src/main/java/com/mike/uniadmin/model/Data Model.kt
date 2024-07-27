@@ -21,9 +21,8 @@ import java.util.UUID
 data class GridItem(
     val title: String = "",
     val description: String = "",
-    val thumbnail: String = "",
-    val link: String = "",
-    var fileType: String = "image"
+    val fileLink: String = "",
+    val imageLink: String = "",
 )
 
 enum class Section {
@@ -51,10 +50,6 @@ data class Feedback(
     val admissionNumber: String = ""
 )
 
-data class Student(
-    val id: String = "",
-    val firstName: String
-)
 
 data class AttendanceRecord(
     val studentId: String = "",
@@ -63,11 +58,7 @@ data class AttendanceRecord(
     val lesson: String = ""
 )
 
-data class AttendanceState(
-    val courseID: String = "",
-    val courseName: String = "",
-    val state: Boolean = false
-)
+
 
 
 data class Assignment(
