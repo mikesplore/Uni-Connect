@@ -1,6 +1,5 @@
 package com.mike.uniadmin.dataModel.coursecontent.coursetimetable
 
-
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
