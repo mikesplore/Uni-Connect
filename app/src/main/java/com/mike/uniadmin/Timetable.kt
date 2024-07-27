@@ -14,8 +14,3 @@ fun AssignmentScreen(navController: NavController,context: Context){
 fun TimetableScreen(navController: NavController,context: Context){
 
 }
-
-@Composable
-fun ManageAttendanceScreen(navController: NavController,context: Context){
-
-}
