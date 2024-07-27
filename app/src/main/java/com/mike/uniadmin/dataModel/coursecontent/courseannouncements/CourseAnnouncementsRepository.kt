@@ -20,7 +20,7 @@ class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnno
         courseAnnouncement: CourseAnnouncement,
         onResult: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        com.mike.uniadmin.dataModel.coursecontent.coursedetails.viewModelScope.launch {
             courseAnnouncementDao.insertCourseAnnouncement(courseAnnouncement)
             val courseAnnouncementRef = MyDatabase.database.child(courseID)
                 .child("courseAnnouncements")
@@ -37,8 +37,8 @@ class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnno
 
 
     fun getCourseAnnouncements(courseID: String, onResult: (List<CourseAnnouncement>) -> Unit) {
-        viewModelScope.launch {
-            val cachedData = courseAnnouncementDao.getCourseAnnouncements()
+        com.mike.uniadmin.dataModel.coursecontent.coursedetails.viewModelScope.launch {
+            val cachedData = courseAnnouncementDao.getCourseAnnouncements(courseID)
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
             } else {
