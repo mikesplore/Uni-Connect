@@ -19,3 +19,18 @@ data class CourseEntity(
         ""
     )
 }
+
+
+@Entity(tableName = "attendanceStates")
+data class AttendanceState(
+    @PrimaryKey val courseID: String,
+    val courseName: String? = null,
+    val state: Boolean = false
+)
+{
+    constructor(): this(
+        "",
+        "",
+        false
+    )
+}
