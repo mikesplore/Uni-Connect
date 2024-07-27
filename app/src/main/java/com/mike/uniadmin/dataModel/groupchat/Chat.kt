@@ -4,6 +4,9 @@ import androidx.room.PrimaryKey
 import android.app.Application
 import com.mike.uniadmin.dataModel.announcements.AnnouncementRepository
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementRepository
+import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentRepository
+import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailRepository
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableRepository
 import com.mike.uniadmin.dataModel.courses.CourseRepository
 import com.mike.uniadmin.dataModel.notifications.NotificationRepository
 import com.mike.uniadmin.dataModel.userchat.MessageRepository
@@ -68,6 +71,9 @@ class UniAdmin : Application() {
     val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao()) }
     val announcementRepository by lazy { AnnouncementRepository(database.announcementsDao()) }
     val notificationRepository by lazy { NotificationRepository(database.notificationDao()) }
-    val courseRepository by lazy {CourseRepository(database.courseDao())}
+    val courseRepository by lazy {CourseRepository(database.courseDao(), database.attendanceStateDao())}
     val courseAnnouncementRepository by lazy { CourseAnnouncementRepository(database.courseAnnouncementDao()) }
+    val courseAssignmentRepository by lazy { CourseAssignmentRepository(database.courseAssignmentDao()) }
+    val courseDetailRepository by lazy { CourseDetailRepository(database.courseDetailsDao()) }
+    val courseTimetableRepository by lazy { CourseTimetableRepository(database.courseTimetableDao()) }
 }
