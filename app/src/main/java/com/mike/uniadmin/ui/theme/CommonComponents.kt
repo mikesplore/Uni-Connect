@@ -23,10 +23,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.DateFormat
 import java.time.LocalTime
-import java.util.Date
-import java.util.Locale
 
 
 object CommonComponents {
@@ -76,10 +73,6 @@ object CommonComponents {
     }
 
 
-    private val currentDate = Date()
-    private val formatter: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()) // Use default locale
-    val date: String = formatter.format(currentDate)
-
     @Composable
     fun getGreetingMessage(): String {
         val currentTime = LocalTime.now()
@@ -126,8 +119,8 @@ object CommonComponents {
     @Composable
     fun primary(): Color {
         val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.primaryColor
-            else GlobalColors.primaryColor,
+            targetValue = if (GlobalColors.isDarkMode) GlobalColors.currentColors.primary
+            else GlobalColors.currentColors.primary,
             label = "primaryBackgroundColor", // Provide a descriptive label
             animationSpec = tween(500)
         )
@@ -137,8 +130,8 @@ object CommonComponents {
     @Composable
     fun secondary(): Color {
         val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.secondaryColor
-            else GlobalColors.secondaryColor,
+            targetValue = if (GlobalColors.isDarkMode) GlobalColors.currentColors.secondary
+            else GlobalColors.currentColors.secondary,
             label = "primaryBackgroundColor", // Provide a descriptive label
             animationSpec = tween(500)
         )
@@ -147,57 +140,32 @@ object CommonComponents {
 
     @Composable
     fun tertiary(): Color {
-        val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.tertiaryColor
-            else GlobalColors.tertiaryColor,
-            label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(100)
-        )
-        return color
+        return if (GlobalColors.isDarkMode)
+            GlobalColors.currentColors.tertiary else GlobalColors.currentColors.tertiary
     }
 
     @Composable
     fun textColor(): Color {
-        val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.textColor
-            else GlobalColors.textColor,
-            label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(100)
-        )
-        return color
+        return if (GlobalColors.isDarkMode)
+            GlobalColors.currentColors.textColor else GlobalColors.currentColors.textColor
     }
 
 
     @Composable
     fun extraColor1(): Color {
-        val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.extraColor1
-            else GlobalColors.extraColor1,
-            label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(100)
-        )
-        return color
+        return if (GlobalColors.isDarkMode)
+            GlobalColors.currentColors.extraColor1 else GlobalColors.currentColors.extraColor1
     }
 
     @Composable
     fun extraColor2(): Color {
-        val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.extraColor2
-            else GlobalColors.extraColor2,
-            label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(100)
-        )
-        return color
+        return if (GlobalColors.isDarkMode)
+            GlobalColors.currentColors.extraColor2 else GlobalColors.currentColors.extraColor2
     }
 
     @Composable
     fun descriptionTextStyle(context: Context): TextStyle {
-        val color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.textColor
-            else GlobalColors.textColor,
-            label = "",
-            animationSpec = tween(100)
-        )
+        val color = if (GlobalColors.isDarkMode) GlobalColors.currentColors.textColor else GlobalColors.currentColors.textColor
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
@@ -224,12 +192,7 @@ object CommonComponents {
 
     @Composable
     fun titleTextStyle(context: Context): TextStyle {
-        val color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.textColor
-            else GlobalColors.textColor,
-            label = "",
-            animationSpec = tween(100)
-        )
+        val color =if (GlobalColors.isDarkMode) GlobalColors.currentColors.textColor else GlobalColors.currentColors.textColor
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
@@ -238,14 +201,14 @@ object CommonComponents {
             fontSize = 25.sp
         )
     }
-
+    
     @Composable
     fun appTextFieldColors(): TextFieldColors {
         return TextFieldDefaults.colors(
-            focusedContainerColor = GlobalColors.primaryColor,
-            unfocusedContainerColor = GlobalColors.primaryColor,
-            focusedIndicatorColor = GlobalColors.tertiaryColor,
-            unfocusedIndicatorColor = GlobalColors.secondaryColor,
+            focusedContainerColor = GlobalColors.currentColors.primary,
+            unfocusedContainerColor = GlobalColors.currentColors.primary,
+            focusedIndicatorColor = GlobalColors.currentColors.tertiary,
+            unfocusedIndicatorColor = GlobalColors.currentColors.secondary,
             focusedLabelColor = textColor(),
             cursorColor = textColor(),
             unfocusedLabelColor = textColor(),
