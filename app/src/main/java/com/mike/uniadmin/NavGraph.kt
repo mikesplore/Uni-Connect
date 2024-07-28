@@ -86,6 +86,10 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
 
         }
 
+        composable("assignments"){
+            AssignmentScreen(context)
+        }
+
         composable("manageattendance"){
             ManageAttendanceScreen(context)
         }
