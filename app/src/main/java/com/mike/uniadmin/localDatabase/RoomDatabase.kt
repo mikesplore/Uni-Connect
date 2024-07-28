@@ -32,6 +32,7 @@ import com.mike.uniadmin.dataModel.userchat.MessageDao
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.users.AccountDeletionDao
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserDao
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserPreferencesDao
@@ -56,7 +57,8 @@ import com.mike.uniadmin.dataModel.users.UserStateEntity
         CourseAssignment::class,
         CourseDetail::class,
         CourseTimetable::class,
-        AttendanceState::class
+        AttendanceState::class,
+        SignedInUser::class
     ],
     version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
