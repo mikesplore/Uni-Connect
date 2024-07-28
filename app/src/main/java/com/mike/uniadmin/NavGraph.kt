@@ -70,7 +70,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "homescreen"){
+    NavHost(navController = navController, startDestination = "login"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
@@ -88,6 +88,10 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
 
         composable("assignments"){
             AssignmentScreen(context)
+        }
+
+        composable("timetable"){
+            TimetableScreen(context)
         }
 
         composable("manageattendance"){
@@ -156,9 +160,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             Statistics(navController, context)
         }
 
-//        composable("timetable"){
-//            TimetableScreen(navController = navController, context)
-//        }
+
 //        composable("assignments"){
 //            AssignmentScreen(navController = navController, context)
 //        }
