@@ -54,6 +54,7 @@ import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Settings
@@ -114,6 +115,7 @@ import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -144,7 +146,6 @@ fun HomeScreen(
     screens: List<Screen>,
     coroutineScope: CoroutineScope,
 ) {
-    val currentPerson = FirebaseAuth.getInstance().currentUser
 
 
     val uniAdmin = context.applicationContext as? UniAdmin
@@ -167,6 +168,7 @@ fun HomeScreen(
             announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
         )
     )
+    val currentPerson by userViewModel.signedInUser.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
 
 
@@ -230,7 +232,8 @@ fun HomeScreen(
                     users = users,
                     userViewModel = userViewModel,
                     chatViewModel = chatViewModel,
-                    userGroups = userGroups
+                    userGroups = userGroups,
+                    activity = activity
                 )
             }
         })
@@ -441,9 +444,9 @@ fun HomeScreen(
             ) { page ->
                 when (screens[page]) {
                     Screen.Home -> Dashboard(navController, context)
-                    Screen.Assignments -> AssignmentScreen(navController, context)
+                    Screen.Assignments -> AssignmentScreen(context)
                     Screen.Announcements -> AnnouncementsScreen(context)
-                    Screen.Timetable -> TimetableScreen(navController, context)
+                    Screen.Timetable -> TimetableScreen(context)
                     Screen.Attendance -> ManageAttendanceScreen(context)
                 }
             }
@@ -507,7 +510,8 @@ fun ModalDrawerItem(
     users: List<UserEntity>,
     userViewModel: UserViewModel,
     chatViewModel: ChatViewModel,
-    userGroups: List<GroupEntity>
+    userGroups: List<GroupEntity>,
+    activity: MainActivity
 ) {
 
 
@@ -620,14 +624,15 @@ fun ModalDrawerItem(
             style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        QuickSettings(navController, context)
+        QuickSettings(context, activity )
 
     }
 }
 
 @Composable
-fun QuickSettings(navController: NavController, context: Context) {
+fun QuickSettings(context: Context, activity: MainActivity) {
     var darkMode by remember { mutableStateOf(false) }
+    var isBiometricsEnabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -659,7 +664,58 @@ fun QuickSettings(navController: NavController, context: Context) {
                 onCheckedChange = {
                     darkMode = it
                     GlobalColors.saveColorScheme(context, it)
-                }, checked = darkMode, colors = SwitchDefaults.colors(
+                }, checked = darkMode,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = CC.extraColor1(),
+                    uncheckedThumbColor = CC.extraColor2(),
+                    checkedTrackColor = CC.extraColor2(),
+                    uncheckedTrackColor = CC.extraColor1(),
+                    checkedIconColor = CC.textColor(),
+                    uncheckedIconColor = CC.textColor()
+                )
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = {},
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(CC.secondary())
+                    .size(50.dp)
+            ) {
+                Icon(
+                    Icons.Default.Fingerprint,
+                    "theme",
+                    tint = CC.textColor()
+                )
+            }
+
+            Text("Biometrics", style = CC.descriptionTextStyle(context))
+            Switch(
+                onCheckedChange = { checked -> // Add checked parameter
+                    if (checked) {
+                        activity.promptManager.showBiometricPrompt(
+                            title = "User Authentication",
+                            description = "Please Authenticate",
+                            onResult = { success ->
+                                isBiometricsEnabled = success // Update state based on success
+                                if (success) {
+                                    Toast.makeText(context, "Authenticated Successfully", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Authentication Failed", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        )
+                    } else {
+                        isBiometricsEnabled = false // Update state if switch is turned off manually
+                    }
+                },
+                checked = isBiometricsEnabled,
+                colors = SwitchDefaults.colors(
                     checkedThumbColor = CC.extraColor1(),
                     uncheckedThumbColor = CC.extraColor2(),
                     checkedTrackColor = CC.extraColor2(),
@@ -680,7 +736,11 @@ fun UserItem(user: UserEntity, context: Context, navController: NavController, v
     var visible by remember { mutableStateOf(false) }
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
+    val signedInUser by viewModel.signedInUser.observeAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.getSignedInUser()
+    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -712,8 +772,9 @@ fun UserItem(user: UserEntity, context: Context, navController: NavController, v
                         contentScale = ContentScale.Crop
                     )
                 } else {
+                    val name = if(signedInUser?.email == user.email) "You" else "${user.firstName?.get(0)}${user.lastName?.get(0)}"
                     Text(
-                        "${user.firstName?.get(0)}${user.lastName?.get(0)}",
+                        name,
                         style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
                     )
                 }
