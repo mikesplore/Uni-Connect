@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.ui.theme
 
 import android.content.Context
 import android.icu.util.Calendar
@@ -23,8 +23,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.ui.theme.GlobalColors
-import com.mike.uniadmin.ui.theme.currentFontFamily
 import java.text.DateFormat
 import java.time.LocalTime
 import java.util.Date
@@ -153,7 +151,7 @@ object CommonComponents {
             targetValue = if (GlobalColors.isDarkMode) GlobalColors.tertiaryColor
             else GlobalColors.tertiaryColor,
             label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(500)
+            animationSpec = tween(100)
         )
         return color
     }
@@ -164,7 +162,7 @@ object CommonComponents {
             targetValue = if (GlobalColors.isDarkMode) GlobalColors.textColor
             else GlobalColors.textColor,
             label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(500)
+            animationSpec = tween(100)
         )
         return color
     }
@@ -176,7 +174,7 @@ object CommonComponents {
             targetValue = if (GlobalColors.isDarkMode) GlobalColors.extraColor1
             else GlobalColors.extraColor1,
             label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(500)
+            animationSpec = tween(100)
         )
         return color
     }
@@ -187,7 +185,7 @@ object CommonComponents {
             targetValue = if (GlobalColors.isDarkMode) GlobalColors.extraColor2
             else GlobalColors.extraColor2,
             label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(500)
+            animationSpec = tween(100)
         )
         return color
     }
@@ -198,7 +196,7 @@ object CommonComponents {
             targetValue = if (GlobalColors.isDarkMode) GlobalColors.textColor
             else GlobalColors.textColor,
             label = "",
-            animationSpec = tween(500)
+            animationSpec = tween(100)
         )
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
@@ -222,18 +220,6 @@ object CommonComponents {
         }
     }
 
-    fun currentDayID(): Int {
-        return when (dayOfWeek) {
-            Calendar.SUNDAY -> 0
-            Calendar.MONDAY -> 1
-            Calendar.TUESDAY -> 2
-            Calendar.WEDNESDAY -> 3
-            Calendar.THURSDAY -> 4
-            Calendar.FRIDAY -> 5
-            Calendar.SATURDAY -> 6
-            else -> 0
-        }
-    }
 
 
     @Composable
@@ -242,7 +228,7 @@ object CommonComponents {
             targetValue = if (GlobalColors.isDarkMode) GlobalColors.textColor
             else GlobalColors.textColor,
             label = "",
-            animationSpec = tween(500)
+            animationSpec = tween(100)
         )
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
@@ -252,8 +238,6 @@ object CommonComponents {
             fontSize = 25.sp
         )
     }
-
-
 
     @Composable
     fun appTextFieldColors(): TextFieldColors {
