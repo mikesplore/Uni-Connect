@@ -72,7 +72,7 @@ import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.model.MyDatabase.getAllScreenTimes
 import com.mike.uniadmin.model.ScreenTime
 import com.mike.uniadmin.ui.theme.GlobalColors
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
