@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun SearchGroup(navController: NavController, context: Context){
