@@ -6,6 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
@@ -27,6 +30,26 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     private val _accountStatus = MutableLiveData<AccountDeletionEntity?>()
     var accountStatus: LiveData<AccountDeletionEntity?> = _accountStatus
 
+    private val _signedInUser = MutableLiveData<SignedInUser?>()
+    val signedInUser: LiveData<SignedInUser?> = _signedInUser
+
+    init {
+        fetchUsers()
+        getSignedInUser()
+    }
+
+    fun getSignedInUser() {
+        repository.getSignedInUser { fetchedUser ->
+            _signedInUser.value = fetchedUser
+        }
+    }
+
+    fun setSignedInUser(signedInUser: SignedInUser) {
+        viewModelScope.launch {
+            repository.setSignedInUser(signedInUser)
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         // Clear all necessary data here
@@ -46,11 +69,6 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-
-
-    init {
-        fetchUsers()
-    }
 
      fun fetchUsers() {
         repository.fetchUsers { users ->
@@ -152,6 +170,8 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 }
+
+
 
 
 
