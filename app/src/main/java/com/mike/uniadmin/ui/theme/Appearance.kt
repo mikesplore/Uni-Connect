@@ -65,82 +65,55 @@ import com.mike.uniadmin.model.ScreenTime
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-data class ColorScheme(
-    val primaryColor: String,
-    val secondaryColor: String,
-    val tertiaryColor: String,
-    val textColor: String,
-    val extraColor1: String,
-    val extraColor2: String
+data class MyColors(
+    val primary: Color,
+    val secondary: Color,
+    val tertiary: Color,
+    val textColor: Color,
+    val extraColor1: Color,
+    val extraColor2: Color
 )
-
-fun parseColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex"))
-    } catch (e: IllegalArgumentException) {
-        Color.Unspecified
-    }
-}
 
 object GlobalColors {
     private const val PREFS_NAME = "color_scheme_prefs"
     private const val THEME_MODE_KEY = "theme_mode"
 
-    private val lightScheme = ColorScheme(
-        primaryColor = "#E1F5FE", // Light Blue
-        secondaryColor = "#B2EBF2", // Lighter Blue
-        tertiaryColor = "#80DEEA", // Light Teal
-        textColor = "#212121", // Dark Gray for Text
-        extraColor1 = "#BBDEFB", // Light Blue Accent
-        extraColor2 = "#00BCD4"  // Cyan
+    private val lightColors = MyColors(
+        primary = Color(0xFFE1F5FE),
+        secondary = Color(0xFFB2EBF2),
+        tertiary = Color(0xFF80DEEA),
+        textColor = Color(0xFF212121),
+        extraColor1 = Color(0xFFBBDEFB),
+        extraColor2 = Color(0xFF00BCD4)
     )
 
-    private val darkScheme = ColorScheme(
-        primaryColor = "#15202B", // Deep Blue
-        secondaryColor = "#1B4F72", // Dark Blue
-        tertiaryColor = "#117A65", // Blue-Green Accent
-        textColor = "#E1E8ED", // Light Gray for Text
-        extraColor1 = "#1C2833", // Dark Gray
-        extraColor2 = "#2980B9"  // Bright Blue
+    private val darkColors = MyColors(
+        primary = Color(0xFF15202B),
+        secondary = Color(0xFF1B4F72),
+        tertiary = Color(0xFF117A65),
+        textColor = Color(0xFFE1E8ED),
+        extraColor1 = Color(0xFF1C2833),
+        extraColor2 = Color(0xFF2980B9)
     )
 
-    private var currentScheme by mutableStateOf(lightScheme)
-    var isDarkMode by mutableStateOf(true)
+    var isDarkMode by mutableStateOf(true) // Initially set to false
+        private set
 
-    fun loadColorScheme(context: Context): ColorScheme {
+    var currentColors by mutableStateOf(lightColors)
+        private set
+
+    fun loadColorScheme(context: Context) {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val isDark = sharedPreferences.getBoolean(THEME_MODE_KEY, true)
-        isDarkMode = isDark
-        currentScheme = if (isDark) darkScheme else lightScheme
-        return currentScheme
+        isDarkMode = sharedPreferences.getBoolean(THEME_MODE_KEY, false) // Default to light
+        currentColors = if (isDarkMode) darkColors else lightColors
     }
 
     fun saveColorScheme(context: Context, isDark: Boolean) {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(THEME_MODE_KEY, isDark)
-        editor.apply()
+        sharedPreferences.edit().putBoolean(THEME_MODE_KEY, isDark).apply()
         isDarkMode = isDark
-        currentScheme = if (isDark) darkScheme else lightScheme
+        currentColors = if (isDarkMode) darkColors else lightColors
     }
-
-    val primaryColor: Color
-        get() = parseColor(currentScheme.primaryColor)
-
-    val secondaryColor: Color
-        get() = parseColor(currentScheme.secondaryColor)
-
-    val tertiaryColor: Color
-        get() = parseColor(currentScheme.tertiaryColor)
-
-    val textColor: Color
-        get() = parseColor(currentScheme.textColor)
-
-    val extraColor1: Color
-        get() = parseColor(currentScheme.extraColor1)
-
-    val extraColor2: Color
-        get() = parseColor(currentScheme.extraColor2)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
