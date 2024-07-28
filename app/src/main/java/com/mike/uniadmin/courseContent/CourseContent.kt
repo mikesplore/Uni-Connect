@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.mike.uniadmin.chat.getCurrentDate
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementViewModel
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementViewModelFactory
@@ -655,7 +656,7 @@ fun AddAssignmentItem(
                             title = title,
                             description = description,
                             dueDate = dueDate,
-                            publishedDate = CC.date
+                            publishedDate = getCurrentDate()
                         )
                         assignmentViewModel.saveCourseAssignment(courseID = courseID,
                             assignment = newAssignment,
