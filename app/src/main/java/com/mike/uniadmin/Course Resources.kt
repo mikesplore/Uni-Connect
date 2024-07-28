@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,7 +63,7 @@ import com.mike.uniadmin.model.MyDatabase.readItems
 import com.mike.uniadmin.model.MyDatabase.writeItem
 import com.mike.uniadmin.model.Section
 import com.mike.uniadmin.ui.theme.GlobalColors
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object CourseName {
     var name: MutableState<String> = mutableStateOf("")
