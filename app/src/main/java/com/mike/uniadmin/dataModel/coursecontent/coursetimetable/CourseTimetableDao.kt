@@ -15,6 +15,12 @@ interface CourseTimetableDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourseTimetables(courseTimetables: List<CourseTimetable>)
 
+    @Query("DELETE FROM courseTimetable WHERE timetableID = :timetableID")
+    suspend fun deleteCourseTimetable(timetableID: String)
+
     @Query("SELECT * FROM courseTimetable WHERE courseID = :courseID")
     suspend fun getCourseTimetables(courseID: String): List<CourseTimetable>
+
+    @Query("SELECT * FROM courseTimetable")
+    suspend fun getAllCourseTimetables(): List<CourseTimetable>
 }
