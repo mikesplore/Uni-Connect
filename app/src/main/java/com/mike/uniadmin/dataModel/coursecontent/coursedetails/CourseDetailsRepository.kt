@@ -1,19 +1,19 @@
 package com.mike.uniadmin.dataModel.coursecontent.coursedetails
 
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.mike.uniadmin.dataModel.courses.CourseEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.Main)
-
 class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
     private val database = FirebaseDatabase.getInstance().reference.child("CourseContent")
 
+    // Scope for running coroutines
+    private val viewModelScope = CoroutineScope(Dispatchers.Main)
+
     init {
+        // Start listening for changes in Firebase
         setupRealtimeUpdates()
     }
 
@@ -36,22 +36,45 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
         })
     }
 
-    fun writeCourseDetail(
-        courseID: String,
-        courseDetail: CourseDetail,
-        onResult: (Boolean) -> Unit
-    ) {
+    fun getCourseDetailsByCourseID(courseCode: String, onResult: (CourseEntity?) -> Unit) {
+        val courseDetailsRef = FirebaseDatabase.getInstance().reference.child("Courses").child(courseCode)
         viewModelScope.launch {
-            courseDetailDao.insertCourseDetail(courseDetail)
-            val courseDetailRef = database.child(courseID).child("courseDetails")
+            val cachedData = courseDetailDao.getCourseDetailsByID(courseCode)
+            if (cachedData != null) {
+                onResult(cachedData)
+            } else {
+                courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val courseInfo = snapshot.getValue(CourseEntity::class.java)
+                        onResult(courseInfo)
+                    }
 
-            courseDetailRef.child(courseDetail.detailID)
-                .setValue(courseDetail).addOnSuccessListener {
-                    onResult(true) // Indicate success
-                }.addOnFailureListener { exception ->
-                    println("Error writing detail: ${exception.message}")
-                    onResult(false) // Indicate failure
-                }
+                    override fun onCancelled(error: DatabaseError) {
+                        println("Error fetching course details: ${error.message}")
+                        onResult(null) // Indicate failure by returning null
+                    }
+                })
+            }
+        }
+    }
+
+    fun writeCourseDetail(courseID: String, courseDetail: CourseDetail, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                // Insert into local database
+                courseDetailDao.insertCourseDetail(courseDetail)
+                // Insert into Firebase
+                val courseDetailRef = database.child(courseID).child("courseDetails")
+                courseDetailRef.child(courseDetail.detailID).setValue(courseDetail)
+                    .addOnSuccessListener { onResult(true) } // Indicate success
+                    .addOnFailureListener { exception ->
+                        println("Error writing detail: ${exception.message}")
+                        onResult(false) // Indicate failure
+                    }
+            } catch (e: Exception) {
+                println("Error writing detail: ${e.message}")
+                onResult(false) // Indicate failure
+            }
         }
     }
 
@@ -62,7 +85,6 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
                 onResult(cachedData)
             } else {
                 val courseDetailRef = database.child(courseID).child("courseDetails").limitToFirst(1)
-
                 courseDetailRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.hasChildren()) {
