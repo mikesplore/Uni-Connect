@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
-    id("org.jetbrains.kotlin.kapt")
+    id("com.google.devtools.ksp") version "1.9.0-1.0.12"
 }
 
 android {
@@ -52,14 +52,16 @@ android {
 }
 
 dependencies {
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation (libs.core)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler.v250) {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+    implementation(libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
-    implementation (libs.google.accompanist.pager)
-    implementation (libs.google.accompanist.pager.indicators)
+    implementation(libs.google.accompanist.pager)
+    implementation(libs.google.accompanist.pager.indicators)
     implementation(libs.androidx.biometric)
     implementation(libs.firebase.database.ktx)
     implementation(libs.androidx.navigation.compose)
@@ -79,8 +81,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.runtime.livedata)
 
-
-    testImplementation("androidx.room:room-testing:2.6.1")
+    testImplementation(libs.androidx.room.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
