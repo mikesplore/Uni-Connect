@@ -6,6 +6,13 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,12 +35,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,17 +53,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mike.uniadmin.chat.getCurrentDate
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
@@ -65,7 +66,6 @@ import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Details
@@ -75,9 +75,9 @@ import com.mike.uniadmin.model.MyDatabase.generateFCMID
 import com.mike.uniadmin.model.MyDatabase.generateIndexNumber
 import com.mike.uniadmin.model.MyDatabase.writeFcmToken
 import com.mike.uniadmin.ui.theme.GlobalColors
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun LoginScreen(navController: NavController, context: Context) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -85,26 +85,24 @@ fun LoginScreen(navController: NavController, context: Context) {
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
     var isSigningUp by remember { mutableStateOf(false) }
     var isGithubLoading by remember { mutableStateOf(false) }
     var isGoogleLoading by remember { mutableStateOf(false) }
-    val firebaseAuth = FirebaseAuth.getInstance()
+
     var visible by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
 
-    val notificationAdmin = context.applicationContext as UniAdmin
-    val notificationRepository = remember { notificationAdmin.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
-    )
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val loginContext = context.applicationContext as UniAdmin
+    val notificationRepository = remember { loginContext.notificationRepository }
+    val userRepository = remember { loginContext.userRepository }
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
+    val notificationViewModel: NotificationViewModel =
+        viewModel(factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository))
+
+    val userViewModel: UserViewModel =
+        viewModel(factory = UserViewModelFactory(userRepository))
 
     val brush = Brush.verticalGradient(
         colors = listOf(
@@ -130,6 +128,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     ) {
         Column(
             modifier = Modifier
+                .imePadding()
                 .padding(it)
                 .background(brush)
                 .fillMaxSize(),
@@ -291,31 +290,52 @@ fun LoginScreen(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(20.dp))
 
             AnimatedVisibility(visible = !isSigningUp) {
-                Text(text = "Forgot Password? Reset",
-                    fontSize = 16.sp,
-                    color = CC.textColor(),
-                    modifier = Modifier.clickable { navController.navigate("passwordreset") })
+                TextButton(onClick = {navController.navigate("passwordreset")}) {
+                    Text(text = "Forgot Password? Reset",
+                        fontSize = 16.sp,
+                        color = CC.textColor(),
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier.clickable { isSigningUp = !isSigningUp },
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (isSigningUp) "Already have an account? " else "Don't have an account?",
-                    style = CC.descriptionTextStyle(context),
-                    fontWeight = FontWeight.Bold,
-                    color = CC.textColor(),
-                    modifier = Modifier.padding(5.dp)
-                )
-                Text(
-                    text = if (isSigningUp) "Sign In" else "Sign Up",
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                    color = CC.extraColor2()
-                )
+            TextButton(onClick = { isSigningUp = !isSigningUp }) {
+                AnimatedContent(
+                    targetState = isSigningUp,
+                    transitionSpec = {
+                        if (targetState) {
+                            // Sign Up animation
+                            (slideInHorizontally { width -> width } + fadeIn()) togetherWith
+                                    (slideOutHorizontally { width -> -width } + fadeOut())
+                        } else {
+                            // Sign In animation
+                            (slideInHorizontally { width -> -width } + fadeIn()) togetherWith
+                                    (slideOutHorizontally { width -> width } + fadeOut())
+                        }.using(
+                            SizeTransform(clip = false)
+                        )
+                    }, label = ""
+                ) { targetIsSigningUp ->
+                    if (targetIsSigningUp) {
+                        Text(
+                            text = "Already have an account? Sign In",
+                            style = CC.descriptionTextStyle(context),
+                            fontWeight = FontWeight.Bold,
+                            color = CC.textColor(),
+                            modifier = Modifier.padding(5.dp)
+                        )
+
+                    } else {
+                        Text(
+                            text = "Don't have an account? Sign Up ",
+                            style = CC.descriptionTextStyle(context),
+                            fontWeight = FontWeight.Bold,
+                            color = CC.textColor(),
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -326,9 +346,13 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
     userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {
         if (it != null) {
             userViewModel.setSignedInUser(SignedInUser(id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""))
-            navController.navigate("homescreen")
+            navController.navigate("homescreen"){
+                popUpTo("login"){inclusive = true}
+            }
         } else {
-            navController.navigate("moredetails")
+            navController.navigate("moredetails"){
+                popUpTo("login"){inclusive = true}
+            }
         }
     }
 }
