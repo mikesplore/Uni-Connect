@@ -9,7 +9,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ModeNight
@@ -90,7 +88,6 @@ import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserPreferencesEntity
-import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Feedback
@@ -101,7 +98,7 @@ import com.mike.uniadmin.model.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.FontPreferences
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -731,7 +728,7 @@ fun MyAbout(context: Context) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Uni Konnect", style = CC.descriptionTextStyle(context).copy(
+            "Uni Admin", style = CC.descriptionTextStyle(context).copy(
                 fontWeight = FontWeight.Bold, fontSize = 20.sp
             )
         )
@@ -761,8 +758,9 @@ fun MyAbout(context: Context) {
                     .background(CC.extraColor1(), CircleShape)
                     .size(35.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.github), // Replace with your actual drawable
+                Icon(
+                    painter = painterResource(id = R.drawable.github),
+                    tint = CC.textColor(),
                     contentDescription = "GitHub Profile", modifier = Modifier.size(30.dp)
                 )
             }
