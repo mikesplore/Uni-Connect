@@ -42,14 +42,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.mike.uniadmin.dataModel.courses.AttendanceState
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.ui.theme.GlobalColors
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 @OptIn(ExperimentalMaterial3Api::class)
