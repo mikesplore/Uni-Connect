@@ -34,6 +34,8 @@ import com.mike.uniadmin.settings.BiometricPromptManager
 
 class MainActivity : AppCompatActivity() {
 
+
+
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var auth: FirebaseAuth
     private var currentUser: UserEntity? = null
