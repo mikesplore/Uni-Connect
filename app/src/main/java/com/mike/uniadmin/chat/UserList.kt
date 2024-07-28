@@ -123,14 +123,14 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
                             .fillMaxWidth()
                             .padding(8.dp),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = GlobalColors.primaryColor,
+                            focusedContainerColor = CC.primary(),
                             unfocusedIndicatorColor = CC.textColor(),
-                            focusedIndicatorColor = GlobalColors.secondaryColor,
-                            unfocusedContainerColor = GlobalColors.primaryColor,
+                            focusedIndicatorColor = CC.secondary(),
+                            unfocusedContainerColor = CC.primary(),
                             focusedTextColor = CC.textColor(),
-                            unfocusedTextColor = GlobalColors.textColor,
-                            focusedLabelColor = GlobalColors.secondaryColor,
-                            unfocusedLabelColor = GlobalColors.textColor
+                            unfocusedTextColor = CC.textColor(),
+                            focusedLabelColor = CC.secondary(),
+                            unfocusedLabelColor = CC.textColor()
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
