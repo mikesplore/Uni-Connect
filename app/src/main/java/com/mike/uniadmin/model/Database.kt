@@ -122,13 +122,6 @@ object MyDatabase {
         }
     }
 
-    fun generateDayID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
-            val indexNumber = "DY$newCode$year"
-            onIndexNumberGenerated(indexNumber)
-        }
-    }
-
     fun getUpdate(onResult: (Update?) -> Unit) {
         val updatesRef = database.child("Updates")
         updatesRef.get().addOnSuccessListener { snapshot ->
@@ -170,23 +163,6 @@ object MyDatabase {
         })
     }
 
-
-
-    fun getCourseDetailsByCourseID(courseCode: String, onResult: (Course?) -> Unit) {
-        val courseDetailsRef = database.child("Courses").child(courseCode)
-
-        courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val courseInfo = snapshot.getValue(Course::class.java)
-                onResult(courseInfo)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                println("Error fetching course details: ${error.message}")
-                onResult(null) // Indicate failure by returning null
-            }
-        })
-    }
 
     fun writeItem(courseId: String, section: Section, item: GridItem) {
         database.child("Course Resources").child(courseId).child(section.name).push().setValue(item)
@@ -348,95 +324,6 @@ object MyDatabase {
     }
 
 
-    fun writeTimetable(timetable: Timetable, onComplete: (Boolean) -> Unit) {
-        database.child("Timetable").child(timetable.id).setValue(timetable)
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-    }
-
-    fun getTimetable(dayId: String, onAssignmentsFetched: (List<Timetable>?) -> Unit) {
-        database.child("Timetable").orderByChild("dayId").equalTo(dayId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val timetable =
-                        snapshot.children.mapNotNull { it.getValue(Timetable::class.java) }
-                    onAssignmentsFetched(timetable)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onAssignmentsFetched(null)
-                }
-            })
-    }
-
-    fun getCurrentDayTimetable(dayName: String, onTimetableFetched: (List<Timetable>?) -> Unit) {
-        // Step 1: Fetch the dayId from the Day node using the dayName
-        database.child("Days").orderByChild("name").equalTo(dayName)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val dayId = snapshot.children.firstOrNull()?.key
-
-                    if (dayId != null) {
-                        // Step 2: Use the fetched dayId to query the Timetable node
-                        database.child("Timetable").orderByChild("dayId").equalTo(dayId)
-                            .addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(snapshot: DataSnapshot) {
-                                    val timetable =
-                                        snapshot.children.mapNotNull { it.getValue(Timetable::class.java) }
-                                    onTimetableFetched(timetable)
-                                }
-
-                                override fun onCancelled(error: DatabaseError) {
-                                    onTimetableFetched(null)
-                                }
-                            })
-                    } else {
-                        // Day not found
-                        onTimetableFetched(null)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onTimetableFetched(null)
-                }
-            })
-    }
-
-
-    fun editTimetable(timetable: Timetable, onComplete: (Boolean) -> Unit) {
-        database.child("Timetable").child(timetable.id).setValue(timetable)
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-    }
-
-    fun deleteTimetable(timetableId: String, onComplete: (Boolean) -> Unit) {
-        database.child("Timetable").child(timetableId).removeValue().addOnCompleteListener { task ->
-            onComplete(task.isSuccessful)
-        }
-    }
-
-
-    fun writeDays(day: Day, onComplete: (Boolean) -> Unit) {
-        database.child("Days").child(day.id).setValue(day).addOnCompleteListener { task ->
-            onComplete(task.isSuccessful)
-        }
-    }
-
-    fun getDays(onCoursesFetched: (List<Day>?) -> Unit) {
-        database.child("Days").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val days = snapshot.children.mapNotNull { it.getValue(Day::class.java) }
-                onCoursesFetched(days)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                onCoursesFetched(null)
-            }
-        })
-    }
-
 
     fun loadAttendanceRecords(onAttendanceRecordsLoaded: (List<AttendanceRecord>?) -> Unit) {
         database.child("attendanceRecords").get().addOnSuccessListener { snapshot ->
@@ -447,23 +334,6 @@ object MyDatabase {
         }
     }
 
-
-
-    //fetch the day id using the day name
-    fun getDayIdByName(dayName: String, onDayIdFetched: (String?) -> Unit) {
-        database.child("Days").orderByChild("name").equalTo(dayName)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val dayId = snapshot.children.firstOrNull()?.key
-                    onDayIdFetched(dayId)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    onDayIdFetched(null)
-                }
-            }
-            )
-    }
 
     fun saveAttendanceRecords(records: List<AttendanceRecord>, onComplete: (Boolean) -> Unit) {
         val batch = database.child("attendanceRecords")
@@ -509,40 +379,6 @@ object MyDatabase {
             }
         }
     }
-
-    //Course Assignments database
-    fun writeCourseAssignments(courseID: String, courseAssignment: CourseAssignment, onResult: (Boolean) -> Unit) {
-        val courseAnnouncementRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseAssignments")
-
-        courseAnnouncementRef.child(courseAssignment.assignmentID).setValue(courseAssignment)
-            .addOnSuccessListener {
-                onResult(true) // Indicate success
-            }
-            .addOnFailureListener { exception ->
-                println("Error writing assignment: ${exception.message}")
-                onResult(false) // Indicate failure
-            }
-    }
-
-
-    //Course Timetable database
-    fun writeCourseTimetable(courseID: String, courseTimetable: CourseTimetable, onResult: (Boolean) -> Unit) {
-        val courseTimetableRef = database.child("CourseContent")
-            .child(courseID)
-            .child("courseTimetable")
-
-        courseTimetableRef.child(courseTimetable.timetableID).setValue(courseTimetable)
-            .addOnSuccessListener {
-                onResult(true) // Indicate success
-            }
-            .addOnFailureListener { exception ->
-                println("Error writing assignment: ${exception.message}")
-                onResult(false) // Indicate failure
-            }
-    }
-
 
 
     fun writeUserActivity(userState: UserStateEntity, onSuccess: (Boolean) -> Unit) {
