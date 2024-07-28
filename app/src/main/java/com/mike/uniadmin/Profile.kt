@@ -1,6 +1,7 @@
 package com.mike.uniadmin
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -54,17 +55,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.ParseException
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.chat.getCurrentDate
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
 import com.mike.uniadmin.dataModel.users.UserEntity
@@ -72,7 +70,6 @@ import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase.generateAccountDeletionID
 import com.mike.uniadmin.ui.theme.GlobalColors
-import java.text.SimpleDateFormat
 import kotlin.random.Random
 import com.mike.uniadmin.CommonComponents as CC
 
@@ -86,60 +83,97 @@ fun ProfileScreen(navController: NavController, context: Context) {
             userRepository ?: throw IllegalStateException("UserRepository is null")
         )
     )
-    var updated by remember { mutableStateOf(false) }
-    val currentUser by userViewModel.user.observeAsState()
 
-    LaunchedEffect(Unit) {
+    val signedInUser by userViewModel.signedInUser.observeAsState()
+    var currentUser by remember { mutableStateOf<UserEntity?>(null) }
+    var updated by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(signedInUser) {
         GlobalColors.loadColorScheme(context)
         userViewModel.fetchUsers()
-        FirebaseAuth.getInstance().currentUser?.email?.let { userViewModel.findUserByEmail(it){} }
+        userViewModel.getSignedInUser()
+
+        if (signedInUser != null) {
+            val email = signedInUser!!.email
+            Log.d("ProfileScreen", "Finding user by email: $email")
+            if (email != null) {
+                userViewModel.findUserByEmail(email) { fetchedUser ->
+                    Log.d("ProfileScreen", "Fetched User: $fetchedUser")
+                    currentUser = fetchedUser
+                    isLoading = false
+                }
+            }
+        } else {
+            isLoading = false
+        }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = {}, navigationIcon = {
-                IconButton(onClick = { navController.navigate("settings") }) {
-                    Icon(
-                        Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
+    if (isLoading || signedInUser == null || currentUser == null) {
+        // Display a loading indicator while data is being fetched
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(CC.primary())
+        ) {
+            CircularProgressIndicator(color = CC.textColor())
+        }
+    } else {
+        // Display the profile screen content
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {},
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigate("settings") }) {
+                            Icon(
+                                Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = CC.primary()
+                    )
+                )
+            },
+            containerColor = CC.primary()
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(it)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .height(100.dp)
+                        .fillMaxWidth(0.9f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Profile",
+                        style = CC.titleTextStyle(context),
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
                 }
-            }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = CC.primary()
-            )
-            )
-        }, containerColor = CC.primary()
-    ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(it)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth(0.9f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Profile",
-                    style = CC.titleTextStyle(context),
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DisplayImage(context, userViewModel, updated, onUpdateChange = { updated = !updated })
+                Spacer(modifier = Modifier.height(20.dp))
+                ProfileDetails(context, userViewModel, updated, onUpdateChange = { updated = !updated })
+                Spacer(modifier = Modifier.height(20.dp))
+                currentUser?.let {
+                    GenderRow(it, context, userViewModel)
+                }
+                Spacer(modifier = Modifier.height(50.dp))
+                DangerZone(context, userViewModel, navController)
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            DisplayImage(context, userViewModel, updated, onUpdateChange = {updated = !updated})
-            Spacer(modifier = Modifier.height(20.dp))
-            ProfileDetails(context, userViewModel, updated, onUpdateChange = {updated = !updated})
-            Spacer(modifier = Modifier.height(20.dp))
-            currentUser?.let { it1 -> GenderRow(it1, context, userViewModel) }
-            Spacer(modifier = Modifier.height(50.dp))
-            DangerZone(context, userViewModel, navController)
         }
     }
 }
+
 
 @Composable
 fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, onUpdateChange:(Boolean) -> Unit) {
