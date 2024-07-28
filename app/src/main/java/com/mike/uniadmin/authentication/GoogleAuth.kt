@@ -61,7 +61,7 @@ fun GoogleAuth(
                     .addOnFailureListener {
                         isLoading = false // Stop loading on failure
                         onSignInFailure(it.message ?: "Unknown error")
-                        Log.e("GithubAuth", "Sign-in failed", it)
+                        Log.e("GoogleAuth", "Sign-in failed", it)
                     }
             }
             .border(
