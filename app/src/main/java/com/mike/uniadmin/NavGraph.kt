@@ -70,7 +70,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "login"){
+    NavHost(navController = navController, startDestination = "unichat"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)

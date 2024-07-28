@@ -137,7 +137,7 @@ fun LoginScreen(navController: NavController, context: Context) {
         ) {
             Text(
                 text = if (isSigningUp) "Sign Up" else "Sign In",
-                style = CC.titleTextStyle(context).copy(fontSize = 40.sp)
+                style = CC.titleTextStyle(context).copy(fontSize = 40.sp, fontWeight = FontWeight.Bold)
             )
 
             Column(
