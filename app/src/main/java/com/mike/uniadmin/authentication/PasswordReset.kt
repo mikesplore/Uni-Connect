@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +39,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.mike.uniadmin.ui.theme.GlobalColors
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,23 +66,22 @@ fun PasswordReset(navController: NavController, context: Context) {
     ) {
 
         Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { }, colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = CC.primary()
-                    )
-                )
-            }, containerColor = CC.primary()
+            topBar = {}, containerColor = CC.primary()
         ) {
             Column(
                 modifier = Modifier
                     .background(brush)
+                    .imePadding()
                     .padding(it)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(modifier = Modifier.fillMaxWidth(0.9f)) {
+                Row(modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth(0.9f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
                     Text(
                         "Password Reset",
                         style = CC.titleTextStyle(context).copy(fontSize = 30.sp)
