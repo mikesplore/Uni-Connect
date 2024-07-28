@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -64,7 +63,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.ScreenTime
 import kotlinx.coroutines.delay
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 data class ColorScheme(
     val primaryColor: String,
@@ -275,6 +274,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
     LaunchedEffect(fontUpdated) {
         val savedFont = fontPrefs.getSelectedFont()
         selectedFontFamily = fontFamilies[savedFont]
+
     }
 
     Column(
@@ -307,10 +307,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
                         color = CC.secondary(),
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .background(
-                        if (isSelected) CC.extraColor1() else CC.primary(),
-                        RoundedCornerShape(12.dp)
-                    )
+
                     .fillMaxWidth()
                     .height(60.dp)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -332,7 +329,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
                     text = fontName,
                     fontFamily = fontFamily,
                     fontSize = 18.sp,
-                    color = if (isSelected) CC.primary() else CC.textColor()
+                    color = if (isSelected) CC.extraColor2() else CC.textColor()
                 )
             }
         }
