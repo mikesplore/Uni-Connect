@@ -340,7 +340,7 @@ fun ChatTopAppBar(
                 )
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = GlobalColors.primaryColor),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary()),
         modifier = Modifier.statusBarsPadding() // Adjust for status bar
     )
 }
@@ -392,14 +392,14 @@ fun SearchBar(
                 .fillMaxWidth()
                 .padding(8.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = GlobalColors.primaryColor,
+                focusedContainerColor = CC.primary(),
                 unfocusedIndicatorColor = CC.textColor(),
-                focusedIndicatorColor = GlobalColors.secondaryColor,
-                unfocusedContainerColor = GlobalColors.primaryColor,
+                focusedIndicatorColor = CC.secondary(),
+                unfocusedContainerColor = CC.primary(),
                 focusedTextColor = CC.textColor(),
-                unfocusedTextColor = GlobalColors.textColor,
-                focusedLabelColor = GlobalColors.secondaryColor,
-                unfocusedLabelColor = GlobalColors.textColor
+                unfocusedTextColor = CC.textColor(),
+                focusedLabelColor = CC.secondary(),
+                unfocusedLabelColor = CC.textColor()
             ),
             shape = RoundedCornerShape(10.dp)
         )
@@ -418,7 +418,7 @@ fun DateHeader(context: Context) {
     ) {
         Box(
             modifier = Modifier
-                .background(GlobalColors.secondaryColor, RoundedCornerShape(10.dp))
+                .background(CC.secondary(), RoundedCornerShape(10.dp))
                 .padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center
         ) {
             Text(
@@ -481,7 +481,7 @@ fun MessageInputRow(
         Spacer(modifier = Modifier.width(8.dp))
         Button(
             onClick = onSendClick,
-            colors = ButtonDefaults.buttonColors(containerColor = GlobalColors.extraColor2),
+            colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2()),
             shape = RoundedCornerShape(10.dp)
         ) {
             Icon(Icons.AutoMirrored.Filled.Send, "Send")
@@ -502,7 +502,7 @@ fun ChatBubble(
     chat: ChatEntity, isUser: Boolean, context: Context, navController: NavController
 ) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
-    val backgroundColor = if (isUser) GlobalColors.extraColor1 else GlobalColors.extraColor2
+    val backgroundColor = if (isUser) CC.extraColor1() else CC.extraColor2()
     val bubbleShape = RoundedCornerShape(
         bottomStart = 16.dp,
         bottomEnd = 16.dp,
@@ -532,7 +532,7 @@ fun ChatBubble(
                                 text = it,
                                 style = CC.descriptionTextStyle(context),
                                 fontWeight = FontWeight.Bold,
-                                color = GlobalColors.primaryColor
+                                color = CC.primary()
                             )
                         }
                     }
@@ -586,7 +586,7 @@ fun ChatBubble(
                 .offset(x = (-16).dp, y = (-16).dp)
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(GlobalColors.primaryColor, CircleShape)
+                .background(CC.primary(), CircleShape)
                 .padding(4.dp),
                 contentAlignment = Alignment.Center) {
                 if (chat.profileImageLink?.isNotBlank() == true) {
