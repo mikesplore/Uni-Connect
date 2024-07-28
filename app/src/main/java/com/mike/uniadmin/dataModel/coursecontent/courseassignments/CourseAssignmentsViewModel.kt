@@ -26,12 +26,14 @@ class CourseAssignmentViewModel(private val repository: CourseAssignmentReposito
     }
 
     // Save a new assignment
-    fun saveCourseAssignment(courseID: String, assignment: CourseAssignment) {
+    fun saveCourseAssignment(courseID: String, assignment: CourseAssignment, onComplete:(Boolean) -> Unit) {
         viewModelScope.launch {
             repository.writeCourseAssignment(courseID, assignment) { success ->
                 if (success) {
+                    onComplete(true)
                     getCourseAssignments(courseID) // Refresh the assignment list after saving
                 } else {
+                    onComplete(false)
                     // Handle save failure if needed
                 }
             }
