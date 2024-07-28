@@ -92,7 +92,7 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 var background = randomColor.random()
 
