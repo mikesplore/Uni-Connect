@@ -48,6 +48,7 @@ import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -169,6 +170,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                                 lastName = lastName,
                                 profileImageLink = imageLink.toString()
                             )
+                            userViewModel.setSignedInUser(signedInUser = SignedInUser(id = "userID", email = email.toString()))
                             userViewModel.writeUser(newUser, onSuccess = {
                                 addloading = false
                                 MyDatabase.generateNotificationID { id ->
