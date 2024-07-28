@@ -13,6 +13,9 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     private val _timetables = MutableLiveData<List<CourseTimetable>>()
     val timetables: LiveData<List<CourseTimetable>> = _timetables
 
+    private val _courseTimetables = MutableLiveData<List<CourseTimetable>>()
+    val courseTimetables: LiveData<List<CourseTimetable>> = _courseTimetables
+
     // Fetch timetables for a specific course
     fun getCourseTimetables(courseID: String) {
         repository.getCourseTimetables(courseID) { timetables ->
@@ -20,13 +23,22 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
         }
     }
 
+    //Fetch timetables for all courses
+    fun getAllCourseTimetables() {
+        repository.getAllCourseTimetables { timetables ->
+            _courseTimetables.value = timetables
+        }
+    }
+
     // Save a new timetable
-    fun saveCourseTimetable(courseID: String, timetable: CourseTimetable) {
+    fun saveCourseTimetable(courseID: String, timetable: CourseTimetable, onCompletion: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.writeCourseTimetable(courseID, timetable) { success ->
                 if (success) {
+                    onCompletion(true)
                     getCourseTimetables(courseID) // Refresh the timetable list after saving
                 } else {
+                    onCompletion(false)
                     // Handle save failure if needed
                 }
             }
