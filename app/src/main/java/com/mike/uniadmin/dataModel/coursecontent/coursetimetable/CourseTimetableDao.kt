@@ -23,4 +23,7 @@ interface CourseTimetableDao {
 
     @Query("SELECT * FROM courseTimetable")
     suspend fun getAllCourseTimetables(): List<CourseTimetable>
+
+    @Query("SELECT * FROM courseTimetable WHERE day = :day")
+    suspend fun getCourseTimetablesByDay(day: String): List<CourseTimetable>?
 }
