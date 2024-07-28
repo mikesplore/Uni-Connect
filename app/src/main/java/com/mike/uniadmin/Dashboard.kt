@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -38,7 +39,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -50,6 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +69,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
@@ -79,10 +79,10 @@ import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.CommonComponents as CC
@@ -90,7 +90,6 @@ import com.mike.uniadmin.CommonComponents as CC
 
 @Composable
 fun Dashboard(navController: NavController, context: Context) {
-    val currentPerson = FirebaseAuth.getInstance().currentUser
     val application = context.applicationContext as UniAdmin
     val chatRepository = remember { application.chatRepository }
     val chatViewModel: ChatViewModel = viewModel(
@@ -124,25 +123,20 @@ fun Dashboard(navController: NavController, context: Context) {
 
     val announcements by announcementViewModel.announcements.observeAsState()
     val user by userViewModel.user.observeAsState()
-
-
     val courses by courseViewModel.courses.observeAsState(emptyList())
-    val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
-
-
-
-    LaunchedEffect(currentPerson?.email) {
-        GlobalColors.loadColorScheme(context)
-        currentPerson?.email?.let { email ->
-            userViewModel.findUserByEmail(email) {}
-        }
-    }
+    val signedInUser by userViewModel.signedInUser.observeAsState()
+    var currentUser by remember { mutableStateOf(UserEntity()) }
 
     LaunchedEffect(user) {
-        user?.let {
-            signedInUser.value = it
+            GlobalColors.loadColorScheme(context)
             userViewModel.checkAllUserStatuses()
             chatViewModel.fetchGroups()
+            userViewModel.getSignedInUser()
+        signedInUser?.email?.let { userViewModel.findUserByEmail(it) { fetchedUser  ->
+            if (fetchedUser != null) {
+                currentUser = fetchedUser
+            }
+        }
         }
     }
 
@@ -151,8 +145,7 @@ fun Dashboard(navController: NavController, context: Context) {
             .background(CC.primary())
             .fillMaxSize()
     ) {
-        signedInUser.value?.let { user ->
-            TopAppBarContent(user, context, navController)
+            TopAppBarContent(signedInUser = currentUser, context = context, navController = navController)
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
@@ -215,12 +208,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }
-        } ?: run {
-            // Show a loading indicator while user details are loading
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = CC.extraColor2())
-            }
-        }
+
     }
 }
 
@@ -237,7 +225,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
             .clip(CircleShape)
             .clickable {
                 CourseName.name.value = course.courseName.toString()
-                navController.navigate("courseResource/${course.courseCode}") }
+                navController.navigate("courseContent/${course.courseCode}") }
             .size(70.dp),
             contentAlignment = Alignment.Center) {
             if (course.courseImageLink?.isNotEmpty() == true) {
@@ -352,7 +340,7 @@ fun CourseBox(
                 Text(visits, style = CC.descriptionTextStyle(context))
                 IconButton(onClick = {
                     onClicked(course)
-                    navController.navigate("courseContent/${course.courseCode}")
+                    navController.navigate("courseResource/${course.courseCode}")
                 }) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowForwardIos, "", tint = CC.textColor()
