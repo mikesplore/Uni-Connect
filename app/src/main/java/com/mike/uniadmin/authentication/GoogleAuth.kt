@@ -53,7 +53,6 @@ fun GoogleAuth(
                 firebaseAuth
                     .startActivityForSignInWithProvider(activity, provider.build())
                     .addOnSuccessListener {
-                        // Navigate to more details screen to add details
                         success = true
                         isLoading = false // Stop loading on success
                         onSignInSuccess()
@@ -92,9 +91,9 @@ fun GoogleAuth(
         else {
             // Show GitHub image when not loading
             Image(
-                painter = painterResource(R.drawable.google),
+                painter = painterResource(com.google.android.gms.base.R.drawable.googleg_standard_color_18),
                 contentDescription = "Google",
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(30.dp)
             )
         }
     }
