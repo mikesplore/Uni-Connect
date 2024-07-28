@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -35,8 +34,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -50,7 +51,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +72,9 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModel
+import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModelFactory
 import com.mike.uniadmin.dataModel.courses.CourseEntity
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
@@ -79,13 +82,12 @@ import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
-import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 @Composable
@@ -119,8 +121,14 @@ fun Dashboard(navController: NavController, context: Context) {
             announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
         )
     )
+    val timetableRepository = remember { announcementAdmin?.courseTimetableRepository }
+    val timetableViewModel: CourseTimetableViewModel = viewModel(
+        factory = CourseTimetableViewModelFactory(
+            timetableRepository ?: throw IllegalStateException("TimetableRepository is null")
+        )
+    )
 
-
+    val timetables by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
     val user by userViewModel.user.observeAsState()
     val courses by courseViewModel.courses.observeAsState(emptyList())
@@ -128,89 +136,199 @@ fun Dashboard(navController: NavController, context: Context) {
     var currentUser by remember { mutableStateOf(UserEntity()) }
 
     LaunchedEffect(user) {
-            GlobalColors.loadColorScheme(context)
-            userViewModel.checkAllUserStatuses()
-            chatViewModel.fetchGroups()
-            userViewModel.getSignedInUser()
-        signedInUser?.email?.let { userViewModel.findUserByEmail(it) { fetchedUser  ->
-            if (fetchedUser != null) {
-                currentUser = fetchedUser
+        GlobalColors.loadColorScheme(context)
+        userViewModel.checkAllUserStatuses()
+        chatViewModel.fetchGroups()
+        userViewModel.getSignedInUser()
+        timetableViewModel.getTimetableByDay(CC.currentDay())
+        signedInUser?.email?.let {
+            userViewModel.findUserByEmail(it) { fetchedUser ->
+                if (fetchedUser != null) {
+                    currentUser = fetchedUser
+                }
             }
-        }
         }
     }
 
     Column(
         modifier = Modifier
             .background(CC.primary())
-            .fillMaxSize()
+            .fillMaxSize(),
     ) {
-            TopAppBarContent(signedInUser = currentUser, context = context, navController = navController)
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .weight(1f)
-            ) {
-                Spacer(modifier = Modifier.height(20.dp))
+        TopAppBarContent(
+            signedInUser = currentUser,
+            context = context,
+            navController = navController
+        )
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     "Courses",
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(start = 15.dp)
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                LazyRow(
-                    modifier = Modifier
-                        .padding(start = 15.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between items
-                ) {
-                    items(courses) { course ->
-                        CourseItem(course, context, navController)
-                    }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyRow(
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between items
+            ) {
+                items(courses) { course ->
+                    CourseItem(course, context, navController)
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     "Course Resources",
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(start = 15.dp)
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                val sortedCourses =
-                    courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            val sortedCourses =
+                courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
 
-                LazyRow(
-                    modifier = Modifier
-                        .padding(start = 15.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(sortedCourses) { course -> // Use the sorted list
-                        CourseBox(course, context, navController, onClicked = {
-                            courseViewModel.saveCourse(
-                                course.copy(
-                                    visits = course.visits?.plus(
-                                        1
-                                    )
+            LazyRow(
+                modifier = Modifier
+                    .padding(start = 15.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(sortedCourses) { course -> // Use the sorted list
+                    CourseBox(course, context, navController, onClicked = {
+                        courseViewModel.saveCourse(
+                            course.copy(
+                                visits = course.visits?.plus(
+                                    1
                                 )
                             )
-                        })
-                    }
+                        )
+                    })
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                "Latest Announcement",
+                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(start = 15.dp)
+            )}
+            Spacer(modifier = Modifier.height(10.dp))
+            announcements?.firstOrNull()?.let { announcement ->
+                AnnouncementCard(announcement, context)
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    "Latest Announcement",
+                    "${CC.currentDay()}'s timetable",
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(start = 15.dp)
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                announcements?.firstOrNull()?.let { announcement ->
-                    AnnouncementCard(announcement, context)
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            if(timetables != null) {
+                LazyRow {
+                    items(timetables!!) { timetable ->
+                        TodayTimetable(timetable, context, courseViewModel)
+                    }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+            }else{
+                Row (
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                ){
+                    Text("No timetable found for today", style = CC.descriptionTextStyle(context))
+                }
             }
 
+        }
     }
 }
+
+@Composable
+fun TodayTimetable(timetable: CourseTimetable, context: Context, courseViewModel: CourseViewModel) {
+    val course by courseViewModel.fetchedCourse.observeAsState()
+    LaunchedEffect(course) {
+        timetable.courseID?.let { courseViewModel.getCourseDetailsByCourseID(it) }
+    }
+    Card(
+        modifier = Modifier
+            .padding(start = 20.dp, end = 20.dp)
+            .border(
+                1.dp,
+                CC
+                    .extraColor2()
+                    .copy(0.5f),
+                RoundedCornerShape(10.dp)
+            )
+            .height(200.dp)
+            .width(350.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            4.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = CC.extraColor1()
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxSize()
+        ) {
+            Text(
+                "${course?.courseName}",
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Timelapse, "time",
+                    tint = CC.textColor()
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    "${timetable.startTime} to ${timetable.endTime}",
+                    style = CC.descriptionTextStyle(context)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.LocationOn, "Location",
+                    tint = CC.textColor()
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text("${timetable.venue}", style = CC.descriptionTextStyle(context))
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxSize(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Text("Please Keep Time!", style = CC.titleTextStyle(context))
+            }
+
+        }
+    }
+
+}
+
+
+
+
 
 @Composable
 fun CourseItem(course: CourseEntity, context: Context, navController: NavController) {
@@ -225,7 +343,8 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
             .clip(CircleShape)
             .clickable {
                 CourseName.name.value = course.courseName.toString()
-                navController.navigate("courseContent/${course.courseCode}") }
+                navController.navigate("courseContent/${course.courseCode}")
+            }
             .size(70.dp),
             contentAlignment = Alignment.Center) {
             if (course.courseImageLink?.isNotEmpty() == true) {
@@ -644,6 +763,9 @@ fun NotificationTitleContent(
 }
 
 
+
+
+
 fun isDeviceOnline(context: Context): Boolean {
     val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -653,15 +775,3 @@ fun isDeviceOnline(context: Context): Boolean {
 }
 
 
-//@Composable
-//fun getViewModel(context: Context, type: String): ViewModel {
-//    val admin = context.applicationContext as UniAdmin
-//    return when (type) {
-//        "chat" -> viewModel(factory = ChatViewModel.ChatViewModelFactory(admin.chatRepository))
-//        "notification" -> viewModel(factory = NotificationViewModel.NotificationViewModelFactory(admin.notificationRepository))
-//        "user" -> viewModel(factory = UserViewModelFactory(admin.userRepository))
-//        "announcement" -> viewModel(factory = AnnouncementViewModelFactory(admin.announcementRepository))
-//        "course" -> viewModel(factory = CourseViewModelFactory(CourseRepository())) // Assuming CourseRepository doesn't need UniAdmin
-//        else -> throw IllegalArgumentException("Unknown ViewModel type")
-//    }
-//}
