@@ -26,6 +26,8 @@ googleGmsGoogleServices = "4.4.2"
 firebaseAuthVersion = "23.0.0"
 firebaseDatabase = "21.0.0"
 firebaseMessaging = "24.0.0"
+roomCompiler = "2.5.0"
+roomTesting = "2.6.1"
 runtimeLivedata = "1.6.8"
 
 [libraries]
@@ -39,6 +41,11 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomTesting" }
+androidx-room-compiler-v250 = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomTesting" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomTesting" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomTesting" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
 firebase-auth = { module = "firebase-auth:firebase-auth", version.ref = "firebaseAuth" }
