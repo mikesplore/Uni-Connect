@@ -115,7 +115,6 @@ import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -128,7 +127,7 @@ import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 @OptIn(
@@ -349,10 +348,12 @@ fun HomeScreen(
 
                         )
                     }
-                    navController.navigate("login")
+                    navController.navigate("login"){
+                        popUpTo("homescreen"){ inclusive = true }
+                    }
                     FirebaseAuth.getInstance().signOut()
-                })
-
+                }
+            )
         }
     }) {
         Scaffold(
