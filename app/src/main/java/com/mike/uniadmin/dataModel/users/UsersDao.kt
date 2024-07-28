@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -25,7 +26,18 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE id = :userID")
     suspend fun getUserByID(userID: String): UserEntity?
+
+    @Query("SELECT * FROM SignedInUser")
+    suspend fun getSignedInUser(): SignedInUser?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSignedInUser(signedInUser: SignedInUser?)
+
+    @Query("DELETE FROM signedinuser")
+    suspend fun deleteSignedInUser()
 }
+
+
 
 @Dao
 interface UserStateDao {
