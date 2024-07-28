@@ -55,24 +55,23 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerDefaults
 import com.google.accompanist.pager.PagerState
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.ui.theme.GlobalColors
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(
     ExperimentalPagerApi::class,
     ExperimentalSnapperApi::class,
-    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3Api::class,
 )
 @Composable
 fun UniChat(
