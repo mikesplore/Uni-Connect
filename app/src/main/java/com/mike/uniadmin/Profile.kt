@@ -71,7 +71,7 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase.generateAccountDeletionID
 import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlin.random.Random
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
