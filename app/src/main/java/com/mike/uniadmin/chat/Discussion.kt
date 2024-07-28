@@ -100,7 +100,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import com.mike.uniadmin.CommonComponents as CC
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 @Composable
