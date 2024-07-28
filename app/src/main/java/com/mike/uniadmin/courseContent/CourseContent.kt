@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
@@ -76,17 +77,14 @@ import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignm
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModel
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModelFactory
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetail
-import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailRepository
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailViewModel
 import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailViewModelFactory
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableRepository
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModel
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModelFactory
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.model.Course
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.GlobalColors
@@ -103,7 +101,6 @@ var background = randomColor.random()
 fun CourseContent(navController: NavController, context: Context, targetCourseID: String) {
 
     val announcementAdmin = context.applicationContext as? UniAdmin
-
     val courseRepository = remember { announcementAdmin?.courseRepository }
     val courseViewModel: CourseViewModel = viewModel(
         factory = CourseViewModelFactory(
@@ -131,8 +128,7 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
     val courseDetailRepository = remember { announcementAdmin?.courseDetailRepository }
     val courseDetailViewModel: CourseDetailViewModel = viewModel(
         factory = CourseDetailViewModelFactory(
-            courseDetailRepository
-                ?: throw IllegalStateException("CourseDetailsRepository is null")
+            courseDetailRepository ?: throw IllegalStateException("CourseDetailsRepository is null")
         )
     )
 
@@ -145,17 +141,17 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
     )
 
 
-
-
     val coroutineScope = rememberCoroutineScope()
     val courseInfo by courseViewModel.fetchedCourse.observeAsState(initial = null)
 
     LaunchedEffect(targetCourseID) {
         background = randomColor.random()
-        courseAnnouncementViewModel.getCourseAnnouncements(targetCourseID)
-        courseViewModel.getCourseDetailsByCourseID(targetCourseID)
         GlobalColors.loadColorScheme(context)
+        courseViewModel.getCourseDetailsByCourseID(targetCourseID)
+        courseAnnouncementViewModel.getCourseAnnouncements(targetCourseID)
         courseAssignmentViewModel.getCourseAssignments(targetCourseID)
+        courseTimetableViewModel.getCourseTimetables(targetCourseID)
+        courseDetailViewModel.getCourseDetails(targetCourseID)
     }
 
 
@@ -164,6 +160,7 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
     ) {
         Column(
             modifier = Modifier
+                .imePadding()
                 .padding(it)
                 .fillMaxSize()
                 .background(CC.primary()),
@@ -232,6 +229,7 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
                     selectedTabIndex = selectedTabIndex,
                     indicator = indicator,
                     edgePadding = 0.dp,
+                    modifier = Modifier.imePadding(),
                     containerColor = CC.primary()
 
                 ) {
@@ -264,26 +262,18 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
 
                 when (selectedTabIndex) {
                     0 -> AnnouncementsItem(
-                        targetCourseID,
-                        courseAnnouncementViewModel,
-                        navController,
-                        context
+                        targetCourseID, courseAnnouncementViewModel, navController, context
                     )
 
                     1 -> AssignmentsItem(
-                        targetCourseID,
-                        courseAssignmentViewModel,
-                        navController,
-                        context
+                        targetCourseID, courseAssignmentViewModel, navController, context
                     )
 
                     2 -> TimetableItem(
-                        targetCourseID,
-                        courseTimetableViewModel,
-                        context
+                        targetCourseID, courseTimetableViewModel, context
                     )
 
-                    3 -> DetailsItem(targetCourseID, courseDetailViewModel,  context)
+                    3 -> DetailsItem(targetCourseID, courseDetailViewModel, context)
                     else -> {}
                 }
             }
@@ -304,7 +294,9 @@ fun AnnouncementsItem(
         courseAnnouncementViewModel.announcements.observeAsState(initial = emptyList())
 
     Column(
-        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .imePadding()
+            .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Row(
@@ -325,12 +317,14 @@ fun AnnouncementsItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedVisibility(visible) {
-                AddAnnouncementItem(courseID,
+                AddAnnouncementItem(
+                    courseID,
                     "Admin",
                     context,
                     visible,
                     onExpandedChange = { visible = !visible },
-                    courseAnnouncementViewModel)
+                    courseAnnouncementViewModel
+                )
             }
             LazyColumn {
                 items(announcements.value) { announcement ->
@@ -414,7 +408,10 @@ fun AddAnnouncementItem(
     var description by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+    Column(modifier = Modifier
+        .imePadding()
+        .imePadding()
+        .fillMaxWidth(0.9f)) {
         AddTextField(
             label = "Title", value = title, onValueChange = { title = it }, context
         )
@@ -443,7 +440,9 @@ fun AddAnnouncementItem(
                             author = senderName,
                             date = date
                         )
-                        viewModel.saveCourseAnnouncement(courseID = courseID, announcement = newAnnouncement)
+                        viewModel.saveCourseAnnouncement(
+                            courseID = courseID, announcement = newAnnouncement
+                        )
                         loading = false
                         onExpandedChange(expanded)
 
@@ -540,6 +539,7 @@ fun AssignmentsItem(
             }
             AnimatedVisibility(visible = expanded) {
                 AddAssignmentItem(courseID,
+                    assignmentViewModel,
                     context,
                     expanded,
                     onExpandedChange = { expanded = !expanded })
@@ -610,7 +610,11 @@ fun AssignmentCard(
 
 @Composable
 fun AddAssignmentItem(
-    courseID: String, context: Context, expanded: Boolean, onExpandedChange: (Boolean) -> Unit
+    courseID: String,
+    assignmentViewModel: CourseAssignmentViewModel,
+    context: Context,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
 ) {
 
     var title by remember { mutableStateOf("") }
@@ -618,7 +622,9 @@ fun AddAssignmentItem(
     var dueDate by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+    Column(modifier = Modifier
+        .imePadding()
+        .fillMaxWidth(0.9f)) {
         AddTextField(
             label = "Title", value = title, onValueChange = { title = it }, context
         )
@@ -651,11 +657,11 @@ fun AddAssignmentItem(
                             dueDate = dueDate,
                             publishedDate = CC.date
                         )
-                        MyDatabase.writeCourseAssignments(
-                            courseID,
-                            courseAssignment = newAssignment,
-                            onResult = { success ->
+                        assignmentViewModel.saveCourseAssignment(courseID = courseID,
+                            assignment = newAssignment,
+                            onComplete = { success ->
                                 if (success) {
+                                    assignmentViewModel.getCourseAssignments(courseID)
                                     loading = false
                                     onExpandedChange(expanded)
                                 } else {
@@ -694,9 +700,7 @@ fun AddAssignmentItem(
 
 @Composable
 fun TimetableItem(
-    courseID: String,
-    timetableViewModel: CourseTimetableViewModel,
-    context: Context
+    courseID: String, timetableViewModel: CourseTimetableViewModel, context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
     val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
@@ -707,7 +711,9 @@ fun TimetableItem(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .imePadding()
+            .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Row(modifier = Modifier.fillMaxWidth(0.9f), horizontalArrangement = Arrangement.End) {
@@ -727,6 +733,7 @@ fun TimetableItem(
         ) {
             AnimatedVisibility(visible = expanded) {
                 AddTimetableItem(courseID,
+                    timetableViewModel,
                     context,
                     expanded,
                     onExpandedChange = { expanded = !expanded })
@@ -734,7 +741,7 @@ fun TimetableItem(
             //timetable card
             LazyColumn {
                 items(timetables.value) { timetable ->
-                    Text("${timetable.day}s")
+                    Text("${timetable.day}s", style = CC.titleTextStyle(context))
                     Spacer(modifier = Modifier.height(20.dp))
                     TimetableCard(timetable, context)
                 }
@@ -825,7 +832,11 @@ fun TimetableCard(
 
 @Composable
 fun AddTimetableItem(
-    courseID: String, context: Context, expanded: Boolean, onExpandedChange: (Boolean) -> Unit
+    courseID: String,
+    timetableViewModel: CourseTimetableViewModel,
+    context: Context,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
 ) {
     var startTime by remember { mutableStateOf("") }
     var endTime by remember { mutableStateOf("") }
@@ -834,7 +845,9 @@ fun AddTimetableItem(
     var loading by remember { mutableStateOf(false) }
     var day by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxWidth(0.9f)) {
+    Column(modifier = Modifier
+        .imePadding()
+        .fillMaxWidth(0.9f)) {
         AddTextField(
             label = "Day", value = day, onValueChange = { day = it }, context
         )
@@ -860,7 +873,8 @@ fun AddTimetableItem(
                 onClick = {
                     loading = true
                     MyDatabase.generateTimetableID { iD ->
-                        val timetable = CourseTimetable(
+                        val newTimetable = CourseTimetable(
+                            day = day,
                             courseID = courseID,
                             timetableID = iD,
                             startTime = startTime,
@@ -868,12 +882,12 @@ fun AddTimetableItem(
                             venue = venue,
                             lecturer = lecturer
                         )
-                        MyDatabase.writeCourseTimetable(
-                            courseID,
-                            courseTimetable = timetable,
-                            onResult = { success ->
+                        timetableViewModel.saveCourseTimetable(courseID = courseID,
+                            timetable = newTimetable,
+                            onCompletion = { success ->
                                 if (success) {
                                     loading = false
+                                    timetableViewModel.getCourseTimetables(courseID)
                                     onExpandedChange(expanded)
                                     startTime = ""
                                     endTime = ""
@@ -913,9 +927,7 @@ fun AddTimetableItem(
 
 @Composable
 fun DetailsItem(
-    courseID: String,
-    detailsViewModel: CourseDetailViewModel,
-    context: Context
+    courseID: String, detailsViewModel: CourseDetailViewModel, context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
     val details = detailsViewModel.details.observeAsState()
@@ -946,11 +958,13 @@ fun DetailsItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedVisibility(visible = expanded) {
-                AddDetailsItem(courseID,
+                AddDetailsItem(
+                    courseID,
                     context,
                     expanded,
                     onExpandedChange = { expanded = !expanded },
-                    detailsViewModel = detailsViewModel)
+                    detailsViewModel = detailsViewModel
+                )
             }
             //card here
 
@@ -983,8 +997,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
         ) {
             courseDetails.courseName?.let {
                 Text(
-                    text = it,
-                    style = CC.titleTextStyle(context).copy(fontSize = 20.sp)
+                    text = it, style = CC.titleTextStyle(context).copy(fontSize = 20.sp)
                 )
             }
             Text(
@@ -1004,7 +1017,8 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                 courseDetails.lecturer?.let {
                     Text(
                         text = it,
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Medium)
+                        style = CC.descriptionTextStyle(context)
+                            .copy(fontWeight = FontWeight.Medium)
                     )
                 }
             }
@@ -1085,8 +1099,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
             )
             courseDetails.requiredMaterials?.let {
                 Text(
-                    text = it,
-                    style = CC.descriptionTextStyle(context).copy(
+                    text = it, style = CC.descriptionTextStyle(context).copy(
                         fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
                     )
                 )
@@ -1097,7 +1110,11 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
 
 @Composable
 fun AddDetailsItem(
-    courseID: String, context: Context, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, detailsViewModel: CourseDetailViewModel
+    courseID: String,
+    context: Context,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    detailsViewModel: CourseDetailViewModel
 ) {
     var courseName by remember { mutableStateOf("") }
     var courseCode by remember { mutableStateOf("") }
@@ -1110,25 +1127,16 @@ fun AddDetailsItem(
     var schedule by remember { mutableStateOf("") }
     var requiredMaterials by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
-    var courseInfo by remember { mutableStateOf(Course()) }
-
+    val courseInfo by detailsViewModel.courseDetails.observeAsState()
 
     LaunchedEffect(courseID) {
-
-        MyDatabase.getCourseDetailsByCourseID(courseID) { fetchedDetails ->
-            Log.d(
-                "Course Details",
-                "The fetched course info for the course: $courseID is: $fetchedDetails "
-            )
-            if (fetchedDetails != null) {
-                courseInfo = fetchedDetails
-                courseName = courseInfo.courseName
-                courseCode = courseInfo.courseCode
-                numberOfVisits = courseInfo.visits.toString()
-
-            } else {
-                Log.e("Error", "Failed to fetch course details or empty database")
+        detailsViewModel.getCourseDetailsByCourseID(courseID) { result ->
+            if (result) {
+                courseName = courseInfo?.courseName.toString()
+                courseCode = courseInfo?.courseCode.toString()
+                numberOfVisits = courseInfo?.visits.toString()
             }
+
         }
 
     }
@@ -1187,7 +1195,7 @@ fun AddDetailsItem(
             Spacer(modifier = Modifier.size(16.dp))
             Button(
                 onClick = {
-                    onExpandedChange(!expanded)
+                    loading = true
                     val newDetails = CourseDetail(
                         courseName = courseName,
                         courseCode = courseCode,
@@ -1200,7 +1208,17 @@ fun AddDetailsItem(
                         schedule = schedule,
                         requiredMaterials = requiredMaterials
                     )
-                    detailsViewModel.saveCourseDetail(courseID = courseID, detail = newDetails)
+                    detailsViewModel.saveCourseDetail(courseID = courseID,
+                        detail = newDetails,
+                        onResult = { success ->
+                            if (success) {
+                                loading = false
+                                onExpandedChange(!expanded)
+                            } else {
+                                Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
+                            }
+
+                        })
                     Log.d(
                         "Course Details",
                         "The new course info for the course: $courseID is: $newDetails "
