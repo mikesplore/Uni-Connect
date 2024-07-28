@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity() {
                 currentUser = fetchedUser
                 currentUser?.let {
                     setupLifecycleObservers(it.id)
-                    Toast.makeText(this, "Welcome ${it.email}", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
