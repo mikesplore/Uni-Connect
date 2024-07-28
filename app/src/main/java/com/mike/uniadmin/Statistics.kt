@@ -223,7 +223,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
 
                 // Draw Y-axis
                 drawLine(
-                    color = GlobalColors.textColor,
+                    color = GlobalColors.currentColors.textColor,
                     start = Offset(leftPadding, canvasHeight - bottomPadding),
                     end = Offset(leftPadding, bottomPadding),
                     strokeWidth = 2f
@@ -231,7 +231,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
 
                 // Draw X-axis
                 drawLine(
-                    color = GlobalColors.textColor,
+                    color = GlobalColors.currentColors.textColor,
                     start = Offset(leftPadding, canvasHeight - bottomPadding),
                     end = Offset(canvasWidth - leftPadding / 2, canvasHeight - bottomPadding),
                     strokeWidth = 2f
@@ -243,7 +243,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
                     canvasWidth / 2,
                     canvasHeight - bottomPadding / 4,
                     Paint().apply {
-                        color = GlobalColors.textColor.toArgb()
+                        color = GlobalColors.currentColors.textColor.toArgb()
                         textAlign = android.graphics.Paint.Align.CENTER
                         textSize = 14.sp.toPx()
                     }
@@ -257,7 +257,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
                     -canvasHeight / 2,
                     leftPadding / 4,
                     Paint().apply {
-                        color = GlobalColors.textColor.toArgb()
+                        color = GlobalColors.currentColors.textColor.toArgb()
                         textAlign = android.graphics.Paint.Align.CENTER
                         textSize = 14.sp.toPx()
                     }
@@ -274,7 +274,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
                         leftPadding - 20.dp.toPx(),
                         y,
                         Paint().apply {
-                            color = GlobalColors.textColor.toArgb()
+                            color = GlobalColors.currentColors.textColor.toArgb()
                             textAlign = android.graphics.Paint.Align.RIGHT
                             textSize = 12.sp.toPx()
                         }
@@ -309,7 +309,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
                             leftPadding + index * (barWidth * 2 + spacing) + barWidth,
                             canvasHeight - bottomPadding - animatedHeight + 15.dp.toPx(),
                             Paint().apply {
-                                color = GlobalColors.textColor
+                                color = GlobalColors.currentColors.textColor
                                 textAlign = android.graphics.Paint.Align.CENTER
                                 textSize = 12.sp.toPx()
                             }
@@ -322,7 +322,7 @@ fun BarGraphContent(courses: List<CourseEntity>, animatedValues: List<Float>, co
                         leftPadding + index * (barWidth * 2 + spacing) + barWidth,
                         canvasHeight - bottomPadding / 2,
                         Paint().apply {
-                            color = GlobalColors.textColor
+                            color = GlobalColors.currentColors.textColor
                             textAlign = android.graphics.Paint.Align.CENTER
                             textSize = 12.sp.toPx()
                         }
