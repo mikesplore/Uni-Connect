@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -62,6 +63,7 @@ import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserRepository
 import com.mike.uniadmin.dataModel.users.UserViewModel
@@ -75,7 +77,7 @@ import com.mike.uniadmin.model.MyDatabase.writeFcmToken
 import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.CommonComponents as CC
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController, context: Context) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -89,7 +91,6 @@ fun LoginScreen(navController: NavController, context: Context) {
     val firebaseAuth = FirebaseAuth.getInstance()
     var visible by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
-    val user = firebaseAuth.currentUser
 
     val notificationAdmin = context.applicationContext as UniAdmin
     val notificationRepository = remember { notificationAdmin.notificationRepository }
@@ -117,19 +118,6 @@ fun LoginScreen(navController: NavController, context: Context) {
         visible = true
     }
 
-//     val lifecycleObserver = object : DefaultLifecycleObserver {
-//        override fun onStart(owner: LifecycleOwner) {
-//            currentUser?.id?.let { writeUserOnlineStatus(it) }
-//        }
-//
-//        override fun onStop(owner: LifecycleOwner) {
-//            currentUser?.id?.let { writeUserOfflineStatus(it) }
-//        }
-//
-//        override fun onDestroy(owner: LifecycleOwner) {
-//            currentUser?.id?.let { writeUserOfflineStatus(it) }
-//        }
-//    }
 
     Scaffold(
         topBar = {
@@ -173,14 +161,14 @@ fun LoginScreen(navController: NavController, context: Context) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     GoogleAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
-                        handleAuthSuccess(navController)
+                        handleAuthSuccess(navController, userViewModel)
                     }, onSignInFailure = {
                         Toast.makeText(context, "Sign-in failed: $it", Toast.LENGTH_SHORT).show()
                         isGoogleLoading = false
                     })
 
                     GitAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
-                        handleAuthSuccess(navController)
+                        handleAuthSuccess(navController, userViewModel)
                     }, onSignInFailure = {
                         Toast.makeText(context, "Sign-in failed: $it", Toast.LENGTH_SHORT).show()
                         isGithubLoading = false
@@ -198,7 +186,9 @@ fun LoginScreen(navController: NavController, context: Context) {
 
                 AnimatedContent(targetState = isSigningUp, label = "") { targetState ->
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .imePadding()
+                            .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (targetState) {
@@ -267,7 +257,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                             userViewModel,
 
 
-                        ) {
+                            ) {
                             loading = false
                         } else handleSignIn(
                             context,
@@ -332,31 +322,16 @@ fun LoginScreen(navController: NavController, context: Context) {
 }
 
 
-fun handleAuthSuccess(navController: NavController) {
-    MyDatabase.database.child("Users").orderByChild("email").equalTo(FirebaseAuth.getInstance().currentUser?.email)
-        .addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val userSnapshot = snapshot.children.firstOrNull()
-                val user = userSnapshot?.getValue(UserEntity::class.java)
-                if (user != null) {
-                    // User details found, navigate to HomeScreen
-                    navController.navigate("homeScreen")
-                } else {
-                    // No user details found, navigate to MoreDetails
-                    navController.navigate("moreDetails")
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error, you might want to log it or show an error message
-                println("Error fetching user: ${error.message}")
-                // For now, let's navigate to MoreDetails on error as well
-                navController.navigate("moreDetails")
-            }
-        })
+fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel) {
+    userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {
+        if (it != null) {
+            userViewModel.setSignedInUser(SignedInUser(id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""))
+            navController.navigate("homescreen")
+        } else {
+            navController.navigate("moredetails")
+        }
+    }
 }
-
-
 
 
 fun handleSignUp(
@@ -370,48 +345,52 @@ fun handleSignUp(
     userViewModel: UserViewModel,
     onComplete: (Boolean) -> Unit,
 
-) {
+    ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
+            if (task.isSuccessful) {
 
-                    Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
-                    generateIndexNumber { userID ->
-                        val newUser = UserEntity(
-                            id = userID,
-                            email = email,
-                            firstName = firstName,
-                            lastName = lastName,
-                            profileImageLink = "",
-                            phoneNumber = "",
-                            gender = ""
-                        )
-                        userViewModel.writeUser(newUser) {
-                            Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
-                        }
-                        MyDatabase.generateNotificationID { id ->
-                            notificationViewModel.writeNotification(
-                                notificationEntity = NotificationEntity(
-                                    name = firstName,
-                                    userId = userID ,
-                                    id = id,
-                                    title = "$firstName $lastName has Joined Uni Admin!",
-                                    description = "Start a conversation by sending  a 👋",
-                                    date = getCurrentDate(),
-                                    time = getCurrentTimeInAmPm()
-                                )
-                            )
-                            notificationViewModel.fetchNotifications()
-                        }
+                Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
+                generateIndexNumber { userID ->
+                    val newUser = UserEntity(
+                        id = userID,
+                        email = email,
+                        firstName = firstName,
+                        lastName = lastName,
+                        profileImageLink = "",
+                        phoneNumber = "",
+                        gender = ""
+                    )
+                    val signedInUser = SignedInUser(id = "userID", email = email)
+                    userViewModel.setSignedInUser(signedInUser)
+
+                    userViewModel.writeUser(newUser) {
+                        Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
                     }
-                    onComplete(true)
-
-                } else {
-                    Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
-                    onComplete(false)
+                    MyDatabase.generateNotificationID { id ->
+                        notificationViewModel.writeNotification(
+                            notificationEntity = NotificationEntity(
+                                name = firstName,
+                                userId = userID ,
+                                id = id,
+                                title = "$firstName $lastName has Joined Uni Admin!",
+                                description = "Start a conversation by sending  a 👋",
+                                date = getCurrentDate(),
+                                time = getCurrentTimeInAmPm()
+                            )
+                        )
+                        notificationViewModel.fetchNotifications()
+                    }
                 }
+                onComplete(true)
+
+            } else {
+                Toast.makeText(context, "Wrong credentials.", Toast.LENGTH_SHORT).show()
+                onComplete(false)
             }
+        }
     } else {
+        onComplete(false)
         Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
     }
 }
@@ -423,46 +402,49 @@ fun handleSignIn(
     password: String,
     navController: NavController,
     userViewModel: UserViewModel,
-    onComplete: () -> Unit
+    onComplete: (Boolean) -> Unit
 ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
         firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Details.email.value = email
-                    firebaseAuth.currentUser?.email?.let { current ->
-                        userViewModel.findUserByEmail(current) { user ->
-                            if (user != null) {
-                                navController.navigate("homescreen")
-                                Toast.makeText(
-                                    context,
-                                    "Welcome back, ${user.firstName}!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
-                                navController.navigate("moredetails")
-                            }
+            if (task.isSuccessful) {
+                Details.email.value = email
+                firebaseAuth.currentUser?.email?.let { current ->
+                    userViewModel.findUserByEmail(current) { user ->
+                        if (user != null) {
+                            navController.navigate("homescreen")
+                            Toast.makeText(
+                                context,
+                                "Welcome back to UniAdmin, ${user.firstName}!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            val signedInUser = SignedInUser(id = "userID", email = email)
+                            userViewModel.setSignedInUser(signedInUser)
+                        } else {
+                            Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
+                            navController.navigate("moredetails")
                         }
                     }
-
-                    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-                        if (!task.isSuccessful) {
-                            Log.w("FCM", "Fetching FCM registration token failed", task.exception)
-                            return@OnCompleteListener
-                        }
-                        val token = task.result
-                        generateFCMID { id ->
-                            val fcmToken = Fcm(id = id, token = token)
-                            writeFcmToken(token = fcmToken)
-                        }
-                    })
-                    onComplete()
-                } else {
-                    Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
-                    onComplete()
                 }
+
+                FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                        return@OnCompleteListener
+                    }
+                    val token = task.result
+                    generateFCMID { id ->
+                        val fcmToken = Fcm(id = id, token = token)
+                        writeFcmToken(token = fcmToken)
+                    }
+                })
+                onComplete(true)
+            } else {
+                Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
+                onComplete(false)
             }
+        }
     } else {
+        onComplete(false)
         Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
     }
 }
