@@ -5,12 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.mike.uniadmin.dataModel.courses.CourseEntity
 import kotlinx.coroutines.launch
 
 class CourseDetailViewModel(private val repository: CourseDetailRepository) : ViewModel() {
 
     private val _details = MutableLiveData<CourseDetail?>()
     val details: MutableLiveData<CourseDetail?> = _details
+
+    private val _courseDetails = MutableLiveData<CourseEntity?>()
+    val courseDetails: MutableLiveData<CourseEntity?> = _courseDetails
 
     // Fetch details for a specific course
     fun getCourseDetails(courseID: String) {
@@ -20,16 +24,32 @@ class CourseDetailViewModel(private val repository: CourseDetailRepository) : Vi
     }
 
     // Save a new detail
-    fun saveCourseDetail(courseID: String, detail: CourseDetail) {
+    fun saveCourseDetail(courseID: String, detail: CourseDetail, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.writeCourseDetail(courseID, detail) { success ->
                 if (success) {
+                    onResult(true)
                     getCourseDetails(courseID) // Refresh the detail list after saving
                 } else {
+                    onResult(false)
                     // Handle save failure if needed
                 }
             }
         }
+    }
+
+    fun getCourseDetailsByCourseID(courseID: String, onResult: (Boolean) -> Unit){
+        viewModelScope.launch {
+            repository.getCourseDetailsByCourseID(courseID) { details ->
+                if (details != null) {
+                    _courseDetails.value = details
+                    onResult(true)
+                } else {
+                    onResult(false)
+                }
+            }
+        }
+
     }
 }
 
