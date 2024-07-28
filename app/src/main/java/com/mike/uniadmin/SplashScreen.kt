@@ -88,7 +88,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     LaunchedEffect(userLoaded) {
         if (userLoaded) {
             navController.navigate(destination) {
-                popUpTo("splash") { inclusive = true }
+                popUpTo("splashscreen") { inclusive = true }
             }
         }
     }
