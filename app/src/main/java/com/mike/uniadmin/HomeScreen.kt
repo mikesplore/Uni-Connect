@@ -110,8 +110,6 @@ import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
-import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
-import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -160,18 +158,7 @@ fun HomeScreen(
             userRepository ?: throw IllegalStateException("UserRepository is null")
         )
     )
-    val announcementAdmin = context.applicationContext as? UniAdmin
-    val announcementRepository = remember { announcementAdmin?.announcementRepository }
-    val announcementViewModel: AnnouncementViewModel = viewModel(
-        factory = AnnouncementViewModelFactory(
-            announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
-        )
-    )
     val currentPerson by userViewModel.signedInUser.observeAsState()
-    val announcements by announcementViewModel.announcements.observeAsState()
-
-
-
     val user by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
@@ -185,14 +172,12 @@ fun HomeScreen(
     var update by remember { mutableStateOf(Update()) }
     val userGroups = groups.filter { it.members?.contains(signedInUser.value?.id) ?: false }
 
-    LaunchedEffect(currentPerson?.email) {
-        GlobalColors.loadColorScheme(context)
+    LaunchedEffect(currentPerson, user) {
         currentPerson?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
-    }
 
-    LaunchedEffect(user) {
+        GlobalColors.loadColorScheme(context)
         user?.let {
             signedInUser.value = it
             userViewModel.checkAllUserStatuses()
@@ -200,22 +185,19 @@ fun HomeScreen(
             userViewModel.fetchUsers()
             userViewModel.checkUserStateByID(it.id)
         }
+
         getUpdate { fetched ->
             if (fetched != null) {
                 update = fetched
-
             }
         }
     }
 
-    LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
-    }
-
-
     //main content starts here
     if (showBottomSheet) {
-        ModalBottomSheet(onDismissRequest = {
+        ModalBottomSheet(
+            tonalElevation = 5.dp,
+            onDismissRequest = {
             scope.launch {
                 sheetState.hide()
                 showBottomSheet = false
@@ -739,9 +721,6 @@ fun UserItem(user: UserEntity, context: Context, navController: NavController, v
     val userState = userStates[user.id]
     val signedInUser by viewModel.signedInUser.observeAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.getSignedInUser()
-    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -873,7 +852,6 @@ fun CheckUpdate(context: Context) {
 
     LaunchedEffect(Unit) {
         while (true) {
-            GlobalColors.loadColorScheme(context)
             getUpdate { localUpdate ->
                 if (localUpdate != null) {
                     myUpdate = localUpdate
@@ -886,10 +864,6 @@ fun CheckUpdate(context: Context) {
             delay(60000) // Wait for 60 seconds
         }
     }
-    val screens = listOf(
-        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
-    )
-
     fun installApk(context: Context, uri: Uri) {
         val installIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
