@@ -27,7 +27,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +48,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -77,6 +75,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -109,7 +108,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
-import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -120,7 +118,6 @@ import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.getUpdate
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.model.Update
-import com.mike.uniadmin.ui.theme.GlobalColors
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -144,40 +141,40 @@ fun HomeScreen(
     coroutineScope: CoroutineScope,
 ) {
 
-
+    // ViewModel instantiation
     val uniAdmin = context.applicationContext as? UniAdmin
-    val chatRepository = uniAdmin?.chatRepository ?: throw IllegalStateException("ChatRepository not initialized")
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
-    )
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
+    val chatRepository =
+        uniAdmin?.chatRepository ?: throw IllegalStateException("ChatRepository not initialized")
+    val chatViewModel: ChatViewModel =
+        viewModel(factory = ChatViewModel.ChatViewModelFactory(chatRepository))
+
+    val userRepository = remember { uniAdmin.userRepository } // Remember userRepository
+    val userViewModel: UserViewModel =
+        viewModel(factory = UserViewModelFactory(userRepository))
+
+// State observation
     val currentPerson by userViewModel.signedInUser.observeAsState()
     val user by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
+
+// Local state
     val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
-    val announcement by remember { mutableStateOf(AnnouncementEntity()) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     var update by remember { mutableStateOf(Update()) }
+
+// Derived state
     val userGroups = groups.filter { it.members?.contains(signedInUser.value?.id) ?: false }
 
+// Side effects
     LaunchedEffect(currentPerson, user) {
-        currentPerson?.email?.let { email ->
-            userViewModel.findUserByEmail(email) {}
-        }
+        currentPerson?.email?.let { email -> userViewModel.findUserByEmail(email) {} }
 
-        GlobalColors.loadColorScheme(context)
         user?.let {
             signedInUser.value = it
             userViewModel.checkAllUserStatuses()
@@ -195,9 +192,7 @@ fun HomeScreen(
 
     //main content starts here
     if (showBottomSheet) {
-        ModalBottomSheet(
-            tonalElevation = 5.dp,
-            onDismissRequest = {
+        ModalBottomSheet(tonalElevation = 5.dp, onDismissRequest = {
             scope.launch {
                 sheetState.hide()
                 showBottomSheet = false
@@ -209,7 +204,6 @@ fun HomeScreen(
                     user = user!!,
                     context = context,
                     navController = navController,
-                    announcement = announcement,
                     users = users,
                     userViewModel = userViewModel,
                     chatViewModel = chatViewModel,
@@ -223,7 +217,9 @@ fun HomeScreen(
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         Column(
             modifier = Modifier
-                .background(CC.secondary(), RoundedCornerShape(0.dp,0.dp,10.dp,10.dp))
+                .background(
+                    CC.secondary(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
+                )
                 .fillMaxHeight(0.7f)
                 .fillMaxWidth(0.5f),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -244,7 +240,8 @@ fun HomeScreen(
                     .weight(1f)
                     .padding(start = 10.dp)
             ) {
-                SideBarItem(icon = Icons.Default.AccountCircle,
+                SideBarItem(
+                    icon = Icons.Default.AccountCircle,
                     text = "Profile",
                     context,
                     onClicked = {
@@ -264,7 +261,8 @@ fun HomeScreen(
                         chatViewModel.fetchGroups()
                         navController.navigate("unichat")
                     })
-                SideBarItem(icon = Icons.Default.BarChart,
+                SideBarItem(
+                    icon = Icons.Default.BarChart,
                     text = "Statistics",
                     context,
                     onClicked = {
@@ -296,7 +294,8 @@ fun HomeScreen(
                     context.startActivity(Intent.createChooser(sendIntent, null))
                     scope.launch { drawerState.close() }
                 })
-                SideBarItem(icon = Icons.Default.ArrowDownward,
+                SideBarItem(
+                    icon = Icons.Default.ArrowDownward,
                     text = "More",
                     context,
                     onClicked = {
@@ -308,34 +307,38 @@ fun HomeScreen(
                         showBottomSheet = true
                     })
             }
-            SideBarItem(icon = Icons.AutoMirrored.Filled.ExitToApp,
-                text = "Sign Out",
-                context,
-                onClicked = {
+            Row(
+                modifier = Modifier
+                    .background(CC.tertiary())
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                TextButton(onClick = {
                     scope.launch {
                         drawerState.close()
                     }
                     userStatus?.let {
-                        MyDatabase.writeUserActivity(
-                            it.copy(
-                                online = "offline",
-                                lastTime = getCurrentTimeInAmPm()
-                            ), onSuccess = {
-                                Toast.makeText(
-                                    context,
-                                    "Signed Out Successfully!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                        MyDatabase.writeUserActivity(it.copy(
+                            online = "offline", lastTime = getCurrentTimeInAmPm()
+                        ), onSuccess = {
+                            Toast.makeText(
+                                context, "Signed Out Successfully!", Toast.LENGTH_SHORT
+                            ).show()
+                        }
 
                         )
                     }
-                    navController.navigate("login"){
-                        popUpTo("homescreen"){ inclusive = true }
+                    navController.navigate("login") {
+                        popUpTo("homescreen") { inclusive = true }
                     }
                     FirebaseAuth.getInstance().signOut()
+                }) {
+                    Text(
+                        "Sign Out",
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    )
                 }
-            )
+            }
         }
     }) {
         Scaffold(
@@ -391,18 +394,18 @@ fun HomeScreen(
                                 }
                             }, icon = {
                                 Column(modifier = Modifier.combinedClickable(onLongClick = {
-                                        scope.launch {
-                                            drawerState.open()
-                                        }
-                                    }, onDoubleClick = {
-                                        userViewModel.fetchUsers()
-                                        chatViewModel.fetchGroups()
-                                        showBottomSheet = true
-                                    }) {
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    },
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                }, onDoubleClick = {
+                                    userViewModel.fetchUsers()
+                                    chatViewModel.fetchGroups()
+                                    showBottomSheet = true
+                                }) {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
@@ -468,14 +471,17 @@ fun SideProfile(user: UserEntity, context: Context) {
             } else {
                 Text(
                     "${user.firstName?.get(0)}${user.lastName?.get(0)}",
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
+                    style = CC.titleTextStyle(context)
+                        .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
                 )
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             user.firstName + " " + user.lastName,
-            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 18.sp), maxLines = 2
+            style = CC.titleTextStyle(context)
+                .copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 18.sp),
+            maxLines = 2
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(user.id, style = CC.descriptionTextStyle(context))
@@ -489,7 +495,6 @@ fun ModalDrawerItem(
     user: UserEntity,
     context: Context,
     navController: NavController,
-    announcement: AnnouncementEntity,
     users: List<UserEntity>,
     userViewModel: UserViewModel,
     chatViewModel: ChatViewModel,
@@ -532,7 +537,8 @@ fun ModalDrawerItem(
                 } else {
                     Text(
                         "${user.firstName?.get(0)}${user.lastName?.get(0)}",
-                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
                     )
                 }
             }
@@ -542,7 +548,8 @@ fun ModalDrawerItem(
             ) {
                 Text(
                     user.firstName + " " + user.lastName,
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold), maxLines = 2
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                    maxLines = 2
                 )
                 user.email?.let { Text(it, style = CC.descriptionTextStyle(context)) }
                 Text(user.id, style = CC.descriptionTextStyle(context))
@@ -603,18 +610,16 @@ fun ModalDrawerItem(
         HorizontalDivider()
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            "Quick Settings",
-            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+            "Quick Settings", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        QuickSettings(context, activity )
+        QuickSettings(context, activity)
 
     }
 }
 
 @Composable
 fun QuickSettings(context: Context, activity: MainActivity) {
-    var darkMode by remember { mutableStateOf(false) }
     var isBiometricsEnabled by remember { mutableStateOf(false) }
 
     Column(
@@ -629,26 +634,26 @@ fun QuickSettings(context: Context, activity: MainActivity) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = {},
+            IconButton(
+                onClick = {},
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(CC.secondary())
                     .size(50.dp)
             ) {
                 Icon(
-                    if (darkMode) Icons.Default.Nightlight else Icons.Default.LightMode,
+                    if (DeviceTheme.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
                     "theme",
-                    tint = CC.extraColor2()
+                    tint = CC.textColor()
                 )
             }
 
             Text("App theme", style = CC.descriptionTextStyle(context))
             Switch(
                 onCheckedChange = {
-                    darkMode = it
-                    GlobalColors.saveColorScheme(context, it)
-                }, checked = darkMode,
-                colors = SwitchDefaults.colors(
+                    DeviceTheme.darkMode.value = it
+                    DeviceTheme.saveDarkModePreference(it)
+                }, checked = DeviceTheme.darkMode.value, colors = SwitchDefaults.colors(
                     checkedThumbColor = CC.extraColor1(),
                     uncheckedThumbColor = CC.extraColor2(),
                     checkedTrackColor = CC.extraColor2(),
@@ -664,16 +669,15 @@ fun QuickSettings(context: Context, activity: MainActivity) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = {},
+            IconButton(
+                onClick = {},
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(CC.secondary())
                     .size(50.dp)
             ) {
                 Icon(
-                    Icons.Default.Fingerprint,
-                    "theme",
-                    tint = CC.textColor()
+                    Icons.Default.Fingerprint, "theme", tint = CC.textColor()
                 )
             }
 
@@ -681,24 +685,28 @@ fun QuickSettings(context: Context, activity: MainActivity) {
             Switch(
                 onCheckedChange = { checked -> // Add checked parameter
                     if (checked) {
-                        activity.promptManager.showBiometricPrompt(
-                            title = "User Authentication",
+                        activity.promptManager.showBiometricPrompt(title = "User Authentication",
                             description = "Please Authenticate",
                             onResult = { success ->
                                 isBiometricsEnabled = success // Update state based on success
                                 if (success) {
-                                    Toast.makeText(context, "Authenticated Successfully", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Authenticated Successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 } else {
-                                    Toast.makeText(context, "Authentication Failed", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Authentication Failed",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                            }
-                        )
+                            })
                     } else {
                         isBiometricsEnabled = false // Update state if switch is turned off manually
                     }
-                },
-                checked = isBiometricsEnabled,
-                colors = SwitchDefaults.colors(
+                }, checked = isBiometricsEnabled, colors = SwitchDefaults.colors(
                     checkedThumbColor = CC.extraColor1(),
                     uncheckedThumbColor = CC.extraColor2(),
                     checkedTrackColor = CC.extraColor2(),
@@ -715,7 +723,12 @@ fun QuickSettings(context: Context, activity: MainActivity) {
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun UserItem(user: UserEntity, context: Context, navController: NavController, viewModel: UserViewModel) {
+fun UserItem(
+    user: UserEntity,
+    context: Context,
+    navController: NavController,
+    viewModel: UserViewModel
+) {
     var visible by remember { mutableStateOf(false) }
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
@@ -741,7 +754,8 @@ fun UserItem(user: UserEntity, context: Context, navController: NavController, v
                 }, onLongClick = {
                     visible = !visible
                 })
-                .size(size), contentAlignment = Alignment.Center) {
+                .size(size), contentAlignment = Alignment.Center
+            ) {
                 if (user.profileImageLink?.isNotEmpty() == true) {
                     AsyncImage(
                         model = user.profileImageLink,
@@ -752,17 +766,19 @@ fun UserItem(user: UserEntity, context: Context, navController: NavController, v
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    val name = if(signedInUser?.email == user.email) "You" else "${user.firstName?.get(0)}${user.lastName?.get(0)}"
+                    val name =
+                        if (signedInUser?.email == user.email) "You" else "${user.firstName?.get(0)}${
+                            user.lastName?.get(0)
+                        }"
                     Text(
-                        name,
-                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                        name, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
 
             val onlineStatus by animateColorAsState(
                 animationSpec = tween(500, easing = LinearEasing),
-                targetValue = if (userState?.online == "online") Color.Green else if(userState?.online == "offline") Color.DarkGray else Color.Red,
+                targetValue = if (userState?.online == "online") Color.Green else if (userState?.online == "offline") Color.DarkGray else Color.Red,
                 label = ""
             )
             Box(
@@ -772,8 +788,7 @@ fun UserItem(user: UserEntity, context: Context, navController: NavController, v
                     )
                     .size(12.dp)
                     .background(
-                        onlineStatus,
-                        CircleShape
+                        onlineStatus, CircleShape
                     )
                     .align(Alignment.BottomEnd)
                     .offset(x = (-6).dp, y = (-6).dp)
@@ -822,19 +837,22 @@ fun UserInfo(user: UserEntity, userState: String, context: Context) {
 @Composable
 fun SideBarItem(icon: ImageVector, text: String, context: Context, onClicked: () -> Unit) {
     Spacer(modifier = Modifier.height(10.dp))
-    Row(modifier = Modifier
-        .clickable { onClicked() }
-        .height(40.dp)
-        .background(CC.secondary())
-        .fillMaxWidth(0.9f),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start) {
-        Icon(
-            icon, "", tint = CC.textColor()
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(text, style = CC.descriptionTextStyle(context))
+    TextButton(onClick = onClicked) {
+        Row(
+            modifier = Modifier
+                .height(40.dp)
+                .background(CC.secondary())
+                .fillMaxWidth(0.9f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                icon, "", tint = CC.textColor()
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text, style = CC.descriptionTextStyle(context))
 
+        }
     }
 
 }
@@ -894,11 +912,13 @@ fun CheckUpdate(context: Context) {
                 }
             }
         }
-        context.registerReceiver(
-            receiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-            Context.RECEIVER_EXPORTED
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(
+                receiver,
+                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                Context.RECEIVER_EXPORTED
+            )
+        }
 
         // Track progress
         val progressHandler = Handler(Looper.getMainLooper())
