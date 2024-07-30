@@ -38,7 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -73,7 +73,7 @@ fun SplashScreen(navController: NavController, context: Context) {
             isDatabaseChecked = true
         }
 
-        GlobalColors.loadColorScheme(context)
+        
         startAnimation = true // Start the animation
         delay(3000)
 
