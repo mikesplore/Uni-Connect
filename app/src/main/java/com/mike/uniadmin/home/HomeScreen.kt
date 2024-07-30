@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.home
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
@@ -105,7 +105,12 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerDefaults
 import com.google.accompanist.pager.PagerState
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.DeviceTheme
+import com.mike.uniadmin.MainActivity
+import com.mike.uniadmin.attendance.ManageAttendanceScreen
+import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.announcements.AnnouncementsScreen
+import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
