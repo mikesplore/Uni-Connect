@@ -70,7 +70,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "unichat"){
+    NavHost(navController = navController, startDestination = "splashscreen"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
@@ -156,9 +156,9 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             PhoneNotifications(navController, context)
         }
 
-        composable("statistics"){
-            Statistics(navController, context)
-        }
+//        composable("statistics"){
+//            Statistics(navController, context)
+//        }
 
 
 //        composable("assignments"){
@@ -193,7 +193,6 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             arguments = listOf(navArgument("courseId") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseContent(
-                navController,
                 context,
                 backStackEntry.arguments?.getString("courseId") ?: ""
             )
