@@ -8,10 +8,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.users.UserStateEntity
-import com.mike.uniadmin.ui.theme.GlobalColors
 import java.util.Calendar
 import java.util.Locale
 
@@ -345,13 +342,13 @@ object MyDatabase {
 
     fun ExitScreen(context: Context, screenID: String, timeSpent: Long){
 
-        GlobalColors.loadColorScheme(context)
+        
         // Fetch the screen details
         getScreenDetails(screenID) { screenDetails ->
             if (screenDetails != null) {
-                MyDatabase.writeScren(courseScreen = screenDetails) {}
+                writeScren(courseScreen = screenDetails) {}
                 // Fetch existing screen time
-                MyDatabase.getScreenTime(screenID) { existingScreenTime ->
+                getScreenTime(screenID) { existingScreenTime ->
                     val totalScreenTime = if (existingScreenTime != null) {
                         Log.d("Screen Time", "Retrieved Screen time: $existingScreenTime")
                         existingScreenTime.time + timeSpent
@@ -367,7 +364,7 @@ object MyDatabase {
                     )
 
                     // Save the updated screen time
-                    MyDatabase.saveScreenTime(screenTime = screenTime, onSuccess = {
+                    saveScreenTime(screenTime = screenTime, onSuccess = {
                         Log.d("Screen Time", "Saved $totalScreenTime to the database")
                     }, onFailure = {
                         Log.d("Screen Time", "Failed to save $totalScreenTime to the database")
