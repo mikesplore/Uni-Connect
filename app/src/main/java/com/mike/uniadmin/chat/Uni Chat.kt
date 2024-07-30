@@ -62,7 +62,7 @@ import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -103,7 +103,7 @@ fun UniChat(
 
 
     LaunchedEffect(currentPerson?.email) {
-        GlobalColors.loadColorScheme(context)
+        
         currentPerson?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
