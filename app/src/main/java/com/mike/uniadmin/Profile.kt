@@ -65,11 +65,12 @@ import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase.generateAccountDeletionID
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import kotlin.random.Random
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -90,7 +91,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(signedInUser) {
-        GlobalColors.loadColorScheme(context)
+        
         userViewModel.fetchUsers()
         userViewModel.getSignedInUser()
 
@@ -182,7 +183,7 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
     var link by remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = Unit) {
-        GlobalColors.loadColorScheme(context)
+        
     }
 
     Row(modifier = Modifier.fillMaxWidth(0.9f)) {
@@ -262,6 +263,7 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
                 onClick = {
                     currentUser?.let {
                         viewModel.writeUser(it.copy(profileImageLink = link), onSuccess = {
+                            viewModel.getSignedInUser()
                             showImageLinkBox = false
                             onUpdateChange(updated)
                         })
@@ -282,14 +284,36 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
 
 @Composable
 fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, onUpdateChange:(Boolean) -> Unit) {
+    val signedUser by viewModel.signedInUser.observeAsState()
     val currentUser by viewModel.user.observeAsState()
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getSignedInUser()
+        signedUser?.let {
+            it.email?.let { email ->
+                Log.d("Profile Screen", "Fetching user by email: $email")
+                viewModel.findUserByEmail(email, onUserFetched = { fetchedUser ->
+
+                    firstName = fetchedUser?.firstName.toString()
+
+                    lastName = fetchedUser?.lastName.toString()
+
+                    phoneNumber = fetchedUser?.phoneNumber.toString()
+
+                    Log.d("Profile Screen", "Fetched User: $fetchedUser")
+                })
+            }
+        }
+    }
 
     fun saveUserData() {
         currentUser?.let { user ->
-            viewModel.writeUser(user, onSuccess = {
+            viewModel.writeUser(user.copy(firstName = firstName, lastName = lastName, phoneNumber = phoneNumber), onSuccess = {
                 isEditing = false
-                viewModel.fetchUsers()
             })
         }
     }
@@ -320,23 +344,25 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
         Spacer(modifier = Modifier.height(10.dp))
 
         currentUser?.let { user ->
-            user.firstName?.let {
-                MyDetails(
-                    title = "First Name",
-                    value = it,
-                    onValueChange = { viewModel.updateUser(user.copy(firstName = it)) },
-                    context = context,
-                    isEditing = isEditing
-                )
-            }
+
+                firstName.let {
+                    MyDetails(
+                        title = "First Name",
+                        value = it,
+                        onValueChange = { firstName = it},
+                        context = context,
+                        isEditing = isEditing
+                    )
+                }
+
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            user.lastName?.let {
+            lastName.let {
                 MyDetails(
                     title = "Last Name",
                     value = it,
-                    onValueChange = { viewModel.updateUser(user.copy(lastName = it)) },
+                    onValueChange = { lastName = it},
                     context = context,
                     isEditing = isEditing
                 )
@@ -357,11 +383,11 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            user.phoneNumber?.let {
+            phoneNumber.let {
                 MyDetails(
-                    title = "Phone Number",
+                    title = "First Name",
                     value = it,
-                    onValueChange = { viewModel.updateUser(user.copy(phoneNumber = it)) },
+                    onValueChange = { phoneNumber = it},
                     context = context,
                     isEditing = isEditing
                 )
@@ -402,7 +428,8 @@ fun MyDetails(
                 unfocusedContainerColor = Color.Transparent,
                 focusedTextColor = CC.textColor(),
                 unfocusedTextColor = CC.textColor(),
-                disabledContainerColor = Color.Transparent
+                disabledContainerColor = Color.Transparent,
+                cursorColor = CC.textColor()
             ),
             enabled = isEditing,
             singleLine = true,
@@ -577,7 +604,8 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                         focusedTextColor = CC.textColor(),
                         unfocusedTextColor = CC.textColor(),
                         errorIndicatorColor = Color.Red,
-                        errorContainerColor = CC.primary()
+                        errorContainerColor = CC.primary(),
+                        cursorColor = CC.textColor()
                     ), singleLine = true, modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(60.dp)
