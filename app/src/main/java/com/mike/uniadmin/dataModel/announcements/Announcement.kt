@@ -1,7 +1,9 @@
 package com.mike.uniadmin.dataModel.announcements
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.mike.uniadmin.dataModel.users.UserEntity
 
 @Entity(tableName = "announcements")
 data class AnnouncementEntity(
