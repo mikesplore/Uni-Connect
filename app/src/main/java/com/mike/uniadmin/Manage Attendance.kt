@@ -46,7 +46,7 @@ import com.mike.uniadmin.dataModel.courses.AttendanceState
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -65,7 +65,7 @@ fun ManageAttendanceScreen(context: Context) {
     var refresh by remember { mutableStateOf(false) }
 
     LaunchedEffect(refresh) {
-        GlobalColors.loadColorScheme(context)
+        
         courseViewModel.fetchAttendanceStates()
     }
 
