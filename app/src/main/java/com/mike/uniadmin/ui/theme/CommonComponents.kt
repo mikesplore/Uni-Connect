@@ -2,8 +2,6 @@ package com.mike.uniadmin.ui.theme
 
 import android.content.Context
 import android.icu.util.Calendar
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -118,54 +116,40 @@ object CommonComponents {
 
     @Composable
     fun primary(): Color {
-        val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.currentColors.primary
-            else GlobalColors.currentColors.primary,
-            label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(500)
-        )
+        val  color = MaterialTheme.colorScheme.primary
         return color
     }
 
     @Composable
     fun secondary(): Color {
-        val  color by animateColorAsState(
-            targetValue = if (GlobalColors.isDarkMode) GlobalColors.currentColors.secondary
-            else GlobalColors.currentColors.secondary,
-            label = "primaryBackgroundColor", // Provide a descriptive label
-            animationSpec = tween(500)
-        )
+        val  color = MaterialTheme.colorScheme.secondary
         return color
     }
 
     @Composable
     fun tertiary(): Color {
-        return if (GlobalColors.isDarkMode)
-            GlobalColors.currentColors.tertiary else GlobalColors.currentColors.tertiary
+        return MaterialTheme.colorScheme.tertiary
     }
 
     @Composable
     fun textColor(): Color {
-        return if (GlobalColors.isDarkMode)
-            GlobalColors.currentColors.textColor else GlobalColors.currentColors.textColor
+        return MaterialTheme.colorScheme.surface
     }
 
 
     @Composable
     fun extraColor1(): Color {
-        return if (GlobalColors.isDarkMode)
-            GlobalColors.currentColors.extraColor1 else GlobalColors.currentColors.extraColor1
+        return MaterialTheme.colorScheme.onPrimary
     }
 
     @Composable
     fun extraColor2(): Color {
-        return if (GlobalColors.isDarkMode)
-            GlobalColors.currentColors.extraColor2 else GlobalColors.currentColors.extraColor2
+        return MaterialTheme.colorScheme.onSecondary
     }
 
     @Composable
     fun descriptionTextStyle(context: Context): TextStyle {
-        val color = if (GlobalColors.isDarkMode) GlobalColors.currentColors.textColor else GlobalColors.currentColors.textColor
+        val color = textColor()
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
@@ -192,7 +176,7 @@ object CommonComponents {
 
     @Composable
     fun titleTextStyle(context: Context): TextStyle {
-        val color =if (GlobalColors.isDarkMode) GlobalColors.currentColors.textColor else GlobalColors.currentColors.textColor
+        val color = textColor()
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
@@ -205,10 +189,10 @@ object CommonComponents {
     @Composable
     fun appTextFieldColors(): TextFieldColors {
         return TextFieldDefaults.colors(
-            focusedContainerColor = GlobalColors.currentColors.primary,
-            unfocusedContainerColor = GlobalColors.currentColors.primary,
-            focusedIndicatorColor = GlobalColors.currentColors.tertiary,
-            unfocusedIndicatorColor = GlobalColors.currentColors.secondary,
+            focusedContainerColor = MaterialTheme.colorScheme.primary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.primary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
             focusedLabelColor = textColor(),
             cursorColor = textColor(),
             unfocusedLabelColor = textColor(),
