@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.timetable
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
