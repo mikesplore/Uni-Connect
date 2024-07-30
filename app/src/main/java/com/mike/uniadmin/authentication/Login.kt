@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -74,7 +73,7 @@ import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.generateFCMID
 import com.mike.uniadmin.model.MyDatabase.generateIndexNumber
 import com.mike.uniadmin.model.MyDatabase.writeFcmToken
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -111,7 +110,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     )
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         auth.currentUser?.email?.let { userViewModel.findUserByEmail(it){} }
         visible = true
     }
