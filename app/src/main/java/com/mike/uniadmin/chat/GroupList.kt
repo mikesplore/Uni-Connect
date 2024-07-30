@@ -68,7 +68,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object GroupDetails {
@@ -107,7 +107,7 @@ fun UniGroups(context: Context, navController: NavController) {
     }
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         chatViewModel.fetchGroups()
     }
 
@@ -179,7 +179,7 @@ fun AddGroupSection(
         if (imageLink.isNotBlank()) animatedVisibility.animateTo(3f)
     }
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
     }
 
     Scaffold(
