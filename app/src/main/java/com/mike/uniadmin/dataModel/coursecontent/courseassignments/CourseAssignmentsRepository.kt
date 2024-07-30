@@ -1,7 +1,6 @@
 package com.mike.uniadmin.dataModel.coursecontent.courseassignments
 
 import com.google.firebase.database.*
-import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
