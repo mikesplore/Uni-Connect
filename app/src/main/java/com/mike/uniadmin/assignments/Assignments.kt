@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.assignments
 
 import android.content.Context
 import androidx.compose.foundation.layout.Box
