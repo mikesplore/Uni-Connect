@@ -89,7 +89,7 @@ fun GoogleAuth(
             )
         }
         else {
-            // Show GitHub image when not loading
+            // Show Google image when not loading
             Image(
                 painter = painterResource(com.google.android.gms.base.R.drawable.googleg_standard_color_18),
                 contentDescription = "Google",
