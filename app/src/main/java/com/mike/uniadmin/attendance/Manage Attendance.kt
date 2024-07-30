@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.attendance
 
 import android.content.Context
 import androidx.compose.animation.animateColorAsState
