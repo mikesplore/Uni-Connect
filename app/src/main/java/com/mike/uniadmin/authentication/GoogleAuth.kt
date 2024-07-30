@@ -7,6 +7,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import android.app.Activity
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -74,22 +79,37 @@ fun GoogleAuth(
         contentAlignment = Alignment.Center
 
     ) {
-        if (isLoading) {
-            // Show CircularProgressIndicator when loading
+        // Use AnimatedVisibility for smooth transitions
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(30.dp),
                 color = CC.primary(),
                 trackColor = CC.textColor()
-
-            )
-        } else if (success){
-            //show a check to indicate successful authentication
-            Icon(
-                Icons.Default.Check, "Success", tint = CC.textColor()
             )
         }
-        else {
-            // Show Google image when not loading
+
+        AnimatedVisibility(
+            visible = success && !isLoading, // Show check only if successful and not loading
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut()
+        ) {
+            Icon(
+                Icons.Default.Check,
+                "Success",
+                tint = CC.textColor(),
+                modifier = Modifier.size(40.dp) // Adjust size as needed
+            )
+        }
+
+        AnimatedVisibility(
+            visible = !isLoading && !success, // Show image only if not loading and not successful
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Image(
                 painter = painterResource(com.google.android.gms.base.R.drawable.googleg_standard_color_18),
                 contentDescription = "Google",
