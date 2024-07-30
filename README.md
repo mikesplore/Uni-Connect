@@ -6,7 +6,7 @@
 
 **Functionality**
 
-The `GoogleAuth` composable function handles Google authentication using Firebase. It initiates the Google sign-in process and provides visual feedback to the user.
+The `GoogleAuth` composable function handles Google authentication using [Firebase](https://firebase.google.com/docs/auth). It initiates the Google sign-in process and provides visual feedback to the user.
 
 **Parameters**
 
@@ -25,7 +25,7 @@ The `GoogleAuth` composable function handles Google authentication using Firebas
 
 **Functionality**
 
-The `GitAuth` composable function handles GitHub authentication using Firebase. It initiates the GitHub sign-in process and provides visual feedback to the user.
+The `GitAuth` composable function handles GitHub authentication using [Firebase](https://firebase.google.com/docs/auth). It initiates the GitHub sign-in process and provides visual feedback to the user.
 
 **Parameters**
 
@@ -59,8 +59,9 @@ The `GitAuth` composable function handles GitHub authentication using Firebase. 
     *   `loading`: Manages the loading state during form submission.
 *   **Repositories and ViewModels:**
 
-    *   Retrieves `notificationRepository` and `userRepository` from the application context.
-    *   Initializes `NotificationViewModel` and `UserViewModel` using the respective repositories.
+    *   Retrieves [notificationRepository](app/src/main/java/com/mike/uniadmin/dataModel/notifications/NotificationRepository.kt) and [userRepository](app/src/main/java/com/mike/uniadmin/dataModel/users/UserRepository.kt) from the application context.
+    *   Initializes [NotificationViewModel](app/src/main/java/com/mike/uniadmin/dataModel/notifications/NotificationsViewModel.kt) and [UserViewModel](app/src/main/java/com/mike/uniadmin/dataModel/users/UserViewModel.kt) using the respective repositories.
+    
 
 ### UI Components
 
@@ -98,7 +99,7 @@ The `GitAuth` composable function handles GitHub authentication using Firebase. 
 
     *   Validates email and password fields.
     *   Registers the user with Firebase Authentication.
-    *   Creates a new `UserEntity` and writes it to the `UserViewModel`.
+    *   Creates a new [UserEntity](app/src/main/java/com/mike/uniadmin/dataModel/users/UserEntity.kt) and writes it to the `UserViewModel`.
     *   Generates a notification indicating the new user has joined.
     *   Displays appropriate Toast messages based on success or failure.
 *   **`handleSignIn`:**
@@ -183,7 +184,7 @@ The `PasswordReset` composable function provides a screen for users to reset the
 *   **UI Layout:**
 
     *   Uses `AnimatedVisibility` to animate the screen content.
-    *   Uses `Scaffold` for basic layout structure with a top app bar and content area.
+    *   Uses `Scaffold` for basic layout structure with a top app bar (though not used) and content area.
     *   Displays a title "Password Reset" at the top.
     *   Includes a text field for email input.
     *   Provides a button to trigger the password reset email.
@@ -215,3 +216,6 @@ The `PasswordReset` composable function provides a screen for users to reset the
 
 ### Password Reset Screen
 ![Password Reset](Images/passwordReset.png)
+
+
+
