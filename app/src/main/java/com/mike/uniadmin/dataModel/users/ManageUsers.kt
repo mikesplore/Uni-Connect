@@ -48,7 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,7 @@ fun ManageUsers(navController: NavController, context: Context) {
     val users by userViewModel.users.observeAsState(emptyList())
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
     }
 
     Scaffold(
