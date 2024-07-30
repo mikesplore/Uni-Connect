@@ -83,7 +83,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
-import com.mike.uniadmin.UserItem
+import com.mike.uniadmin.home.UserItem
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
