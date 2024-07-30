@@ -65,7 +65,7 @@ import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFac
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -95,7 +95,7 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
     var searchQuery by remember { mutableStateOf("") }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     LaunchedEffect(key1 = Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         auth.currentUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
