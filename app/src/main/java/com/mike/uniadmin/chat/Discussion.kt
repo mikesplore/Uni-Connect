@@ -94,7 +94,7 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -142,7 +142,7 @@ fun DiscussionScreen(
 
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         while (true) {
             timeSpent = System.currentTimeMillis() - startTime
             delay(1000)
