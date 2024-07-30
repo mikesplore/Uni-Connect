@@ -80,7 +80,7 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -136,7 +136,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     }
 
     LaunchedEffect(targetUserId) {
-        GlobalColors.loadColorScheme(context)
+        
         currentUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
