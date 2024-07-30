@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.getValue
@@ -21,6 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.mike.uniadmin.announcements.AnnouncementsScreen
+import com.mike.uniadmin.assignments.AssignmentScreen
+import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
@@ -32,15 +35,19 @@ import com.mike.uniadmin.chat.UniGroups
 import com.mike.uniadmin.chat.UniScreen
 import com.mike.uniadmin.chat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
+import com.mike.uniadmin.courseResources.CourseResources
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.ManageUsers
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.home.Dashboard
+import com.mike.uniadmin.home.HomeScreen
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.settings.Settings
+import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.ui.theme.Appearance
 
 @OptIn(ExperimentalPagerApi::class)
@@ -70,7 +77,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "splashscreen"){
+    NavHost(navController = navController, startDestination = "login"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
@@ -165,7 +172,10 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
 //            AssignmentScreen(navController = navController, context)
 //        }
 
-        composable("passwordreset"){
+        composable("passwordreset",
+            enterTransition = {
+            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(500))
+        }) {
             PasswordReset(navController = navController, context)
         }
 
@@ -173,7 +183,10 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             Appearance(navController = navController, context)
         }
 
-        composable("homescreen"){
+        composable("homescreen",
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(500))
+            }) {
             HomeScreen(navController,context,pagerState,mainActivity,screens,coroutineScope)
         }
         composable("unichat"){
