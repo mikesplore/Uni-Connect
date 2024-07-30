@@ -53,7 +53,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -90,7 +90,7 @@ fun MoreDetails(context: Context, navController: NavController) {
     )
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         userViewModel.findUserByEmail(loggedInUser?.email!!) {}
 
     }
