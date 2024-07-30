@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.courseResources
 
 import android.content.Context
 import android.widget.Toast
