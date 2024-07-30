@@ -62,7 +62,6 @@ import com.mike.uniadmin.model.MyDatabase.deleteItem
 import com.mike.uniadmin.model.MyDatabase.readItems
 import com.mike.uniadmin.model.MyDatabase.writeItem
 import com.mike.uniadmin.model.Section
-import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object CourseName {
@@ -80,7 +79,7 @@ fun CourseResources(courseCode: String, context: Context) {
     var showAddSection by remember { mutableStateOf<Section?>(null) }
 
     LaunchedEffect(courseCode) {
-        GlobalColors.loadColorScheme(context)
+        
         isLoading = true
         readItems(courseCode, Section.NOTES) { fetchedNotes ->
             notes.addAll(fetchedNotes)
