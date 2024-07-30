@@ -38,7 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -56,7 +56,7 @@ fun PasswordReset(navController: NavController, context: Context) {
     )
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         visible = true
     }
     AnimatedVisibility(
