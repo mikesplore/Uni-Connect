@@ -1,4 +1,4 @@
-package com.mike.uniadmin
+package com.mike.uniadmin.home
 
 
 import android.annotation.SuppressLint
@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -69,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.mike.uniadmin.courseResources.CourseName
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
@@ -133,9 +135,11 @@ fun Dashboard(navController: NavController, context: Context) {
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val signedInUser by userViewModel.signedInUser.observeAsState()
     var currentUser by remember { mutableStateOf(UserEntity()) }
+    val announcementsLoading by announcementViewModel.isLoading.observeAsState()
+    val coursesLoading by courseViewModel.isLoading.observeAsState()
 
     LaunchedEffect(user) {
-        
+
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
         userViewModel.getSignedInUser()
@@ -174,6 +178,14 @@ fun Dashboard(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
+            if (coursesLoading == true) {
+                Box(
+                    modifier = Modifier.height(100.dp)
+                ){
+                    CircularProgressIndicator(color = CC.textColor())
+
+                }
+            } else {
             LazyRow(
                 modifier = Modifier
                     .padding(start = 15.dp)
@@ -184,8 +196,10 @@ fun Dashboard(navController: NavController, context: Context) {
                     CourseItem(course, context, navController)
                 }
             }
+            }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
+
                 Text(
                     "Course Resources",
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
@@ -193,6 +207,14 @@ fun Dashboard(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
+            if (coursesLoading == true) {
+                Box(
+                    modifier = Modifier.height(100.dp)
+                ){
+                    CircularProgressIndicator(color = CC.textColor())
+
+                }
+            } else {
             val sortedCourses =
                 courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
 
@@ -213,7 +235,7 @@ fun Dashboard(navController: NavController, context: Context) {
                         )
                     })
                 }
-            }
+            }}
 
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -224,8 +246,17 @@ fun Dashboard(navController: NavController, context: Context) {
                 modifier = Modifier.padding(start = 15.dp)
             )}
             Spacer(modifier = Modifier.height(10.dp))
-            announcements?.firstOrNull()?.let { announcement ->
-                AnnouncementCard(announcement, context)
+            if (announcementsLoading == true) {
+                Box(
+                    modifier = Modifier.height(100.dp)
+                ){
+                    CircularProgressIndicator(color = CC.textColor())
+
+                }
+            } else {
+                announcements?.firstOrNull()?.let { announcement ->
+                    AnnouncementCard(announcement, context)
+                }
             }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
