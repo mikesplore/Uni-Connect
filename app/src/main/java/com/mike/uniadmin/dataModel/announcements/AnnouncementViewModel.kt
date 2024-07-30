@@ -11,13 +11,19 @@ class AnnouncementViewModel(private val repository: AnnouncementRepository) : Vi
     private val _announcements = MutableLiveData<List<AnnouncementEntity>>()
     val announcements: LiveData<List<AnnouncementEntity>> = _announcements
 
+    private val _isLoading = MutableLiveData(false) // Add isLoading state
+    val isLoading: LiveData<Boolean> = _isLoading
+
+
     init {
         fetchAnnouncements()
     }
 
     fun fetchAnnouncements() {
+        _isLoading.value = true // Set loading to true before fetching
         repository.fetchAnnouncements { announcements ->
             _announcements.value = announcements
+            _isLoading.value = false // Set loading to false after fetching
         }
     }
 
