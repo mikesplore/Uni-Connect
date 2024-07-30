@@ -2,7 +2,7 @@
 
 ## Authentication
 
-[### GoogleAuth](app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt)
+### [GoogleAuth](app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt)
 
 **Functionality**
 
@@ -21,7 +21,7 @@ The `GoogleAuth` composable function handles Google authentication using Firebas
 3.  If the sign-in is successful, a check icon is displayed and `onSignInSuccess` is called.
 4.  If the sign-in fails, an error message is displayed and `onSignInFailure` is called.
 
-### GitAuth
+### [GitAuth](app/src/main/java/com/mike/uniadmin/authentication/GithubAuth.kt)
 
 **Functionality**
 
@@ -43,7 +43,7 @@ The `GitAuth` composable function handles GitHub authentication using Firebase. 
 
 
 
-## Authentication Screen
+## [Authentication Screen](app/src/main/java/com/mike/uniadmin/authentication/Login.kt)
 
 ### Initialization
 
