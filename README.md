@@ -223,10 +223,6 @@ The `PasswordReset` composable function provides a screen for users to reset the
 ![Password Reset](Images/passwordReset.png)
 
 
-### Example Illustration
-I wont show the login process for privacy reasons.
-
-[Sample-Illustration.mp4](Images%2FSample-Illustration.mp4)
 
 
 
