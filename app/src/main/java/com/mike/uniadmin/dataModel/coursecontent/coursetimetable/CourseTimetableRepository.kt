@@ -2,7 +2,6 @@ package com.mike.uniadmin.dataModel.coursecontent.coursetimetable
 
 import android.util.Log
 import com.google.firebase.database.*
-import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
