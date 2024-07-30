@@ -15,6 +15,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -31,10 +33,31 @@ import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
+import com.mike.uniadmin.ui.theme.UniAdminTheme
+
+object DeviceTheme {
+    private lateinit var sharedPreferences: SharedPreferences
+
+    val darkMode: MutableState<Boolean> = mutableStateOf(false)
+
+    fun init(sharedPrefs: SharedPreferences) {
+        sharedPreferences = sharedPrefs
+        darkMode.value = loadDarkModePreference()
+    }
+
+     fun saveDarkModePreference(isDarkMode: Boolean) {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("DARK_MODE", isDarkMode)
+        editor.apply()
+    }
+
+    private fun loadDarkModePreference(): Boolean {
+        return sharedPreferences.getBoolean("DARK_MODE", false) // Default to false if not found
+    }
+}
+
 
 class MainActivity : AppCompatActivity() {
-
-
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var auth: FirebaseAuth
@@ -43,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         BiometricPromptManager(this)
     }
     private val database = FirebaseDatabase.getInstance()
-
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         val user = firebaseAuth.currentUser
         if (user != null) {
@@ -84,10 +106,16 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("NotificationPrefs", Context.MODE_PRIVATE)
         createNotificationChannel(this)
 
+        // Initialize DeviceTheme with sharedPreferences
+        DeviceTheme.init(sharedPreferences)
+
         auth.addAuthStateListener(authStateListener)
 
         setContent {
-            NavigationGraph(this, this)
+            UniAdminTheme(dynamicColor = false, darkTheme = DeviceTheme.darkMode.value) {
+                NavigationGraph(this, this)
+            }
+
         }
     }
 
@@ -192,4 +220,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
 }
+
