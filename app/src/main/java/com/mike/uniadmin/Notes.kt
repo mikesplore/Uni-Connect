@@ -27,3 +27,29 @@ package com.mike.uniadmin
 //feature for enabling offline mode
 //feature for liking announcements
 //feature for showing previous feedback of a current signed in user
+
+
+
+//BUGS AND IMPROVEMENTS TO MAKE
+
+//LIGHT THEME
+//the light theme is giving Zimbabwe
+
+//HOME SCREEN
+//the modal drawer is blinking then disappearing
+//the profile icon is showing null at start before loading the image
+//the timetable is null initially, which requires you to open the course content for it to load
+
+//GROUP CHAT SCREEN
+//the users list to have some padding both on top and bottom
+//the animated to appear and disappear only from one direction
+//fix the date display, these is wrong date title
+
+//USER CHAT LIST
+//the chats are not opening on time when you click on them
+
+//ANNOUNCEMENTS SCREEN
+//fix the text fields for new assignments (imepadding()) needed
+
+//COURSE CONTENT SCREEN
+//add scrollable column to display all the course details content

@@ -2,7 +2,12 @@
 
 ## Authentication
 
-### [GoogleAuth](app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt)
+### Overview
+This section provides a detailed overview of the components and functionality related to user authentication within a Uni Admin. 
+It covers different authentication methods, including email/password login, third-party authentication using Google and GitHub, and password reset functionality. 
+The documentation outlines the UI components, state management, and backend logic involved in each authentication process. It also includes references to relevant code files and visual representations of the user interface.
+
+### 1. [GoogleAuth](app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt)
 
 **Functionality**
 
@@ -21,7 +26,7 @@ The `GoogleAuth` composable function handles Google authentication using [Fireba
 3.  If the sign-in is successful, a check icon is displayed and `onSignInSuccess` is called.
 4.  If the sign-in fails, an error message is displayed and `onSignInFailure` is called.
 
-### [GitAuth](app/src/main/java/com/mike/uniadmin/authentication/GithubAuth.kt)
+### 2. [GitAuth](app/src/main/java/com/mike/uniadmin/authentication/GithubAuth.kt)
 
 **Functionality**
 
@@ -39,8 +44,6 @@ The `GitAuth` composable function handles GitHub authentication using [Firebase]
 2.  While the sign-in process is ongoing, a circular progress indicator is displayed.
 3.  If the sign-in is successful, a check icon is displayed and `onSignInSuccess` is called.
 4.  If the sign-in fails, an error message is displayed and `onSignInFailure` is called.
-
-
 
 
 ## [Authentication Screen](app/src/main/java/com/mike/uniadmin/authentication/Login.kt)
@@ -211,11 +214,21 @@ The `PasswordReset` composable function provides a screen for users to reset the
 ### Sign In Screen
 ![Sign In](Images/SignIn.png)
 
+
 ### Sign Up Screen
 ![Sign Up](Images/SignUp.png)
 
+
 ### Password Reset Screen
 ![Password Reset](Images/passwordReset.png)
+
+
+### Example Illustration
+I wont show the login process for privacy reasons.
+![Sample Video](Images/Sample-Illustration.mp4)
+
+
+
 
 
 

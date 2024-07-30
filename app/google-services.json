@@ -60,6 +60,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "545774727181-2fsd21ee63o9goagk6e01bdatemqekdm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mike.uniadmin",
+            "certificate_hash": "7d3f73a35581b0d514858731d67eaef5de789323"
+          }
+        },
+        {
           "client_id": "545774727181-ks0kvrq92egdri4aldokpu2u8jftl4tl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
