@@ -59,7 +59,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -86,7 +85,6 @@ import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.ui.theme.GlobalColors
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -137,7 +135,7 @@ fun Dashboard(navController: NavController, context: Context) {
     var currentUser by remember { mutableStateOf(UserEntity()) }
 
     LaunchedEffect(user) {
-        GlobalColors.loadColorScheme(context)
+        
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
         userViewModel.getSignedInUser()
@@ -150,10 +148,6 @@ fun Dashboard(navController: NavController, context: Context) {
             }
         }
     }
-
-    val brush = Brush.verticalGradient(
-        listOf(CC.primary(), CC.secondary())
-    )
 
     Column(
         modifier = Modifier
@@ -742,8 +736,7 @@ fun TopAppBarContent(
         }
     }, colors = TopAppBarDefaults.topAppBarColors(
         containerColor = CC.primary(),
-    )
-    )
+    ))
 }
 
 
