@@ -14,7 +14,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -73,7 +74,6 @@ import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.generateFCMID
 import com.mike.uniadmin.model.MyDatabase.generateIndexNumber
 import com.mike.uniadmin.model.MyDatabase.writeFcmToken
-
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -97,11 +97,11 @@ fun LoginScreen(navController: NavController, context: Context) {
     val notificationRepository = remember { loginContext.notificationRepository }
     val userRepository = remember { loginContext.userRepository }
 
-    val notificationViewModel: NotificationViewModel =
-        viewModel(factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository))
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
+    )
 
-    val userViewModel: UserViewModel =
-        viewModel(factory = UserViewModelFactory(userRepository))
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
 
     val brush = Brush.verticalGradient(
         colors = listOf(
@@ -110,8 +110,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     )
 
     LaunchedEffect(Unit) {
-        
-        auth.currentUser?.email?.let { userViewModel.findUserByEmail(it){} }
+        auth.currentUser?.email?.let { userViewModel.findUserByEmail(it) {} }
         visible = true
     }
 
@@ -136,7 +135,8 @@ fun LoginScreen(navController: NavController, context: Context) {
         ) {
             Text(
                 text = if (isSigningUp) "Sign Up" else "Sign In",
-                style = CC.titleTextStyle(context).copy(fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                style = CC.titleTextStyle(context)
+                    .copy(fontSize = 40.sp, fontWeight = FontWeight.Bold)
             )
 
             Column(
@@ -148,7 +148,7 @@ fun LoginScreen(navController: NavController, context: Context) {
             ) {
                 Text(
                     text = "Continue with one of the following options",
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
                 )
 
                 Row(
@@ -174,20 +174,21 @@ fun LoginScreen(navController: NavController, context: Context) {
                 }
 
                 Text(
-                    text = "Or", style = CC.descriptionTextStyle(context), color = CC.textColor()
+                    text = "Or",
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
                 )
 
                 Text(
                     if (isSigningUp) "Sign up with your email and password" else "Sign in with your email and password",
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
                 )
 
                 AnimatedContent(targetState = isSigningUp, label = "") { targetState ->
                     Column(
                         modifier = Modifier
+                            .verticalScroll(rememberScrollState())
                             .imePadding()
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (targetState) {
                             Spacer(modifier = Modifier.height(20.dp))
@@ -224,6 +225,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                             label = "Password",
                             context = context
                         )
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
             }
@@ -258,12 +260,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                             ) {
                             loading = false
                         } else handleSignIn(
-                            context,
-                            firebaseAuth,
-                            email,
-                            password,
-                            navController,
-                            userViewModel
+                            context, firebaseAuth, email, password, navController, userViewModel
                         ) {
                             loading = false
                         }
@@ -281,6 +278,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                         Text(
                             if (isSigningUp) "Sign Up" else "Sign In",
                             style = CC.descriptionTextStyle(context = context)
+                                .copy(fontWeight = FontWeight.Bold)
                         )
                     }
                 }
@@ -289,10 +287,10 @@ fun LoginScreen(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(20.dp))
 
             AnimatedVisibility(visible = !isSigningUp) {
-                TextButton(onClick = {navController.navigate("passwordreset")}) {
-                    Text(text = "Forgot Password? Reset",
-                        fontSize = 16.sp,
-                        color = CC.textColor(),
+                TextButton(onClick = { navController.navigate("passwordreset") }) {
+                    Text(
+                        text = "Forgot Password? Reset",
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
@@ -301,16 +299,13 @@ fun LoginScreen(navController: NavController, context: Context) {
 
             TextButton(onClick = { isSigningUp = !isSigningUp }) {
                 AnimatedContent(
-                    targetState = isSigningUp,
-                    transitionSpec = {
+                    targetState = isSigningUp, transitionSpec = {
                         if (targetState) {
                             // Sign Up animation
-                            (slideInHorizontally { width -> width } + fadeIn()) togetherWith
-                                    (slideOutHorizontally { width -> -width } + fadeOut())
+                            (slideInHorizontally { width -> width } + fadeIn()) togetherWith (slideOutHorizontally { width -> -width } + fadeOut())
                         } else {
                             // Sign In animation
-                            (slideInHorizontally { width -> -width } + fadeIn()) togetherWith
-                                    (slideOutHorizontally { width -> width } + fadeOut())
+                            (slideInHorizontally { width -> -width } + fadeIn()) togetherWith (slideOutHorizontally { width -> width } + fadeOut())
                         }.using(
                             SizeTransform(clip = false)
                         )
@@ -321,7 +316,6 @@ fun LoginScreen(navController: NavController, context: Context) {
                             text = "Already have an account? Sign In",
                             style = CC.descriptionTextStyle(context),
                             fontWeight = FontWeight.Bold,
-                            color = CC.textColor(),
                             modifier = Modifier.padding(5.dp)
                         )
 
@@ -330,7 +324,6 @@ fun LoginScreen(navController: NavController, context: Context) {
                             text = "Don't have an account? Sign Up ",
                             style = CC.descriptionTextStyle(context),
                             fontWeight = FontWeight.Bold,
-                            color = CC.textColor(),
                             modifier = Modifier.padding(5.dp)
                         )
                     }
@@ -344,13 +337,18 @@ fun LoginScreen(navController: NavController, context: Context) {
 fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel) {
     userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {
         if (it != null) {
-            userViewModel.setSignedInUser(SignedInUser(id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""))
-            navController.navigate("homescreen"){
-                popUpTo("login"){inclusive = true}
+            userViewModel.setSignedInUser(
+                SignedInUser(
+                    id = "userID",
+                    email = FirebaseAuth.getInstance().currentUser?.email ?: ""
+                )
+            )
+            navController.navigate("homescreen") {
+                popUpTo("login") { inclusive = true }
             }
         } else {
-            navController.navigate("moredetails"){
-                popUpTo("login"){inclusive = true}
+            navController.navigate("moredetails") {
+                popUpTo("login") { inclusive = true }
             }
         }
     }
@@ -394,7 +392,7 @@ fun handleSignUp(
                         notificationViewModel.writeNotification(
                             notificationEntity = NotificationEntity(
                                 name = firstName,
-                                userId = userID ,
+                                userId = userID,
                                 id = id,
                                 title = "$firstName $lastName has Joined Uni Admin!",
                                 description = "Start a conversation by sending  a 👋",
