@@ -206,3 +206,12 @@ The `PasswordReset` composable function provides a screen for users to reset the
 *   The function uses `remember` and `mutableStateOf` to manage state variables.
 *   It handles loading states and provides visual feedback to the user.
 *   It uses Toast messages to inform the user about the status of the password reset process.
+
+### Sign In Screen
+![Sign In](Images/SignIn.png)
+
+### Sign Up Screen
+![Sign Up](Images/SignUp.png)
+
+### Password Reset Screen
+![Password Reset](Images/passwordReset.png)
