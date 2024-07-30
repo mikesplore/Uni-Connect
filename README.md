@@ -2,7 +2,7 @@
 
 ## Authentication
 
-### GoogleAuth
+[### GoogleAuth](app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt)
 
 **Functionality**
 
