@@ -4,7 +4,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,10 +21,7 @@ class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnno
     ) {
         viewModelScope.launch {
             courseAnnouncementDao.insertCourseAnnouncement(courseAnnouncement)
-            val courseAnnouncementRef = MyDatabase.database.child(courseID)
-                .child("courseAnnouncements")
-
-            courseAnnouncementRef.child(courseAnnouncement.announcementID)
+            database.child(courseID).child(courseAnnouncement.announcementID)
                 .setValue(courseAnnouncement).addOnSuccessListener {
                     onResult(true) // Indicate success
                 }.addOnFailureListener { exception ->
