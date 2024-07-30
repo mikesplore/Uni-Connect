@@ -41,7 +41,7 @@ import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import java.text.SimpleDateFormat
 import java.util.*
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -69,7 +69,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
     var refresh by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         notificationViewModel.fetchNotifications()
     }
 
