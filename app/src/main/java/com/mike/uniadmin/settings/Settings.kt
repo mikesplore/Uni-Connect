@@ -83,6 +83,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -96,7 +97,7 @@ import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
 import com.mike.uniadmin.model.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.FontPreferences
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -105,8 +106,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun Settings(navController: NavController, context: Context, mainActivity: MainActivity) {
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var signInMethod by remember { mutableStateOf("") }
     val fontPrefs = remember { FontPreferences(context) }
     val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var timeSpent by remember { mutableLongStateOf(0L) }
@@ -123,7 +122,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     val currentUser by userViewModel.user.observeAsState()
     val screenID = "SC8"
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
         savedFont = fontPrefs.getSelectedFont().toString()
         userViewModel.findUserByEmail(user?.email!!) {}
 
@@ -330,9 +329,8 @@ fun MyIconButton(icon: ImageVector, navController: NavController, route: String)
 
 @Composable
 fun DarkMode(context: Context) {
-    var isDarkMode by remember { mutableStateOf(true) }
-    val icon = if (isDarkMode) Icons.Filled.ModeNight else Icons.Filled.WbSunny
-    val iconDescription = if (isDarkMode) "Switch to Dark Mode" else "Switch to Light Mode"
+    val icon = if (DeviceTheme.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
+    val iconDescription = if (DeviceTheme.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
 
     Row(
         modifier = Modifier
@@ -356,9 +354,11 @@ fun DarkMode(context: Context) {
         Text("Dark Mode", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
         Switch(
             onCheckedChange = {
-                isDarkMode = it
-                GlobalColors.saveColorScheme(context, it)
-            }, checked = isDarkMode, colors = SwitchDefaults.colors(
+                DeviceTheme.darkMode.value = it
+                DeviceTheme.saveDarkModePreference(it)
+
+            }, checked = DeviceTheme.darkMode.value,
+            colors = SwitchDefaults.colors(
                 checkedThumbColor = CC.extraColor1(),
                 uncheckedThumbColor = CC.extraColor2(),
                 checkedTrackColor = CC.extraColor2(),
@@ -707,6 +707,7 @@ fun PasswordTextField(
             unfocusedContainerColor = CC.primary(),
             focusedIndicatorColor = CC.secondary(),
             unfocusedIndicatorColor = CC.tertiary(),
+            cursorColor = CC.textColor()
         ),
         modifier = Modifier
             .fillMaxWidth()
