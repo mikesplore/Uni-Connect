@@ -65,61 +65,9 @@ import com.mike.uniadmin.model.ScreenTime
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-data class MyColors(
-    val primary: Color,
-    val secondary: Color,
-    val tertiary: Color,
-    val textColor: Color,
-    val extraColor1: Color,
-    val extraColor2: Color
-)
-
-object GlobalColors {
-    private const val PREFS_NAME = "color_scheme_prefs"
-    private const val THEME_MODE_KEY = "theme_mode"
-
-    private val lightColors = MyColors(
-        primary = Color(0xFFE1F5FE),
-        secondary = Color(0xFFB2EBF2),
-        tertiary = Color(0xFF80DEEA),
-        textColor = Color(0xFF212121),
-        extraColor1 = Color(0xFFBBDEFB),
-        extraColor2 = Color(0xFF00BCD4)
-    )
-
-    private val darkColors = MyColors(
-        primary = Color(0xFF15202B),
-        secondary = Color(0xFF1B4F72),
-        tertiary = Color(0xFF117A65),
-        textColor = Color(0xFFE1E8ED),
-        extraColor1 = Color(0xFF1C2833),
-        extraColor2 = Color(0xFF2980B9)
-    )
-
-    var isDarkMode by mutableStateOf(true) // Initially set to false
-        private set
-
-    var currentColors by mutableStateOf(lightColors)
-        private set
-
-    fun loadColorScheme(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        isDarkMode = sharedPreferences.getBoolean(THEME_MODE_KEY, false) // Default to light
-        currentColors = if (isDarkMode) darkColors else lightColors
-    }
-
-    fun saveColorScheme(context: Context, isDark: Boolean) {
-        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit().putBoolean(THEME_MODE_KEY, isDark).apply()
-        isDarkMode = isDark
-        currentColors = if (isDarkMode) darkColors else lightColors
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Appearance(navController: NavController, context: Context) {
-    var isDarkMode by remember { mutableStateOf(GlobalColors.isDarkMode) }
     var currentFont by remember { mutableStateOf<FontFamily?>(null) }
     var fontUpdated by remember { mutableStateOf(false) }
     val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -134,7 +82,7 @@ fun Appearance(navController: NavController, context: Context) {
     }
 
     DisposableEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+
         onDispose {
             // Fetch the screen details
             MyDatabase.getScreenDetails(screenID) { screenDetails ->
@@ -169,11 +117,6 @@ fun Appearance(navController: NavController, context: Context) {
                 }
             }
         }
-    }
-    // Load color scheme from SharedPreferences and update dark mode based on system settings
-    LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
-        isDarkMode = GlobalColors.isDarkMode
     }
 
     Scaffold(
@@ -388,7 +331,7 @@ fun Background(context: Context) {
         Icons.Outlined.Book,
     )
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+        
 
     }
     // Calculate the number of repetitions needed to fill the screen
@@ -422,6 +365,6 @@ fun Background(context: Context) {
 @Composable
 fun ColorSettingsPreview() {
     val context = LocalContext.current
-    GlobalColors.loadColorScheme(context)
+    
     Appearance(rememberNavController(), context)
 }
