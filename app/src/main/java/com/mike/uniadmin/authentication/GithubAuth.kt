@@ -2,6 +2,11 @@ package com.mike.uniadmin.authentication
 
 import android.app.Activity
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,7 +44,7 @@ fun GitAuth(
 ) {
     val activity = LocalContext.current as Activity
     val provider = OAuthProvider.newBuilder("github.com")
-    var isLoading by remember { mutableStateOf(false) } // State to track loading
+    var isLoading by remember { mutableStateOf(false) }
     var success by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier
@@ -49,12 +54,11 @@ fun GitAuth(
                 .startActivityForSignInWithProvider(activity, provider.build())
                 .addOnSuccessListener {
                     success = true
-                    isLoading = false // Stop loading on success
+                    isLoading = false
                     onSignInSuccess()
-
                 }
                 .addOnFailureListener {
-                    isLoading = false // Stop loading on failure
+                    isLoading = false
                     onSignInFailure(it.message ?: "Unknown error")
                     Log.e("GithubAuth", "Sign-in failed", it)
                 }
@@ -65,20 +69,39 @@ fun GitAuth(
         .background(CC.secondary(), shape = RoundedCornerShape(10.dp))
         .height(60.dp)
         .width(130.dp),
-        contentAlignment = Alignment.Center) {
-        if (isLoading) {
-            // Show CircularProgressIndicator when loading
+        contentAlignment = Alignment.Center
+    ) {
+        // Use AnimatedVisibility for smooth transitions
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             CircularProgressIndicator(
-                modifier = Modifier.size(30.dp), color = CC.primary(), trackColor = CC.textColor()
+                modifier = Modifier.size(30.dp),
+                color = CC.primary(),
+                trackColor = CC.textColor()
+            )
+        }
 
-            )
-        } else if (success) {
-            //show a check to indicate successful authentication
+        AnimatedVisibility(
+            visible = success && !isLoading, // Show check only if successful and not loading
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut()
+        ) {
             Icon(
-                Icons.Default.Check, "Success", tint = CC.textColor()
+                Icons.Default.Check,
+                "Success",
+                tint = CC.textColor(),
+                modifier = Modifier.size(40.dp) // Adjust size as needed
             )
-        } else {
-            // Show GitHub image when not loading
+        }
+
+        AnimatedVisibility(
+            visible = !isLoading && !success, // Show image only if not loading and not successful
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Image(
                 painter = painterResource(R.drawable.github),
                 contentDescription = "GitHub",
@@ -87,5 +110,4 @@ fun GitAuth(
             )
         }
     }
-
 }
