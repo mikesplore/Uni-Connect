@@ -53,7 +53,7 @@ import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +79,7 @@ fun TimetableScreen(context: Context) {
     var courseCode by remember { mutableStateOf("") }
 
     LaunchedEffect(refresh) {
-        GlobalColors.loadColorScheme(context)
+        
         courseViewModel.fetchCourses()
         timetableViewModel.getAllCourseTimetables()
 
