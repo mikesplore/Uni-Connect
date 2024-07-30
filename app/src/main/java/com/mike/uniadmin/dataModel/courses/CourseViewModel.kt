@@ -16,6 +16,9 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
     private val _attendanceStates = MutableLiveData<Map<String, AttendanceState>>()
     val attendanceStates: LiveData<Map<String, AttendanceState>> = _attendanceStates
 
+    private val _isLoading = MutableLiveData(false) // Add isLoading state
+    val isLoading: LiveData<Boolean> = _isLoading
+
 
     init {
         fetchCourses()
@@ -26,13 +29,16 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
         repository.fetchAttendanceStates { fetchedStates ->
             val statesMap = fetchedStates.associateBy { it.courseID }
             _attendanceStates.value = statesMap
+
         }
     }
 
 
     fun fetchCourses() {
+        _isLoading.value = true // Set loading to true before fetching
         repository.fetchCourses { courses ->
             _courses.value = courses
+            _isLoading.value = false // Set loading to false after fetching
         }
     }
 
