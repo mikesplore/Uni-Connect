@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,7 +38,6 @@ import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignm
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.ui.theme.GlobalColors
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,11 +60,11 @@ fun AssignmentScreen(context: Context) {
     val assignments by assignmentViewModel.assignments.observeAsState()
     val courses by courseViewModel.courses.observeAsState()
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedCourseId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        GlobalColors.loadColorScheme(context)
+
         courseViewModel.fetchCourses()
     }
 
@@ -75,9 +75,11 @@ fun AssignmentScreen(context: Context) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Assignments", style = CC.titleTextStyle(context)) }, navigationIcon = {}, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = CC.primary(), titleContentColor = CC.textColor()
-            )
+            TopAppBar(title = { Text("Assignments", style = CC.titleTextStyle(context)) },
+                navigationIcon = {},
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = CC.primary(), titleContentColor = CC.textColor()
+                )
             )
         }, containerColor = CC.primary()
     ) {
@@ -89,12 +91,18 @@ fun AssignmentScreen(context: Context) {
         ) {
             courses?.let { courseList ->
                 ScrollableTabRow(
-                    containerColor = CC.primary(),
-                    selectedTabIndex = selectedTabIndex) {
+                    containerColor = CC.primary(), selectedTabIndex = selectedTabIndex
+                ) {
                     courseList.forEachIndexed { index, course ->
                         Tab(selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { course.courseName?.let { it1 -> Text(it1, style = CC.descriptionTextStyle(context)) } })
+                            text = {
+                                course.courseName?.let { it1 ->
+                                    Text(
+                                        it1, style = CC.descriptionTextStyle(context)
+                                    )
+                                }
+                            })
                     }
                 }
 
@@ -121,11 +129,9 @@ fun AssignmentCard(assignment: CourseAssignment, context: Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(
+            .padding(8.dp), colors = CardDefaults.cardColors(
             containerColor = CC.secondary()
-        ),
-        elevation = CardDefaults.elevatedCardElevation(4.dp)
+        ), elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             assignment.title?.let {
