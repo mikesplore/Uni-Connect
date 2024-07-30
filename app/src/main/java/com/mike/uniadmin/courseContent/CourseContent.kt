@@ -68,7 +68,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.chat.getCurrentDate
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
@@ -86,9 +85,11 @@ import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.randomColor
-import com.mike.uniadmin.ui.theme.GlobalColors
+
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -99,7 +100,7 @@ var background = randomColor.random()
 
 
 @Composable
-fun CourseContent(navController: NavController, context: Context, targetCourseID: String) {
+fun CourseContent(context: Context, targetCourseID: String) {
 
     val announcementAdmin = context.applicationContext as? UniAdmin
     val courseRepository = remember { announcementAdmin?.courseRepository }
@@ -141,13 +142,21 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
         )
     )
 
+    val userRepository = remember { announcementAdmin?.userRepository }
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            userRepository
+                ?: throw IllegalStateException("CourseTimetableRepository is null")
+        )
+    )
+
 
     val coroutineScope = rememberCoroutineScope()
     val courseInfo by courseViewModel.fetchedCourse.observeAsState(initial = null)
 
     LaunchedEffect(targetCourseID) {
         background = randomColor.random()
-        GlobalColors.loadColorScheme(context)
+        
         courseViewModel.getCourseDetailsByCourseID(targetCourseID)
         courseAnnouncementViewModel.getCourseAnnouncements(targetCourseID)
         courseAssignmentViewModel.getCourseAssignments(targetCourseID)
@@ -263,11 +272,11 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
 
                 when (selectedTabIndex) {
                     0 -> AnnouncementsItem(
-                        targetCourseID, courseAnnouncementViewModel, navController, context
+                        targetCourseID, courseAnnouncementViewModel, context, userViewModel
                     )
 
                     1 -> AssignmentsItem(
-                        targetCourseID, courseAssignmentViewModel, navController, context
+                        targetCourseID, courseAssignmentViewModel, context
                     )
 
                     2 -> TimetableItem(
@@ -287,8 +296,8 @@ fun CourseContent(navController: NavController, context: Context, targetCourseID
 fun AnnouncementsItem(
     courseID: String,
     courseAnnouncementViewModel: CourseAnnouncementViewModel,
-    navController: NavController,
-    context: Context
+    context: Context,
+    userViewModel: UserViewModel
 ) {
     var visible by remember { mutableStateOf(false) }
     val announcements =
@@ -320,11 +329,11 @@ fun AnnouncementsItem(
             AnimatedVisibility(visible) {
                 AddAnnouncementItem(
                     courseID,
-                    "Admin",
                     context,
                     visible,
                     onExpandedChange = { visible = !visible },
-                    courseAnnouncementViewModel
+                    courseAnnouncementViewModel,
+                    userViewModel
                 )
             }
             LazyColumn {
@@ -395,19 +404,28 @@ fun AnnouncementCard(
 @Composable
 fun AddAnnouncementItem(
     courseID: String,
-    senderName: String,
     context: Context,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
-    viewModel: CourseAnnouncementViewModel
+    courseViewModel: CourseAnnouncementViewModel,
+    userViewModel: UserViewModel
 ) {
+    val user by userViewModel.signedInUser.observeAsState()
     var title by remember { mutableStateOf("") }
-    val currentDate = Date()
-    val formatter =
-        DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()) // Use default locale
-    val date = formatter.format(currentDate)
     var description by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
+    var senderName by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        userViewModel.getSignedInUser()
+        user?.let {
+            it.email?.let { it1 ->
+                userViewModel.findUserByEmail(it1, onUserFetched = { fetchedUser ->
+                    senderName = fetchedUser?.firstName.toString()
+                })
+            }
+        }
+    }
 
     Column(modifier = Modifier
         .imePadding()
@@ -439,9 +457,9 @@ fun AddAnnouncementItem(
                             title = title,
                             description = description,
                             author = senderName,
-                            date = date
+                            date = getCurrentDate()
                         )
-                        viewModel.saveCourseAnnouncement(
+                        courseViewModel.saveCourseAnnouncement(
                             courseID = courseID, announcement = newAnnouncement
                         )
                         loading = false
@@ -503,14 +521,13 @@ fun AddTextField(
 fun AssignmentsItem(
     courseID: String,
     assignmentViewModel: CourseAssignmentViewModel,
-    navController: NavController,
     context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
     val assignment = assignmentViewModel.assignments.observeAsState(initial = emptyList())
 
     LaunchedEffect(courseID) {
-        GlobalColors.loadColorScheme(context)
+        
     }
     Column(
         modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
@@ -707,7 +724,7 @@ fun TimetableItem(
     val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
 
     LaunchedEffect(courseID) {
-        GlobalColors.loadColorScheme(context)
+        
         timetableViewModel.getCourseTimetables(courseID)
     }
 
@@ -933,7 +950,7 @@ fun DetailsItem(
     var expanded by remember { mutableStateOf(false) }
     val details = detailsViewModel.details.observeAsState()
     LaunchedEffect(courseID) {
-        GlobalColors.loadColorScheme(context)
+        
         detailsViewModel.getCourseDetails(courseID)
     }
     Column(
