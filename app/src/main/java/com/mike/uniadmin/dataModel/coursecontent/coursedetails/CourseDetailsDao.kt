@@ -14,6 +14,6 @@ interface CourseDetailDao {
     @Query("SELECT * FROM courseDetails WHERE courseCode = :courseId LIMIT 1")
     suspend fun getCourseDetail(courseId: String): CourseDetail?
 
-    @Query("SELECT courseName, courseCode, visits FROM courses WHERE courseCode = :courseId")
+    @Query("SELECT courseName, courseCode, courseImageLink, visits FROM courses WHERE courseCode = :courseId")
     suspend fun getCourseDetailsByID(courseId: String): CourseEntity?
 }
