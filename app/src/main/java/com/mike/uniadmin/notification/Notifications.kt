@@ -184,14 +184,16 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
         notification.title?.let {
             Text(
                 text = it,
-                style = CC.titleTextStyle(context),
-                modifier = Modifier.padding(bottom = 8.dp)
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(bottom = 8.dp),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
         notification.description?.let {
             Text(
                 text = it,
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -206,6 +208,16 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                     text = it,
                     style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
                 )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier
+                .height(30.dp)
+                .background(CC.extraColor1(), RoundedCornerShape(10.dp))
+                .padding(end = 5.dp),
+                contentAlignment = Alignment.Center){
+                Text("Hi ${notification.name} 👋",
+                    modifier = Modifier.padding(start = 10.dp),
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
             }
             IconButton(onClick = {
                 MyDatabase.generateChatID { id ->
@@ -244,7 +256,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                     contentDescription = "Wave",
                     tint = CC.secondary()
                 )
-            }
+            }}
         }
     }
 }
