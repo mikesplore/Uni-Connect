@@ -75,7 +75,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -94,7 +93,6 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
-
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -128,7 +126,7 @@ fun DiscussionScreen(
 
     val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var timeSpent by remember { mutableLongStateOf(0L) }
-    var messagetext by remember { mutableStateOf("") }
+    var messageText by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showUsers by remember { mutableStateOf(false) }
     var isSearchVisible by remember { mutableStateOf(false) }
@@ -236,13 +234,13 @@ fun DiscussionScreen(
                             }
                         }
                     }
-                    MessageInputRow(message = messagetext,
-                        onMessageChange = { messagetext = it },
+                    MessageInputRow(message = messageText,
+                        onMessageChange = { messageText = it },
                         onSendClick = {
-                            if (messagetext.isNotBlank() && currentUser.firstName?.isNotBlank() == true) {
+                            if (messageText.isNotBlank() && currentUser.firstName?.isNotBlank() == true) {
                                 MyDatabase.generateChatID { chatID ->
                                     val chat = ChatEntity(
-                                        message = messagetext,
+                                        message = messageText,
                                         senderName = currentUser.firstName,
                                         senderID = currentUser.id,
                                         time = getCurrentTimeInAmPm(),
@@ -253,7 +251,7 @@ fun DiscussionScreen(
                                     sendMessage(
                                         chat = chat, viewModel = chatViewModel, path = groupPath
                                     )
-                                    messagetext = ""
+                                    messageText = ""
                                 }
                             }
                         },
@@ -641,18 +639,13 @@ fun RowText(context: Context) {
 fun getCurrentDate(): String {
     val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
     val currentDate = Date()
-    return dateFormat.format(currentDate)
+    return dateFormat.format(currentDate).lowercase(Locale.getDefault()) // Convert to lowercase
 }
 
 fun getCurrentTimeInAmPm(): String {
     val currentTime = Date()
     val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return formatter.format(currentTime)
+    return formatter.format(currentTime).lowercase(Locale.getDefault()) // Convert to lowercase
 }
 
 
-@Preview
-@Composable
-fun PreviewMyScreen() {
-
-}
