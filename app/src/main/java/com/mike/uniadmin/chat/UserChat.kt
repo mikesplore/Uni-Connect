@@ -80,7 +80,6 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
-
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -128,10 +127,10 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
     var myUserState by remember { mutableStateOf("") }
     if (userState != null) {
-        if (userState!!.online == "online") {
-            myUserState = "Online"
+        myUserState = if (userState!!.online == "online") {
+            "Online"
         } else {
-            myUserState = "Last seen ${userState!!.lastTime}"
+            "Last seen ${userState!!.lastTime}"
         }
     }
 
