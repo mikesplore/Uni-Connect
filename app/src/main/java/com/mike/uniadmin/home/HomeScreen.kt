@@ -119,6 +119,7 @@ import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -162,14 +163,13 @@ fun HomeScreen(
         viewModel(factory = UserViewModelFactory(userRepository))
 
     // State observation
-    val currentPerson by userViewModel.signedInUser.observeAsState()
-    val user by userViewModel.user.observeAsState()
+    val signedInUser by userViewModel.signedInUser.observeAsState()
+    val fetchedUserDetails by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
 
     // Local state
-    val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -179,19 +179,19 @@ fun HomeScreen(
     val signedInUserLoading by userViewModel.isLoading.observeAsState()
 
     // Derived state
-    val userGroups = groups.filter { it.members?.contains(signedInUser.value?.id) ?: false }
+    val userGroups = groups.filter { it.members?.contains(fetchedUserDetails?.id) ?: false }
 
     // Side effects
-    LaunchedEffect(currentPerson, user) {
-        currentPerson?.email?.let { email -> userViewModel.findUserByEmail(email) {} }
-
-        user?.let {
-            signedInUser.value = it
+    LaunchedEffect(signedInUser, fetchedUserDetails) {
+            userViewModel.getSignedInUser()
+            signedInUser?.let {
+                it.email?.let { it1 -> userViewModel.findUserByEmail(it1) {} }
+            }
             userViewModel.checkAllUserStatuses()
             chatViewModel.fetchGroups()
             userViewModel.fetchUsers()
-            userViewModel.checkUserStateByID(it.id)
-        }
+        fetchedUserDetails?.id?.let { userViewModel.checkUserStateByID(it) }
+
 
         getUpdate { fetched ->
             if (fetched != null) {
@@ -208,10 +208,10 @@ fun HomeScreen(
                 showBottomSheet = false
             }
         }, containerColor = CC.primary(), sheetState = sheetState, content = {
-            signedInUser.value?.let {
+            fetchedUserDetails?.let {
                 ModalDrawerItem(
                     signedInUser = it,
-                    user = user!!,
+                    user = fetchedUserDetails!!,
                     context = context,
                     navController = navController,
                     users = users,
@@ -221,6 +221,7 @@ fun HomeScreen(
                     activity = activity
                 )
             }
+
         })
     }
     CheckUpdate(context)
@@ -244,8 +245,8 @@ fun HomeScreen(
             ) {
                 if (signedInUserLoading == true) {
                     CircularProgressIndicator(color = CC.textColor())
-                } else if (signedInUser.value != null) {
-                    SideProfile(signedInUser.value!!, context)
+                } else if (signedInUser != null) {
+                    fetchedUserDetails?.let { SideProfile(it, context) }
                 } else{
                     Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
                 }
@@ -312,7 +313,7 @@ fun HomeScreen(
                         action = Intent.ACTION_SEND
                         putExtra(
                             Intent.EXTRA_TEXT,
-                            "${signedInUser.value?.firstName} invites you to join Uni Konnect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                            "${fetchedUserDetails?.firstName} invites you to join Uni Konnect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
                         ) // Customize the text
                         type = "text/plain"
                     }
