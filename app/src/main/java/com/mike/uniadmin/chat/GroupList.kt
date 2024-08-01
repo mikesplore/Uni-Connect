@@ -125,7 +125,7 @@ fun UniGroups(context: Context, navController: NavController) {
             enter = expandVertically(animationSpec = tween(durationMillis = 300)),
             exit = shrinkVertically(animationSpec = tween(durationMillis = 300))
         ) {
-            AddGroupSection(signedInUser, context, chatViewModel, users)
+            AddGroupSection(signedInUser, context, chatViewModel, users, onComplete = { showAddGroup = false })
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -163,7 +163,8 @@ fun AddGroupSection(
     user: UserEntity,
     context: Context,
     chatViewModel: ChatViewModel,
-    users: List<UserEntity>
+    users: List<UserEntity>,
+    onComplete: (Boolean) -> Unit = {}
 ) {
     var groupName by remember { mutableStateOf("") }
     var groupDescription by remember { mutableStateOf("") }
@@ -331,6 +332,7 @@ fun AddGroupSection(
                                             isLoading = false
                                             expanded = false
                                             groupDescription = ""
+                                            onComplete(true)
                                             groupName = ""
                                             imageLink = ""
                                             if (it) {
@@ -386,7 +388,8 @@ fun EditGroupSection(
             CC.SingleLinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
-                onValueChange = { groupName = it },
+                onValueChange = { newValue ->
+                    groupName = newValue },
                 label = "Group Name",
                 enabled = true,
                 singleLine = true,
@@ -397,7 +400,8 @@ fun EditGroupSection(
             CC.SingleLinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
-                onValueChange = { groupDescription = it },
+                onValueChange = { newValue ->
+                    groupDescription = newValue },
                 label = "Description",
                 enabled = true,
                 singleLine = true,
@@ -408,7 +412,8 @@ fun EditGroupSection(
             CC.SingleLinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
-                onValueChange = { imageLink = it },
+                onValueChange = { newValue ->
+                    imageLink = newValue },
                 label = "Image link",
                 enabled = true,
                 singleLine = true,
@@ -467,8 +472,8 @@ fun EditGroupSection(
                             modifier = Modifier.padding(start = 8.dp)
                         )
                         selectedMembers?.let {
-                            Checkbox(checked = it.contains(user.id), onCheckedChange = {
-                                selectedMembers = if (it) {
+                            Checkbox(checked = it.contains(user.id), onCheckedChange = { newValue ->
+                                selectedMembers = if (newValue) {
                                     selectedMembers?.plus(user.id)
                                 } else {
                                     selectedMembers?.minus(user.id)
