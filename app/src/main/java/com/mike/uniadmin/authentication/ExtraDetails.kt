@@ -69,7 +69,7 @@ fun MoreDetails(context: Context, navController: NavController) {
         )
     )
 
-    var addloading by remember { mutableStateOf(false) }
+    var addLoading by remember { mutableStateOf(false) }
     val loggedInUser = FirebaseAuth.getInstance().currentUser
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -161,7 +161,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        addloading = true
+                        addLoading = true
                         MyDatabase.generateIndexNumber { userId ->
                             val newUser = UserEntity(
                                 id = userId,
@@ -172,7 +172,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                             )
                             userViewModel.setSignedInUser(signedInUser = SignedInUser(id = "userID", email = email.toString()))
                             userViewModel.writeUser(newUser, onSuccess = {
-                                addloading = false
+                                addLoading = false
                                 MyDatabase.generateNotificationID { id ->
                                     notificationViewModel.writeNotification(
                                         notificationEntity = NotificationEntity(
@@ -199,7 +199,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                     Row(
                         modifier = Modifier, verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (addloading) {
+                        if (addLoading) {
                             CircularProgressIndicator(
                                 color = CC.secondary(), trackColor = CC.textColor()
                             )
