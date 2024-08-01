@@ -118,7 +118,7 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
                 AnimatedVisibility(visible = searchVisible) {
                     TextField(value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        label = { Text("Search Participants") },
+                        placeholder = { Text("Search Participants") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
