@@ -151,10 +151,9 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
     fun getTimetableByDay(day: String, onResult: (List<CourseTimetable>?) -> Unit) {
         viewModelScope.launch {
             val cachedData = courseTimetableDao.getCourseTimetablesByDay(day)
-            if (cachedData !=null) {
+            if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
-            }
-            else{
+            } else {
                 Log.e("Empty", "Empty database")
             }
         }
