@@ -352,12 +352,12 @@ fun Dashboard(navController: NavController, context: Context) {
 
             if (timetablesLoading == true) {
                 LoadingTodayTimetable()
-            } else if (timetables.isNullOrEmpty()) {
+            } else if (timetables==null) {
                 Row(
                     modifier = Modifier
-                        .background(CC.secondary(), RoundedCornerShape(10.dp))
+                        .background(CC.extraColor1(), RoundedCornerShape(10.dp))
                         .height(200.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth(0.9f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
@@ -381,9 +381,7 @@ fun TodayTimetable(courseName: String, timetable: CourseTimetable, context: Cont
             .padding(start = 20.dp, end = 20.dp)
             .border(
                 1.dp,
-                CC
-                    .extraColor2()
-                    .copy(0.5f),
+                CC.extraColor2().copy(0.5f),
                 RoundedCornerShape(10.dp)
             )
             .height(200.dp)
@@ -463,7 +461,6 @@ fun LoadingTodayTimetable() {
         ) {
             CC.ColorProgressIndicator(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
                     .fillMaxWidth(0.9f)
                     .height(20.dp)
             )
@@ -475,7 +472,6 @@ fun LoadingTodayTimetable() {
                 Spacer(modifier = Modifier.width(10.dp))
                 CC.ColorProgressIndicator(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
                         .width(100.dp)
                         .height(20.dp)
                 )
@@ -488,7 +484,6 @@ fun LoadingTodayTimetable() {
                 Spacer(modifier = Modifier.width(10.dp))
                 CC.ColorProgressIndicator(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
                         .width(100.dp)
                         .height(20.dp)
                 )
@@ -501,7 +496,6 @@ fun LoadingTodayTimetable() {
                 CC.ColorProgressIndicator(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(10.dp))
                 )
             }
 
@@ -710,19 +704,18 @@ fun LoadingCourseBox() {
                 .background(CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
                 .fillMaxWidth(), verticalArrangement = Arrangement.SpaceBetween
         ) {
+            Spacer(modifier = Modifier.height(1.dp))
             Row(
                 modifier = Modifier
                     .height(20.dp)
                     .width(100.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(start = 10.dp, top = 5.dp)
+                    .padding(start = 10.dp)
                     .fillMaxWidth()
             ) {
                 CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
             }
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
                     .height(25.dp)
                     .padding(start = 10.dp, end = 10.dp)
                     .fillMaxWidth()
@@ -733,7 +726,6 @@ fun LoadingCourseBox() {
                 modifier = Modifier
                     .width(100.dp)
                     .height(25.dp)
-                    .clip(RoundedCornerShape(10.dp))
                     .padding(start = 10.dp, bottom = 5.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1063,7 +1055,7 @@ fun TopAppBarContent(
                 Icon(
                     Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = CC.textColor(),
+                    tint = CC.secondary(),
                     modifier = Modifier.fillMaxSize()
                 )
                 Box(
@@ -1085,7 +1077,7 @@ fun TopAppBarContent(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .heightIn(max = 500.dp)
-                    .width(150.dp)
+                    .width(160.dp)
                     .background(CC.extraColor1())
             ) {
                 Column(
@@ -1093,12 +1085,12 @@ fun TopAppBarContent(
                 ) {
                     if (notifications != null && notifications!!.isNotEmpty()) {
                         notifications!!.take(5).forEach { notification ->
-                            NotificationTitleContent(notification, context, navController)
+                            NotificationTitleContent(notification, context)
                         }
                         HorizontalDivider()
                         TextButton(
                             onClick = {
-
+                                navController.navigate("notifications")
                                 expanded = false
                             }, modifier = Modifier.fillMaxWidth()
                         ) {
@@ -1119,11 +1111,10 @@ fun TopAppBarContent(
 
 @Composable
 fun NotificationTitleContent(
-    notification: NotificationEntity, context: Context, navController: NavController
+    notification: NotificationEntity, context: Context
 ) {
     Row(modifier = Modifier
         .height(30.dp)
-        .clickable { navController.navigate("notifications") }
         .padding(5.dp)
         .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         notification.title?.let {
