@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -76,7 +75,7 @@ import com.mike.uniadmin.model.MyDatabase.generateIndexNumber
 import com.mike.uniadmin.model.MyDatabase.writeFcmToken
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController, context: Context) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -160,15 +159,17 @@ fun LoginScreen(navController: NavController, context: Context) {
                 ) {
                     GoogleAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
                         handleAuthSuccess(navController, userViewModel)
-                    }, onSignInFailure = {
-                        Toast.makeText(context, "Sign-in failed: $it", Toast.LENGTH_SHORT).show()
+                    }, onSignInFailure = { failure ->
+                        Toast.makeText(context, "Sign-in failed: $failure", Toast.LENGTH_SHORT)
+                            .show()
                         isGoogleLoading = false
                     })
 
                     GitAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
                         handleAuthSuccess(navController, userViewModel)
-                    }, onSignInFailure = {
-                        Toast.makeText(context, "Sign-in failed: $it", Toast.LENGTH_SHORT).show()
+                    }, onSignInFailure = { failure ->
+                        Toast.makeText(context, "Sign-in failed: $failure", Toast.LENGTH_SHORT)
+                            .show()
                         isGithubLoading = false
                     })
                 }
@@ -193,37 +194,30 @@ fun LoginScreen(navController: NavController, context: Context) {
                         if (targetState) {
                             Spacer(modifier = Modifier.height(20.dp))
                             CC.SingleLinedTextField(
-                                value = firstName,
-                                onValueChange = { firstName = it },
-                                label = "First Name",
-                                singleLine = true,
-                                context = context
+                                value = firstName, onValueChange = { newValue ->
+                                    firstName = newValue
+                                }, label = "First Name", singleLine = true, context = context
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             CC.SingleLinedTextField(
-                                value = lastName,
-                                onValueChange = { lastName = it },
-                                label = "Last Name",
-                                singleLine = true,
-                                context = context
+                                value = lastName, onValueChange = { newValue ->
+                                    lastName = newValue
+                                }, label = "Last Name", singleLine = true, context = context
                             )
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
                         CC.SingleLinedTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = "Email",
-                            singleLine = true,
-                            context = context
+                            value = email, onValueChange = { newValue ->
+                                email = newValue
+                            }, label = "Email", singleLine = true, context = context
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
                         CC.PasswordTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = "Password",
-                            context = context
+                            value = password, onValueChange = { newValue ->
+                                password = newValue
+                            }, label = "Password", context = context
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -339,8 +333,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
         if (it != null) {
             userViewModel.setSignedInUser(
                 SignedInUser(
-                    id = "userID",
-                    email = FirebaseAuth.getInstance().currentUser?.email ?: ""
+                    id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
                 )
             )
             navController.navigate("homescreen") {
@@ -446,12 +439,12 @@ fun handleSignIn(
                     }
                 }
 
-                FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { tokenTask ->
+                    if (!tokenTask.isSuccessful) {
+                        Log.w("FCM", "Fetching FCM registration token failed", tokenTask.exception)
                         return@OnCompleteListener
                     }
-                    val token = task.result
+                    val token = tokenTask.result
                     generateFCMID { id ->
                         val fcmToken = Fcm(id = id, token = token)
                         writeFcmToken(token = fcmToken)
