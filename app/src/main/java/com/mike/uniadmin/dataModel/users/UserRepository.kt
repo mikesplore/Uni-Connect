@@ -208,12 +208,7 @@ class UserRepository
         preferences.studentID?.let {
             viewModelScope.launch {
                 userPreferencesDao.insertUserPreferences(preferences)
-                database.child(" User Preferences").child(it).setValue(preferences)
-                    .addOnSuccessListener {
-                        onSuccess(true)
-                    }.addOnFailureListener {
-                        onSuccess(false)
-                    }
+                onSuccess(true)
             }
         }
     }
@@ -223,15 +218,6 @@ class UserRepository
             val cachedPreferences = userPreferencesDao.getUserPreferences(userId)
             if (cachedPreferences != null) {
                 onPreferencesFetched(cachedPreferences)
-            } else {
-
-                database.child(" User Preferences").child(userId).get()
-                    .addOnSuccessListener { snapshot ->
-                        val preferences = snapshot.getValue(UserPreferencesEntity::class.java)
-                        onPreferencesFetched(preferences)
-                    }.addOnFailureListener {
-                        onPreferencesFetched(null) // Handle failure, e.g., by returning null
-                    }
             }
         }
     }
