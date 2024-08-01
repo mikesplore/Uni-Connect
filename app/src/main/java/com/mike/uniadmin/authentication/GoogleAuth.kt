@@ -32,7 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
-import com.mike.uniadmin.R
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
