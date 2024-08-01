@@ -183,14 +183,11 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             Appearance(navController = navController, context)
         }
 
-        composable("homescreen",
-            enterTransition = {
-                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(500))
-            }) {
+        composable("homescreen"){
             HomeScreen(navController,context,pagerState,mainActivity,screens,coroutineScope)
         }
         composable("unichat"){
-            UniChat(navController,context,pagerState, mainActivity,uniChatScreens, coroutineScope  )
+            UniChat(navController,context,pagerState, uniChatScreens, coroutineScope  )
         }
 
         composable("courseResource/{courseCode}",
