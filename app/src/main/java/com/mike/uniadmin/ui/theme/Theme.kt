@@ -36,8 +36,8 @@ private val LightColorScheme = lightColorScheme(
 )
 
 
-val IndieFlower = FontFamily(
-    Font(R.font.indieflower, FontWeight.Normal),
+val EAustralia = FontFamily(
+    Font(R.font.eaustralia, FontWeight.Normal),
 
     )
 
