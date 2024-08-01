@@ -31,7 +31,7 @@ interface UserDao {
     suspend fun getSignedInUser(): SignedInUser?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSignedInUser(signedInUser: SignedInUser?)
+    suspend fun insertSignedInUser(signedInUser: SignedInUser)
 
     @Query("DELETE FROM signedinuser")
     suspend fun deleteSignedInUser()
