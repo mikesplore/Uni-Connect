@@ -180,13 +180,14 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     fun sendMessage(messageContent: String) {
         try {
             MyDatabase.generateChatID { chatId ->
+                val currentTime = System.currentTimeMillis() // Save the current time as a Long
                 val newMessage = MessageEntity(
                     id = chatId,
                     message = messageContent,
                     senderName = user?.firstName.orEmpty(),
                     senderID = user?.id.orEmpty(),
                     recipientID = targetUserId,
-                    time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date()),
+                    timeStamp = currentTime, // Save timestamp as Long
                     date = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()),
                     profileImageLink = user?.profileImageLink.orEmpty()
                 )
@@ -313,9 +314,16 @@ fun MessageBubble(
                         text = it, style = CC.descriptionTextStyle(context)
                     )
                 }
-                message.time?.let {
+                // Convert the timestamp to a formatted time string
+                val formattedTime =
+                    message.timeStamp?.let { Date(it) }?.let {
+                        SimpleDateFormat("hh:mm a", Locale.getDefault())
+                            .format(it)
+                    }
+
+                if (formattedTime != null) {
                     Text(
-                        text = it,
+                        text = formattedTime,
                         style = CC.descriptionTextStyle(context),
                         fontSize = 12.sp,
                         textAlign = TextAlign.End,
