@@ -23,13 +23,11 @@ data class UserEntity(
     val lastName: String? = null,
     val email: String? = null,
     val phoneNumber: String? = null,
-    val gender: String? = null,
     val profileImageLink: String? = null
 )
 {
     constructor() : this(
         "",
-        null,
         null,
         null,
         null,
