@@ -77,7 +77,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "splashscreen"){
+    NavHost(navController = navController, startDestination = "homescreen"){
 
         composable("splashscreen"){
             SplashScreen(navController = navController, context)
@@ -146,7 +146,7 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             UniGroups(context, navController)
         }
 
-        composable("moredetails"){
+        composable("moreDetails"){
             MoreDetails(context, navController)
 
         }
