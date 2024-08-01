@@ -38,7 +38,8 @@ package com.mike.uniadmin
 //HOME SCREEN
 //the modal drawer is blinking then disappearing
 //the profile icon is showing null at start before loading the image
-//the timetable is null initially, which requires you to open the course content for it to load
+//the timetable is null initially, which requires you to
+// open the course content for it to load
 
 //GROUP CHAT SCREEN
 //the users list to have some padding both on top and bottom
@@ -52,4 +53,4 @@ package com.mike.uniadmin
 //fix the text fields for new assignments (imepadding()) needed
 
 //COURSE CONTENT SCREEN
-//add scrollable column to display all the course details content
+//add scrollable column property to display all the course details content
