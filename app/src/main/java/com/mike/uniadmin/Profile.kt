@@ -479,7 +479,7 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = {
-                    showPuzzle = true
+                    showPuzzle = !showPuzzle
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = CC.secondary()
                 ), shape = RoundedCornerShape(10.dp)
