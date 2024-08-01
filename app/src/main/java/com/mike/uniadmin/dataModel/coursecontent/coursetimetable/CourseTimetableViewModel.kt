@@ -19,18 +19,26 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     private val _timetablesToday = MutableLiveData<List<CourseTimetable>?>()
     val timetablesToday: MutableLiveData<List<CourseTimetable>?> = _timetablesToday
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
     // Fetch timetables for a specific course
     fun getCourseTimetables(courseID: String) {
+        _isLoading.value = true
         repository.getCourseTimetables(courseID) { timetables ->
             _timetables.value = timetables
+            _isLoading.value = false
         }
     }
 
     //Fetch timetables for all courses
     fun getAllCourseTimetables() {
+        _isLoading.value = true
         repository.getAllCourseTimetables { timetables ->
             _courseTimetables.value = timetables
+
         }
+        _isLoading.value = false
     }
 
     // Save a new timetable
@@ -49,8 +57,10 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     }
 
     fun getTimetableByDay(day: String) {
+        _isLoading.value = true
         repository.getTimetableByDay(day) { timetables ->
             _timetablesToday.value = timetables
+            _isLoading.value = false
         }
     }
 }
