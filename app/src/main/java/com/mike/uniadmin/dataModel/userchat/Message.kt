@@ -9,7 +9,7 @@ data class MessageEntity(
     var message: String? = null,
     var senderName: String? = null,
     var senderID: String? = null,
-    var time: String? = null,
+    var timeStamp: Long? = null,
     var date: String? = null,
     var recipientID: String? = null,
     var profileImageLink: String? = null
