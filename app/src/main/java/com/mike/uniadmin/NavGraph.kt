@@ -52,7 +52,7 @@ import com.mike.uniadmin.ui.theme.Appearance
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun NavigationGraph(context: Context,  mainActivity: MainActivity){
+fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
@@ -70,58 +70,92 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
     )
 
     val users by userViewModel.users.observeAsState(emptyList())
-    val signedInUser by remember { mutableStateOf(UserEntity())}
+    val signedInUser by remember { mutableStateOf(UserEntity()) }
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
     val uniChatScreens = listOf(
         UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
-    NavHost(navController = navController, startDestination = "homescreen"){
 
-        composable("splashscreen"){
+    NavHost(navController = navController, startDestination = "homescreen") {
+
+        composable("splashscreen") {
             SplashScreen(navController = navController, context)
         }
-//        composable("videos"){
-//            Videos(navController = navController, context)
-//        }
-        composable("login"){
+
+        composable("login") {
             LoginScreen(navController = navController, context)
         }
-        composable("addgroup"){
-            AddGroupSection(signedInUser,context,chatViewModel,users)
 
+        composable("addgroup") {
+            AddGroupSection(signedInUser, context, chatViewModel, users)
         }
 
-        composable("assignments"){
+        composable("assignments", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             AssignmentScreen(context)
         }
 
-        composable("timetable"){
+        composable("timetable", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             TimetableScreen(context)
         }
 
-        composable("manageattendance"){
+        composable("manageattendance", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             ManageAttendanceScreen(context)
         }
 
-        composable("dashboard"){
+        composable("dashboard", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             Dashboard(navController = navController, context)
         }
-        composable("profile"){
+
+        composable("profile", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             ProfileScreen(navController = navController, context)
         }
-        composable("settings"){
+
+        composable("settings", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             Settings(navController = navController, context, mainActivity)
         }
-        composable("users"){
+
+        composable("users", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             ParticipantsScreen(navController = navController, context)
         }
-        composable("chat/{userId}", enterTransition = {
-            fadeIn(animationSpec = tween(1000)) + slideInVertically(animationSpec = tween(1000)) { initialState -> initialState }
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(1000)) + slideOutVertically(animationSpec = tween(1000)) { finalState -> finalState }
-        }, arguments = listOf(navArgument("userId") { type = NavType.StringType })
+
+        composable("chat/{userId}",
+            enterTransition = {
+                fadeIn(animationSpec = tween(1000)) + slideInVertically(animationSpec = tween(1000)) { initialState -> initialState }
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(1000)) + slideOutVertically(animationSpec = tween(1000)) { finalState -> finalState }
+            },
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
             UserChatScreen(
                 navController,
@@ -129,11 +163,15 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
                 backStackEntry.arguments?.getString("userId") ?: ""
             )
         }
-        composable("GroupChat/{groupId}", enterTransition = {
-            fadeIn(animationSpec = tween(1000)) + slideInVertically(animationSpec = tween(1000)) { initialState -> initialState }
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(1000)) + slideOutVertically(animationSpec = tween(1000)) { finalState -> finalState }
-        }, arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+
+        composable("GroupChat/{groupId}",
+            enterTransition = {
+                fadeIn(animationSpec = tween(1000)) + slideInVertically(animationSpec = tween(1000)) { initialState -> initialState }
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(1000)) + slideOutVertically(animationSpec = tween(1000)) { finalState -> finalState }
+            },
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
         ) { backStackEntry ->
             DiscussionScreen(
                 navController,
@@ -142,55 +180,84 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
             )
         }
 
-        composable("groups"){
+        composable("groups", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             UniGroups(context, navController)
         }
 
-        composable("moreDetails"){
+        composable("moreDetails", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             MoreDetails(context, navController)
-
         }
 
-        composable("announcements"){
+        composable("announcements", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             AnnouncementsScreen(context)
         }
 
-        composable("manageusers"){
+        composable("manageusers", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             ManageUsers(navController, context)
         }
 
-        composable("notifications"){
+        composable("notifications", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             PhoneNotifications(navController, context)
         }
 
-//        composable("statistics"){
-//            Statistics(navController, context)
-//        }
-
-
-//        composable("assignments"){
-//            AssignmentScreen(navController = navController, context)
-//        }
-
         composable("passwordreset",
             enterTransition = {
-            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(500))
-        }) {
+                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(500))
+            }) {
             PasswordReset(navController = navController, context)
         }
 
-        composable("appearance"){
+        composable("appearance", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
             Appearance(navController = navController, context)
         }
 
-        composable("homescreen"){
-            HomeScreen(navController,context,pagerState,mainActivity,screens,coroutineScope)
+        composable("homescreen", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
+            HomeScreen(navController, context, pagerState, mainActivity, screens, coroutineScope)
         }
-        composable("unichat"){
-            UniChat(navController,context,pagerState, uniChatScreens, coroutineScope  )
+
+        composable("unichat", enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }) {
+            UniChat(navController, context, pagerState, uniChatScreens, coroutineScope)
         }
 
         composable("courseResource/{courseCode}",
+            enterTransition = {
+                fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(500))
+            },
             arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseResources(
@@ -200,6 +267,12 @@ fun NavigationGraph(context: Context,  mainActivity: MainActivity){
         }
 
         composable("courseContent/{courseId}",
+            enterTransition = {
+                fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(500))
+            },
             arguments = listOf(navArgument("courseId") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseContent(
