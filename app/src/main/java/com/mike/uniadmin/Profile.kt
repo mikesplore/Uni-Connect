@@ -164,10 +164,6 @@ fun ProfileScreen(navController: NavController, context: Context) {
                 DisplayImage(context, userViewModel, updated, onUpdateChange = { updated = !updated })
                 Spacer(modifier = Modifier.height(20.dp))
                 ProfileDetails(context, userViewModel, updated, onUpdateChange = { updated = !updated })
-                Spacer(modifier = Modifier.height(20.dp))
-                currentUser?.let {
-                    GenderRow(it, context, userViewModel)
-                }
                 Spacer(modifier = Modifier.height(50.dp))
                 DangerZone(context, userViewModel, navController)
             }
@@ -440,94 +436,6 @@ fun MyDetails(
     }
 }
 
-
-@Composable
-fun GenderRow(currentUser: UserEntity, context: Context, viewModel: UserViewModel) {
-    var selectedMale by remember { mutableStateOf(false) }
-    var selectedFemale by remember { mutableStateOf(false) }
-    var save by remember { mutableStateOf(false) }
-    var gender by remember { mutableStateOf(currentUser.gender) }
-
-    gender = if (!selectedFemale && !selectedMale) {
-        "not set"
-    } else if (!selectedFemale) {
-        "Male"
-    } else {
-        "Female"
-    }
-    if (gender == "Male") {
-        selectedMale = true
-    } else {
-        selectedFemale = true
-    }
-
-    if (save) {
-        viewModel.writeUser(
-            user = UserEntity(
-                id = currentUser.id,
-                firstName = currentUser.firstName,
-                lastName = currentUser.lastName,
-                phoneNumber = currentUser.phoneNumber,
-                gender = gender,
-                email = currentUser.email,
-            )
-        ) {
-            save = false
-
-        }
-    }
-    Row(
-        modifier = Modifier
-            .height(70.dp)
-            .fillMaxWidth(0.9f),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text("Gender", style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
-        Spacer(modifier = Modifier.width(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(1f), horizontalArrangement = Arrangement.Center
-        ) {
-            IconButton(
-                onClick = {
-                    save = true
-                    selectedMale = true
-                    selectedFemale = false
-                }, modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        if (selectedMale) CC.extraColor1() else CC.secondary(), CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Male,
-                    contentDescription = "Male",
-                    tint = if (selectedMale) CC.extraColor2() else CC.extraColor1(),
-                    modifier = Modifier.size(50.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(100.dp))
-            IconButton(
-                onClick = {
-                    save = true
-                    selectedFemale = true
-                    selectedMale = false
-                }, modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        if (selectedFemale) CC.extraColor1() else CC.secondary(), CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Female,
-                    contentDescription = "Female",
-                    tint = if (selectedFemale) CC.extraColor2() else CC.extraColor1(),
-                    modifier = Modifier.size(50.dp)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavController) {
