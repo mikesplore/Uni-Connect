@@ -91,8 +91,9 @@ fun AnnouncementsScreen(context: Context) {
     var refresh by remember { mutableStateOf(true) }
     var editingAnnouncementId by remember { mutableStateOf<String?>(null) }
 
+    val announcementsLoading by announcementViewModel.isLoading.observeAsState()
+
     LaunchedEffect(refresh) {
-        
         announcementViewModel.fetchAnnouncements()
         refresh = false
     }
@@ -100,14 +101,12 @@ fun AnnouncementsScreen(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(title = {}, actions = {
-
                 IconButton(onClick = {
                     addAnnouncement = !addAnnouncement
                 }) {
                     Icon(
                         Icons.Default.Add, "Add", tint = CC.textColor()
                     )
-
                 }
 
                 IconButton(onClick = {
@@ -119,13 +118,10 @@ fun AnnouncementsScreen(context: Context) {
                     Icon(
                         Icons.Default.Refresh, "Refresh", tint = CC.textColor()
                     )
-
                 }
             }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = CC.primary(),
-
-                )
-            )
+                containerColor = CC.primary()
+            ))
         }, containerColor = CC.primary()
     ) {
         Column(
@@ -165,31 +161,51 @@ fun AnnouncementsScreen(context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            LazyColumn(modifier = Modifier.fillMaxWidth(0.9f)) {
-                announcements?.let { announcements ->
-                    items(announcements) { announcement ->
-                        val isEditing = editingAnnouncementId == announcement.id
 
-                        AnnouncementCard(announcement = announcement, onEdit = {
-                            editingAnnouncementId = if (isEditing) null else announcement.id
-                        }, onDelete = { id ->
-                            announcementViewModel.deleteAnnouncement(id) { success ->
-                                if (success) {
-                                    refresh = !refresh
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Failed to delete Announcement",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+            when {
+                announcementsLoading == true -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = CC.textColor())
+                    }
+                }
+                announcements.isNullOrEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No announcements available", color = CC.textColor())
+                    }
+                }
+                else -> {
+                    LazyColumn(modifier = Modifier.fillMaxWidth(0.9f)) {
+                        announcements?.let { announcements ->
+                            items(announcements) { announcement ->
+                                val isEditing = editingAnnouncementId == announcement.id
 
+                                AnnouncementCard(announcement = announcement, onEdit = {
+                                    editingAnnouncementId = if (isEditing) null else announcement.id
+                                }, onDelete = { id ->
+                                    announcementViewModel.deleteAnnouncement(id) { success ->
+                                        if (success) {
+                                            refresh = !refresh
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to delete Announcement",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                }, context = context, isEditing = isEditing, onEditComplete = {
+                                    editingAnnouncementId = null
+                                }, announcementViewModel = announcementViewModel
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
                             }
-                        }, context = context, isEditing = isEditing, onEditComplete = {
-                            editingAnnouncementId = null
-                        }, announcementViewModel = announcementViewModel
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        }
                     }
                 }
             }

@@ -63,8 +63,9 @@ fun AssignmentScreen(context: Context) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedCourseId by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
+    val isLoading by assignmentViewModel.isLoading.observeAsState()
 
+    LaunchedEffect(Unit) {
         courseViewModel.fetchCourses()
     }
 
@@ -75,13 +76,16 @@ fun AssignmentScreen(context: Context) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Assignments", style = CC.titleTextStyle(context)) },
+            TopAppBar(
+                title = { Text("Assignments", style = CC.titleTextStyle(context)) },
                 navigationIcon = {},
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CC.primary(), titleContentColor = CC.textColor()
+                    containerColor = CC.primary(),
+                    titleContentColor = CC.textColor()
                 )
             )
-        }, containerColor = CC.primary()
+        },
+        containerColor = CC.primary()
     ) {
         Column(
             modifier = Modifier
@@ -89,40 +93,73 @@ fun AssignmentScreen(context: Context) {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            courses?.let { courseList ->
-                ScrollableTabRow(
-                    containerColor = CC.primary(), selectedTabIndex = selectedTabIndex
-                ) {
-                    courseList.forEachIndexed { index, course ->
-                        Tab(selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = {
-                                course.courseName?.let { it1 ->
-                                    Text(
-                                        it1, style = CC.descriptionTextStyle(context)
-                                    )
-                                }
-                            })
+            when {
+                courses.isNullOrEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No courses available", color = CC.textColor())
                     }
                 }
-
-                assignments?.let { assignmentList ->
-                    LazyColumn {
-                        items(assignmentList) { assignment -> // Use the correct items overload
-                            AssignmentCard(assignment = assignment, context)
-                        }
-                    }
-                } ?: run {
+                isLoading == true -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = CC.textColor())
+                    }
+                }
+                else -> {
+                    courses?.let { courseList ->
+                        ScrollableTabRow(
+                            containerColor = CC.primary(), selectedTabIndex = selectedTabIndex
+                        ) {
+                            courseList.forEachIndexed { index, course ->
+                                Tab(
+                                    selected = selectedTabIndex == index,
+                                    onClick = { selectedTabIndex = index },
+                                    text = {
+                                        course.courseName?.let { courseName ->
+                                            Text(
+                                                courseName, style = CC.descriptionTextStyle(context)
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        assignments?.let { assignmentList ->
+                            if (assignmentList.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = "No assignments available", color = CC.textColor())
+                                }
+                            } else {
+                                LazyColumn {
+                                    items(assignmentList) { assignment ->
+                                        AssignmentCard(assignment = assignment, context)
+                                    }
+                                }
+                            }
+                        } ?: run {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = CC.textColor())
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun AssignmentCard(assignment: CourseAssignment, context: Context) {
