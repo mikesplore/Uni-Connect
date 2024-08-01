@@ -60,6 +60,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -158,14 +159,14 @@ fun HomeScreen(
     val userViewModel: UserViewModel =
         viewModel(factory = UserViewModelFactory(userRepository))
 
-// State observation
+    // State observation
     val currentPerson by userViewModel.signedInUser.observeAsState()
     val user by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
 
-// Local state
+    // Local state
     val signedInUser = remember { mutableStateOf<UserEntity?>(null) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -173,10 +174,12 @@ fun HomeScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var update by remember { mutableStateOf(Update()) }
 
-// Derived state
+    val signedInUserLoading by userViewModel.isLoading.observeAsState()
+
+    // Derived state
     val userGroups = groups.filter { it.members?.contains(signedInUser.value?.id) ?: false }
 
-// Side effects
+    // Side effects
     LaunchedEffect(currentPerson, user) {
         currentPerson?.email?.let { email -> userViewModel.findUserByEmail(email) {} }
 
@@ -195,7 +198,7 @@ fun HomeScreen(
         }
     }
 
-    //main content starts here
+    // Main content starts here
     if (showBottomSheet) {
         ModalBottomSheet(tonalElevation = 5.dp, onDismissRequest = {
             scope.launch {
@@ -237,8 +240,13 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                signedInUser.value?.let { SideProfile(it, context) }
-
+                if (signedInUserLoading == true) {
+                    CircularProgressIndicator(color = CC.textColor())
+                } else if (signedInUser.value != null) {
+                    SideProfile(signedInUser.value!!, context)
+                } else{
+                    Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
+                }
             }
             Column(
                 modifier = Modifier
@@ -427,23 +435,26 @@ fun HomeScreen(
                 }
             }, containerColor = CC.primary()
         ) { innerPadding ->
-            HorizontalPager(
-                state = pagerState,
-                count = screens.size,
-                modifier = Modifier.padding(innerPadding),
-                flingBehavior = PagerDefaults.flingBehavior(state = pagerState)
-            ) { page ->
-                when (screens[page]) {
-                    Screen.Home -> Dashboard(navController, context)
-                    Screen.Assignments -> AssignmentScreen(context)
-                    Screen.Announcements -> AnnouncementsScreen(context)
-                    Screen.Timetable -> TimetableScreen(context)
-                    Screen.Attendance -> ManageAttendanceScreen(context)
+            Box(modifier = Modifier.fillMaxSize()) {
+                HorizontalPager(
+                    state = pagerState,
+                    count = screens.size,
+                    modifier = Modifier.padding(innerPadding),
+                    flingBehavior = PagerDefaults.flingBehavior(state = pagerState)
+                ) { page ->
+                    when (screens[page]) {
+                        Screen.Home -> Dashboard(navController, context)
+                        Screen.Assignments -> AssignmentScreen(context)
+                        Screen.Announcements -> AnnouncementsScreen(context)
+                        Screen.Timetable -> TimetableScreen(context)
+                        Screen.Attendance -> ManageAttendanceScreen(context)
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun SideProfile(user: UserEntity, context: Context) {
@@ -845,7 +856,7 @@ fun SideBarItem(icon: ImageVector, text: String, context: Context, onClicked: ()
     TextButton(onClick = onClicked) {
         Row(
             modifier = Modifier
-                .height(40.dp)
+                .height(30.dp)
                 .background(CC.secondary())
                 .fillMaxWidth(0.9f),
             verticalAlignment = Alignment.CenterVertically,
