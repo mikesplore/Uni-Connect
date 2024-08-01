@@ -24,16 +24,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,18 +64,23 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
+import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ParticipantsScreen(navController: NavController, context: Context) {
+fun UniChat(navController: NavController, context: Context) {
 
     val uniAdmin = context.applicationContext as? UniAdmin
     val messageRepository = remember { uniAdmin?.messageRepository }
@@ -90,140 +99,124 @@ fun ParticipantsScreen(navController: NavController, context: Context) {
 
     val auth = FirebaseAuth.getInstance()
     val users by userViewModel.users.observeAsState(initial = emptyList())
+    val messages by messageViewModel.messages.observeAsState(initial = emptyList()) // Assume you have a list of messages
     val errorMessage by remember { mutableStateOf<String?>(null) }
     var searchVisible by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     LaunchedEffect(key1 = Unit) {
-        
         auth.currentUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
     }
 
-    // Filter and sort users
-    val filteredUsers = users.filter { user ->
-            user.firstName?.contains(searchQuery, ignoreCase = true) == true || user.lastName?.contains(
-                searchQuery,
-                ignoreCase = true
-            ) ?: false
-        }.sortedByDescending { it.id }
+    // Map users to their latest message timestamp
+    val userMessages = users.map { user ->
+        user to messages.filter { message ->
+            message.senderID == user.id || message.recipientID == user.id
+        }.maxByOrNull { it.timeStamp ?: 0L } // Safely get the latest message for each user
+    }
 
+// Filter and sort users
+    val filteredUsers = userMessages.filter { (user, _) ->
+        user.firstName?.contains(searchQuery, ignoreCase = true) == true || user.lastName?.contains(
+            searchQuery,
+            ignoreCase = true
+        ) == true
+    }.sortedWith(compareByDescending<Pair<UserEntity, MessageEntity?>> {
+        it.second?.timeStamp ?: -1L // Sort by timestamp, use -1L for users with no messages
+    }.thenBy {
+        it.first.firstName // Secondary sort by first name to ensure stable sorting
+    }).map { it.first } // Extract only the user part
 
-    Scaffold(
-        content = {
-            Column(
-                modifier = Modifier.fillMaxSize()
+    Scaffold(topBar = {
+        TopAppBar(title = {}, actions = {
+            IconButton(onClick = { searchVisible = !searchVisible }) {
+                Icon(
+                    imageVector = Icons.Default.Search, contentDescription = "Search"
+                )
+            }
+        }, colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = CC.primary(), titleContentColor = CC.textColor()
+        )
+        )
+    }, content = {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
+            AnimatedVisibility(visible = searchVisible) {
+                TextField(value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search Participants") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = CC.primary(),
+                        unfocusedIndicatorColor = CC.textColor(),
+                        focusedIndicatorColor = CC.secondary(),
+                        unfocusedContainerColor = CC.primary(),
+                        focusedTextColor = CC.textColor(),
+                        unfocusedTextColor = CC.textColor(),
+                        focusedLabelColor = CC.secondary(),
+                        unfocusedLabelColor = CC.textColor()
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+
             ) {
-                AnimatedVisibility(visible = searchVisible) {
-                    TextField(value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Search Participants") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = CC.primary(),
-                            unfocusedIndicatorColor = CC.textColor(),
-                            focusedIndicatorColor = CC.secondary(),
-                            unfocusedContainerColor = CC.primary(),
-                            focusedTextColor = CC.textColor(),
-                            unfocusedTextColor = CC.textColor(),
-                            focusedLabelColor = CC.secondary(),
-                            unfocusedLabelColor = CC.textColor()
-                        ),
-                        shape = RoundedCornerShape(10.dp)
+                Text(
+                    "Uni Chat",
+                    style = CC.titleTextStyle(context)
+                        .copy(fontWeight = FontWeight.Bold, fontSize = 35.sp)
+                )
+            }
+
+            when {
+                errorMessage != null -> {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        style = CC.descriptionTextStyle(context)
                     )
                 }
-                when {
-                    errorMessage != null -> {
-                        Text(
-                            text = errorMessage!!,
-                            color = Color.Red,
-                            style = CC.descriptionTextStyle(context)
-                        )
-                    }
 
-                    filteredUsers.isEmpty() -> {
-                        Text(
-                            text = "No participants found.",
-                            style = CC.descriptionTextStyle(context)
-                        )
-                    }
+                filteredUsers.isEmpty() -> {
+                    Text(
+                        text = "No participants found.",
+                        style = CC.descriptionTextStyle(context)
+                    )
+                }
 
-                    else -> {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .fillMaxSize()
-                        ) {
-                            items(filteredUsers) { user ->
-                                ProfileCard(
-                                    user,
-                                    navController,
-                                    context,
-                                    userViewModel,
-                                    messageViewModel
-                                )
-                            }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxSize()
+                    ) {
+                        items(filteredUsers) { user ->
+                            ProfileCard(
+                                user, navController, context, userViewModel, messageViewModel
+                            )
                         }
                     }
                 }
             }
+        }
 
-        }, containerColor = CC.primary()
+    }, containerColor = CC.primary()
     )
-
-    ModalNavigationDrawer(modifier = Modifier.fillMaxWidth(0.5f),
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                // Display list of users to start a conversation with
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(CC.secondary())
-                        .padding(16.dp)
-                ) {
-                    items(users) { user ->
-                        UserListItem(user, navController)
-                    }
-                }
-            }
-        },
-        content = {
-
-        })
 }
 
-@Composable
-fun UserListItem(user: UserEntity, navController: NavController) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .clickable { navController.navigate("chat/${user.id}") }
-        .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.size(40.dp)) {
-            Image(
-                painter = if (user.profileImageLink?.isNotBlank() == true) rememberAsyncImagePainter(user.profileImageLink) else painterResource(
-                    id = R.drawable.student
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .background(Color.Gray),
-                contentScale = ContentScale.Crop
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = "${user.firstName} ${user.lastName}",
-                style = CC.titleTextStyle(navController.context).copy(fontSize = 16.sp)
-            )
-        }
-    }
-}
 
 @Composable
 fun ProfileCard(
@@ -252,13 +245,12 @@ fun ProfileCard(
     val latestMessage = messages?.lastOrNull()
     val messageCount = messages?.size ?: 0
 
-    Card(
-        modifier = Modifier
-            .clickable { navController.navigate("chat/${user.id}") }
-            .fillMaxWidth(),
+    Card(modifier = Modifier
+        .clickable { navController.navigate("chat/${user.id}") }
+        .padding(start = 10.dp)
+        .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = CC.primary())
-    ) {
+        colors = CardDefaults.cardColors(containerColor = CC.primary())) {
         Row(
             modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top
         ) {
@@ -288,8 +280,7 @@ fun ProfileCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -322,10 +313,15 @@ fun ProfileCard(
                             style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
                             color = textColor
                         )
-                        Text(
-                            text = latestMessage?.time ?: "",
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                        )
+                        val formattedTime = latestMessage?.timeStamp?.let { Date(it) }?.let {
+                            SimpleDateFormat("hh:mm a", Locale.getDefault()).format(it)
+                        }
+                        if (formattedTime != null) {
+                            Text(
+                                text = formattedTime,
+                                style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                            )
+                        }
                     }
                 }
 
@@ -351,18 +347,22 @@ fun ProfileCard(
                         "Message Content",
                         "The last message for $conversationId is ${latestMessage?.message}"
                     )
-                    if (messageCount >=1) {
-                    Box(modifier = Modifier
-                        .widthIn(min = 20.dp)
-                        .clip(CircleShape)
-                        .background(CC.extraColor2(), CircleShape),
-                        contentAlignment = Alignment.Center){
-                    Text(
-                        text = messageCount.toString(),
-                        style = CC.descriptionTextStyle(context),
-                        modifier = Modifier.padding(2.dp),
-                        color = CC.textColor()
-                    )}}
+                    if (messageCount >= 1) {
+                        Box(
+                            modifier = Modifier
+                                .widthIn(min = 20.dp)
+                                .clip(CircleShape)
+                                .background(CC.extraColor2(), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = messageCount.toString(),
+                                style = CC.descriptionTextStyle(context),
+                                modifier = Modifier.padding(2.dp),
+                                color = CC.textColor()
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -379,7 +379,6 @@ fun createAnnotatedText(message: String): AnnotatedString {
 }
 
 
-
 @Composable
 fun createAnnotatedMessage(message: String): AnnotatedString {
     val emojiRegex = Regex("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]")
@@ -392,9 +391,7 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
 
             append(message.substring(startIndex, emojiIndex))
             addStyle(
-                SpanStyle(color = CC.textColor().copy(alpha = 0.5f)),
-                startIndex,
-                emojiIndex
+                SpanStyle(color = CC.textColor().copy(alpha = 0.5f)), startIndex, emojiIndex
             ) // Apply color to non-emoji text
 
             append(emoji)
@@ -404,9 +401,7 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
 
         append(message.substring(startIndex))
         addStyle(
-            SpanStyle(color = CC.textColor().copy(alpha = 0.5f)),
-            startIndex,
-            message.length
+            SpanStyle(color = CC.textColor().copy(alpha = 0.5f)), startIndex, message.length
         ) // Apply color to non-emoji text
     }
 }
