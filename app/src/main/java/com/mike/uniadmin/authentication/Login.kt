@@ -347,7 +347,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                 popUpTo("login") { inclusive = true }
             }
         } else {
-            navController.navigate("moredetails") {
+            navController.navigate("moreDetails") {
                 popUpTo("login") { inclusive = true }
             }
         }
@@ -380,7 +380,6 @@ fun handleSignUp(
                         lastName = lastName,
                         profileImageLink = "",
                         phoneNumber = "",
-                        gender = ""
                     )
                     val signedInUser = SignedInUser(id = "userID", email = email)
                     userViewModel.setSignedInUser(signedInUser)
@@ -442,7 +441,7 @@ fun handleSignIn(
                             userViewModel.setSignedInUser(signedInUser)
                         } else {
                             Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
-                            navController.navigate("moredetails")
+                            navController.navigate("moreDetails")
                         }
                     }
                 }
