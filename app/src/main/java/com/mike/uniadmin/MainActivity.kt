@@ -52,7 +52,7 @@ object DeviceTheme {
     }
 
     private fun loadDarkModePreference(): Boolean {
-        return sharedPreferences.getBoolean("DARK_MODE", false) // Default to false if not found
+        return sharedPreferences.getBoolean("DARK_MODE", true) // Default to false if not found
     }
 }
 
