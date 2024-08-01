@@ -14,11 +14,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.mike.uniadmin.announcements.AnnouncementsScreen
@@ -27,21 +22,13 @@ import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
-import com.mike.uniadmin.chat.AddGroupSection
 import com.mike.uniadmin.chat.DiscussionScreen
-import com.mike.uniadmin.chat.ParticipantsScreen
 import com.mike.uniadmin.chat.UniChat
 import com.mike.uniadmin.chat.UniGroups
-import com.mike.uniadmin.chat.UniScreen
 import com.mike.uniadmin.chat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
 import com.mike.uniadmin.courseResources.CourseResources
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.ManageUsers
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.home.Dashboard
 import com.mike.uniadmin.home.HomeScreen
 import com.mike.uniadmin.model.Screen
@@ -56,26 +43,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
-    val application = context.applicationContext as UniAdmin
-    val chatRepository = remember { application.chatRepository }
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
-    )
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
 
-    val users by userViewModel.users.observeAsState(emptyList())
-    val signedInUser by remember { mutableStateOf(UserEntity()) }
     val screens = listOf(
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
-    )
-    val uniChatScreens = listOf(
-        UniScreen.Chats, UniScreen.Groups, UniScreen.Status
     )
 
     NavHost(navController = navController, startDestination = "homescreen") {
@@ -86,10 +56,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
 
         composable("login") {
             LoginScreen(navController = navController, context)
-        }
-
-        composable("addgroup") {
-            AddGroupSection(signedInUser, context, chatViewModel, users)
         }
 
         composable("assignments", enterTransition = {
@@ -140,12 +106,12 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             Settings(navController = navController, context, mainActivity)
         }
 
-        composable("users", enterTransition = {
+        composable("unichat", enterTransition = {
             fadeIn(animationSpec = tween(500))
         }, exitTransition = {
             fadeOut(animationSpec = tween(500))
         }) {
-            ParticipantsScreen(navController = navController, context)
+            UniChat(navController = navController, context)
         }
 
         composable("chat/{userId}",
@@ -241,14 +207,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             fadeOut(animationSpec = tween(500))
         }) {
             HomeScreen(navController, context, pagerState, mainActivity, screens, coroutineScope)
-        }
-
-        composable("unichat", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
-        }) {
-            UniChat(navController, context, pagerState, uniChatScreens, coroutineScope)
         }
 
         composable("courseResource/{courseCode}",
