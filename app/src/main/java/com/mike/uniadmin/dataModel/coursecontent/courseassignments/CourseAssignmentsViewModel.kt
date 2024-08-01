@@ -18,10 +18,15 @@ class CourseAssignmentViewModel(private val repository: CourseAssignmentReposito
     private val _assignments = MutableLiveData<List<CourseAssignment>>()
     val assignments: LiveData<List<CourseAssignment>> = _assignments
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
     // Fetch assignments for a specific course
     fun getCourseAssignments(courseID: String) {
+        _isLoading.value = true
         repository.getCourseAssignments(courseID) { assignments ->
             _assignments.value = assignments
+            _isLoading.value = false
         }
     }
 
