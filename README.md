@@ -7,7 +7,7 @@
     - [Google Authentication](#google-authentication)
     - [GitHub Authentication](#github-authentication)
     - [Authentication Screen](#authentication-screen)
-    - [MoreDetails Composable](#moredetails-composable)
+    - [MoreDetails Composable](#moreDetails-composable)
     - [Password Reset](#password-reset)
 - [Visuals](#visuals)
 
@@ -100,7 +100,7 @@ The `GitAuth` composable function handles GitHub authentication using [Firebase]
 
 - **`handleAuthSuccess`:**
     - Called after successful third-party authentication.
-    - Fetches user by email and navigates to the appropriate screen (`homescreen` or `moredetails`).
+    - Fetches user by email and navigates to the appropriate screen (`homescreen` or `moreDetails`).
 - **`handleSignUp`:**
     - Validates email and password fields.
     - Registers the user with Firebase Authentication.
@@ -122,7 +122,7 @@ This structure ensures the screen dynamically handles both sign-in and sign-up p
 
 ## MoreDetails Composable
 
-**File**: [MoreDetails.kt](app/src/main/java/com/mike/uniadmin/ui/moredetails/MoreDetails.kt)
+**File**: [MoreDetails.kt](app/src/main/java/com/mike/uniadmin/ui/moreDetails/MoreDetails.kt)
 
 ### Description
 
