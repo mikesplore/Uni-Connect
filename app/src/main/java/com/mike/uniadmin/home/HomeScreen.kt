@@ -53,8 +53,10 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
@@ -226,9 +228,9 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .background(
-                    CC.secondary(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
+                    CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
                 )
-                .fillMaxHeight(0.7f)
+                .fillMaxHeight(0.8f)
                 .fillMaxWidth(0.5f),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
@@ -274,9 +276,8 @@ fun HomeScreen(
                         chatViewModel.fetchGroups()
                         navController.navigate("unichat")
                     })
-                SideBarItem(
-                    icon = Icons.Default.BarChart,
-                    text = "Statistics",
+                SideBarItem(icon = Icons.Default.Groups,
+                    text = "Groups",
                     context,
                     onClicked = {
                         scope.launch {
@@ -284,7 +285,18 @@ fun HomeScreen(
                         }
                         userViewModel.fetchUsers()
                         chatViewModel.fetchGroups()
-                        navController.navigate("statistics")
+                        navController.navigate("groups")
+                    })
+                SideBarItem(icon = Icons.Default.Notifications,
+                    text = "Notifications",
+                    context,
+                    onClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
+                        navController.navigate("notifications")
                     })
                 SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
                     scope.launch {
@@ -322,7 +334,7 @@ fun HomeScreen(
             }
             Row(
                 modifier = Modifier
-                    .background(CC.tertiary())
+                    .background(CC.extraColor1())
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
@@ -462,7 +474,11 @@ fun SideProfile(user: UserEntity, context: Context) {
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .background(CC.extraColor2()),
+            .background(
+                CC
+                    .extraColor2()
+                    .copy(0.5f)
+            ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -857,7 +873,6 @@ fun SideBarItem(icon: ImageVector, text: String, context: Context, onClicked: ()
         Row(
             modifier = Modifier
                 .height(30.dp)
-                .background(CC.secondary())
                 .fillMaxWidth(0.9f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
