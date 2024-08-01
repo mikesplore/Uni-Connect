@@ -78,13 +78,13 @@ fun TimetableScreen(context: Context) {
     val courses by courseViewModel.courses.observeAsState(emptyList())
     var courseCode by remember { mutableStateOf("") }
 
+    val coursesLoading by courseViewModel.isLoading.observeAsState()
+    val timetableLoading by timetableViewModel.isLoading.observeAsState()
+
     LaunchedEffect(refresh) {
-        
         courseViewModel.fetchCourses()
         timetableViewModel.getAllCourseTimetables()
-
     }
-
 
     Scaffold(
         topBar = {
@@ -99,7 +99,6 @@ fun TimetableScreen(context: Context) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh",
                             tint = CC.textColor())
                     }
-
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CC.primary(),
@@ -131,52 +130,83 @@ fun TimetableScreen(context: Context) {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Add Timetable", style = CC.titleTextStyle(context).copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
-                Spacer(modifier = Modifier.height(10.dp))
-                CC.SingleLinedTextField(
-                    value = courseCode,
-                    onValueChange = { newText ->
-                        courseCode = newText
-                    },
-                    label = "Course Code",
-                    context = context,
-                    singleLine = true
-                )
-                AddTimetableItem(courseCode, timetableViewModel, context, expanded = visible, onExpandedChange = {visible = !visible})
+                    Text(text = "Add Timetable", style = CC.titleTextStyle(context).copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    CC.SingleLinedTextField(
+                        value = courseCode,
+                        onValueChange = { newText ->
+                            courseCode = newText
+                        },
+                        label = "Course Code",
+                        context = context,
+                        singleLine = true
+                    )
+                    AddTimetableItem(courseCode, timetableViewModel, context, expanded = visible, onExpandedChange = { visible = !visible })
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
-            if (timetables.isNotEmpty()) {
-                val groupedTimetables = timetables.groupBy { fetchedTimetable ->
-                    fetchedTimetable.day }
-                LazyColumn {
-                    groupedTimetables.forEach { (day, timetablesForDay) ->
-                        if (day != null) { // Check for null day
-                            item {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(text = day, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
-                                Spacer(modifier = Modifier.height(10.dp))
-                            }
-                            items(timetablesForDay) { timetable ->
-                                val courseName = courses.find { it.courseCode == timetable.courseID }?.courseName
-                                if (courseName != null) { // Check for null courseName
-                                    TimetableCard(timetable = timetable, courseName = courseName, context = context)
+
+            when {
+                coursesLoading == true -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = CC.textColor())
+                    }
+                }
+                courses.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No courses available", color = CC.textColor())
+                    }
+                }
+                timetableLoading == true -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = CC.textColor())
+                    }
+                }
+                timetables.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No timetables available", color = CC.textColor())
+                    }
+                }
+                else -> {
+                    val groupedTimetables = timetables.groupBy { fetchedTimetable ->
+                        fetchedTimetable.day
+                    }
+                    LazyColumn {
+                        groupedTimetables.forEach { (day, timetablesForDay) ->
+                            if (day != null) { // Check for null day
+                                item {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(text = day, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                }
+                                items(timetablesForDay) { timetable ->
+                                    val courseName = courses.find { course ->
+                                        course.courseCode == timetable.courseID }?.courseName
+                                    if (courseName != null) { // Check for null courseName
+                                        TimetableCard(timetable = timetable, courseName = courseName, context = context)
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = CC.textColor())
-                }
             }
         }
     }
 }
+
 
 @Composable
 fun TimetableCard(timetable: CourseTimetable, courseName: String?, context: Context) {
