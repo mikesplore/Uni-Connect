@@ -3,7 +3,7 @@
     <font
         android:fontStyle="normal"
         android:fontWeight="300"
-        android:font="@font/indieflower" />
+        android:font="@font/eaustralia" />
     <font
         android:fontStyle="normal"
         android:fontWeight="400"
