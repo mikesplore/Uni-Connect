@@ -50,7 +50,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -162,7 +161,7 @@ fun currentFontFamily(context: Context): FontFamily {
     val selectedFontName = fontPrefs.getSelectedFont()
 
     return when (selectedFontName) {
-        "Indie Flower" -> IndieFlower
+        "Edu Australia" -> EAustralia
         "Dancing Script" -> DancingScript
         "Shadow Into Light" -> ShadowIntoLight
         "Caveat" -> Caveat
@@ -179,7 +178,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
     var fontUpdated by remember { mutableStateOf(false) }
     var selectedFontFamily by remember { mutableStateOf<FontFamily?>(null) }
     val fontFamilies = mapOf(
-        "Indie Flower" to IndieFlower,
+        "Edu Australia" to EAustralia,
         "Shadow Into Light" to ShadowIntoLight,
         "Dancing Script" to DancingScript,
         "Caveat" to Caveat,
