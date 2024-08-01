@@ -5,6 +5,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -34,10 +36,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Timelapse
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -129,6 +133,12 @@ fun Dashboard(navController: NavController, context: Context) {
         )
     )
 
+    val notificationAdmin = context.applicationContext as UniAdmin
+    val notificationRepository = remember { notificationAdmin.notificationRepository }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
+    )
+
     val timetables by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
     val user by userViewModel.user.observeAsState()
@@ -137,6 +147,11 @@ fun Dashboard(navController: NavController, context: Context) {
     var currentUser by remember { mutableStateOf(UserEntity()) }
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
     val coursesLoading by courseViewModel.isLoading.observeAsState()
+    val timetablesLoading by timetableViewModel.isLoading.observeAsState()
+
+    val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
+
+
 
     LaunchedEffect(user) {
 
@@ -144,12 +159,22 @@ fun Dashboard(navController: NavController, context: Context) {
         chatViewModel.fetchGroups()
         userViewModel.getSignedInUser()
         timetableViewModel.getTimetableByDay(CC.currentDay())
+        timetables?.let { timetableList ->
+            timetableList.forEach { timetable ->
+                timetable.courseID?.let { courseViewModel.getCourseDetailsByCourseID(courseCode = it) }
+                Log.d("Course", timetable.courseID.toString())
+            }
+        }
         signedInUser?.email?.let {
             userViewModel.findUserByEmail(it) { fetchedUser ->
                 if (fetchedUser != null) {
                     currentUser = fetchedUser
                 }
             }
+        }
+        while (true) {
+            isOnline.value = isDeviceOnline(context)
+            delay(10000L) // Check every 10 seconds
         }
     }
 
@@ -161,7 +186,9 @@ fun Dashboard(navController: NavController, context: Context) {
         TopAppBarContent(
             signedInUser = currentUser,
             context = context,
-            navController = navController
+            navController = navController,
+            userViewModel = userViewModel,
+            notificationViewModel = notificationViewModel
         )
         Column(
             modifier = Modifier
@@ -169,6 +196,20 @@ fun Dashboard(navController: NavController, context: Context) {
                 .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            AnimatedVisibility(visible = !isOnline.value) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Warning, "Warning", tint = Color.Red)
+                    Text(
+                        "You are not connected to the internet",
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(start = 15.dp)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -179,23 +220,40 @@ fun Dashboard(navController: NavController, context: Context) {
             }
             Spacer(modifier = Modifier.height(20.dp))
             if (coursesLoading == true) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    items(5) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 15.dp)
+                                .height(100.dp)
+                        ) {
+                            LoadingCourseItem()
+                        }
+                    }
+                }
+            } else if (courses.isEmpty()) {
                 Box(
-                    modifier = Modifier.height(100.dp)
-                ){
-                    CircularProgressIndicator(color = CC.textColor())
+                    modifier = Modifier
+                        .height(100.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No courses found", style = CC.descriptionTextStyle(context))
+                }
 
-                }
             } else {
-            LazyRow(
-                modifier = Modifier
-                    .padding(start = 15.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between items
-            ) {
-                items(courses) { course ->
-                    CourseItem(course, context, navController)
+                LazyRow(
+                    modifier = Modifier
+                        .padding(start = 15.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between items
+                ) {
+                    items(courses) { course ->
+                        CourseItem(course, context, navController)
+                    }
                 }
-            }
             }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -208,50 +266,74 @@ fun Dashboard(navController: NavController, context: Context) {
             }
             Spacer(modifier = Modifier.height(10.dp))
             if (coursesLoading == true) {
-                Box(
-                    modifier = Modifier.height(100.dp)
-                ){
-                    CircularProgressIndicator(color = CC.textColor())
-
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    items(5) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 15.dp)
+                                .height(200.dp)
+                        ) {
+                            LoadingCourseBox()
+                        }
+                    }
                 }
-            } else {
-            val sortedCourses =
-                courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
+            } else if(courses.isNotEmpty()) {
+                val sortedCourses =
+                    courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
 
-            LazyRow(
-                modifier = Modifier
-                    .padding(start = 15.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(sortedCourses) { course -> // Use the sorted list
-                    CourseBox(course, context, navController, onClicked = {
-                        courseViewModel.saveCourse(
-                            course.copy(
-                                visits = course.visits?.plus(
-                                    1
+                LazyRow(
+                    modifier = Modifier
+                        .padding(start = 15.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(sortedCourses) { course -> // Use the sorted list
+                        CourseBox(course, context, navController, onClicked = {
+                            courseViewModel.saveCourse(
+                                course.copy(
+                                    visits = course.visits?.plus(
+                                        1
+                                    )
                                 )
                             )
-                        )
-                    })
+                        })
+                    }
                 }
-            }}
+            }else{
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                    ) {
+                    Text("No courses found", style = CC.descriptionTextStyle(context))
+                    }
+            }
 
 
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                "Latest Announcement",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(start = 15.dp)
-            )}
+                Text(
+                    "Latest Announcement",
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(start = 15.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(10.dp))
             if (announcementsLoading == true) {
-                Box(
-                    modifier = Modifier.height(100.dp)
-                ){
-                    CircularProgressIndicator(color = CC.textColor())
 
+                LoadingAnnouncementCard()
+
+            } else if (announcements == null) {
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No announcements found", style = CC.descriptionTextStyle(context))
                 }
             } else {
                 announcements?.firstOrNull()?.let { announcement ->
@@ -267,32 +349,33 @@ fun Dashboard(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            if(timetables != null) {
-                LazyRow {
-                    items(timetables!!) { timetable ->
-                        TodayTimetable(timetable, context, courseViewModel)
-                    }
-                }
-            }else{
-                Row (
+
+            if (timetablesLoading == true) {
+                LoadingTodayTimetable()
+            } else if (timetables.isNullOrEmpty()) {
+                Row(
                     modifier = Modifier
+                        .background(CC.secondary(), RoundedCornerShape(10.dp))
                         .height(200.dp)
-                        .fillMaxWidth()
-                ){
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Text("No timetable found for today", style = CC.descriptionTextStyle(context))
                 }
+            } else {
+                LazyRow {
+                    items(timetables!!) { timetable ->
+                        TodayTimetable("", timetable, context)
+                    }
+                }
             }
-
         }
     }
 }
 
 @Composable
-fun TodayTimetable(timetable: CourseTimetable, context: Context, courseViewModel: CourseViewModel) {
-    val course by courseViewModel.fetchedCourse.observeAsState()
-    LaunchedEffect(course) {
-        timetable.courseID?.let { courseViewModel.getCourseDetailsByCourseID(it) }
-    }
+fun TodayTimetable(courseName: String, timetable: CourseTimetable, context: Context) {
     Card(
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp)
@@ -304,7 +387,8 @@ fun TodayTimetable(timetable: CourseTimetable, context: Context, courseViewModel
                 RoundedCornerShape(10.dp)
             )
             .height(200.dp)
-            .width(350.dp),
+            .padding(start = 10.dp, end = 10.dp)
+            .fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(
             4.dp
         ),
@@ -318,14 +402,13 @@ fun TodayTimetable(timetable: CourseTimetable, context: Context, courseViewModel
                 .fillMaxSize()
         ) {
             Text(
-                "${course?.courseName}",
+                courseName,
                 style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.Timelapse, "time",
-                    tint = CC.textColor()
+                    Icons.Default.Timelapse, "time", tint = CC.textColor()
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
@@ -336,16 +419,14 @@ fun TodayTimetable(timetable: CourseTimetable, context: Context, courseViewModel
             Spacer(modifier = Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.LocationOn, "Location",
-                    tint = CC.textColor()
+                    Icons.Default.LocationOn, "Location", tint = CC.textColor()
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text("${timetable.venue}", style = CC.descriptionTextStyle(context))
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row(
-                modifier = Modifier.fillMaxSize(1f),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxSize(1f), verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(modifier = Modifier.width(10.dp))
                 Text("Please Keep Time!", style = CC.titleTextStyle(context))
@@ -356,8 +437,78 @@ fun TodayTimetable(timetable: CourseTimetable, context: Context, courseViewModel
 
 }
 
+@Composable
+fun LoadingTodayTimetable() {
+    Card(
+        modifier = Modifier
+            .padding(start = 20.dp, end = 20.dp)
+            .border(
+                1.dp,
+                CC
+                    .extraColor2()
+                    .copy(0.5f),
+                RoundedCornerShape(10.dp)
+            )
+            .height(200.dp)
+            .width(350.dp), elevation = CardDefaults.elevatedCardElevation(
+            4.dp
+        ), colors = CardDefaults.cardColors(
+            containerColor = CC.extraColor1()
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxSize()
+        ) {
+            CC.ColorProgressIndicator(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .fillMaxWidth(0.9f)
+                    .height(20.dp)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                CC.ColorProgressIndicator(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .width(100.dp)
+                        .height(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                CC.ColorProgressIndicator(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .width(100.dp)
+                        .height(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxSize(1f), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(10.dp))
+                CC.ColorProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
 
+        }
+    }
 
+}
 
 
 @Composable
@@ -375,8 +526,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
                 CourseName.name.value = course.courseName.toString()
                 navController.navigate("courseContent/${course.courseCode}")
             }
-            .size(70.dp),
-            contentAlignment = Alignment.Center) {
+            .size(70.dp), contentAlignment = Alignment.Center) {
             if (course.courseImageLink?.isNotEmpty() == true) {
                 AsyncImage(
                     model = course.courseImageLink,
@@ -402,6 +552,37 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
                 text = it, style = CC.descriptionTextStyle(context), maxLines = 1
             )
         }
+    }
+}
+
+@Composable
+fun LoadingCourseItem() {
+    Column(
+        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .border(
+                    1.dp, CC.textColor(), CircleShape
+                )
+                .background(CC.primary(), CircleShape)
+                .clip(CircleShape)
+                .size(70.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+
+        }
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .width(90.dp)
+                .height(15.dp)
+        ) {
+            CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+        }
+
     }
 }
 
@@ -500,6 +681,69 @@ fun CourseBox(
     }
 }
 
+
+@Composable
+fun LoadingCourseBox() {
+    Column(
+        modifier = Modifier
+            .border(
+                1.dp, CC.secondary(), RoundedCornerShape(16.dp)
+            )
+            .width(200.dp)
+            .height(230.dp), horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight(0.4f)
+                .background(CC.primary(), RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
+                .fillMaxWidth()
+        ) {
+            CC.ColorProgressIndicator(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
+                    .fillMaxSize()
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
+                .fillMaxWidth(), verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier
+                    .height(20.dp)
+                    .width(100.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(start = 10.dp, top = 5.dp)
+                    .fillMaxWidth()
+            ) {
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .height(25.dp)
+                    .padding(start = 10.dp, end = 10.dp)
+                    .fillMaxWidth()
+            ) {
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
+            Row(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(25.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(start = 10.dp, bottom = 5.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
+        }
+    }
+}
 
 @Composable
 fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
@@ -612,22 +856,101 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
 }
 
 
+@Composable
+fun LoadingAnnouncementCard() {
+    Card(
+        modifier = Modifier
+            .heightIn(min = 200.dp)
+            .fillMaxWidth()
+            .padding(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = CC.extraColor1()
+        ),
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.elevatedCardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .background(CC.extraColor1())
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .border(
+                            1.dp, CC.textColor(), CircleShape
+                        )
+                        .clip(CircleShape)
+                        .size(40.dp), contentAlignment = Alignment.Center
+                ) {
+                    CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                CC.ColorProgressIndicator(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(30.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth()
+            ) {
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                CC.ColorProgressIndicator(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .height(20.dp)
+                        .width(100.dp)
+                )
+
+                CC.ColorProgressIndicator(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .height(20.dp)
+                        .width(100.dp)
+                )
+            }
+        }
+    }
+}
+
+
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarContent(
-    signedInUser: UserEntity, context: Context, navController: NavController
+    signedInUser: UserEntity,
+    context: Context,
+    navController: NavController,
+    userViewModel: UserViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
-    val notificationAdmin = context.applicationContext as UniAdmin
-    val notificationRepository = remember { notificationAdmin.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
-    )
+    val loading by userViewModel.isLoading.observeAsState()
     val notifications by notificationViewModel.notifications.observeAsState()
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     var expanded by remember { mutableStateOf(false) }
 
-    // Optionally, you can periodically check the network status
+    // periodically check the network status
     LaunchedEffect(Unit) {
         while (true) {
             isOnline.value = isDeviceOnline(context)
@@ -646,28 +969,40 @@ fun TopAppBarContent(
                 modifier = Modifier.padding(end = 10.dp)
             ) {
                 val size = 50.dp
-                Box(modifier = Modifier
-                    .border(
-                        1.dp, CC.textColor(), CircleShape
-                    )
-                    .background(CC.tertiary(), CircleShape)
-                    .clip(CircleShape)
-                    .size(size),
-                    contentAlignment = Alignment.Center) {
-                    if (signedInUser.profileImageLink?.isNotEmpty() == true) {
-                        AsyncImage(
-                            model = signedInUser.profileImageLink,
-                            contentDescription = signedInUser.firstName,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                Box(
+                    modifier = Modifier
+                        .border(
+                            1.dp, CC.textColor(), CircleShape
+                        )
+                        .background(CC.secondary(), CircleShape)
+                        .clip(CircleShape)
+                        .size(size),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    if (loading == true) {
+                        CircularProgressIndicator(color = CC.textColor())
+                    } else if (signedInUser.firstName.isNullOrEmpty()) {
+                        Icon(
+                            Icons.Default.AccountCircle, "Location", tint = CC.textColor()
                         )
                     } else {
-                        Text(
-                            "${signedInUser.firstName?.get(0)}${signedInUser.lastName?.get(0)}",
-                            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
-                        )
+                        if (signedInUser.profileImageLink?.isNotEmpty() == true) {
+                            AsyncImage(
+                                model = signedInUser.profileImageLink,
+                                contentDescription = signedInUser.firstName,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text(
+                                "${signedInUser.firstName[0]}${signedInUser.lastName?.get(0)}",
+                                style = CC.titleTextStyle(context)
+                                    .copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
                     }
                 }
 
@@ -701,12 +1036,22 @@ fun TopAppBarContent(
                     style = CC.descriptionTextStyle(context)
                         .copy(color = CC.textColor().copy(alpha = 0.5f))
                 )
-                signedInUser.firstName?.let {
+                if (signedInUser.firstName != null) {
                     Text(
-                        text = it,
+                        text = signedInUser.firstName,
                         style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
                     )
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .height(20.dp)
+                            .width(150.dp)
+                    ) {
+                        CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+                    }
                 }
+
             }
         }
     }, actions = {
@@ -714,7 +1059,7 @@ fun TopAppBarContent(
             IconButton(onClick = {
                 notificationViewModel.fetchNotifications()
                 expanded = !expanded
-            }, modifier = Modifier.size(50.dp)) {
+            }, modifier = Modifier.size(40.dp)) {
                 Icon(
                     Icons.Default.Notifications,
                     contentDescription = null,
@@ -767,7 +1112,8 @@ fun TopAppBarContent(
         }
     }, colors = TopAppBarDefaults.topAppBarColors(
         containerColor = CC.primary(),
-    ))
+    )
+    )
 }
 
 
@@ -790,9 +1136,6 @@ fun NotificationTitleContent(
         }
     }
 }
-
-
-
 
 
 fun isDeviceOnline(context: Context): Boolean {
