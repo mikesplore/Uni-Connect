@@ -48,7 +48,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "homescreen") {
+    NavHost(navController = navController, startDestination = "groups") {
 
         composable("splashscreen") {
             SplashScreen(navController = navController, context)
