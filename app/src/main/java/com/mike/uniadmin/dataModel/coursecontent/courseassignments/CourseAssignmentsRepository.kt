@@ -27,7 +27,7 @@ class CourseAssignmentRepository(private val courseAssignmentDao: CourseAssignme
                 // Insert into local database
                 courseAssignmentDao.insertCourseAssignment(courseAssignment)
                 // Insert into Firebase
-                val courseAssignmentRef = database.child(courseID).child("courseAssignments")
+                val courseAssignmentRef = database.child(courseID).child("Course Assignments")
                 courseAssignmentRef.child(courseAssignment.assignmentID).setValue(courseAssignment)
                     .addOnSuccessListener { onResult(true) } // Indicate success
                     .addOnFailureListener { exception ->
@@ -48,7 +48,7 @@ class CourseAssignmentRepository(private val courseAssignmentDao: CourseAssignme
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
             } else {
-                val courseAssignmentRef = database.child(courseID).child("courseAssignments")
+                val courseAssignmentRef = database.child(courseID).child("Course Assignments")
                 courseAssignmentRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val assignments = mutableListOf<CourseAssignment>()
