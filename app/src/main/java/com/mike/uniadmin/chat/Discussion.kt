@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -207,7 +208,9 @@ fun DiscussionScreen(
                     onSearchQueryChange = { searchQuery = it })
                 user?.let { currentUser ->
                     LazyColumn(
-                        state = scrollState, modifier = Modifier.weight(1f)
+                        state = scrollState, modifier = Modifier
+                            .animateContentSize()
+                            .weight(1f)
                     ) {
                         val groupedChats = chats.groupBy { it.date }
 
@@ -358,12 +361,12 @@ fun GroupUsersList(
 
     AnimatedVisibility(visible = isVisible,
         enter = slideInHorizontally(initialOffsetX = { it }),
-        exit = slideOutHorizontally(targetOffsetX = { -it })
+        exit = slideOutHorizontally(targetOffsetX = { it })
     ) {
         LazyRow(
             modifier = Modifier
-                .background(CC.secondary())
                 .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             items(filteredUsers) { user ->  // Use the filtered list
                 UserItem(user, context, navController, viewModel)
