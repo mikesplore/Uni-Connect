@@ -28,7 +28,7 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
                 // Insert into local database
                 courseTimetableDao.insertCourseTimetable(courseTimetable)
                 // Insert into Firebase
-                val courseTimetableRef = database.child(courseID).child("courseTimetable")
+                val courseTimetableRef = database.child(courseID).child("Course Timetable")
                 courseTimetableRef.child(courseTimetable.timetableID).setValue(courseTimetable)
                     .addOnSuccessListener { onResult(true) } // Indicate success
                     .addOnFailureListener { exception ->
@@ -49,7 +49,7 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
                 onResult(cachedData)
             }
 
-            val courseTimetableRef = database.child(courseID).child("courseTimetable")
+            val courseTimetableRef = database.child(courseID).child("Course Timetable")
 
             courseTimetableRef.addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
