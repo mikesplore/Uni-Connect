@@ -22,7 +22,7 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (courseSnapshot in snapshot.children) {
                     val courseID = courseSnapshot.key ?: continue
-                    val courseDetailRef = courseSnapshot.child("courseDetails")
+                    val courseDetailRef = courseSnapshot.child("Course Details")
                     val details = courseDetailRef.children.mapNotNull { it.getValue(CourseDetail::class.java) }
                     viewModelScope.launch {
                         details.forEach { courseDetailDao.insertCourseDetail(it) }
@@ -64,7 +64,7 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
                 // Insert into local database
                 courseDetailDao.insertCourseDetail(courseDetail)
                 // Insert into Firebase
-                val courseDetailRef = database.child(courseID).child("courseDetails")
+                val courseDetailRef = database.child(courseID).child("Course Details")
                 courseDetailRef.child(courseDetail.detailID).setValue(courseDetail)
                     .addOnSuccessListener { onResult(true) } // Indicate success
                     .addOnFailureListener { exception ->
@@ -84,7 +84,7 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
             if (cachedData != null) {
                 onResult(cachedData)
             } else {
-                val courseDetailRef = database.child(courseID).child("courseDetails").limitToFirst(1)
+                val courseDetailRef = database.child(courseID).child("Course Details").limitToFirst(1)
                 courseDetailRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.hasChildren()) {
