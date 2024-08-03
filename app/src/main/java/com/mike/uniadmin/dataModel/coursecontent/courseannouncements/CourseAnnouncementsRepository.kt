@@ -21,7 +21,7 @@ class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnno
     ) {
         viewModelScope.launch {
             courseAnnouncementDao.insertCourseAnnouncement(courseAnnouncement)
-            database.child(courseID).child(courseAnnouncement.announcementID)
+            database.child(courseID).child("Course Announcements").child(courseAnnouncement.announcementID)
                 .setValue(courseAnnouncement).addOnSuccessListener {
                     onResult(true) // Indicate success
                 }.addOnFailureListener { exception ->
@@ -39,7 +39,7 @@ class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnno
                 onResult(cachedData)
             } else {
                 val courseAnnouncementRef =
-                    database.child(courseID).child("courseAnnouncements")
+                    database.child(courseID).child("Course Announcements")
 
                 courseAnnouncementRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
