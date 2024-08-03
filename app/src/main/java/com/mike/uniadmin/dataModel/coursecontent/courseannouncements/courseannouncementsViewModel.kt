@@ -14,10 +14,15 @@ class CourseAnnouncementViewModel(private val repository: CourseAnnouncementRepo
     private val _announcements = MutableLiveData<List<CourseAnnouncement>>()
     val announcements: LiveData<List<CourseAnnouncement>> = _announcements
 
+    private val _isLoading = MutableLiveData(false) // Add isLoading state
+    val isLoading: LiveData<Boolean> = _isLoading
+
     // Fetch announcements for a specific course
     fun getCourseAnnouncements(courseID: String) {
+        _isLoading.value = true // Set loading to true before fetching
         repository.getCourseAnnouncements(courseID) { announcements ->
             _announcements.value = announcements
+            _isLoading.value = false // Set loading to false after fetching
         }
     }
 
