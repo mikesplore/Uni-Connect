@@ -336,7 +336,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text("No announcements found", style = CC.descriptionTextStyle(context))
                 }
             } else {
-                announcements?.firstOrNull()?.let { announcement ->
+                announcements?.lastOrNull()?.let { announcement ->
                     AnnouncementCard(announcement, context)
                 }
             }
