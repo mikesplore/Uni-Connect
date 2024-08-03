@@ -450,6 +450,8 @@ fun HomeScreen(
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 HorizontalPager(
+
+                    userScrollEnabled = false,
                     state = pagerState,
                     count = screens.size,
                     modifier = Modifier.padding(innerPadding),
@@ -587,11 +589,14 @@ fun ModalDrawerItem(
                 user.email?.let { Text(it, style = CC.descriptionTextStyle(context)) }
                 Text(user.id, style = CC.descriptionTextStyle(context))
             }
-
-
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text("Chat", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            "Select a user to open chat",
+            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+        )
         Spacer(modifier = Modifier.height(20.dp))
         LazyRow(
             modifier = Modifier.animateContentSize()
@@ -828,15 +833,15 @@ fun UserItem(
             )
         }
         Spacer(modifier = Modifier.height(5.dp))
-        (if (user.firstName?.length!! > 10) {
-            user.firstName.substring(0, 10) + "..."
-        } else {
-            user.firstName
-        }).let {
-            Text(
-                text = it, style = CC.descriptionTextStyle(context), maxLines = 1
-            )
-        }
+
+        Text(
+            text = user.firstName?.let {
+                if (it.length > 10) it.substring(0, 10) + "..." else it
+            } ?: "",
+            style = CC.descriptionTextStyle(context),
+            maxLines = 1
+        )
+
         val state = when (userState?.online) {
             "online" -> "Online"
             "offline" -> "Last Seen ${userState.lastTime}"
