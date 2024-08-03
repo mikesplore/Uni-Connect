@@ -16,10 +16,15 @@ class CourseDetailViewModel(private val repository: CourseDetailRepository) : Vi
     private val _courseDetails = MutableLiveData<CourseEntity?>()
     val courseDetails: MutableLiveData<CourseEntity?> = _courseDetails
 
+    private val _isLoading = MutableLiveData(false) // Add isLoading state
+    val isLoading: LiveData<Boolean> = _isLoading
+
     // Fetch details for a specific course
     fun getCourseDetails(courseID: String) {
+        _isLoading.value = true
         repository.getCourseDetails(courseID) { details ->
             _details.value = details
+            _isLoading.value = false
         }
     }
 
