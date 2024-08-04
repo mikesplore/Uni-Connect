@@ -55,6 +55,16 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
+    fun deleteSignedInUser() {
+        viewModelScope.launch {
+            repository.deleteSignedInUser()
+        }
+    }
+
+    fun deleteAllTables(){
+        repository.deleteAllTables()
+    }
+
     override fun onCleared() {
         super.onCleared()
         // Clear all necessary data here
