@@ -517,7 +517,6 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
             .background(CC.tertiary(), CircleShape)
             .clip(CircleShape)
             .clickable {
-                CourseName.name.value = course.courseName.toString()
                 navController.navigate("courseContent/${course.courseCode}")
             }
             .size(70.dp), contentAlignment = Alignment.Center) {
@@ -664,6 +663,7 @@ fun CourseBox(
                 Text(visits, style = CC.descriptionTextStyle(context))
                 IconButton(onClick = {
                     onClicked(course)
+                    CourseName.name.value = course.courseName.toString()
                     navController.navigate("courseResource/${course.courseCode}")
                 }) {
                     Icon(
