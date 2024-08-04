@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dataModel.coursecontent.coursetimetable
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,7 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     val courseTimetables: LiveData<List<CourseTimetable>> = _courseTimetables
 
     private val _timetablesToday = MutableLiveData<List<CourseTimetable>?>()
-    val timetablesToday: MutableLiveData<List<CourseTimetable>?> = _timetablesToday
+    val timetablesToday: LiveData<List<CourseTimetable>?> = _timetablesToday
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -26,8 +27,8 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     fun getCourseTimetables(courseID: String) {
         _isLoading.value = true
         repository.getCourseTimetables(courseID) { timetables ->
-            _timetables.value = timetables
-            _isLoading.value = false
+            _timetables.postValue(timetables) // Use postValue for background updates
+            _isLoading.postValue(false)
         }
     }
 
@@ -35,10 +36,9 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     fun getAllCourseTimetables() {
         _isLoading.value = true
         repository.getAllCourseTimetables { timetables ->
-            _courseTimetables.value = timetables
-
+            _courseTimetables.postValue(timetables) // Use postValue for background updates
+            _isLoading.postValue(false)
         }
-        _isLoading.value = false
     }
 
     // Save a new timetable
@@ -51,6 +51,7 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
                 } else {
                     onCompletion(false)
                     // Handle save failure if needed
+                    Log.e("CourseTimetableViewModel", "Failed to save timetable")
                 }
             }
         }
@@ -59,11 +60,12 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     fun getTimetableByDay(day: String) {
         _isLoading.value = true
         repository.getTimetableByDay(day) { timetables ->
-            _timetablesToday.value = timetables
-            _isLoading.value = false
+            _timetablesToday.postValue(timetables) // Use postValue for background updates
+            _isLoading.postValue(false)
         }
     }
 }
+
 
 class CourseTimetableViewModelFactory(private val repository: CourseTimetableRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
