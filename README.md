@@ -225,6 +225,10 @@ The `PasswordReset` composable function provides a screen for users to reset the
   - [Course Announcements](#announcementsitem-composable)
      - [Announcement Card](#announcementitemcard-composable)
      - [Add Announcement Item](#addannouncementitem-composable)
+- [Course Assignments](#assignmentsitem-composable)
+     - [Add Assignment](#addassignmentitem-composable)
+     - [Edit Assignment](#assignmentcarditem-composable)
+
     
 
 
@@ -621,3 +625,64 @@ The `AddTextField` composable creates a reusable text field with customizable pr
   - Displays a text field with customizable label, value, and color styles.
   - Adjusts height and width to fit content and provides visual feedback for focused and unfocused states.
 
+
+# AssignmentsItem Composable
+
+The `AssignmentsItem` composable displays a list of course assignments and provides an option to add new assignments. It uses various UI components and state management to provide an interactive user experience.
+
+## Key Components
+
+### 1. State Management
+- **Purpose**: To manage the visibility of the "Add Assignment" section and handle the list of assignments.
+- **Functionality**:
+  - Uses `remember` and `mutableStateOf` to manage the visibility state of the "Add Assignment" section.
+  - Observes assignments data from `CourseAssignmentViewModel` to display the list of assignments.
+
+### 2. UI Layout
+- **Purpose**: To structure the content and actions available in the assignments section.
+- **Functionality**:
+  - Displays a `FloatingActionButton` to toggle the visibility of the "Add Assignment" section.
+  - Provides an `IconButton` for refreshing the list of assignments.
+  - Conditionally shows either the "Add Assignment" UI or the list of assignments based on the visibility state.
+
+### 3. Assignment List
+- **Purpose**: To show a list of assignments if available.
+- **Functionality**:
+  - Displays a message ("No Assignments") if the list is empty.
+  - Uses `LazyColumn` to efficiently display a scrollable list of `AssignmentCard` items.
+
+## AssignmentCardItem Composable
+
+The `AssignmentCard` composable represents a single assignment in a card format.
+
+### 1. UI Layout
+- **Purpose**: To present individual assignments in a visually appealing way.
+- **Functionality**:
+  - Uses a `Card` to provide a bordered and colored background.
+  - Displays assignment title, description, published date, and due date.
+  - Changes the text color based on whether the assignment is past due or due today.
+
+## AddAssignmentItem Composable
+
+The `AddAssignmentItem` composable provides a form for users to add new assignments.
+
+### 1. State Management
+- **Purpose**: To manage the form's input fields and loading state.
+- **Functionality**:
+  - Uses `remember` to store the title, description, due date, due time, and loading state.
+  - Utilizes `SimpleDateFormat` to format the date and time.
+
+### 2. Form Layout
+- **Purpose**: To create a user-friendly form for adding assignments.
+- **Functionality**:
+  - Displays input fields for the assignment's title and description.
+  - Provides buttons for selecting due date and time using `DatePickerDialog` and `TimePickerDialog`.
+  - Displays "Post" and "Cancel" buttons to submit or discard the assignment.
+
+### 3. Form Submission
+- **Purpose**: To handle the submission of a new assignment.
+- **Functionality**:
+  - Generates a new assignment ID and creates a `CourseAssignment` object.
+  - Saves the new assignment using `CourseAssignmentViewModel` and updates the UI accordingly.
+  - Shows a `CircularProgressIndicator` while the assignment is being posted.
+  - Displays a `Toast` message if the assignment fails to save.
