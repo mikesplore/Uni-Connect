@@ -6,19 +6,12 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "notifications")
 data class NotificationEntity(
     @PrimaryKey val id: String,
-    val title: String? = null,
-    val name:String? = null,
-    val userId: String? = null,
-    val description: String? = null,
-    val date: String? = null,
-    val time: String? = null
+    val title: String = "",
+    val name:String = "",
+    val userId: String = "",
+    val description: String = "",
+    val date: String = "",
+    val time: String = ""
 ){
-    constructor():this(
-        "",
-        null,
-        null,
-        null,
-        null
-    )
+    constructor(): this("", "", "", "", "", "", "")
 }
-
