@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mike.uniadmin.dataModel.groupchat.ChatEntity
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Transaction
+
 
 @Dao
 interface UserDao {
@@ -33,7 +33,7 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSignedInUser(signedInUser: SignedInUser)
 
-    @Query("DELETE FROM signedinuser")
+    @Query("DELETE FROM SignedInUser")
     suspend fun deleteSignedInUser()
 }
 
@@ -75,5 +75,77 @@ interface UserPreferencesDao{
 
     @Query ("SELECT * FROM userPreferences WHERE id = :userID")
     suspend fun getUserPreferences(userID: String): UserPreferencesEntity?
+
+}
+
+@Dao
+interface DatabaseDao {
+    @Query("DELETE FROM announcements")
+    suspend fun deleteAnnouncements()
+
+    @Query("DELETE FROM notifications")
+    suspend fun deleteNotifications()
+
+    @Query("DELETE FROM courseAnnouncements")
+    suspend fun deleteCourseAnnouncements()
+
+    @Query("DELETE FROM courseAssignments")
+    suspend fun deleteCourseAssignments()
+
+    @Query("DELETE FROM courseDetails")
+    suspend fun deleteCourseDetails()
+
+    @Query("DELETE FROM courseTimetable")
+    suspend fun deleteCourseTimetables()
+
+    @Query("DELETE FROM attendanceStates")
+    suspend fun deleteAttendanceStates()
+
+    @Query("DELETE FROM courses")
+    suspend fun deleteCourses()
+
+    @Query("DELETE FROM chats")
+    suspend fun deleteChats()
+
+    @Query("DELETE FROM groups")
+    suspend fun deleteGroups()
+
+    @Query("DELETE FROM messages")
+    suspend fun deleteMessages()
+
+    @Query("DELETE FROM users")
+    suspend fun deleteUsers()
+
+    @Query("DELETE FROM accountDeletion")
+    suspend fun deleteAccountDeletions()
+
+    @Query("DELETE FROM userPreferences")
+    suspend fun deleteUserPreferences()
+
+    @Query("DELETE FROM userState")
+    suspend fun deleteUserStates()
+
+    @Query("DELETE FROM SignedInUser")
+    suspend fun deleteSignedInUser()
+
+    @Transaction
+    suspend fun deleteAllTables() {
+        deleteAnnouncements()
+        deleteNotifications()
+        deleteCourseAnnouncements()
+        deleteCourseAssignments()
+        deleteCourseDetails()
+        deleteCourseTimetables()
+        deleteAttendanceStates()
+        deleteCourses()
+        deleteChats()
+        deleteGroups()
+        deleteMessages()
+        deleteUsers()
+        deleteAccountDeletions()
+        deleteUserPreferences()
+        deleteUserStates()
+        deleteSignedInUser()
+    }
 
 }
