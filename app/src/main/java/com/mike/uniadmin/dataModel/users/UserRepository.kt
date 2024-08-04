@@ -7,7 +7,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -20,13 +19,41 @@ class UserRepository
     private val userDao: UserDao,
     private val userStateDao: UserStateDao,
     private val accountDeletionDao: AccountDeletionDao,
-    private val userPreferencesDao: UserPreferencesDao
+    private val userPreferencesDao: UserPreferencesDao,
+    private val databaseDao: DatabaseDao
 ) {
     private val database = FirebaseDatabase.getInstance().reference
 
     init {
         startUserListener()
         startUserStateListener()
+    }
+
+
+    fun getSignedInUser(onSuccess: (SignedInUser?) -> Unit){
+        viewModelScope.launch {
+            val signedInUser = userDao.getSignedInUser()
+            onSuccess(signedInUser)
+        }
+    }
+
+
+    fun setSignedInUser(signedInUser: SignedInUser){
+        viewModelScope.launch {
+            userDao.insertSignedInUser(signedInUser)
+        }
+    }
+
+    fun deleteSignedInUser(){
+        viewModelScope.launch {
+            userDao.deleteSignedInUser()
+        }
+    }
+
+    fun deleteAllTables(){
+        viewModelScope.launch {
+            databaseDao.deleteAllTables()
+        }
     }
 
     private fun startUserListener() {
@@ -262,18 +289,6 @@ class UserRepository
             })
     }
 
-     fun getSignedInUser(onSuccess: (SignedInUser?) -> Unit){
-         viewModelScope.launch {
-             val signedInUser = userDao.getSignedInUser()
-             onSuccess(signedInUser)
-         }
-     }
 
-
-    fun setSignedInUser(signedInUser: SignedInUser){
-        viewModelScope.launch {
-            userDao.insertSignedInUser(signedInUser)
-        }
-    }
 
 }
