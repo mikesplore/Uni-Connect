@@ -161,8 +161,8 @@ fun Dashboard(navController: NavController, context: Context) {
         timetableViewModel.getTimetableByDay(CC.currentDay())
         timetables?.let { timetableList ->
             timetableList.forEach { timetable ->
-                timetable.courseID?.let { courseViewModel.getCourseDetailsByCourseID(courseCode = it) }
-                Log.d("Course", timetable.courseID.toString())
+                timetable.courseID.let { courseViewModel.getCourseDetailsByCourseID(courseCode = it) }
+                Log.d("Course", timetable.courseID)
             }
         }
         signedInUser?.email?.let {
@@ -293,7 +293,7 @@ fun Dashboard(navController: NavController, context: Context) {
                         CourseBox(course, context, navController, onClicked = {
                             courseViewModel.saveCourse(
                                 course.copy(
-                                    visits = course.visits?.plus(
+                                    visits = course.visits.plus(
                                         1
                                     )
                                 )
@@ -420,7 +420,7 @@ fun TodayTimetable(courseName: String, timetable: CourseTimetable, context: Cont
                     Icons.Default.LocationOn, "Location", tint = CC.textColor()
                 )
                 Spacer(modifier = Modifier.width(10.dp))
-                Text("${timetable.venue}", style = CC.descriptionTextStyle(context))
+                Text(timetable.venue, style = CC.descriptionTextStyle(context))
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row(
@@ -520,7 +520,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
                 navController.navigate("courseContent/${course.courseCode}")
             }
             .size(70.dp), contentAlignment = Alignment.Center) {
-            if (course.courseImageLink?.isNotEmpty() == true) {
+            if (course.courseImageLink.isNotEmpty()) {
                 AsyncImage(
                     model = course.courseImageLink,
                     contentDescription = course.courseName,
@@ -536,7 +536,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
             }
         }
         Spacer(modifier = Modifier.height(5.dp))
-        (if (course.courseName?.length!! > 10) {
+        (if (course.courseName.length > 10) {
             course.courseName.substring(0, 10) + "..."
         } else {
             course.courseName
@@ -629,15 +629,13 @@ fun CourseBox(
                     .padding(start = 10.dp)
                     .fillMaxWidth()
             ) {
-                course.courseName?.let {
-                    Text(
-                        it,
-                        style = CC.titleTextStyle(context)
-                            .copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Text(
+                    course.courseName,
+                    style = CC.titleTextStyle(context)
+                        .copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
             Row(
                 modifier = Modifier
@@ -663,7 +661,7 @@ fun CourseBox(
                 Text(visits, style = CC.descriptionTextStyle(context))
                 IconButton(onClick = {
                     onClicked(course)
-                    CourseName.name.value = course.courseName.toString()
+                    CourseName.name.value = course.courseName
                     navController.navigate("courseResource/${course.courseCode}")
                 }) {
                     Icon(
@@ -774,7 +772,7 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
                         .size(40.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (announcement.imageLink?.isNotEmpty() == true) {
+                    if (announcement.imageLink.isNotEmpty()) {
                         AsyncImage(
                             model = announcement.imageLink,
                             contentDescription = "Profile Image",
@@ -783,24 +781,23 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
                         )
                     } else {
                         Text(
-                            "${announcement.authorName?.get(0)}",
+                            "${announcement.authorName[0]}",
                             style = CC.descriptionTextStyle(context)
                                 .copy(fontWeight = FontWeight.Bold),
                         )
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                announcement.title?.let {
                     Row(modifier = Modifier.fillMaxWidth(1f)) {
                         Text(
-                            text = it,
+                            text = announcement.title,
                             style = CC.titleTextStyle(context),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center
                         )
                     }
-                }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -809,14 +806,12 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                announcement.description?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                Text(
+                    text = announcement.description,
+                    style = CC.descriptionTextStyle(context),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
 
             }
 
@@ -827,21 +822,17 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
             Row(
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                announcement.date?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context)
-                            .copy(color = CC.textColor().copy(alpha = 0.7f))
-                    )
-                }
+                Text(
+                    text = announcement.date,
+                    style = CC.descriptionTextStyle(context)
+                        .copy(color = CC.textColor().copy(alpha = 0.7f))
+                )
 
-                announcement.authorName?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context)
-                            .copy(color = CC.textColor().copy(alpha = 0.7f))
-                    )
-                }
+                Text(
+                    text = announcement.authorName,
+                    style = CC.descriptionTextStyle(context)
+                        .copy(color = CC.textColor().copy(alpha = 0.7f))
+                )
             }
         }
     }
@@ -974,12 +965,12 @@ fun TopAppBarContent(
 
                     if (loading == true) {
                         CircularProgressIndicator(color = CC.textColor())
-                    } else if (signedInUser.firstName.isNullOrEmpty()) {
+                    } else if (signedInUser.firstName.isEmpty()) {
                         Icon(
                             Icons.Default.AccountCircle, "Location", tint = CC.textColor()
                         )
                     } else {
-                        if (signedInUser.profileImageLink?.isNotEmpty() == true) {
+                        if (signedInUser.profileImageLink.isNotEmpty()) {
                             AsyncImage(
                                 model = signedInUser.profileImageLink,
                                 contentDescription = signedInUser.firstName,
@@ -990,7 +981,7 @@ fun TopAppBarContent(
                             )
                         } else {
                             Text(
-                                "${signedInUser.firstName[0]}${signedInUser.lastName?.get(0)}",
+                                "${signedInUser.firstName[0]}${signedInUser.lastName[0]}",
                                 style = CC.titleTextStyle(context)
                                     .copy(fontWeight = FontWeight.Bold)
                             )
@@ -1028,21 +1019,10 @@ fun TopAppBarContent(
                     style = CC.descriptionTextStyle(context)
                         .copy(color = CC.textColor().copy(alpha = 0.5f))
                 )
-                if (signedInUser.firstName != null) {
-                    Text(
-                        text = signedInUser.firstName,
-                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                } else {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .height(20.dp)
-                            .width(150.dp)
-                    ) {
-                        CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
-                    }
-                }
+                Text(
+                    text = signedInUser.firstName,
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
+                )
 
             }
         }
@@ -1117,14 +1097,12 @@ fun NotificationTitleContent(
         .height(30.dp)
         .padding(5.dp)
         .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        notification.title?.let {
-            Text(
-                text = it,
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Text(
+            text = notification.title,
+            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
