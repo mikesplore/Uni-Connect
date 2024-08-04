@@ -6,22 +6,13 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "courseAnnouncements")
 data class CourseAnnouncement(
   @PrimaryKey val announcementID: String,
-  val courseID: String? = null,
-  val title: String? = null,
-  val content: String? = null,
-  val date: String? = null,
-  val author: String? = null,
-  val description: String? = null
-)
-{
-  constructor(): this (
-    "",
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  )
+  val courseID: String = "",
+  val title: String = "",
+  val content: String = "",
+  val date: String = "",
+  val author: String = "",
+  val description: String = ""
+){
+  constructor(): this("", "", "", "", "", "", "")
 
 }
