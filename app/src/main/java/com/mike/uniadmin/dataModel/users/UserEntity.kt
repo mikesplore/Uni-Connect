@@ -9,10 +9,7 @@ data class SignedInUser(
    @PrimaryKey val id: String,
     val email: String = ""
 ){
-    constructor(): this(
-        "",
-        ""
-    )
+    constructor(): this("", "")
 }
 
 
@@ -24,7 +21,9 @@ data class UserEntity(
     val email: String = "",
     val phoneNumber: String = "",
     val profileImageLink: String = ""
-)
+){
+    constructor(): this("", "", "", "", "", "")
+}
 
 
 @Entity(tableName = "accountDeletion")
@@ -34,7 +33,11 @@ data class AccountDeletionEntity(
     val email: String = "",
     val date: String = "",
     val status: String = ""
-)
+){
+    constructor(): this("", "", "", "", "")
+}
+
+
 @Entity(tableName = "userPreferences")
 data class UserPreferencesEntity(
     @PrimaryKey val id: String,
@@ -45,15 +48,7 @@ data class UserPreferencesEntity(
     val notifications: String = ""
 
 ){
-    constructor() : this(
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
-
-    )
+    constructor(): this("", "", "", "", "", "")
 }
 
 
@@ -64,11 +59,6 @@ data class UserStateEntity(
     val online: String = "",
     val lastTime: String = "",
 ){
-    constructor() : this(
-        "",
-        "",
-        "",
-        "",
+    constructor(): this("", "", "", "")
 
-    )
 }
