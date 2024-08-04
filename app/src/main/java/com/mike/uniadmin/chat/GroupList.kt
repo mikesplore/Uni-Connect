@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -36,7 +35,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -64,11 +62,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -113,7 +109,7 @@ fun UniGroups(context: Context, navController: NavController) {
 
 
 
-    val userGroups = groups.filter { it.members?.contains(fetchedUserDetails?.id) == true }
+    val userGroups = groups.filter { it.members.contains(fetchedUserDetails?.id) }
     Scaffold(topBar = {
         TopAppBar(title = {}, actions = {
             IconButton(onClick = { showAddGroup = !showAddGroup}) {
@@ -177,7 +173,7 @@ fun UniGroups(context: Context, navController: NavController) {
                     modifier = Modifier.animateContentSize()
                 ) {
                     items(userGroups) { group ->
-                        if (group.name?.isNotEmpty() == true && group.description?.isNotEmpty() == true) {
+                        if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
                             fetchedUserDetails?.let { it1 ->
                                 GroupItem(
                                     group,
@@ -359,7 +355,7 @@ fun UserSelectionItem(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (user.profileImageLink?.isNotBlank() == true) {
+                if (user.profileImageLink.isNotBlank()) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = "Profile Image",
@@ -369,11 +365,11 @@ fun UserSelectionItem(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Text("${user.firstName?.get(0)}${user.lastName?.get(0)}")
+                    Text("${user.firstName[0]}${user.lastName[0]}")
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = user.firstName ?: "",
+                    text = user.firstName,
                     style = CC.descriptionTextStyle(context),
                     maxLines = 1
                 )
@@ -402,38 +398,41 @@ fun EditGroupSection(
 ) {
     var groupName by remember { mutableStateOf(group.name) }
     var groupDescription by remember { mutableStateOf(group.description) }
-    var selectedMembers by remember { mutableStateOf(group.members?.toSet()) }
+    var selectedMembers by remember { mutableStateOf(group.members.toSet()) }
     var expanded by remember { mutableStateOf(false) }
     var imageLink by remember { mutableStateOf(group.groupImageLink) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        groupName?.let {
+        groupName.let {
             CC.SingleLinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
-                onValueChange = { groupName = it },
+                onValueChange = { newValue ->
+                    groupName = newValue },
                 label = "Group Name",
                 enabled = true,
                 singleLine = true,
                 context = context
             )
         }
-        groupDescription?.let {
+        groupDescription.let {
             CC.SingleLinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
-                onValueChange = { groupDescription = it },
+                onValueChange = {
+                    newValue ->   groupDescription = newValue },
                 label = "Description",
                 enabled = true,
                 singleLine = true,
                 context = context
             )
         }
-        imageLink?.let {
+        imageLink.let {
             CC.SingleLinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
-                onValueChange = { imageLink = it },
+                onValueChange = {
+                        newValue ->   imageLink = newValue },
                 label = "Image link",
                 enabled = true,
                 singleLine = true,
@@ -465,12 +464,12 @@ fun EditGroupSection(
                     UserSelectionItem(
                         context,
                         user = user,
-                        isSelected = selectedMembers?.contains(user.id) == true,
+                        isSelected = selectedMembers.contains(user.id),
                         onClick = {
-                            selectedMembers = if (selectedMembers?.contains(user.id) == true) {
-                                selectedMembers?.minus(user.id)
+                            selectedMembers = if (selectedMembers.contains(user.id)) {
+                                selectedMembers.minus(user.id)
                             } else {
-                                selectedMembers?.plus(user.id)
+                                selectedMembers.plus(user.id)
                             }
                         }
                     )
@@ -486,7 +485,7 @@ fun EditGroupSection(
                     name = groupName,
                     description = groupDescription,
                     groupImageLink = imageLink,
-                    members = selectedMembers?.toList()
+                    members = selectedMembers.toList()
                 )
                 chatViewModel.saveGroup(updatedGroup, onSuccess = {
                     if (it) {
@@ -538,7 +537,7 @@ fun GroupItem(
                     .background(CC.secondary(), CircleShape)
                     .size(50.dp)
             ) {
-                if (group.groupImageLink?.isNotBlank() == true) {
+                if (group.groupImageLink.isNotBlank()) {
                     AsyncImage(
                         model = group.groupImageLink,
                         contentDescription = "Group Image",
@@ -568,16 +567,12 @@ fun GroupItem(
             Column(
                 modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
             ) {
-                group.name?.let {
-                    Text(
-                        text = it, style = CC.titleTextStyle(context)
-                    )
-                }
-                group.description?.let {
-                    Text(
-                        text = it, style = CC.descriptionTextStyle(context)
-                    )
-                }
+                Text(
+                    text = group.name, style = CC.titleTextStyle(context)
+                )
+                Text(
+                    text = group.description, style = CC.descriptionTextStyle(context)
+                )
             }
         }
     }
