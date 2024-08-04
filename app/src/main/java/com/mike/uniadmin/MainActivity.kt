@@ -35,7 +35,6 @@ import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
 import java.io.File
-import kotlin.io.path.exists
 import kotlin.text.endsWith
 import kotlin.text.substringBeforeLast
 
@@ -65,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var auth: FirebaseAuth
-    private var currentUser: UserEntity? = null
+    private var currentUser: UserEntity = UserEntity()
     val promptManager by lazy {
         BiometricPromptManager(this)
     }
@@ -73,14 +72,17 @@ class MainActivity : AppCompatActivity() {
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         val user = firebaseAuth.currentUser
         if (user != null) {
-            fetchUserDataByEmail(user.email ?: "") { fetchedUser ->
-                currentUser = fetchedUser
-                currentUser?.let {
-                    setupLifecycleObservers(it.id)
+            val userEmail = user.email ?: "" // Handle potential null email
+            fetchUserDataByEmail(userEmail) { fetchedUser ->
+                if (fetchedUser == null) {
+                    Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
+                    return@fetchUserDataByEmail // Exit the callback
+                } else {
+                    currentUser = fetchedUser
+                    setupLifecycleObservers(currentUser.id)
                 }
             }
         } else {
-            currentUser = null
             lifecycle.removeObserver(lifecycleObserver)
             Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show()
         }
@@ -88,15 +90,15 @@ class MainActivity : AppCompatActivity() {
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
-            currentUser?.id?.let { writeUserOnlineStatus(it) }
+            writeUserOnlineStatus(currentUser.id)
         }
 
         override fun onStop(owner: LifecycleOwner) {
-            currentUser?.id?.let { writeUserOfflineStatus(it) }
+            writeUserOfflineStatus(currentUser.id)
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
-            currentUser?.id?.let { writeUserOfflineStatus(it) }
+            writeUserOfflineStatus(currentUser.id)
         }
     }
 
