@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dataModel.announcements
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -47,6 +48,7 @@ class AnnouncementViewModel(private val repository: AnnouncementRepository) : Vi
                 onComplete(true)
                 fetchAnnouncements() // Refresh the announcement list after deleting
             }, onFailure = { exception ->
+                Log.e("AnnouncementViewModel", "Error deleting announcement", exception)
                 onComplete(false)
                 // Handle delete failure if needed
             })
