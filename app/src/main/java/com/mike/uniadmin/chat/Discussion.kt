@@ -240,7 +240,7 @@ fun DiscussionScreen(
                     MessageInputRow(message = messageText,
                         onMessageChange = { messageText = it },
                         onSendClick = {
-                            if (messageText.isNotBlank() && currentUser.firstName?.isNotBlank() == true) {
+                            if (messageText.isNotBlank() && currentUser.firstName.isNotBlank()) {
                                 MyDatabase.generateChatID { chatID ->
                                     val chat = ChatEntity(
                                         message = messageText,
