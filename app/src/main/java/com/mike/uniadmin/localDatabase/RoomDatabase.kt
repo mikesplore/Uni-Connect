@@ -5,8 +5,6 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementsDao
 import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
@@ -32,6 +30,7 @@ import com.mike.uniadmin.dataModel.userchat.MessageDao
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.users.AccountDeletionDao
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
+import com.mike.uniadmin.dataModel.users.DatabaseDao
 import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserDao
 import com.mike.uniadmin.dataModel.users.UserEntity
@@ -41,8 +40,7 @@ import com.mike.uniadmin.dataModel.users.UserStateDao
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 
 @Database(
-    entities =
-    [
+    entities = [
         ChatEntity::class,
         GroupEntity::class,
         MessageEntity::class,
@@ -59,8 +57,10 @@ import com.mike.uniadmin.dataModel.users.UserStateEntity
         CourseTimetable::class,
         AttendanceState::class,
         SignedInUser::class
-    ],
-    version = 2, exportSchema = false)
+               ],
+    version = 1,
+    exportSchema = false
+)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
@@ -78,6 +78,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun courseDetailsDao(): CourseDetailDao
     abstract fun courseTimetableDao(): CourseTimetableDao
     abstract fun attendanceStateDao(): AttendanceStateDao
+    abstract fun databaseDao(): DatabaseDao
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
@@ -85,11 +87,8 @@ abstract class AppDatabase : RoomDatabase() {
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "UniAdminDatabase"
-                ).addMigrations(MIGRATION_1_2) // Add this line
-                    .build()
+                    context.applicationContext, AppDatabase::class.java, "UniAdminDatabaseV2"
+                ).build()
                 INSTANCE = instance
                 instance
             }
@@ -98,9 +97,3 @@ abstract class AppDatabase : RoomDatabase() {
 }
 
 
-
-val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE groups ADD COLUMN new_column TEXT")
-    }
-}
