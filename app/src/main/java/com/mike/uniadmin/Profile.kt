@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,8 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Female
-import androidx.compose.material.icons.filled.Male
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -65,7 +62,6 @@ import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
-import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -98,12 +94,10 @@ fun ProfileScreen(navController: NavController, context: Context) {
         if (signedInUser != null) {
             val email = signedInUser!!.email
             Log.d("ProfileScreen", "Finding user by email: $email")
-            if (email != null) {
-                userViewModel.findUserByEmail(email) { fetchedUser ->
-                    Log.d("ProfileScreen", "Fetched User: $fetchedUser")
-                    currentUser = fetchedUser
-                    isLoading = false
-                }
+            userViewModel.findUserByEmail(email) { fetchedUser ->
+                Log.d("ProfileScreen", "Fetched User: $fetchedUser")
+                currentUser = fetchedUser
+                isLoading = false
             }
         } else {
             isLoading = false
@@ -290,7 +284,7 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
     LaunchedEffect(Unit) {
         viewModel.getSignedInUser()
         signedUser?.let {
-            it.email?.let { email ->
+            it.email.let { email ->
                 Log.d("Profile Screen", "Fetching user by email: $email")
                 viewModel.findUserByEmail(email, onUserFetched = { fetchedUser ->
 
@@ -341,53 +335,45 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
 
         currentUser?.let { user ->
 
-                firstName.let {
-                    MyDetails(
-                        title = "First Name",
-                        value = it,
-                        onValueChange = { firstName = it},
-                        context = context,
-                        isEditing = isEditing
-                    )
-                }
-
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            lastName.let {
-                MyDetails(
-                    title = "Last Name",
-                    value = it,
-                    onValueChange = { lastName = it},
-                    context = context,
-                    isEditing = isEditing
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            user.email?.let {
-                MyDetails(
-                    title = "Email",
-                    value = it,
-                    onValueChange = {},
-                    context = context,
-                    isEditing = false, // Email is not editable
-                    fontSize = 15.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            phoneNumber.let {
                 MyDetails(
                     title = "First Name",
-                    value = it,
-                    onValueChange = { phoneNumber = it},
+                    value = firstName,
+                    onValueChange = { firstName = it},
                     context = context,
                     isEditing = isEditing
                 )
-            }
+
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            MyDetails(
+                title = "Last Name",
+                value = lastName,
+                onValueChange = { lastName = it},
+                context = context,
+                isEditing = isEditing
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            MyDetails(
+                title = "Email",
+                value = user.email,
+                onValueChange = {},
+                context = context,
+                isEditing = false, // Email is not editable
+                fontSize = 15.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            MyDetails(
+                title = "First Name",
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it},
+                context = context,
+                isEditing = isEditing
+            )
         }
     }
 }
