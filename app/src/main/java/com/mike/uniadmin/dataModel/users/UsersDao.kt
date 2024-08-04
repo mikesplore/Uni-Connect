@@ -16,7 +16,7 @@ interface UserDao {
     suspend fun insertUser(users: UserEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUsers(users: List<UserEntity>) // New method to insert multiple users
+    suspend fun insertUsers(users: List<UserEntity>)
 
     @Query("DELETE FROM users WHERE id = :userID")
     suspend fun deleteUser(userID: String)
@@ -28,7 +28,7 @@ interface UserDao {
     suspend fun getUserByID(userID: String): UserEntity?
 
     @Query("SELECT * FROM SignedInUser")
-    suspend fun getSignedInUser(): SignedInUser?
+    suspend fun getSignedInUser(): SignedInUser
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSignedInUser(signedInUser: SignedInUser)
