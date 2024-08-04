@@ -1,12 +1,15 @@
 package com.mike.uniadmin.courseContent
 
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -24,8 +28,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.AccessTime
@@ -33,6 +40,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocalPostOffice
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -93,6 +101,8 @@ import com.mike.uniadmin.model.randomColor
 
 import kotlinx.coroutines.launch
 import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -155,7 +165,6 @@ fun CourseContent(context: Context, targetCourseID: String) {
     val timetablesLoading by courseTimetableViewModel.isLoading.observeAsState(initial = false)
     val detailsLoading by courseDetailViewModel.isLoading.observeAsState(initial = false)
 
-    val courses by courseViewModel.courses.observeAsState(initial = emptyList())
     val coroutineScope = rememberCoroutineScope()
     val courseInfo by courseViewModel.fetchedCourse.observeAsState(initial = null)
 
@@ -427,11 +436,11 @@ fun AnnouncementCard(
             ) {
                 courseAnnouncement.author?.let {
                     Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context).copy(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = CC.textColor().copy(0.7f))
+                        text = it, style = CC.descriptionTextStyle(context).copy(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = CC.textColor().copy(0.7f)
+                        )
                     )
                 }
                 courseAnnouncement.date?.let {
@@ -473,7 +482,12 @@ fun AddAnnouncementItem(
 
     Column(
         modifier = Modifier
+            .border(
+                width = 1.dp, color = CC.secondary(), shape = RoundedCornerShape(10.dp)
+            )
+            .padding(10.dp)
             .imePadding()
+            .verticalScroll(rememberScrollState())
             .imePadding()
             .fillMaxWidth(0.9f)
     ) {
@@ -552,15 +566,19 @@ fun AddTextField(
         value = value,
         textStyle = CC.descriptionTextStyle(context),
         onValueChange = onValueChange,
-        label = { Text(label, style = CC.descriptionTextStyle(context)) },
-        modifier = Modifier.fillMaxWidth(),
+        placeholder = { Text(label, style = CC.descriptionTextStyle(context)) },
+        modifier = Modifier
+            .heightIn(min = 20.dp, max = 100.dp)
+            .fillMaxWidth(),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = CC.primary(),
+            focusedPlaceholderColor = CC.textColor().copy(0.5f),
             unfocusedContainerColor = CC.primary(),
             focusedTextColor = CC.textColor(),
             unfocusedTextColor = CC.textColor(),
             focusedIndicatorColor = CC.textColor(),
-            unfocusedIndicatorColor = CC.textColor()
+            unfocusedIndicatorColor = CC.textColor(),
+            cursorColor = CC.textColor()
 
         ),
         shape = RoundedCornerShape(10.dp)
@@ -575,9 +593,6 @@ fun AssignmentsItem(
     var expanded by remember { mutableStateOf(false) }
     val assignment = assignmentViewModel.assignments.observeAsState(initial = emptyList())
 
-    LaunchedEffect(courseID) {
-
-    }
     Column(
         modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -587,8 +602,11 @@ fun AssignmentsItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = {assignmentViewModel.getCourseAssignments(courseID)}) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = CC.textColor())
+                }
                 FloatingActionButton(
                     onClick = { expanded = !expanded },
                     modifier = Modifier.size(30.dp),
@@ -662,17 +680,18 @@ fun AssignmentCard(
                 Text(
                     text = "Published: ${assignment.publishedDate}",
                     style = CC.descriptionTextStyle(context)
-                        .copy(fontSize = 12.sp, color = CC.secondary())
+                        .copy(fontSize = 12.sp)
                 )
                 Text(
                     text = if (assignment.dueDate!! < formattedDate) "Past Due" else if (assignment.dueDate == formattedDate) "Due Today" else "Due: ${assignment.dueDate}",
                     fontSize = 12.sp,
+                    style = CC.descriptionTextStyle(context),
                     color = if (assignment.dueDate < formattedDate) Color.Red else CC.textColor()
                 )
             }
             assignment.description?.let {
                 Text(
-                    text = it, fontSize = 14.sp, color = Color.Black
+                    text = it, style = CC.descriptionTextStyle(context).copy(color = CC.primary())
                 )
             }
         }
@@ -687,11 +706,14 @@ fun AddAssignmentItem(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit
 ) {
-
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var dueDate by remember { mutableStateOf("") }
+    var dueTime by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
+    val calendar = Calendar.getInstance()
+    val dateFormatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+    val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
 
     Column(
         modifier = Modifier
@@ -699,20 +721,64 @@ fun AddAssignmentItem(
             .fillMaxWidth(0.9f)
     ) {
         AddTextField(
-            label = "Title", value = title, onValueChange = { title = it }, context
+            label = "Title", value = title, onValueChange = { title = it }, context = context
         )
         Spacer(modifier = Modifier.height(10.dp))
         AddTextField(
             label = "Description",
             value = description,
             onValueChange = { description = it },
-            context
+            context = context
         )
         Spacer(modifier = Modifier.height(10.dp))
-        AddTextField(
-            label = "Due date", value = dueDate, onValueChange = { dueDate = it }, context
-        )
+
+        // Date Picker
+        Button(onClick = {
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(Calendar.YEAR, year)
+                    calendar.set(Calendar.MONTH, month)
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    dueDate = dateFormatter.format(calendar.time)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = CC.extraColor1()
+            )
+            ) {
+            Text(
+                text = if (dueDate.isEmpty()) "Pick Date" else "Date: $dueDate",
+                style = CC.descriptionTextStyle(context)
+            )
+        }
+
         Spacer(modifier = Modifier.height(10.dp))
+
+        // Time Picker
+        Button(onClick = {
+            TimePickerDialog(
+                context, { _, hourOfDay, minute ->
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    calendar.set(Calendar.MINUTE, minute)
+                    dueTime = timeFormatter.format(calendar.time)
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false
+            ).show()
+        },colors = ButtonDefaults.buttonColors(
+            containerColor = CC.extraColor1()
+        )) {
+            Text(
+                text = if (dueTime.isEmpty()) "Pick Time" else "Time: $dueTime",
+                style = CC.descriptionTextStyle(context)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -721,13 +787,14 @@ fun AddAssignmentItem(
             Button(
                 onClick = {
                     loading = true
+                    val completeDueDate = "$dueDate at $dueTime"
                     MyDatabase.generateAssignmentID { iD ->
                         val newAssignment = CourseAssignment(
                             courseCode = courseID,
                             assignmentID = iD,
                             title = title,
                             description = description,
-                            dueDate = dueDate,
+                            dueDate = completeDueDate,
                             publishedDate = getCurrentDate()
                         )
                         assignmentViewModel.saveCourseAssignment(courseID = courseID,
@@ -742,7 +809,6 @@ fun AddAssignmentItem(
                                     onExpandedChange(expanded)
                                     Log.e("Error", "Failed to write announcement")
                                     Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
-
                                 }
                             })
                     }
@@ -751,7 +817,9 @@ fun AddAssignmentItem(
                 ), modifier = Modifier.width(100.dp)
             ) {
                 if (loading) {
-                    CircularProgressIndicator(color = background, modifier = Modifier.size(20.dp))
+                    CircularProgressIndicator(
+                        color = CC.textColor(), modifier = Modifier.size(20.dp)
+                    )
                 } else {
                     Text("Post", style = CC.descriptionTextStyle(context))
                 }
@@ -765,9 +833,7 @@ fun AddAssignmentItem(
             ) {
                 Text("Cancel", style = CC.descriptionTextStyle(context))
             }
-
         }
-
     }
 }
 
@@ -777,11 +843,6 @@ fun TimetableItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
-
-    LaunchedEffect(courseID) {
-
-        timetableViewModel.getCourseTimetables(courseID)
-    }
 
     Column(
         modifier = Modifier
@@ -813,11 +874,15 @@ fun TimetableItem(
                     onExpandedChange = { expanded = !expanded })
             }
             //timetable card
-            LazyColumn {
-                items(timetables.value) { timetable ->
-                    Text("${timetable.day}s", style = CC.titleTextStyle(context))
-                    Spacer(modifier = Modifier.height(20.dp))
-                    TimetableCard(timetable, context)
+            if (timetables.value.isEmpty()) {
+                Text("No Timetables", style = CC.descriptionTextStyle(context))
+            } else {
+                LazyColumn {
+                    items(timetables.value) { timetable ->
+                        Text("${timetable.day}s", style = CC.titleTextStyle(context))
+                        Spacer(modifier = Modifier.height(20.dp))
+                        TimetableCard(timetable, context)
+                    }
                 }
             }
         }
@@ -1007,10 +1072,6 @@ fun DetailsItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val details = detailsViewModel.details.observeAsState()
-    LaunchedEffect(courseID) {
-
-        detailsViewModel.getCourseDetails(courseID)
-    }
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -1287,8 +1348,7 @@ fun AddDetailsItem(
                         schedule = schedule,
                         requiredMaterials = requiredMaterials
                     )
-                    detailsViewModel.saveCourseDetail(
-                        courseID = courseID,
+                    detailsViewModel.saveCourseDetail(courseID = courseID,
                         detail = newDetails,
                         onResult = { success ->
                             if (success) {
