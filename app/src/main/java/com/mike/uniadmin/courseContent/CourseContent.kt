@@ -32,7 +32,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.AccessTime
@@ -48,6 +47,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -417,37 +417,29 @@ fun AnnouncementCard(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            courseAnnouncement.title?.let {
-                Text(
-                    text = it, style = CC.titleTextStyle(context)
+            Text(
+                text = courseAnnouncement.title, style = CC.titleTextStyle(context)
+            )
+            Text(
+                text = courseAnnouncement.description, style = CC.descriptionTextStyle(context).copy(
+                    color = CC.textColor().copy(0.5f), textAlign = TextAlign.Center
                 )
-            }
-            courseAnnouncement.description?.let {
-                Text(
-                    text = it, style = CC.descriptionTextStyle(context).copy(
-                        color = CC.textColor().copy(0.5f), textAlign = TextAlign.Center
-                    )
-                )
-            }
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                courseAnnouncement.author?.let {
-                    Text(
-                        text = it, style = CC.descriptionTextStyle(context).copy(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = CC.textColor().copy(0.7f)
-                        )
+                Text(
+                    text = courseAnnouncement.author, style = CC.descriptionTextStyle(context).copy(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = CC.textColor().copy(0.7f)
                     )
-                }
-                courseAnnouncement.date?.let {
-                    Text(
-                        text = it, fontSize = 12.sp, style = CC.descriptionTextStyle(context)
-                    )
-                }
+                )
+                Text(
+                    text = courseAnnouncement.date, fontSize = 12.sp, style = CC.descriptionTextStyle(context)
+                )
             }
         }
     }
@@ -472,7 +464,7 @@ fun AddAnnouncementItem(
     LaunchedEffect(Unit) {
         userViewModel.getSignedInUser()
         user?.let {
-            it.email?.let { it1 ->
+            it.email.let { it1 ->
                 userViewModel.findUserByEmail(it1, onUserFetched = { fetchedUser ->
                     senderName = fetchedUser?.firstName.toString()
                 })
@@ -667,11 +659,9 @@ fun AssignmentCard(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            assignment.title?.let {
-                Text(
-                    text = it, style = CC.titleTextStyle(context)
-                )
-            }
+            Text(
+                text = assignment.title, style = CC.titleTextStyle(context)
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -683,17 +673,15 @@ fun AssignmentCard(
                         .copy(fontSize = 12.sp)
                 )
                 Text(
-                    text = if (assignment.dueDate!! < formattedDate) "Past Due" else if (assignment.dueDate == formattedDate) "Due Today" else "Due: ${assignment.dueDate}",
+                    text = if (assignment.dueDate < formattedDate) "Past Due" else if (assignment.dueDate == formattedDate) "Due Today" else "Due: ${assignment.dueDate}",
                     fontSize = 12.sp,
                     style = CC.descriptionTextStyle(context),
                     color = if (assignment.dueDate < formattedDate) Color.Red else CC.textColor()
                 )
             }
-            assignment.description?.let {
-                Text(
-                    text = it, style = CC.descriptionTextStyle(context).copy(color = CC.primary())
-                )
-            }
+            Text(
+                text = assignment.description, style = CC.descriptionTextStyle(context).copy(color = CC.primary())
+            )
         }
     }
 }
@@ -1135,11 +1123,9 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            courseDetails.courseName?.let {
-                Text(
-                    text = it, style = CC.titleTextStyle(context).copy(fontSize = 20.sp)
-                )
-            }
+            Text(
+                text = courseDetails.courseName, style = CC.titleTextStyle(context).copy(fontSize = 20.sp)
+            )
             Text(
                 text = "Course Code: ${courseDetails.courseCode}",
                 style = CC.descriptionTextStyle(context)
@@ -1154,13 +1140,11 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                     tint = CC.textColor(),
                     modifier = Modifier.size(20.dp)
                 )
-                courseDetails.lecturer?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context)
-                            .copy(fontWeight = FontWeight.Medium)
-                    )
-                }
+                Text(
+                    text = courseDetails.lecturer,
+                    style = CC.descriptionTextStyle(context)
+                        .copy(fontWeight = FontWeight.Medium)
+                )
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1198,13 +1182,11 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                 style = CC.descriptionTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.primary())
             )
-            courseDetails.overview?.let {
-                Text(
-                    text = it, style = CC.descriptionTextStyle(context).copy(
-                        fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
-                    )
+            Text(
+                text = courseDetails.overview, style = CC.descriptionTextStyle(context).copy(
+                    fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
                 )
-            }
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = "Learning Outcomes",
@@ -1224,26 +1206,22 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                 style = CC.descriptionTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.primary())
             )
-            courseDetails.schedule?.let {
-                Text(
-                    text = it, style = CC.descriptionTextStyle(context).copy(
-                        fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
-                    )
+            Text(
+                text = courseDetails.schedule, style = CC.descriptionTextStyle(context).copy(
+                    fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
                 )
-            }
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = "Required Materials",
                 style = CC.descriptionTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.primary())
             )
-            courseDetails.requiredMaterials?.let {
-                Text(
-                    text = it, style = CC.descriptionTextStyle(context).copy(
-                        fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
-                    )
+            Text(
+                text = courseDetails.requiredMaterials, style = CC.descriptionTextStyle(context).copy(
+                    fontWeight = FontWeight.Medium, color = CC.textColor(), fontSize = 16.sp
                 )
-            }
+            )
         }
     }
 }
