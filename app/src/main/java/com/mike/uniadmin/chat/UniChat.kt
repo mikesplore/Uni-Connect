@@ -53,7 +53,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,15 +112,15 @@ fun UniChat(navController: NavController, context: Context) {
     val userMessages = users.map { user ->
         user to messages.filter { message ->
             message.senderID == user.id || message.recipientID == user.id
-        }.maxByOrNull { it.timeStamp ?: 0L } // Safely get the latest message for each user
+        }.maxByOrNull { it.timeStamp } // Safely get the latest message for each user
     }
 
 // Filter and sort users
     val filteredUsers = userMessages.filter { (user, _) ->
-        user.firstName?.contains(searchQuery, ignoreCase = true) == true || user.lastName?.contains(
+        user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
             searchQuery,
             ignoreCase = true
-        ) == true
+        )
     }.sortedWith(compareByDescending<Pair<UserEntity, MessageEntity?>> {
         it.second?.timeStamp ?: -1L // Sort by timestamp, use -1L for users with no messages
     }.thenBy {
@@ -147,7 +146,7 @@ fun UniChat(navController: NavController, context: Context) {
         ) {
             AnimatedVisibility(visible = searchVisible) {
                 TextField(value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = { newValue ->  searchQuery = newValue },
                     placeholder = { Text("Search Participants") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -166,20 +165,7 @@ fun UniChat(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
 
-            ) {
-                Text(
-                    "Uni Chat",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 35.sp)
-                )
-            }
 
             when {
                 errorMessage != null -> {
@@ -255,7 +241,7 @@ fun ProfileCard(
             modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top
         ) {
             Box(modifier = Modifier.size(50.dp)) {
-                if (user.profileImageLink?.isNotBlank() == true) {
+                if (user.profileImageLink.isNotBlank()) {
                     Image(
                         painter = rememberAsyncImagePainter(user.profileImageLink),
                         contentDescription = "Profile Image",
