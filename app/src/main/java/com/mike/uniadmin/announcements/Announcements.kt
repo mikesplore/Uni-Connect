@@ -1,7 +1,6 @@
 package com.mike.uniadmin.announcements
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -76,6 +75,8 @@ fun AnnouncementsScreen(context: Context) {
     var addAnnouncement by rememberSaveable { mutableStateOf(false) }
     val announcementAdmin = context.applicationContext as? UniAdmin
     val announcementRepository = remember { announcementAdmin?.announcementRepository }
+
+    // ViewModel for announcements
     val announcementViewModel: AnnouncementViewModel = viewModel(
         factory = AnnouncementViewModelFactory(
             announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
@@ -83,17 +84,20 @@ fun AnnouncementsScreen(context: Context) {
     )
 
     val userRepository = remember { announcementAdmin?.userRepository }
+
+    // ViewModel for users (if needed for AddAnnouncement)
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(
             userRepository ?: throw IllegalStateException("UserRepository is null")
         )
     )
+
     val announcements by announcementViewModel.announcements.observeAsState()
     var refresh by remember { mutableStateOf(true) }
     var editingAnnouncementId by remember { mutableStateOf<String?>(null) }
-
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
 
+    // Fetch announcements on refresh
     LaunchedEffect(refresh) {
         announcementViewModel.fetchAnnouncements()
         refresh = false
@@ -102,28 +106,19 @@ fun AnnouncementsScreen(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(title = {}, actions = {
-                IconButton(onClick = {
-                    addAnnouncement = !addAnnouncement
-                }) {
-                    Icon(
-                        Icons.Default.Add, "Add", tint = CC.textColor()
-                    )
+                // Add Announcement button
+                IconButton(onClick = { addAnnouncement = !addAnnouncement }) {
+                    Icon(Icons.Default.Add, "Add", tint = CC.textColor())
                 }
 
-                IconButton(onClick = {
-                    refresh = !refresh
-                }) {
+                // Refresh button
+                IconButton(onClick = { refresh = !refresh }) {
                     if (refresh) {
                         CircularProgressIndicator(color = CC.extraColor2())
                     }
-                    Icon(
-                        Icons.Default.Refresh, "Refresh", tint = CC.textColor()
-                    )
+                    Icon(Icons.Default.Refresh, "Refresh", tint = CC.textColor())
                 }
-            }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = CC.primary()
-            )
-            )
+            }, colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary()))
         }, containerColor = CC.primary()
     ) {
         Column(
@@ -154,6 +149,8 @@ fun AnnouncementsScreen(context: Context) {
             )
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            // Add Announcement form (conditionally visible)
             AnimatedVisibility(visible = addAnnouncement) {
                 AddAnnouncement(
                     context,
@@ -166,48 +163,46 @@ fun AnnouncementsScreen(context: Context) {
 
             when {
                 announcementsLoading == true -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                    ) {
+                    // Loading indicator
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = CC.textColor())
                     }
                 }
 
                 announcements.isNullOrEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No announcements available",
-                            style = CC.descriptionTextStyle(context)
-                        )
+                    // No announcements message
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No announcements available", style = CC.descriptionTextStyle(context))
                     }
                 }
 
                 else -> {
+                    // Display announcements list
                     LazyColumn(modifier = Modifier.fillMaxWidth(0.9f)) {
                         announcements?.let { announcements ->
-                            val sortedAnnouncements = announcements.sortedByDescending { it.id }
+                            val sortedAnnouncements = announcements.sortedByDescending { sortedAnn -> sortedAnn.id }
                             items(sortedAnnouncements) { announcement ->
                                 val isEditing = editingAnnouncementId == announcement.id
-
-                                AnnouncementCard(announcement = announcement, onEdit = {
-                                    editingAnnouncementId = if (isEditing) null else announcement.id
-                                }, onDelete = { id ->
-                                    announcementViewModel.deleteAnnouncement(id) { success ->
-                                        if (success) {
-                                            refresh = !refresh
-                                        } else {
-                                            Toast.makeText(
-                                                context,
-                                                "Failed to delete Announcement",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                AnnouncementCard(
+                                    announcement = announcement,
+                                    onEdit = { editingAnnouncementId = if (isEditing) null else announcement.id },
+                                    onDelete = { id ->
+                                        announcementViewModel.deleteAnnouncement(id) { success ->
+                                            if (success) {
+                                                refresh = !refresh
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Failed to delete Announcement",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         }
-                                    }
-                                }, context = context, isEditing = isEditing, onEditComplete = {
-                                    editingAnnouncementId = null
-                                }, announcementViewModel = announcementViewModel
+                                    },
+                                    context = context,
+                                    isEditing = isEditing,
+                                    onEditComplete = { editingAnnouncementId = null },
+                                    announcementViewModel = announcementViewModel
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
@@ -233,10 +228,12 @@ fun AddAnnouncement(
     val signedInUser by userViewModel.signedInUser.observeAsState()
     val user by userViewModel.user.observeAsState()
 
+    //these will be filled automatically (if the data exists that is)
     val profileLink = user?.profileImageLink ?: ""
     val author = user?.firstName ?: ""
     val senderId = user?.id ?: ""
 
+    //get the data of the signed in user
     LaunchedEffect(Unit) {
         userViewModel.getSignedInUser()
         signedInUser?.let {
@@ -244,7 +241,6 @@ fun AddAnnouncement(
         }
 
     }
-
 
 
     Column(
@@ -275,6 +271,7 @@ fun AddAnnouncement(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Profile picture
             Box(
                 modifier = Modifier
                     .border(
@@ -317,6 +314,7 @@ fun AddAnnouncement(
         Spacer(modifier = Modifier.height(20.dp))
         Text("Enter announcement description", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
+
         AnnouncementTextField(
             value = description,
             onValueChange = { description = it },
@@ -326,6 +324,8 @@ fun AddAnnouncement(
         )
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.fillMaxWidth(0.9f)) {
+
+            // save the announcement
             Button(
                 onClick = {
                     MyDatabase.generateAnnouncementID { id ->
@@ -387,7 +387,8 @@ fun AnnouncementTextField(
             focusedIndicatorColor = CC.extraColor2(),
             unfocusedIndicatorColor = CC.textColor(),
             focusedPlaceholderColor = CC.textColor(),
-            unfocusedPlaceholderColor = CC.textColor()
+            unfocusedPlaceholderColor = CC.textColor(),
+            cursorColor = CC.textColor()
         ),
         modifier = modifier
 
@@ -403,7 +404,7 @@ fun EditAnnouncement(
     announcement: AnnouncementEntity,
     announcementViewModel: AnnouncementViewModel
 ) {
-
+    // State variables to hold the title and description of the announcement being edited
     var title by remember { mutableStateOf(announcement.title) }
     var description by remember { mutableStateOf(announcement.description) }
 
@@ -413,7 +414,7 @@ fun EditAnnouncement(
             .border(1.dp, CC.extraColor2(), RoundedCornerShape(10.dp))
             .fillMaxWidth(0.9f), horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        // Title of the editing section
         Row(
             modifier = Modifier.height(50.dp),
             verticalAlignment = Alignment.Bottom,
@@ -426,6 +427,7 @@ fun EditAnnouncement(
         }
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Display the profile image and current date
         Row(
             modifier = Modifier
                 .height(50.dp)
@@ -433,17 +435,17 @@ fun EditAnnouncement(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Profile image or author's initial
             Box(
                 modifier = Modifier
-                    .border(
-                        1.dp, CC.textColor(), CircleShape
-                    )
+                    .border(1.dp, CC.textColor(), CircleShape)
                     .clip(CircleShape)
                     .background(CC.secondary(), CircleShape)
                     .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (announcement.imageLink.isNotEmpty()) {
+                    // Load the profile image if the link is available
                     AsyncImage(
                         model = announcement.imageLink,
                         contentDescription = "Profile Image",
@@ -451,6 +453,7 @@ fun EditAnnouncement(
                         contentScale = ContentScale.Crop
                     )
                 } else {
+                    // Show the initial of the author's name if no image is available
                     Text(
                         "${announcement.authorName[0]}",
                         style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
@@ -458,45 +461,59 @@ fun EditAnnouncement(
                 }
             }
 
+            // Display the current date
             Text(getCurrentDate(), style = CC.descriptionTextStyle(context))
         }
 
+        // Title input section
         Text("Enter announcement title", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
-
         AnnouncementTextField(
-            value = title, onValueChange = { newTitle ->
+            value = title,
+            onValueChange = { newTitle ->
                 title = newTitle
-            }, singleLine = true, placeholder = "Title", context = context
+            },
+            singleLine = true,
+            placeholder = "Title",
+            context = context
         )
 
         Spacer(modifier = Modifier.height(20.dp))
+
+        // Description input section
         Text("Enter announcement description", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
-            value = description, onValueChange = { newDescription ->
+            value = description,
+            onValueChange = { newDescription ->
                 description = newDescription
-            }, singleLine = false, placeholder = "Description", context = context
+            },
+            singleLine = false,
+            placeholder = "Description",
+            context = context
         )
         Spacer(modifier = Modifier.height(20.dp))
+
+        // Button to save the edited announcement
         Row(modifier = Modifier.fillMaxWidth(0.9f)) {
             Button(
                 onClick = {
-                    announcementViewModel.saveAnnouncement(announcement.copy(
-                        title = title, description = description, date = getCurrentDate()
-                    ), onComplete = { success ->
-                        if (success) {
-                            onComplete()
-                            Log.d(
-                                "EditAnnouncement",
-                                "Announcement updated successfully, the new announcement is: $announcement"
-                            )
+                    // Save the edited announcement through the ViewModel
+                    announcementViewModel.saveAnnouncement(
+                        announcement.copy(
+                            title = title,
+                            description = description,
+                            date = getCurrentDate()
+                        ),
+                        onComplete = { success ->
+                            if (success) {
+                                onComplete() // Call the onComplete callback if save is successful
+                            }
                         }
-                    })
-
-                }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.extraColor2()
-                )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
             ) {
                 Text("Edit", style = CC.descriptionTextStyle(context))
             }
@@ -516,6 +533,7 @@ fun AnnouncementCard(
     onEditComplete: () -> Unit,
     announcementViewModel: AnnouncementViewModel
 ) {
+    // State to track whether the card is expanded or not
     var expanded by remember { mutableStateOf(false) }
     val text = if (expanded) "Close" else "Open"
 
@@ -531,6 +549,7 @@ fun AnnouncementCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Profile image or author's initial
             Box(
                 modifier = Modifier
                     .border(1.dp, CC.textColor(), CircleShape)
@@ -540,6 +559,7 @@ fun AnnouncementCard(
                 contentAlignment = Alignment.Center
             ) {
                 if (announcement.imageLink.isNotEmpty()) {
+                    // Load image asynchronously if the link is available
                     AsyncImage(
                         model = announcement.imageLink,
                         contentDescription = "Profile Image",
@@ -547,13 +567,17 @@ fun AnnouncementCard(
                         contentScale = ContentScale.Crop
                     )
                 } else {
+                    // Display author's initial if no image is available
                     Text(
                         "${announcement.authorName[0]}",
                         style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
+
             Spacer(modifier = Modifier.width(8.dp))
+
+            // Announcement title
             Text(
                 text = announcement.title,
                 style = CC.descriptionTextStyle(context),
@@ -563,6 +587,8 @@ fun AnnouncementCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
+
+            // Button to toggle expansion of the card
             Button(
                 onClick = { expanded = !expanded },
                 colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
@@ -573,6 +599,8 @@ fun AnnouncementCard(
 
         if (expanded) {
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Announcement description
             Text(
                 text = announcement.description,
                 style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
@@ -580,7 +608,10 @@ fun AnnouncementCard(
                 maxLines = if (expanded) Int.MAX_VALUE else 3,
                 overflow = TextOverflow.Ellipsis
             )
+
             Spacer(modifier = Modifier.height(4.dp))
+
+            // Author name and date
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
@@ -597,9 +628,13 @@ fun AnnouncementCard(
                     color = CC.textColor().copy(alpha = 0.6f),
                 )
             }
+
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Edit and Delete buttons
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
                 Button(
                     onClick = { onEdit() },
@@ -617,6 +652,7 @@ fun AnnouncementCard(
             }
         }
 
+        // Inline editing form when the card is in editing mode
         if (isEditing) {
             Spacer(modifier = Modifier.height(8.dp))
             Column(
@@ -624,14 +660,18 @@ fun AnnouncementCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 EditAnnouncement(
-                    announcement = announcement, context = context, onComplete = {
+                    announcement = announcement,
+                    context = context,
+                    onComplete = {
                         onEditComplete()
-                    }, announcementViewModel = announcementViewModel
+                    },
+                    announcementViewModel = announcementViewModel
                 )
             }
         }
     }
 }
+
 
 @Preview
 @Composable
