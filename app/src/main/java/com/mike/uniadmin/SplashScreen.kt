@@ -3,7 +3,6 @@ package com.mike.uniadmin
 import android.content.Context
 import android.util.Log
 import android.view.animation.OvershootInterpolator
-import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -69,7 +68,6 @@ fun SplashScreen(navController: NavController, context: Context) {
     val destination = if (currentUser?.email != null) "homescreen" else "login"
 
     LaunchedEffect(currentUser) {
-        userViewModel.deleteSignedInUser()
         if (!isDatabaseChecked) {
             userViewModel.getSignedInUser()
             isDatabaseChecked = true
@@ -96,8 +94,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     }
 
     if (currentUser != null) {
-        Log.e("Found User", "User found in the database ${currentUser?.email}")
-        Toast.makeText(context, "User found in the database ${currentUser?.email}", Toast.LENGTH_SHORT).show()
+        Log.d("Found User", "User found in the database ${currentUser?.email}")
     } else {
         Log.e("Found User", "No User found in the database")
     }
