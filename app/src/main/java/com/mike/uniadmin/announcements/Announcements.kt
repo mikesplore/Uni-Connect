@@ -122,7 +122,8 @@ fun AnnouncementsScreen(context: Context) {
                 }
             }, colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = CC.primary()
-            ))
+            )
+            )
         }, containerColor = CC.primary()
     ) {
         Column(
@@ -166,20 +167,23 @@ fun AnnouncementsScreen(context: Context) {
             when {
                 announcementsLoading == true -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = CC.textColor())
                     }
                 }
+
                 announcements.isNullOrEmpty() -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "No announcements available", style = CC.descriptionTextStyle(context))
+                        Text(
+                            text = "No announcements available",
+                            style = CC.descriptionTextStyle(context)
+                        )
                     }
                 }
+
                 else -> {
                     LazyColumn(modifier = Modifier.fillMaxWidth(0.9f)) {
                         announcements?.let { announcements ->
@@ -229,9 +233,9 @@ fun AddAnnouncement(
     val signedInUser by userViewModel.signedInUser.observeAsState()
     val user by userViewModel.user.observeAsState()
 
-    val profileLink = user?.profileImageLink
-    val author = user?.firstName
-    val senderId = user?.id
+    val profileLink = user?.profileImageLink ?: ""
+    val author = user?.firstName ?: ""
+    val senderId = user?.id ?: ""
 
     LaunchedEffect(Unit) {
         userViewModel.getSignedInUser()
@@ -248,7 +252,8 @@ fun AddAnnouncement(
             .verticalScroll(rememberScrollState())
             .imePadding()
             .border(1.dp, CC.extraColor2(), RoundedCornerShape(10.dp))
-            .fillMaxWidth(0.9f), horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth(0.9f),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Row(
@@ -334,7 +339,8 @@ fun AddAnnouncement(
                             imageLink = profileLink
                         )
                         if (title != "" && description != "") {
-                            announcementViewModel.saveAnnouncement(newAnnouncement,
+                            announcementViewModel.saveAnnouncement(
+                                newAnnouncement,
                                 onComplete = { success ->
                                     if (success) {
                                         title = ""
@@ -344,9 +350,7 @@ fun AddAnnouncement(
                                 })
                         } else {
                             Toast.makeText(
-                                context,
-                                "Please enter title and description",
-                                Toast.LENGTH_SHORT
+                                context, "Please enter title and description", Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
@@ -439,7 +443,7 @@ fun EditAnnouncement(
                     .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (announcement.imageLink?.isNotEmpty() == true) {
+                if (announcement.imageLink.isNotEmpty()) {
                     AsyncImage(
                         model = announcement.imageLink,
                         contentDescription = "Profile Image",
@@ -448,7 +452,7 @@ fun EditAnnouncement(
                     )
                 } else {
                     Text(
-                        "${announcement.authorName?.get(0)}",
+                        "${announcement.authorName[0]}",
                         style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
@@ -460,32 +464,26 @@ fun EditAnnouncement(
         Text("Enter announcement title", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
 
-        title?.let {
-            AnnouncementTextField(
-                value = it, onValueChange = { newTitle ->
-                    title = newTitle
-                }, singleLine = true, placeholder = "Title", context = context
-            )
-        }
+        AnnouncementTextField(
+            value = title, onValueChange = { newTitle ->
+                title = newTitle
+            }, singleLine = true, placeholder = "Title", context = context
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
         Text("Enter announcement description", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
-        description?.let {
-            AnnouncementTextField(
-                value = it, onValueChange = { newDescription ->
-                    description = newDescription
-                }, singleLine = false, placeholder = "Description", context = context
-            )
-        }
+        AnnouncementTextField(
+            value = description, onValueChange = { newDescription ->
+                description = newDescription
+            }, singleLine = false, placeholder = "Description", context = context
+        )
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.fillMaxWidth(0.9f)) {
             Button(
                 onClick = {
                     announcementViewModel.saveAnnouncement(announcement.copy(
-                        title = title,
-                        description = description,
-                        date = getCurrentDate()
+                        title = title, description = description, date = getCurrentDate()
                     ), onComplete = { success ->
                         if (success) {
                             onComplete()
@@ -541,7 +539,7 @@ fun AnnouncementCard(
                     .size(32.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (announcement.imageLink?.isNotEmpty() == true) {
+                if (announcement.imageLink.isNotEmpty()) {
                     AsyncImage(
                         model = announcement.imageLink,
                         contentDescription = "Profile Image",
@@ -550,23 +548,21 @@ fun AnnouncementCard(
                     )
                 } else {
                     Text(
-                        "${announcement.authorName?.get(0)}",
+                        "${announcement.authorName[0]}",
                         style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
-            announcement.title?.let {
-                Text(
-                    text = it,
-                    style = CC.descriptionTextStyle(context),
-                    fontWeight = FontWeight.Bold,
-                    color = CC.textColor(),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            Text(
+                text = announcement.title,
+                style = CC.descriptionTextStyle(context),
+                fontWeight = FontWeight.Bold,
+                color = CC.textColor(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
             Button(
                 onClick = { expanded = !expanded },
                 colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
@@ -577,35 +573,29 @@ fun AnnouncementCard(
 
         if (expanded) {
             Spacer(modifier = Modifier.height(8.dp))
-            announcement.description?.let {
-                Text(
-                    text = it,
-                    style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
-                    color = CC.textColor().copy(alpha = 0.8f),
-                    maxLines = if (expanded) Int.MAX_VALUE else 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = announcement.description,
+                style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
+                color = CC.textColor().copy(alpha = 0.8f),
+                maxLines = if (expanded) Int.MAX_VALUE else 3,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                announcement.authorName?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                        color = CC.textColor().copy(alpha = 0.6f),
-                    )
-                }
-                announcement.date?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                        color = CC.textColor().copy(alpha = 0.6f),
-                    )
-                }
+                Text(
+                    text = announcement.authorName,
+                    style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                    color = CC.textColor().copy(alpha = 0.6f),
+                )
+                Text(
+                    text = announcement.date,
+                    style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                    color = CC.textColor().copy(alpha = 0.6f),
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
