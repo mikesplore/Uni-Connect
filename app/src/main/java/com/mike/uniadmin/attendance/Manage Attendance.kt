@@ -128,22 +128,20 @@ fun ManageAttendanceScreen(context: Context) {
                             .animateContentSize(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        course.courseName?.let {
-                            Text(
-                                it,
-                                modifier = Modifier.weight(1f),
-                                style = CC.descriptionTextStyle(context),
-                                fontSize = 18.sp,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
+                        Text(
+                            course.courseName,
+                            modifier = Modifier.weight(1f),
+                            style = CC.descriptionTextStyle(context),
+                            fontSize = 18.sp,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
                         Switch(
                             checked = isChecked,
                             onCheckedChange = { newState ->
                                 val newAttendanceState = AttendanceState(
                                     courseID = course.courseCode,
-                                    courseName = course.courseName ?: "",
+                                    courseName = course.courseName,
                                     state = newState
                                 )
                                 courseViewModel.saveAttendanceState(newAttendanceState)
