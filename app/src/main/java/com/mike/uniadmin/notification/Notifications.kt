@@ -135,23 +135,21 @@ fun PhoneNotifications(navController: NavController, context: Context) {
             ) {
                 groupedNotifications.forEach { (date, notificationsForDate) ->
                     item {
-                        if (date != null) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Box(
+                                modifier = Modifier.background(
+                                    CC.secondary(),
+                                    RoundedCornerShape(10.dp)
+                                )
                             ) {
-                                Box(
-                                    modifier = Modifier.background(
-                                        CC.secondary(),
-                                        RoundedCornerShape(10.dp)
-                                    )
-                                ) {
-                                    Text(
-                                        text = date,
-                                        style = CC.descriptionTextStyle(context),
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
+                                Text(
+                                    text = date,
+                                    style = CC.descriptionTextStyle(context),
+                                    modifier = Modifier.padding(8.dp)
+                                )
                             }
                         }
                     }
@@ -181,34 +179,28 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
             .background(CC.primary(), RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
-        notification.title?.let {
-            Text(
-                text = it,
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 8.dp),
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
-        }
-        notification.description?.let {
-            Text(
-                text = it,
-                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
+        Text(
+            text = notification.title,
+            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(bottom = 8.dp),
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+        )
+        Text(
+            text = notification.description,
+            style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)),
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            notification.time?.let {
-                Text(
-                    text = it,
-                    style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
-                )
-            }
+            Text(
+                text = notification.time,
+                style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier
                 .height(30.dp)
@@ -222,7 +214,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
             IconButton(onClick = {
                 MyDatabase.generateChatID { id ->
                     user?.let { currentUser ->
-                        notification.userId?.let { notificationUserId ->
+                        notification.userId.let { notificationUserId ->
                             val conversationId = "Direct Messages/${generateConversationId(userId1 = currentUser.id, userId2 = notificationUserId)}"
                             chatViewModel.saveChat(
                                 path = conversationId,
@@ -243,8 +235,6 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                                     }
                                 }
                             )
-                        } ?: run {
-                            Toast.makeText(context, "Notification userId is null", Toast.LENGTH_SHORT).show()
                         }
                     } ?: run {
                         Toast.makeText(context, "Current user is null", Toast.LENGTH_SHORT).show()
@@ -262,13 +252,13 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
 }
 
 
-private fun NotificationEntity.getFormattedDateForGrouping(): String? {
+private fun NotificationEntity.getFormattedDateForGrouping(): String {
     val today = Calendar.getInstance()
     val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
 
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val notificationDate = Calendar.getInstance().apply {
-        time = this@getFormattedDateForGrouping.date?.let { dateFormat.parse(it) }!!
+        time = this@getFormattedDateForGrouping.date.let { dateFormat.parse(it) }!!
     }
 
     return when {
