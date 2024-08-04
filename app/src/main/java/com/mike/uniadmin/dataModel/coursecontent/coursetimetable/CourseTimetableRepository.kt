@@ -6,11 +6,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+val timetableViewModelScope = CoroutineScope(Dispatchers.Main)
+
 class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableDao) {
     private val database = FirebaseDatabase.getInstance().reference.child("CourseContent")
 
-    // Scope for running coroutines
-    private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
     init {
         // Start listening for changes in Firebase
@@ -23,7 +23,7 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
         courseTimetable: CourseTimetable,
         onResult: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        timetableViewModelScope.launch {
             try {
                 // Insert into local database
                 courseTimetableDao.insertCourseTimetable(courseTimetable)
@@ -43,71 +43,105 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
     }
 
     fun getCourseTimetables(courseID: String, onResult: (List<CourseTimetable>) -> Unit) {
-        viewModelScope.launch {
+        timetableViewModelScope.launch {
+            Log.d("Timetables", "Searching repository timetable for course: $courseID")
+
+            // Fetch cached data from local database
             val cachedData = courseTimetableDao.getCourseTimetables(courseID)
+
             if (cachedData.isNotEmpty()) {
+                // Return cached data if available
                 onResult(cachedData)
+                Log.d("Timetables", "Found timetable in database")
+            } else {
+                Log.d("Timetables", "No timetable found in database, fetching from repository")
+                val courseTimetableRef = database.child(courseID).child("Course Timetable")
+
+                // Fetch data from the remote database
+                courseTimetableRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val timetables = mutableListOf<CourseTimetable>()
+                        for (childSnapshot in snapshot.children) {
+                            val timetable = childSnapshot.getValue(CourseTimetable::class.java)
+                            timetable?.let {
+                                Log.d("Timetables", "Found timetable in repository")
+                                timetables.add(it)
+                            }
+                        }
+                        timetableViewModelScope.launch {
+                            // Update local database with fetched timetables
+                            if (timetables.isNotEmpty()) {
+                                courseTimetableDao.insertCourseTimetables(timetables)
+                                val updatedData = courseTimetableDao.getCourseTimetables(courseID)
+                                onResult(updatedData)
+                            } else {
+                                onResult(emptyList())
+                            }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Timetables", "Error reading timetables: ${error.message}")
+                        onResult(emptyList())
+                    }
+                })
+
+                // Listen for real-time updates to the remote database
+                courseTimetableRef.addChildEventListener(object : ChildEventListener {
+                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                        val timetable = snapshot.getValue(CourseTimetable::class.java)
+                        timetable?.let {
+                            timetableViewModelScope.launch {
+                                courseTimetableDao.insertCourseTimetable(it)
+                                val updatedData = courseTimetableDao.getCourseTimetables(courseID)
+                                onResult(updatedData)
+                            }
+                        }
+                    }
+
+                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                        val timetable = snapshot.getValue(CourseTimetable::class.java)
+                        timetable?.let {
+                            timetableViewModelScope.launch {
+                                courseTimetableDao.insertCourseTimetable(it)
+                                val updatedData = courseTimetableDao.getCourseTimetables(courseID)
+                                onResult(updatedData)
+                            }
+                        }
+                    }
+
+                    override fun onChildRemoved(snapshot: DataSnapshot) {
+                        val timetable = snapshot.getValue(CourseTimetable::class.java)
+                        timetable?.let {
+                            timetableViewModelScope.launch {
+                                courseTimetableDao.deleteCourseTimetable(it.timetableID)
+                                val updatedData = courseTimetableDao.getCourseTimetables(courseID)
+                                onResult(updatedData)
+                            }
+                        }
+                    }
+
+                    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                        // Handle if necessary
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Timetables", "Error handling child event: ${error.message}")
+                        onResult(emptyList())
+                    }
+                })
             }
-
-            val courseTimetableRef = database.child(courseID).child("Course Timetable")
-
-            courseTimetableRef.addChildEventListener(object : ChildEventListener {
-                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                    val timetable = snapshot.getValue(CourseTimetable::class.java)
-                    timetable?.let {
-                        viewModelScope.launch {
-                            courseTimetableDao.insertCourseTimetable(it)
-                            val updatedData = courseTimetableDao.getCourseTimetables(courseID)
-                            onResult(updatedData)
-                        }
-                    }
-                }
-
-                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    val timetable = snapshot.getValue(CourseTimetable::class.java)
-                    timetable?.let {
-                        viewModelScope.launch {
-                            courseTimetableDao.insertCourseTimetable(it)
-                            val updatedData = courseTimetableDao.getCourseTimetables(courseID)
-                            onResult(updatedData)
-                        }
-                    }
-                }
-
-                override fun onChildRemoved(snapshot: DataSnapshot) {
-                    val timetable = snapshot.getValue(CourseTimetable::class.java)
-                    timetable?.let {
-                        viewModelScope.launch {
-                            courseTimetableDao.deleteCourseTimetable(it.timetableID)
-                            val updatedData = courseTimetableDao.getCourseTimetables(courseID)
-                            onResult(updatedData)
-                        }
-                    }
-                }
-
-                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                    // Handle if necessary
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    println("Error reading timetables: ${error.message}")
-                    onResult(emptyList())
-                }
-            })
         }
     }
 
-    //get all course timetables
+
     fun getAllCourseTimetables(onResult: (List<CourseTimetable>) -> Unit) {
-        viewModelScope.launch {
+        timetableViewModelScope.launch(Dispatchers.IO) { // Ensure this runs on a background thread
             val cachedData = courseTimetableDao.getAllCourseTimetables()
-            if (cachedData.isNotEmpty()) {
-                onResult(cachedData)
-            }else{
-                Log.e("Empty", "Empty database")
-            }
+            onResult(cachedData)
         }
     }
+
 
 
     // Listen for changes in Firebase and update local database accordingly
@@ -124,7 +158,7 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val timetable = snapshot.getValue(CourseTimetable::class.java)
                 timetable?.let {
-                    viewModelScope.launch {
+                    timetableViewModelScope.launch {
                         courseTimetableDao.deleteCourseTimetable(it.timetableID)
                     }
                 }
@@ -141,7 +175,7 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
                     val timetable = childSnapshot.getValue(CourseTimetable::class.java)
                     timetable?.let { timetables.add(it) }
                 }
-                viewModelScope.launch {
+                timetableViewModelScope.launch {
                     courseTimetableDao.insertCourseTimetables(timetables)
                 }
             }
@@ -149,7 +183,7 @@ class CourseTimetableRepository(private val courseTimetableDao: CourseTimetableD
     }
 
     fun getTimetableByDay(day: String, onResult: (List<CourseTimetable>?) -> Unit) {
-        viewModelScope.launch {
+        timetableViewModelScope.launch {
             val cachedData = courseTimetableDao.getCourseTimetablesByDay(day)
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
