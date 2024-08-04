@@ -18,20 +18,34 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
     }
 
     private fun setupRealtimeUpdates() {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (courseSnapshot in snapshot.children) {
-                    val courseID = courseSnapshot.key ?: continue
-                    val courseDetailRef = courseSnapshot.child("Course Details")
-                    val details = courseDetailRef.children.mapNotNull { it.getValue(CourseDetail::class.java) }
-                    viewModelScope.launch {
-                        details.forEach { courseDetailDao.insertCourseDetail(it) }
-                    }
+        database.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                updateLocalDatabase(snapshot)
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                updateLocalDatabase(snapshot)
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val courseID = snapshot.key ?: return
+                val details = snapshot.child("Course Details").children.mapNotNull { it.getValue(CourseDetail::class.java) }
+                viewModelScope.launch {
+                    details.forEach { courseDetailDao.deleteCourseDetail(it.detailID) }
                 }
             }
 
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
             override fun onCancelled(error: DatabaseError) {
                 println("Error setting up real-time updates: ${error.message}")
+            }
+
+            private fun updateLocalDatabase(snapshot: DataSnapshot) {
+                val courseID = snapshot.key ?: return
+                val details = snapshot.child("Course Details").children.mapNotNull { it.getValue(CourseDetail::class.java) }
+                viewModelScope.launch {
+                    details.forEach { courseDetailDao.insertCourseDetail(it) }
+                }
             }
         })
     }
