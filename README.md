@@ -211,3 +211,78 @@ The `PasswordReset` composable function provides a screen for users to reset the
 
 ### Password Reset Screen
 ![Password Reset](Images/passwordReset.png)
+
+
+## Components
+### Overview
+
+The `AnnouncementsScreen` Composable function is responsible for displaying a screen where users can view, add, and manage announcements. It utilizes a top app bar with buttons for adding new announcements and refreshing the list. The screen presents a list of announcements retrieved from a repository and offers functionality to edit or delete them.
+
+### Components and Logic
+
+#### State Management
+
+*   **`addAnnouncement`**: A Boolean state variable that controls the visibility of the add announcement form.
+*   **`announcementAdmin`, `announcementRepository`, `userRepository`**: Instances used to access the respective repositories from the application context.
+*   **`announcementViewModel`, `userViewModel`**: ViewModel instances created using factories to manage the state and business logic related to announcements and users.
+*   **`announcements`, `announcementsLoading`**: Observed states from `announcementViewModel` that represent the list of announcements and the loading status, respectively.
+*   **`refresh`**: A Boolean state that triggers the fetching of announcements when its value changes.
+*   **`editingAnnouncementId`**: A nullable String state variable that keeps track of the announcement currently being edited.
+
+#### Effect and Data Fetching
+
+*   **`LaunchedEffect`**: This effect is triggered when the `refresh` state changes. It calls the `fetchAnnouncements()` function from the `announcementViewModel` to load the announcements.
+
+#### Scaffold and Top App Bar
+
+*   **`Scaffold`**: Provides the basic structure for the screen, including a `TopAppBar`.
+*   **`TopAppBar`**: Contains two `IconButton` components: one for adding a new announcement and another for refreshing the announcements list. Clicking the add button toggles the visibility of the add announcement form, while the refresh button initiates data re-fetching.
+
+#### Content
+
+*   **`Column` and `Row` Layouts**: A `Column` is used to arrange the content vertically, with a `Row` employed to display the screen title centered at the top.
+*   **`Text` and `Spacer`**: The `Text` composable displays the "Announcements" title and a subtitle for user guidance. The `Spacer` adds vertical spacing between components.
+
+#### AnimatedVisibility
+
+*   This composable controls the visibility of the `AddAnnouncement` composable based on the `addAnnouncement` state.
+
+#### Loading and Empty State
+
+*   Conditional rendering is used based on the `announcementsLoading` and `announcements` states:
+  *   If `announcementsLoading` is true, a `CircularProgressIndicator` is displayed.
+  *   If `announcements` is empty or null, a message indicating that there are no announcements is shown.
+
+#### LazyColumn
+
+*   The list of announcements is displayed using a `LazyColumn`.
+*   The list items are sorted in descending order by ID before being rendered.
+*   Each announcement is presented within an `AnnouncementCard`, which provides options to edit or delete the announcement:
+  *   **Edit**: Toggles the editing state for the specific announcement.
+  *   **Delete**: Triggers the `deleteAnnouncement` function in `announcementViewModel` and displays a Toast message if the deletion fails.
+
+#### AnnouncementCard
+
+*   This composable represents each announcement in the list and includes logic to handle editing and deleting operations.
+
+## Visuals
+
+### Announcements
+![Announcements](Images/Announcements.png)
+
+### Announcements Add
+![Announcements Add](Images/AnnouncementsAdd.png)
+
+### Announcements Edit
+![Announcements Edit](Images/AnnouncementsEdit.png)
+
+
+The `AnnouncementsScreen` presents a visually appealing and user-friendly interface for managing announcements. The top app bar provides easy access to actions for adding new announcements and refreshing the list. The announcements are displayed in a clear and organized manner within the `LazyColumn`, with each `AnnouncementCard` offering options for editing or deleting. Loading states and potential empty states are handled gracefully, providing appropriate feedback to the user.
+
+### Important Notes
+
+*   The function uses `remember` and `mutableStateOf` to manage state variables.
+*   It handles loading states and provides visual feedback to the user.
+*   It uses Toast messages to inform the user about the status of operations, such as successful deletion.
+
+By leveraging these components and logic, the `AnnouncementsScreen` provides a robust and intuitive experience for managing announcements within the Uni Admin.
