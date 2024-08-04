@@ -16,4 +16,7 @@ interface CourseDetailDao {
 
     @Query("SELECT courseName, courseCode, courseImageLink, visits FROM courses WHERE courseCode = :courseId")
     suspend fun getCourseDetailsByID(courseId: String): CourseEntity?
+
+    @Query("DELETE FROM courseDetails WHERE detailID = :detailID")
+    suspend fun deleteCourseDetail(detailID: String)
 }
