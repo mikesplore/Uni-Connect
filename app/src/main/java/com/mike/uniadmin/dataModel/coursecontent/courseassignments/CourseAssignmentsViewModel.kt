@@ -1,9 +1,5 @@
 package com.mike.uniadmin.dataModel.coursecontent.courseassignments
 
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentRepository
-
-
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,20 +14,20 @@ class CourseAssignmentViewModel(private val repository: CourseAssignmentReposito
     private val _assignments = MutableLiveData<List<CourseAssignment>>()
     val assignments: LiveData<List<CourseAssignment>> = _assignments
 
-    private val _isLoading = MutableLiveData<Boolean>()
+    private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
 
     // Fetch assignments for a specific course
     fun getCourseAssignments(courseID: String) {
-        _isLoading.value = true
+        _isLoading.value = true // Set loading to true before fetching
         repository.getCourseAssignments(courseID) { assignments ->
             _assignments.value = assignments
-            _isLoading.value = false
+            _isLoading.value = false // Set loading to false after fetching
         }
     }
 
     // Save a new assignment
-    fun saveCourseAssignment(courseID: String, assignment: CourseAssignment, onComplete:(Boolean) -> Unit) {
+    fun saveCourseAssignment(courseID: String, assignment: CourseAssignment, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.writeCourseAssignment(courseID, assignment) { success ->
                 if (success) {
