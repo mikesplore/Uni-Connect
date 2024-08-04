@@ -223,10 +223,10 @@ fun DiscussionScreen(
                             }
 
                             items(chatsForDate.filter {
-                                it.message?.contains(
+                                it.message.contains(
                                     searchQuery.text,
                                     ignoreCase = true
-                                ) ?: false
+                                )
                             }) { chat ->
                                 ChatBubble(
                                     chat = chat,
@@ -356,7 +356,7 @@ fun GroupUsersList(
     group: GroupEntity
 ) {
     val filteredUsers = users.filter { user ->
-        group.members?.contains(user.id) ?: false  // Filter users based on membership
+        group.members.contains(user.id)  // Filter users based on membership
     }
 
     AnimatedVisibility(visible = isVisible,
@@ -528,14 +528,12 @@ fun ChatBubble(
                     Row(
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        chat.senderName?.let {
-                            Text(
-                                text = it,
-                                style = CC.descriptionTextStyle(context),
-                                fontWeight = FontWeight.Bold,
-                                color = CC.primary()
-                            )
-                        }
+                        Text(
+                            text = chat.senderName,
+                            style = CC.descriptionTextStyle(context),
+                            fontWeight = FontWeight.Bold,
+                            color = CC.primary()
+                        )
                     }
                 }
                 SelectionContainer {
@@ -546,7 +544,7 @@ fun ChatBubble(
                         append(chat.message)
                         // Use a regex or any other method to detect links and apply linkStyle
                         val regex = Regex("(https?://[\\w./?=#]+)")
-                        chat.message?.let {
+                        chat.message.let {
                             regex.findAll(it).forEach { result ->
                                 val start = result.range.first
                                 val end = result.range.last + 1
@@ -557,7 +555,7 @@ fun ChatBubble(
                             }
                         }
                     }, onClick = { offset ->
-                        val annotations = chat.message?.substring(offset)
+                        val annotations = chat.message.substring(offset)
                         annotations.let {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotations))
                             context.startActivity(intent)
@@ -565,17 +563,15 @@ fun ChatBubble(
                     }, style = CC.descriptionTextStyle(context)
                     )
                 }
-                chat.time?.let {
-                    Text(
-                        text = it,
-                        style = CC.descriptionTextStyle(context),
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(top = 4.dp)
-                    )
-                }
+                Text(
+                    text = chat.time,
+                    style = CC.descriptionTextStyle(context),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 4.dp)
+                )
             }
         }
         if (!isUser) {
@@ -590,7 +586,7 @@ fun ChatBubble(
                 .background(CC.primary(), CircleShape)
                 .padding(4.dp),
                 contentAlignment = Alignment.Center) {
-                if (chat.profileImageLink?.isNotBlank() == true) {
+                if (chat.profileImageLink.isNotBlank()) {
                     AsyncImage(
                         model = chat.profileImageLink,
                         contentDescription = "Profile Image",
@@ -602,12 +598,10 @@ fun ChatBubble(
                         error = painterResource(id = R.drawable.logo)
                     )
                 } else {
-                    chat.senderName?.get(0)?.let {
-                        Text(
-                            text = it.toString(),
-                            style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
-                        )
-                    }
+                    Text(
+                        text = chat.senderName[0].toString(),
+                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
+                    )
                 }
             }
         }
