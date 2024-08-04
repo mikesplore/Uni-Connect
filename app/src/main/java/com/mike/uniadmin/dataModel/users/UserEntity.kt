@@ -7,60 +7,51 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "SignedInUser")
 data class SignedInUser(
    @PrimaryKey val id: String,
-    val email: String? = null
+    val email: String = ""
 ){
     constructor(): this(
         "",
-        null
+        ""
     )
 }
 
 
 @Entity(tableName = "users")
 data class UserEntity(
-    @PrimaryKey val id: String,
-    val firstName: String? = null,
-    val lastName: String? = null,
-    val email: String? = null,
-    val phoneNumber: String? = null,
-    val profileImageLink: String? = null
+    @PrimaryKey val id: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+    val phoneNumber: String = "",
+    val profileImageLink: String = ""
 )
-{
-    constructor() : this(
-        "",
-        null,
-        null,
-        null,
-        null,
-        ""
-    )
-}
+
 
 @Entity(tableName = "accountDeletion")
 data class AccountDeletionEntity(
     @PrimaryKey val id: String,
-    val admissionNumber: String? = null,
-    val email: String? = null,
-    val date: String? = null,
-    val status: String? = null
+    val admissionNumber: String ="",
+    val email: String = "",
+    val date: String = "",
+    val status: String = ""
 )
 @Entity(tableName = "userPreferences")
 data class UserPreferencesEntity(
     @PrimaryKey val id: String,
-    val studentID: String? = null,
-    val profileImageLink: String? = null,
-    val biometrics: String? = null,
-    val darkMode: String? = null,
-    val notifications: String? = null
+    val studentID: String = "",
+    val profileImageLink: String = "",
+    val biometrics: String = "",
+    val darkMode: String = "",
+    val notifications: String = ""
 
 ){
     constructor() : this(
         "",
-        null,
-        null,
-        null,
-        null,
-        null,
+        "",
+        "",
+        "",
+        "",
+        ""
 
     )
 }
@@ -69,15 +60,15 @@ data class UserPreferencesEntity(
 @Entity(tableName = "userState")
 data class UserStateEntity(
     @PrimaryKey val id: String,
-    val userID: String? = null,
-    val online: String? = null,
-    val lastTime: String? = null,
+    val userID: String = "",
+    val online: String = "",
+    val lastTime: String = "",
 ){
     constructor() : this(
         "",
-        null,
-        null,
-        null,
+        "",
+        "",
+        "",
 
     )
 }
