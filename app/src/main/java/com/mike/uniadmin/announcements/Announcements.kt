@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
@@ -56,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.chat.getCurrentDate
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
@@ -176,7 +177,7 @@ fun AnnouncementsScreen(context: Context) {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "No announcements available", color = CC.textColor())
+                        Text(text = "No announcements available", style = CC.descriptionTextStyle(context))
                     }
                 }
                 else -> {
@@ -225,6 +226,7 @@ fun AddAnnouncement(
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    val signedInUser by userViewModel.signedInUser.observeAsState()
     val user by userViewModel.user.observeAsState()
 
     val profileLink = user?.profileImageLink
@@ -232,12 +234,18 @@ fun AddAnnouncement(
     val senderId = user?.id
 
     LaunchedEffect(Unit) {
-        FirebaseAuth.getInstance().currentUser?.email?.let { userViewModel.findUserByEmail(it) {} }
+        userViewModel.getSignedInUser()
+        signedInUser?.let {
+            it.email.let { email -> userViewModel.findUserByEmail(email) {} }
+        }
+
     }
+
 
 
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .imePadding()
             .border(1.dp, CC.extraColor2(), RoundedCornerShape(10.dp))
             .fillMaxWidth(0.9f), horizontalAlignment = Alignment.CenterHorizontally
