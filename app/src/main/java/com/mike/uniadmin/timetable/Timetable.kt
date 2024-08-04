@@ -1,7 +1,6 @@
 package com.mike.uniadmin.timetable
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -223,26 +222,24 @@ fun TimetableScreen(context: Context) {
                     }
                     LazyColumn {
                         groupedTimetables.forEach { (day, timetablesForDay) ->
-                            if (day != null) { // Check for null day
-                                item {
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        text = day,
-                                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = day,
+                                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            items(timetablesForDay) { timetable ->
+                                val courseName = courses.find { course ->
+                                    course.courseCode == timetable.courseID
+                                }?.courseName
+                                if (courseName != null) { // Check for null courseName
+                                    TimetableCard(
+                                        timetable = timetable,
+                                        courseName = courseName,
+                                        context = context
                                     )
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                }
-                                items(timetablesForDay) { timetable ->
-                                    val courseName = courses.find { course ->
-                                        course.courseCode == timetable.courseID
-                                    }?.courseName
-                                    if (courseName != null) { // Check for null courseName
-                                        TimetableCard(
-                                            timetable = timetable,
-                                            courseName = courseName,
-                                            context = context
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -302,7 +299,7 @@ fun TimetableCard(timetable: CourseTimetable, courseName: String?, context: Cont
                 Icon(Icons.Default.AccountCircle, contentDescription = "Day", tint = CC.textColor())
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Lecturer: ${timetable.lecturer?:"No Lecturer"}",
+                    text = "Lecturer: ${timetable.lecturer}",
                     style = CC.descriptionTextStyle(context)
                 )
             }
