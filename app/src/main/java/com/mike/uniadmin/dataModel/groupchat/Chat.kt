@@ -68,7 +68,7 @@ class UniAdmin : Application() {
     val database by lazy { AppDatabase.getDatabase(this) }
     val chatRepository by lazy { ChatRepository(database.chatDao(), database.groupDao()) }
     val messageRepository by lazy { MessageRepository(database.messageDao()) }
-    val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao()) }
+    val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao(), database.databaseDao()) }
     val announcementRepository by lazy { AnnouncementRepository(database.announcementsDao()) }
     val notificationRepository by lazy { NotificationRepository(database.notificationDao()) }
     val courseRepository by lazy {CourseRepository(database.courseDao(), database.attendanceStateDao())}
