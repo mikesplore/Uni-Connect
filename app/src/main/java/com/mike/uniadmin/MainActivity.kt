@@ -34,6 +34,10 @@ import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
+import java.io.File
+import kotlin.io.path.exists
+import kotlin.text.endsWith
+import kotlin.text.substringBeforeLast
 
 object DeviceTheme {
     private lateinit var sharedPreferences: SharedPreferences
@@ -220,6 +224,20 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+}
 
+fun clearAllPreferences(context: Context) {
+    val prefsDir = File(context.filesDir.parentFile, "shared_prefs")
+    if (prefsDir.exists() && prefsDir.isDirectory) {
+        for (file in prefsDir.listFiles() ?: emptyArray()) {
+            if (file.isFile && file.name.endsWith(".xml")) {
+                val prefsName = file.name.substringBeforeLast(".xml")
+                val sharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.clear()
+                editor.apply()
+            }
+        }
+    }
 }
 
