@@ -43,14 +43,15 @@ package com.mike.uniadmin
 
 //GROUP CHAT SCREEN
 //the users list to have some padding both on top and bottom✅
-//the animated to appear and disappear only from one direction
-//fix the date display, these is wrong date title
+//the animated to appear and disappear only from one direction✅
+//fix the date display, there is wrong date title
 
 //USER CHAT LIST
-//the chats are not opening on time when you click on them
+//the chats are not opening on time when you click on them✅
 
 //ANNOUNCEMENTS SCREEN
-//fix the text fields for new assignments (imepadding()) needed
+//fix the text fields for new assignments (imepadding()) needed ✅
 
 //COURSE CONTENT SCREEN
 //add scrollable column property to display all the course details content
+//the course name is not displaying properly
