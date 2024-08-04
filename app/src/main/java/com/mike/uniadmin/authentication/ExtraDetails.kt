@@ -1,6 +1,7 @@
 package com.mike.uniadmin.authentication
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -107,13 +110,14 @@ fun MoreDetails(context: Context, navController: NavController) {
                     tint = CC.textColor(),
                 )
             }
-        }, colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
+        }, colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary().copy(alpha = 0.2f))
         )
     }, containerColor = CC.primary()) {
         // main content
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .imePadding()
                 .background(brush)
                 .padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -161,6 +165,11 @@ fun MoreDetails(context: Context, navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
+                        if (firstName.isEmpty() && lastName.isEmpty()) {
+                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        else{
                         addLoading = true
                         MyDatabase.generateIndexNumber { userId ->
                             val newUser = UserEntity(
@@ -180,16 +189,20 @@ fun MoreDetails(context: Context, navController: NavController) {
                                             userId = userId ,
                                             id = id,
                                             title = "$firstName $lastName has Joined Uni Admin!",
-                                            description = "Start a conversation by sending  a 👋",
+                                            description = "Say hi and get the conversation started!",
                                             date = getCurrentDate(),
                                             time = getCurrentTimeInAmPm()
                                         )
                                     )
                                     notificationViewModel.fetchNotifications()
                                 }
-                                navController.navigate("homescreen")
+                                navController.navigate("homescreen") {
+                                    popUpTo("moreDetails") {
+                                        inclusive = true
+                                    }
+                                }
                             })
-                        }
+                        }}
 
                     },
                     modifier = Modifier.width(275.dp),
@@ -200,11 +213,9 @@ fun MoreDetails(context: Context, navController: NavController) {
                         modifier = Modifier, verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (addLoading) {
-                            CircularProgressIndicator(
-                                color = CC.secondary(), trackColor = CC.textColor()
-                            )
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = CC.textColor())
                         } else {
-                            Text("Save details")
+                            Text("Save details", style = CC.descriptionTextStyle(context))
                         }
                     }
                 }
