@@ -6,19 +6,12 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "courseTimetable")
 data class CourseTimetable(
    @PrimaryKey val timetableID: String,
-    val day: String? = null,
-    val courseID: String? = null,
-    val startTime: String? = null,
-    val endTime: String? = null,
-    val venue: String? = null,
-    val lecturer: String? = null,
-)
-{
-    constructor(): this(
-        "",
-        null,
-        null,
-        null,
-        null
-    )
+    val day: String = "",
+    val courseID: String = "",
+    val startTime: String = "",
+    val endTime: String = "",
+    val venue: String = "",
+    val lecturer: String = "",
+){
+    constructor(): this("", "", "", "", "", "", "")
 }
