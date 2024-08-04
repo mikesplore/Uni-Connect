@@ -108,8 +108,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerDefaults
 import com.google.accompanist.pager.PagerState
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
@@ -182,13 +180,13 @@ fun HomeScreen(
     val signedInUserLoading by userViewModel.isLoading.observeAsState()
 
     // Derived state
-    val userGroups = groups.filter { it.members?.contains(fetchedUserDetails?.id) ?: false }
+    val userGroups = groups.filter { it.members.contains(fetchedUserDetails?.id)}
 
     // Side effects
     LaunchedEffect(signedInUser, fetchedUserDetails) {
         userViewModel.getSignedInUser()
         signedInUser?.let {
-            it.email?.let { it1 -> userViewModel.findUserByEmail(it1) {} }
+            it.email.let { it1 -> userViewModel.findUserByEmail(it1) {} }
         }
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
@@ -568,7 +566,7 @@ fun SideProfile(user: UserEntity, context: Context) {
                 .size(100.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (user.profileImageLink?.isNotEmpty() == true) {
+            if (user.profileImageLink.isNotEmpty()) {
                 AsyncImage(
                     model = user.profileImageLink,
                     contentDescription = "Profile Image",
@@ -577,7 +575,7 @@ fun SideProfile(user: UserEntity, context: Context) {
                 )
             } else {
                 Text(
-                    "${user.firstName?.get(0)}${user.lastName?.get(0)}",
+                    "${user.firstName[0]}${user.lastName[0]}",
                     style = CC.titleTextStyle(context)
                         .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
                 )
@@ -634,7 +632,7 @@ fun ModalDrawerItem(
                     .size(70.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.profileImageLink?.isNotEmpty() == true) {
+                if (user.profileImageLink.isNotEmpty()) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = "Profile Image",
@@ -643,7 +641,7 @@ fun ModalDrawerItem(
                     )
                 } else {
                     Text(
-                        "${user.firstName?.get(0)}${user.lastName?.get(0)}",
+                        "${user.firstName[0]}${user.lastName[0]}",
                         style = CC.titleTextStyle(context)
                             .copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
                     )
@@ -658,7 +656,7 @@ fun ModalDrawerItem(
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     maxLines = 2
                 )
-                user.email?.let { Text(it, style = CC.descriptionTextStyle(context)) }
+                Text(user.email, style = CC.descriptionTextStyle(context))
                 Text(user.id, style = CC.descriptionTextStyle(context))
             }
         }
@@ -703,7 +701,7 @@ fun ModalDrawerItem(
                 modifier = Modifier.animateContentSize()
             ) {
                 items(userGroups) { group ->
-                    if ((group.name?.isNotEmpty() == true) && (group.description?.isNotEmpty() == true)) {
+                    if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
                         GroupItem(
                             group,
                             context,
@@ -866,7 +864,7 @@ fun UserItem(
                 })
                 .size(size), contentAlignment = Alignment.Center
             ) {
-                if (user.profileImageLink?.isNotEmpty() == true) {
+                if (user.profileImageLink.isNotEmpty()) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = user.firstName,
@@ -877,8 +875,8 @@ fun UserItem(
                     )
                 } else {
                     val name =
-                        if (signedInUser?.email == user.email) "You" else "${user.firstName?.get(0)}${
-                            user.lastName?.get(0)
+                        if (signedInUser?.email == user.email) "You" else "${user.firstName[0]}${
+                            user.lastName[0]
                         }"
                     Text(
                         name, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
@@ -907,9 +905,9 @@ fun UserItem(
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = user.firstName?.let {
+            text = user.firstName.let {
                 if (it.length > 10) it.substring(0, 10) + "..." else it
-            } ?: "",
+            },
             style = CC.descriptionTextStyle(context),
             maxLines = 1
         )
