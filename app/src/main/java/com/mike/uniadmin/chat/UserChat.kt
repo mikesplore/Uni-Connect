@@ -210,16 +210,14 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     Scaffold(
         topBar = {
             if (user2 != null) {
-                user2!!.firstName?.let {
-                    TopAppBarComponent(name = it,
-                        navController = navController,
-                        context = context,
-                        user = user2!!,
-                        userState = myUserState,
-                        onValueChange = {
-                            isSearchVisible = !isSearchVisible
-                        })
-                }
+                TopAppBarComponent(name = user2!!.firstName,
+                    navController = navController,
+                    context = context,
+                    user = user2!!,
+                    userState = myUserState,
+                    onValueChange = {
+                        isSearchVisible = !isSearchVisible
+                    })
             }
         }, containerColor = CC.primary()
     ) { innerPadding ->
@@ -251,14 +249,12 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                         item {
                             RowMessage(context)
                             Spacer(modifier = Modifier.height(8.dp))
-                            if (date != null) {
-                                RowDate(date, context)
-                            }
+                            RowDate(date, context)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         items(chatsForDate.filter {
-                            it.message?.contains(searchQuery, ignoreCase = true) ?: false
+                            it.message.contains(searchQuery, ignoreCase = true)
                         }) { chat ->
                             MessageBubble(
                                 message = chat,
@@ -309,29 +305,25 @@ fun MessageBubble(
                 .align(alignment)
         ) {
             Column {
-                message.message?.let {
-                    Text(
-                        text = it, style = CC.descriptionTextStyle(context)
-                    )
-                }
+                Text(
+                    text = message.message, style = CC.descriptionTextStyle(context)
+                )
                 // Convert the timestamp to a formatted time string
                 val formattedTime =
-                    message.timeStamp?.let { Date(it) }?.let {
+                    Date(message.timeStamp).let {
                         SimpleDateFormat("hh:mm a", Locale.getDefault())
                             .format(it)
                     }
 
-                if (formattedTime != null) {
-                    Text(
-                        text = formattedTime,
-                        style = CC.descriptionTextStyle(context),
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(top = 4.dp)
-                    )
-                }
+                Text(
+                    text = formattedTime,
+                    style = CC.descriptionTextStyle(context),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 4.dp)
+                )
             }
         }
     }
@@ -383,7 +375,7 @@ fun TopAppBarComponent(
             Box(
                 contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)
             ) {
-                if (user.profileImageLink?.isNotBlank() == true) {
+                if (user.profileImageLink.isNotBlank()) {
                     Image(
                         painter = rememberAsyncImagePainter(user.profileImageLink),
                         contentDescription = "Profile Image",
