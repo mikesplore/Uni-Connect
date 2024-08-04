@@ -1,6 +1,7 @@
 package com.mike.uniadmin.timetable
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -11,11 +12,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -74,7 +78,7 @@ fun TimetableScreen(context: Context) {
     )
     var refresh by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
-    val timetables by timetableViewModel.courseTimetables.observeAsState(emptyList())
+    val timetables by timetableViewModel.courseTimetables.observeAsState(initial = null)
     val courses by courseViewModel.courses.observeAsState(emptyList())
     var courseCode by remember { mutableStateOf("") }
 
@@ -92,12 +96,18 @@ fun TimetableScreen(context: Context) {
                 title = {},
                 actions = {
                     IconButton(onClick = { visible = !visible }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Timetable",
-                            tint = CC.textColor())
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Add Timetable",
+                            tint = CC.textColor()
+                        )
                     }
                     IconButton(onClick = { refresh = !refresh }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh",
-                            tint = CC.textColor())
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = CC.textColor()
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -114,23 +124,41 @@ fun TimetableScreen(context: Context) {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth(),
+            Row(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Timetable", style = CC.titleTextStyle(context).copy(fontSize = 30.sp, fontWeight = FontWeight.Bold))
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Timetable",
+                    style = CC.titleTextStyle(context).copy(
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
             AnimatedVisibility(visible) {
-                Column(modifier = Modifier
-                    .border(
-                        1.dp, CC.textColor(), RoundedCornerShape(10.dp)
-                    )
-                    .fillMaxWidth(0.9f),
+                Column(
+                    modifier = Modifier
+                        .imePadding()
+                        .verticalScroll(rememberScrollState())
+                        .border(
+                            1.dp, CC.textColor(), RoundedCornerShape(10.dp)
+                        )
+                        .fillMaxWidth(0.9f),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(text = "Add Timetable", style = CC.titleTextStyle(context).copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                    Text(
+                        text = "Add Timetable",
+                        style = CC.titleTextStyle(context).copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
                     Spacer(modifier = Modifier.height(10.dp))
                     CC.SingleLinedTextField(
                         value = courseCode,
@@ -141,7 +169,13 @@ fun TimetableScreen(context: Context) {
                         context = context,
                         singleLine = true
                     )
-                    AddTimetableItem(courseCode, timetableViewModel, context, expanded = visible, onExpandedChange = { visible = !visible })
+                    AddTimetableItem(
+                        courseCode,
+                        timetableViewModel,
+                        context,
+                        expanded = visible,
+                        onExpandedChange = { visible = !visible }
+                    )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
@@ -155,6 +189,7 @@ fun TimetableScreen(context: Context) {
                         CircularProgressIndicator(color = CC.textColor())
                     }
                 }
+
                 courses.isEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -163,6 +198,7 @@ fun TimetableScreen(context: Context) {
                         Text(text = "No courses available", color = CC.textColor())
                     }
                 }
+
                 timetableLoading == true -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -171,7 +207,8 @@ fun TimetableScreen(context: Context) {
                         CircularProgressIndicator(color = CC.textColor())
                     }
                 }
-                timetables.isEmpty() -> {
+
+                timetables.isNullOrEmpty() -> { // Check if timetables is null or empty
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -179,8 +216,9 @@ fun TimetableScreen(context: Context) {
                         Text(text = "No timetables available", color = CC.textColor())
                     }
                 }
+
                 else -> {
-                    val groupedTimetables = timetables.groupBy { fetchedTimetable ->
+                    val groupedTimetables = timetables!!.groupBy { fetchedTimetable ->
                         fetchedTimetable.day
                     }
                     LazyColumn {
@@ -188,14 +226,22 @@ fun TimetableScreen(context: Context) {
                             if (day != null) { // Check for null day
                                 item {
                                     Spacer(modifier = Modifier.height(16.dp))
-                                    Text(text = day, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
+                                    Text(
+                                        text = day,
+                                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                                    )
                                     Spacer(modifier = Modifier.height(10.dp))
                                 }
                                 items(timetablesForDay) { timetable ->
                                     val courseName = courses.find { course ->
-                                        course.courseCode == timetable.courseID }?.courseName
+                                        course.courseCode == timetable.courseID
+                                    }?.courseName
                                     if (courseName != null) { // Check for null courseName
-                                        TimetableCard(timetable = timetable, courseName = courseName, context = context)
+                                        TimetableCard(
+                                            timetable = timetable,
+                                            courseName = courseName,
+                                            context = context
+                                        )
                                     }
                                 }
                             }
@@ -206,6 +252,7 @@ fun TimetableScreen(context: Context) {
         }
     }
 }
+
 
 
 @Composable
