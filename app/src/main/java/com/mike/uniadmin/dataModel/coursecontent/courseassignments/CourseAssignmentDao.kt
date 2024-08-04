@@ -14,8 +14,9 @@ interface CourseAssignmentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourseAssignments(courseAssignments: List<CourseAssignment>)
 
-    @Query("DELETE FROM courseAssignments WHERE courseCode = :courseID")
-    suspend fun deleteCourseAssignments(courseID: String)
+    @Query("DELETE FROM courseAssignments WHERE assignmentID = :assignmentID")
+    suspend fun deleteCourseAssignments(assignmentID: String)
+
 
     @Query("SELECT * FROM courseAssignments WHERE courseCode = :courseID")
     suspend fun getCourseAssignments(courseID: String): List<CourseAssignment>
