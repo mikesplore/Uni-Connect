@@ -51,7 +51,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LightMode
@@ -63,6 +62,7 @@ import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -108,6 +108,8 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerDefaults
 import com.google.accompanist.pager.PagerState
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
@@ -116,11 +118,13 @@ import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.getCurrentTimeInAmPm
+import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
+import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
@@ -137,7 +141,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @OptIn(
     ExperimentalPagerApi::class,
     ExperimentalSnapperApi::class,
-    ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,
 )
 @Composable
@@ -158,7 +161,7 @@ fun HomeScreen(
     val chatViewModel: ChatViewModel =
         viewModel(factory = ChatViewModel.ChatViewModelFactory(chatRepository))
 
-    val userRepository = remember { uniAdmin.userRepository } // Remember userRepository
+    val userRepository = remember { uniAdmin.userRepository }
     val userViewModel: UserViewModel =
         viewModel(factory = UserViewModelFactory(userRepository))
 
@@ -183,16 +186,16 @@ fun HomeScreen(
 
     // Side effects
     LaunchedEffect(signedInUser, fetchedUserDetails) {
-            userViewModel.getSignedInUser()
-            signedInUser?.let {
-                it.email?.let { it1 -> userViewModel.findUserByEmail(it1) {} }
-            }
-            userViewModel.checkAllUserStatuses()
-            chatViewModel.fetchGroups()
-            userViewModel.fetchUsers()
+        userViewModel.getSignedInUser()
+        signedInUser?.let {
+            it.email?.let { it1 -> userViewModel.findUserByEmail(it1) {} }
+        }
+        userViewModel.checkAllUserStatuses()
+        chatViewModel.fetchGroups()
+        userViewModel.fetchUsers()
         fetchedUserDetails?.id?.let { userViewModel.checkUserStateByID(it) }
 
-
+        //fetch app version
         getUpdate { fetched ->
             if (fetched != null) {
                 update = fetched
@@ -226,231 +229,43 @@ fun HomeScreen(
     }
     CheckUpdate(context)
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
-        Column(
-            modifier = Modifier
-                .background(
-                    CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
-                )
-                .fillMaxHeight(0.8f)
-                .fillMaxWidth(0.5f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (signedInUserLoading == true) {
-                    CircularProgressIndicator(color = CC.textColor())
-                } else if (signedInUser != null) {
-                    fetchedUserDetails?.let { SideProfile(it, context) }
-                } else{
-                    Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp)
-            ) {
-                SideBarItem(
-                    icon = Icons.Default.AccountCircle,
-                    text = "Profile",
-                    context,
-                    onClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        navController.navigate("profile")
-                    })
-                SideBarItem(icon = Icons.AutoMirrored.Filled.Message,
-                    text = "Uni Chat",
-                    context,
-                    onClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        userViewModel.fetchUsers()
-                        chatViewModel.fetchGroups()
-                        navController.navigate("unichat")
-                    })
-                SideBarItem(icon = Icons.Default.Groups,
-                    text = "Groups",
-                    context,
-                    onClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        userViewModel.fetchUsers()
-                        chatViewModel.fetchGroups()
-                        navController.navigate("groups")
-                    })
-                SideBarItem(icon = Icons.Default.Notifications,
-                    text = "Notifications",
-                    context,
-                    onClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        userViewModel.fetchUsers()
-                        chatViewModel.fetchGroups()
-                        navController.navigate("notifications")
-                    })
-                SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    navController.navigate("settings")
-                })
-                SideBarItem(icon = Icons.Default.Share, text = "Share App", context, onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    val sendIntent: Intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(
-                            Intent.EXTRA_TEXT,
-                            "${fetchedUserDetails?.firstName} invites you to join Uni Konnect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
-                        ) // Customize the text
-                        type = "text/plain"
-                    }
-                    context.startActivity(Intent.createChooser(sendIntent, null))
-                    scope.launch { drawerState.close() }
-                })
-                SideBarItem(
-                    icon = Icons.Default.ArrowDownward,
-                    text = "More",
-                    context,
-                    onClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        userViewModel.fetchUsers()
-                        chatViewModel.fetchGroups()
-                        showBottomSheet = true
-                    })
-            }
-            Row(
-                modifier = Modifier
-                    .background(CC.extraColor1())
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                TextButton(onClick = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    userStatus?.let {
-                        MyDatabase.writeUserActivity(it.copy(
-                            online = "offline", lastTime = getCurrentTimeInAmPm()
-                        ), onSuccess = {
-                            Toast.makeText(
-                                context, "Signed Out Successfully!", Toast.LENGTH_SHORT
-                            ).show()
-                        }
+        userStatus?.let {
+            ModalNavigationDrawerItem(
+                drawerState = drawerState,
+                scope = coroutineScope,
+                context = context,
+                navController = navController,
+                userViewModel = userViewModel,
+                chatViewModel = chatViewModel,
+                signedInUserLoading = signedInUserLoading,
+                signedInUser = signedInUser,
+                fetchedUserDetails = fetchedUserDetails,
+                showBottomSheet = {value -> showBottomSheet = value },
+                userStatus = it,
+                update = update
 
-                        )
-                    }
-                    navController.navigate("login") {
-                        popUpTo("homescreen") { inclusive = true }
-                    }
-                    FirebaseAuth.getInstance().signOut()
-                }) {
-                    Text(
-                        "Sign Out",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
-                    )
-                }
-            }
+            )
         }
+
     }) {
         Scaffold(
             bottomBar = {
-                NavigationBar(
-                    modifier = Modifier
-                        .height(85.dp)
-                        .background(Color.Transparent),
-                    containerColor = Color.Transparent
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                CC
-                                    .primary()
-                                    .copy()
-                            ),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        screens.forEachIndexed { index, screen ->
-                            val isSelected = pagerState.currentPage == index
-
-                            val iconColor by animateColorAsState(
-                                targetValue = if (isSelected) CC.textColor() else CC.textColor()
-                                    .copy(0.7f), label = "", animationSpec = tween(500)
-                            )
-
-                            // Use NavigationBarItem
-                            NavigationBarItem(selected = isSelected, label = {
-                                AnimatedVisibility(visible = isSelected,
-                                    enter = fadeIn(animationSpec = tween(500)) + slideInVertically(
-                                        animationSpec = tween(500)
-                                    ) { initialState -> initialState },
-                                    exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(
-                                        animationSpec = tween(500)
-                                    ) { initialState -> initialState }) {
-                                    Text(
-                                        text = screen.name,
-                                        style = CC.descriptionTextStyle(context)
-                                            .copy(fontSize = 13.sp),
-                                        color = CC.textColor()
-                                    )
-                                }
-                            }, colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = CC.extraColor2(),
-                                unselectedIconColor = CC.textColor(),
-                                selectedIconColor = CC.textColor()
-                            ), onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            }, icon = {
-                                Column(modifier = Modifier.combinedClickable(onLongClick = {
-                                    scope.launch {
-                                        drawerState.open()
-                                    }
-                                }, onDoubleClick = {
-                                    userViewModel.fetchUsers()
-                                    chatViewModel.fetchGroups()
-                                    showBottomSheet = true
-                                }) {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                },
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Icon(
-                                        imageVector = if (isSelected) screen.selectedIcon else screen.unselectedIcon,
-                                        contentDescription = screen.name,
-                                        tint = iconColor,
-                                        modifier = Modifier.size(25.dp)
-                                    )
-                                }
-                            })
-                        }
-                    }
-                }
-            }, containerColor = CC.primary()
+                BottomBar(
+                    context,
+                    screens,
+                    pagerState,
+                    coroutineScope,
+                    drawerState,
+                    userViewModel,
+                    chatViewModel,
+                    scope,
+                    showBottomSheet = { showBottomSheet = true }
+                )
+            },
+            containerColor = CC.primary()
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 HorizontalPager(
-
                     userScrollEnabled = false,
                     state = pagerState,
                     count = screens.size,
@@ -468,6 +283,263 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+fun ModalNavigationDrawerItem(
+    drawerState: DrawerState,
+    scope: CoroutineScope,
+    context: Context,
+    navController: NavController,
+    userViewModel: UserViewModel,
+    chatViewModel: ChatViewModel,
+    signedInUserLoading: Boolean?,
+    signedInUser: SignedInUser?,
+    fetchedUserDetails: UserEntity?,
+    showBottomSheet:(Boolean) -> Unit,
+    userStatus: UserStateEntity,
+    update: Update
+
+){
+    Column(
+        modifier = Modifier
+            .background(
+                CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
+            )
+            .fillMaxHeight(0.8f)
+            .fillMaxWidth(0.5f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (signedInUserLoading == true) {
+                CircularProgressIndicator(color = CC.textColor())
+            } else if (signedInUser != null) {
+                fetchedUserDetails?.let { SideProfile(it, context) }
+            } else{
+                Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
+            }
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 10.dp)
+        ) {
+            SideBarItem(
+                icon = Icons.Default.AccountCircle,
+                text = "Profile",
+                context,
+                onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    navController.navigate("profile")
+                })
+            SideBarItem(icon = Icons.AutoMirrored.Filled.Message,
+                text = "Uni Chat",
+                context,
+                onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    userViewModel.fetchUsers()
+                    chatViewModel.fetchGroups()
+                    navController.navigate("unichat")
+                })
+            SideBarItem(icon = Icons.Default.Groups,
+                text = "Groups",
+                context,
+                onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    userViewModel.fetchUsers()
+                    chatViewModel.fetchGroups()
+                    navController.navigate("groups")
+                })
+            SideBarItem(icon = Icons.Default.Notifications,
+                text = "Notifications",
+                context,
+                onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    userViewModel.fetchUsers()
+                    chatViewModel.fetchGroups()
+                    navController.navigate("notifications")
+                })
+            SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
+                scope.launch {
+                    drawerState.close()
+                }
+                navController.navigate("settings")
+            })
+            SideBarItem(icon = Icons.Default.Share, text = "Share App", context, onClicked = {
+                scope.launch {
+                    drawerState.close()
+                }
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "${fetchedUserDetails?.firstName} invites you to join Uni Konnect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                    ) // Customize the text
+                    type = "text/plain"
+                }
+                context.startActivity(Intent.createChooser(sendIntent, null))
+                scope.launch { drawerState.close() }
+            })
+            SideBarItem(
+                icon = Icons.Default.ArrowDownward,
+                text = "More",
+                context,
+                onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    userViewModel.fetchUsers()
+                    chatViewModel.fetchGroups()
+                    showBottomSheet(true)
+                })
+        }
+        Row(
+            modifier = Modifier
+                .background(CC.extraColor1())
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            TextButton(onClick = {
+                scope.launch {
+                    drawerState.close()
+                }
+                userStatus.let {
+                    MyDatabase.writeUserActivity(it.copy(
+                        online = "offline", lastTime = getCurrentTimeInAmPm()
+                    ), onSuccess = {
+                        userViewModel.deleteAllTables()
+                        userViewModel.deleteSignedInUser()
+                        clearAllPreferences(context)
+
+                        // Sign out AFTER clearing data
+                        FirebaseAuth.getInstance().signOut()
+
+                        navController.navigate("login") {
+                            popUpTo("homescreen") { inclusive = true }
+                        }
+                        Toast.makeText(
+                            context, "Signed Out Successfully!", Toast.LENGTH_SHORT
+                        ).show()
+                    })
+                }
+
+            }) {
+                Text(
+                    "Sign Out",
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
+@Composable
+fun BottomBar(
+    context: Context,
+    screens: List<Screen>,
+    pagerState: PagerState,
+    coroutineScope: CoroutineScope,
+    drawerState: DrawerState,
+    userViewModel: UserViewModel,
+    chatViewModel: ChatViewModel,
+    scope: CoroutineScope,
+    showBottomSheet:(Boolean) -> Unit
+){
+        NavigationBar(
+            modifier = Modifier
+                .height(85.dp)
+                .background(Color.Transparent),
+            containerColor = Color.Transparent
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        CC
+                            .primary()
+                            .copy()
+                    ),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                screens.forEachIndexed { index, screen ->
+                    val isSelected = pagerState.currentPage == index
+
+                    val iconColor by animateColorAsState(
+                        targetValue = if (isSelected) CC.textColor() else CC.textColor()
+                            .copy(0.7f), label = "", animationSpec = tween(500)
+                    )
+
+                    // Use NavigationBarItem
+                    NavigationBarItem(selected = isSelected, label = {
+                        AnimatedVisibility(visible = isSelected,
+                            enter = fadeIn(animationSpec = tween(500)) + slideInVertically(
+                                animationSpec = tween(500)
+                            ) { initialState -> initialState },
+                            exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(
+                                animationSpec = tween(500)
+                            ) { initialState -> initialState }) {
+                            Text(
+                                text = screen.name,
+                                style = CC.descriptionTextStyle(context)
+                                    .copy(fontSize = 13.sp),
+                                color = CC.textColor()
+                            )
+                        }
+                    }, colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = CC.extraColor2(),
+                        unselectedIconColor = CC.textColor(),
+                        selectedIconColor = CC.textColor()
+                    ), onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }, icon = {
+                        Column(modifier = Modifier.combinedClickable(onLongClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }, onDoubleClick = {
+                            userViewModel.fetchUsers()
+                            chatViewModel.fetchGroups()
+                            showBottomSheet(true)
+                        }) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = if (isSelected) screen.selectedIcon else screen.unselectedIcon,
+                                contentDescription = screen.name,
+                                tint = iconColor,
+                                modifier = Modifier.size(25.dp)
+                            )
+                        }
+                    })
+                }
+            }
+        }
+
 }
 
 
