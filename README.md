@@ -212,8 +212,17 @@ The `PasswordReset` composable function provides a screen for users to reset the
 ### Password Reset Screen
 ![Password Reset](Images/passwordReset.png)
 
+//Announcements starts here
+## Modules
+  -[Announcements](#announcements)
+      -[Overview](#overview)
+      -[Announcement Card](#announcementcard)
+      -[Add Announcement](#addannouncement-composable)
+      -[Edit Announcement](#editannouncement-composable)
+
 ***
 ## Announcements
+**File**[Announcements.kt](app/src/main/java/com/mike/uniadmin/announcements/Announcements.kt)
 
 ### Overview
 
@@ -271,12 +280,6 @@ The `AnnouncementsScreen` Composable function is responsible for displaying a sc
 ### Announcements
 ![Announcements](Images/Announcements.png)
 
-### Announcements Add
-![Announcements Add](Images/AnnouncementsAdd.png)
-
-### Announcements Edit
-![Announcements Edit](Images/AnnouncementsEdit.png)
-
 
 The `AnnouncementsScreen` presents a visually appealing and user-friendly interface for managing announcements. The top app bar provides easy access to actions for adding new announcements and refreshing the list. The announcements are displayed in a clear and organized manner within the `LazyColumn`, with each `AnnouncementCard` offering options for editing or deleting. Loading states and potential empty states are handled gracefully, providing appropriate feedback to the user.
 
@@ -287,3 +290,118 @@ The `AnnouncementsScreen` presents a visually appealing and user-friendly interf
 *   It uses Toast messages to inform the user about the status of operations, such as successful deletion.
 
 By leveraging these components and logic, the `AnnouncementsScreen` provides a robust and intuitive experience for managing announcements within the Uni Admin.
+
+
+
+# AddAnnouncement Composable
+
+
+## Overview
+`AddAnnouncement` is a Composable function that provides a UI for adding a new announcement. It includes input fields for the announcement title and description, and displays the user's profile image or initials, along with the current date.
+
+## Parameters
+- `context: Context`: The context of the current application, used for styling and resources.
+- `onComplete: (Boolean) -> Unit`: A callback function that is triggered upon the completion of the announcement addition process, passing a Boolean indicating success.
+- `userViewModel: UserViewModel`: A `ViewModel` instance for managing user-related data and operations.
+- `announcementViewModel: AnnouncementViewModel`: A `ViewModel` instance for managing announcement-related data and operations.
+
+## State
+- `title`: A `String` representing the announcement title, managed using `mutableStateOf`.
+- `description`: A `String` representing the announcement description, managed using `mutableStateOf`.
+- `signedInUser`, `user`: Observed states for the signed-in user and current user, respectively, from the `userViewModel`.
+
+## UI Components
+- **Profile Box**: Displays the user's profile image or initials if the image is not available.
+- **Text Fields**: Input fields for entering the announcement title and description.
+- **Button**: A button to post the announcement, which validates the inputs and calls the `saveAnnouncement` function from the `announcementViewModel`.
+
+## Logic
+- Fetches the signed-in user on launch and updates the `user` state accordingly.
+- Generates a new announcement ID and saves the announcement to the database when the post button is clicked.
+- Displays a toast message if the title or description is empty.
+
+### Announcements Add
+![Announcements Add](Images/AnnouncementsAdd.png)
+---
+
+# EditAnnouncement Composable
+
+## Overview
+`EditAnnouncement` is a Composable function that provides a UI for editing an existing announcement. It allows users to modify the title and description of an announcement.
+
+## Parameters
+- `context: Context`: The context of the current application, used for styling and resources.
+- `onComplete: () -> Unit`: A callback function that is triggered upon the completion of the announcement editing process.
+- `announcement: AnnouncementEntity`: The announcement entity being edited.
+- `announcementViewModel: AnnouncementViewModel`: A `ViewModel` instance for managing announcement-related data and operations.
+
+## State
+- `title`: A `String` representing the announcement title, initialized with the existing title and managed using `mutableStateOf`.
+- `description`: A `String` representing the announcement description, initialized with the existing description and managed using `mutableStateOf`.
+
+## UI Components
+- **Profile Box**: Displays the announcement author's profile image or initials if the image is not available.
+- **Text Fields**: Input fields for editing the announcement title and description.
+- **Button**: A button to save the edited announcement, which calls the `saveAnnouncement` function from the `announcementViewModel`.
+
+## Logic
+- Updates the announcement with the new title and description when the save button is clicked.
+- Logs a success message upon successful update.
+
+### Announcements Edit
+![Announcements Edit](Images/AnnouncementsEdit.png)
+---
+
+# AnnouncementTextField Composable
+
+## Overview
+`AnnouncementTextField` is a Composable function that provides a styled text input field used within the `AddAnnouncement` and `EditAnnouncement` Composables.
+
+## Parameters
+- `modifier: Modifier`: A `Modifier` instance to apply to the TextField for styling and layout. Defaults to an empty `Modifier`.
+- `value: String`: The current text value of the TextField.
+- `onValueChange: (String) -> Unit`: A callback function that is triggered when the text value changes.
+- `singleLine: Boolean`: A flag indicating whether the TextField should be single-lined or multi-lined.
+- `placeholder: String`: A placeholder text displayed when the TextField is empty.
+- `context: Context`: The context of the current application, used for styling.
+
+## UI Components
+- **TextField**: A Material Design TextField with customized colors and placeholder text. The colors are defined by `CC`, a style configuration presumably managing theme colors for the app.
+
+## Customization
+- The colors for the TextField's text, container, indicator, and placeholder are customized to match the app's theme.
+- Supports both single-line and multi-line input based on the `singleLine` parameter.
+
+
+# AnnouncementCard Composable
+
+## Overview
+`AnnouncementCard` is a Composable function that displays an announcement in a card format. It allows users to view, edit, and delete announcements, with the ability to expand or collapse the announcement details.
+
+## Parameters
+- `announcement: AnnouncementEntity`: The announcement entity to be displayed in the card.
+- `onEdit: () -> Unit`: A callback function triggered when the edit button is clicked.
+- `onDelete: (String) -> Unit`: A callback function triggered when the delete button is clicked, with the announcement ID as a parameter.
+- `context: Context`: The context of the current application, used for styling and resources.
+- `isEditing: Boolean`: A flag indicating whether the announcement is currently being edited.
+- `onEditComplete: () -> Unit`: A callback function triggered upon completion of the editing process.
+- `announcementViewModel: AnnouncementViewModel`: A `ViewModel` instance for managing announcement-related data and operations.
+
+## State
+- `expanded`: A `Boolean` state managed using `mutableStateOf`, determining whether the announcement details are expanded or collapsed.
+
+## UI Components
+- **Profile Box**: Displays the author's profile image or initials if the image is not available.
+- **Title and Description**: Shows the announcement title and description, with options to expand or collapse the description.
+- **Author and Date**: Displays the author's name and the date of the announcement.
+- **Buttons**: Provides options to edit or delete the announcement.
+
+## Logic
+- The card can be expanded or collapsed to show or hide the announcement details.
+- The edit and delete buttons trigger their respective callback functions.
+- If `isEditing` is true, the `EditAnnouncement` Composable is displayed, allowing users to edit the announcement details.
+
+## Customization
+- The card's appearance is styled using a custom theme defined by `CC`, managing colors and text styles.
+- The expand/collapse button toggles between "Open" and "Close" text based on the `expanded` state.
+
