@@ -120,11 +120,9 @@ fun AssignmentScreen(context: Context) {
                                     selected = selectedTabIndex == index,
                                     onClick = { selectedTabIndex = index },
                                     text = {
-                                        course.courseName?.let { courseName ->
-                                            Text(
-                                                courseName, style = CC.descriptionTextStyle(context)
-                                            )
-                                        }
+                                        Text(
+                                            course.courseName, style = CC.descriptionTextStyle(context)
+                                        )
                                     }
                                 )
                             }
@@ -171,17 +169,13 @@ fun AssignmentCard(assignment: CourseAssignment, context: Context) {
         ), elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            assignment.title?.let {
-                Text(
-                    text = it, style = CC.titleTextStyle(context)
-                )
-            }
+            Text(
+                text = assignment.title, style = CC.titleTextStyle(context)
+            )
             Spacer(modifier = Modifier.height(8.dp))
-            assignment.description?.let {
-                Text(
-                    text = it, style = CC.descriptionTextStyle(context)
-                )
-            }
+            Text(
+                text = assignment.description, style = CC.descriptionTextStyle(context)
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Due Date: ${assignment.dueDate}",
