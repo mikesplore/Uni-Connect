@@ -212,8 +212,9 @@ The `PasswordReset` composable function provides a screen for users to reset the
 ### Password Reset Screen
 ![Password Reset](Images/passwordReset.png)
 
+***
+## Announcements
 
-## Components
 ### Overview
 
 The `AnnouncementsScreen` Composable function is responsible for displaying a screen where users can view, add, and manage announcements. It utilizes a top app bar with buttons for adding new announcements and refreshing the list. The screen presents a list of announcements retrieved from a repository and offers functionality to edit or delete them.
