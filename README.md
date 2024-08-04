@@ -122,7 +122,7 @@ This structure ensures the screen dynamically handles both sign-in and sign-up p
 
 ## MoreDetails Composable
 
-**File**: [MoreDetails.kt](app/src/main/java/com/mike/uniadmin/ui/moreDetails/MoreDetails.kt)
+**File**: [MoreDetails.kt](app/src/main/java/com/mike/uniadmin/authentication/ExtraDetails.kt)
 
 ### Description
 
@@ -212,13 +212,21 @@ The `PasswordReset` composable function provides a screen for users to reset the
 ### Password Reset Screen
 ![Password Reset](Images/passwordReset.png)
 
-//Announcements starts here
 ## Modules
-  -[Announcements](#announcements)
-      -[Overview](#overview)
-      -[Announcement Card](#announcementcard)
-      -[Add Announcement](#addannouncement-composable)
-      -[Edit Announcement](#editannouncement-composable)
+- [Announcements](#announcements)
+  - [Overview](#overview)
+  - [Announcement Card](#announcementcard)
+  - [Add Announcement](#addannouncement-composable)
+  - [Edit Announcement](#editannouncement-composable)
+- [Assignments](#assignmentscreen-composable)
+  - [Assignment Card](#assignmentcard-composable)
+- [Attendance](#manageattendancescreen-composable)
+- [Course Content](#coursecontent-composable)
+  - [Course Announcements](#announcementsitem-composable)
+     - [Announcement Card](#announcementitemcard-composable)
+     - [Add Announcement Item](#addannouncementitem-composable)
+    
+
 
 ***
 ## Announcements
@@ -355,7 +363,7 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 # AnnouncementTextField Composable
 
 ## Overview
-`AnnouncementTextField` is a Composable function that provides a styled text input field used within the `AddAnnouncement` and `EditAnnouncement` Composables.
+`AnnouncementTextField` is a Composable function that provides a styled text input field used within the `AddAnnouncement` and `EditAnnouncement` Composable.
 
 ## Parameters
 - `modifier: Modifier`: A `Modifier` instance to apply to the TextField for styling and layout. Defaults to an empty `Modifier`.
@@ -404,4 +412,212 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 ## Customization
 - The card's appearance is styled using a custom theme defined by `CC`, managing colors and text styles.
 - The expand/collapse button toggles between "Open" and "Close" text based on the `expanded` state.
+
+
+
+# AssignmentScreen Composable
+
+## Overview
+`AssignmentScreen` is a Composable function that displays a list of assignments for courses. It allows users to navigate between courses using tabs and view assignments specific to the selected course.
+
+## Dependencies
+- `UniAdmin`: A custom application class that provides repositories for courses and assignments.
+- `CourseViewModel`: ViewModel for managing course-related data and operations.
+- `CourseAssignmentViewModel`: ViewModel for managing course assignment-related data and operations.
+
+## Parameters
+- `context: Context`: The context of the current application, used for styling and resources.
+
+## State
+- `selectedTabIndex`: An `Int` state managed using `mutableIntStateOf`, representing the index of the currently selected course tab.
+- `selectedCourseId`: A `String?` state managed using `mutableStateOf`, representing the ID of the currently selected course.
+- `isLoading`: A `Boolean` state indicating whether the data is still being loaded.
+
+## UI Components
+- **TopAppBar**: Displays the title "Assignments" with a primary color background.
+- **ScrollableTabRow**: Allows users to navigate between different courses using tabs.
+- **LazyColumn**: Displays a list of assignments for the selected course using `AssignmentCard` Composable.
+- **CircularProgressIndicator**: Displays a loading indicator when data is being fetched.
+- **Text**: Displays messages for "No courses available" and "No assignments available" when appropriate.
+
+## Logic
+- Observes assignments and courses from their respective ViewModels.
+- Fetches courses on launch and assignments for the selected course when the tab changes.
+- Displays loading indicators or messages when data is not yet available or empty.
+
+## Customization
+- Styled using a custom theme defined by `CC`, managing colors and text styles.
+
+# AssignmentCard Composable
+
+## Overview
+`AssignmentCard` is a Composable function that displays the details of a single assignment in a card format.
+
+## Parameters
+- `assignment: CourseAssignment`: The assignment entity to be displayed in the card.
+- `context: Context`: The context of the current application, used for styling and resources.
+
+## UI Components
+- **Card**: Displays the assignment details with a secondary color background and elevated styling.
+- **Column**: Organizes the assignment title, description, and due date vertically.
+- **Text**: Displays the assignment's title, description, and due date.
+
+## Customization
+- Styled using a custom theme defined by `CC`, managing colors and text styles.
+
+
+# ManageAttendanceScreen Composable
+
+## Overview
+`ManageAttendanceScreen` is a Composable function that allows users to manage attendance for courses. Users can view a list of courses and toggle attendance states using switches.
+
+## Dependencies
+- `UniAdmin`: A custom application class that provides a course repository.
+- `CourseViewModel`: ViewModel for managing course-related data and operations.
+
+## Parameters
+- `context: Context`: The context of the current application, used for styling and resources.
+
+## State
+- `courses`: A list of courses fetched from `CourseViewModel`.
+- `attendanceStates`: A map of attendance states keyed by course codes.
+- `refresh`: A `Boolean` state to trigger the refresh of attendance states.
+
+## UI Components
+- **TopAppBar**: Displays an icon button for refreshing attendance states.
+- **Column**: Organizes the header and list of courses vertically.
+- **Row**: Displays the header and each course with its attendance toggle.
+- **Text**: Displays the header and course names.
+- **Switch**: Allows users to toggle the attendance state for each course.
+
+## Logic
+- Observes courses and attendance states from the `CourseViewModel`.
+- Fetches attendance states on launch and when the refresh icon is clicked.
+- Displays a message when no courses are available.
+- Updates the attendance state in the ViewModel when a switch is toggled.
+
+## Animations
+- Uses `animateColorAsState` to animate the background color of course rows based on attendance state.
+- Uses `animateContentSize` to animate the size changes of course rows.
+
+## Customization
+- Styled using a custom theme defined by `CC`, managing colors and text styles.
+
+
+# CourseContent Composable
+
+The `CourseContent` composable is responsible for displaying detailed information about a specific course, including announcements, assignments, timetables, and other details. It dynamically fetches and displays data from various repositories based on the provided course ID.
+
+## Key Components
+
+### 1. Repositories and ViewModels Initialization
+- **Purpose**: To fetch and manage data related to the course from different sources.
+- **Functionality**:
+  - Initializes various repositories (course, announcements, assignments, timetables, etc.) using a custom application context (`UniAdmin`).
+  - Creates ViewModel instances for each repository using their respective factories. This ensures that data is managed and accessed in a consistent manner across the composable.
+
+### 2. State Observers
+- **Purpose**: To handle the loading states of different data components.
+- **Functionality**:
+  - Observes LiveData for loading states of announcements, assignments, timetables, and details.
+  - Updates the UI based on whether the data is currently being loaded.
+
+### 3. Data Fetching
+- **Purpose**: To retrieve course-specific data when the component is loaded.
+- **Functionality**:
+  - Uses `LaunchedEffect` with the `targetCourseID` to trigger data fetching whenever the course ID changes.
+  - Calls methods on ViewModels to fetch announcements, assignments, timetables, and details for the specified course ID.
+
+### 4. UI Layout
+- **Purpose**: To display the course content in a structured and user-friendly manner.
+- **Functionality**:
+  - Uses a `Scaffold` to provide a consistent layout structure with a container color.
+  - Displays a course image and name in a styled header using `AsyncImage` and `Text`.
+  - Implements a `ScrollableTabRow` to allow users to switch between different sections (Announcements, Assignments, Timetable, Details) of the course.
+  - Uses conditional rendering to show loading indicators or the relevant content based on the current tab and loading state.
+
+### 5. Tab Navigation
+- **Purpose**: To enable navigation between different sections of the course content.
+- **Functionality**:
+  - Defines a list of tab titles (Announcements, Assignments, Timetable, Details).
+  - Sets up a custom tab indicator and handles tab selection.
+  - Updates the content displayed based on the selected tab.
+
+### 6. Content Rendering
+- **Purpose**: To display the appropriate content for each tab.
+- **Functionality**:
+  - Checks the selected tab index and renders corresponding components such as `AnnouncementsItem`, `AssignmentsItem`, `TimetableItem`, and `DetailsItem`.
+  - Shows a loading indicator if the data for the current tab is still being fetched.
+
+## Summary
+The `CourseContent` composable effectively manages and displays various aspects of a course's content, providing a tabbed interface for users to easily navigate between announcements, assignments, timetables, and other details. It uses ViewModels to handle data fetching and observes loading states to update the UI dynamically.
+
+
+
+# AnnouncementsItem Composable
+
+The `AnnouncementsItem` composable displays a list of course announcements and provides an option to add new announcements. It leverages various UI components and state management to provide an interactive user experience.
+
+## Key Components
+
+### 1. State Management
+- **Purpose**: To handle the visibility of the "Add Announcement" section and manage the list of announcements.
+- **Functionality**:
+  - Uses `remember` and `mutableStateOf` to manage the visibility state of the "Add Announcement" section.
+  - Observes announcements data from `CourseAnnouncementViewModel` to display the list of announcements.
+
+### 2. UI Layout
+- **Purpose**: To structure the content and actions available in the announcements section.
+- **Functionality**:
+  - Displays a `FloatingActionButton` to toggle the visibility of the "Add Announcement" section.
+  - Conditionally shows either the "Add Announcement" UI or the list of announcements based on the visibility state.
+
+### 3. Announcement List
+- **Purpose**: To show a list of announcements if available.
+- **Functionality**:
+  - Displays a message ("No Announcements") if the list is empty.
+  - Uses `LazyColumn` to efficiently display a scrollable list of `AnnouncementCard` items.
+
+## AnnouncementItemCard Composable
+
+The `AnnouncementCard` composable represents a single announcement in a card format.
+
+### 1. UI Layout
+- **Purpose**: To present individual announcements in a visually appealing way.
+- **Functionality**:
+  - Uses a `Card` to provide a bordered and colored background.
+  - Displays announcement title, description, author, and date in a structured layout.
+
+## AddAnnouncementItem Composable
+
+The `AddAnnouncementItem` composable provides a form for users to add new announcements.
+
+### 1. State Management
+- **Purpose**: To manage the form's input fields and loading state.
+- **Functionality**:
+  - Uses `remember` to store the title, description, loading state, and sender's name.
+  - Fetches the signed-in user's information and uses it to populate the announcement's author field.
+
+### 2. Form Layout
+- **Purpose**: To create a user-friendly form for adding announcements.
+- **Functionality**:
+  - Displays input fields for the announcement's title and description.
+  - Provides "Post" and "Cancel" buttons to submit or discard the announcement.
+
+### 3. Form Submission
+- **Purpose**: To handle the submission of a new announcement.
+- **Functionality**:
+  - Generates a new announcement ID and creates a `CourseAnnouncement` object.
+  - Saves the new announcement using `CourseAnnouncementViewModel` and updates the UI accordingly.
+  - Shows a `CircularProgressIndicator` while the announcement is being posted.
+
+## AddTextField Composable
+
+The `AddTextField` composable creates a reusable text field with customizable properties.
+
+### 1. UI Layout
+- **Purpose**: To provide a styled text field for user input.
+- **Functionality**:
+  - Displays a text field with customizable label, value, and color styles.
+  - Adjusts height and width to fit content and provides visual feedback for focused and unfocused states.
 
