@@ -100,7 +100,7 @@ The `GitAuth` composable function handles GitHub authentication using [Firebase]
 
 - **`handleAuthSuccess`:**
     - Called after successful third-party authentication.
-    - Fetches user by email and navigates to the appropriate screen (`homescreen` or `moreDetails`).
+    - Fetches user by email and navigates to the appropriate screen (`homeScreen` or `moreDetails`).
 - **`handleSignUp`:**
     - Validates email and password fields.
     - Registers the user with Firebase Authentication.
