@@ -9,11 +9,11 @@ data class MessageEntity(
     var message: String = "",
     var senderName: String = "",
     var senderID: String = "",
-    var timeStamp: Long = 0L,
+    var timeStamp: String = "",
     var date: String = "",
     var recipientID: String = "",
     var profileImageLink: String = ""
 
 ){
-    constructor(): this("", "", "", "", 0L, "", "", "")
+    constructor(): this("", "", "", "", "", "", "", "")
 }
