@@ -246,8 +246,8 @@ fun DiscussionScreen(
                                         message = messageText,
                                         senderName = currentUser.firstName,
                                         senderID = currentUser.id,
-                                        time = getCurrentTimeInAmPm(),
-                                        date = getCurrentDate(),
+                                        time = CC.getTimeStamp(),
+                                        date = CC.getTimeStamp(),
                                         id = chatID,
                                         profileImageLink = currentUser.profileImageLink
                                     )
@@ -333,7 +333,7 @@ fun ChatTopAppBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("homescreen") }) {
+            IconButton(onClick = { navController.navigate("homeScreen") }) {
                 Icon(
                     Icons.Default.ArrowBackIosNew,
                     contentDescription = "Back",
@@ -633,16 +633,5 @@ fun RowText(context: Context) {
 }
 
 
-fun getCurrentDate(): String {
-    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
-    val currentDate = Date()
-    return dateFormat.format(currentDate).lowercase(Locale.getDefault()) // Convert to lowercase
-}
-
-fun getCurrentTimeInAmPm(): String {
-    val currentTime = Date()
-    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return formatter.format(currentTime).lowercase(Locale.getDefault()) // Convert to lowercase
-}
 
 
