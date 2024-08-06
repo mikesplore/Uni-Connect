@@ -171,7 +171,6 @@ fun currentFontFamily(context: Context): FontFamily {
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
     val fontPrefs = remember { FontPreferences(context) }
