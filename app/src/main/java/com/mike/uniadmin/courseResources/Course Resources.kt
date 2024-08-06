@@ -139,7 +139,7 @@ fun CourseResources(courseCode: String, context: Context) {
                 Section(title = "Notes",
                     items = notes,
                     onAddClick = { showAddSection = Section.NOTES },
-                    onDelete = { notes.remove(it); deleteItem(courseCode, Section.NOTES, it) },
+                    onDelete = { gridItem -> notes.remove(gridItem); deleteItem(courseCode, Section.NOTES, gridItem) },
                     context = context
                 )
                 AnimatedVisibility(showAddSection == Section.NOTES) {
@@ -159,11 +159,11 @@ fun CourseResources(courseCode: String, context: Context) {
                     title = "Past Papers",
                     items = pastPapers,
                     onAddClick = { showAddSection = Section.PAST_PAPERS },
-                    onDelete = {
-                        pastPapers.remove(it); deleteItem(
+                    onDelete = { gridItem ->
+                        pastPapers.remove(gridItem); deleteItem(
                         courseCode,
                         Section.PAST_PAPERS,
-                        it
+                        gridItem
                     )
                     },
                     context = context
@@ -186,11 +186,11 @@ fun CourseResources(courseCode: String, context: Context) {
                     title = "Additional Resources",
                     items = resources,
                     onAddClick = { showAddSection = Section.RESOURCES },
-                    onDelete = {
-                        resources.remove(it); deleteItem(
+                    onDelete = { gridItem ->
+                        resources.remove(gridItem); deleteItem(
                         courseCode,
                         Section.RESOURCES,
-                        it
+                        gridItem
                     )
                     },
                     context = context
