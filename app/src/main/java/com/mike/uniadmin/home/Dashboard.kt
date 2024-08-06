@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -1062,7 +1061,7 @@ fun TopAppBarContent(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .heightIn(max = 500.dp)
+                    .heightIn(max = 200.dp)
                     .width(160.dp)
                     .background(CC.extraColor1())
             ) {
@@ -1080,10 +1079,10 @@ fun TopAppBarContent(
                                 expanded = false
                             }, modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("View More", style = CC.descriptionTextStyle(context))
+                            Text("View All", style = CC.descriptionTextStyle(context))
                         }
                     } else {
-                        Text("No new notifications", style = CC.descriptionTextStyle(context))
+                        Text("No notifications", style = CC.descriptionTextStyle(context))
                     }
                 }
             }
