@@ -672,7 +672,7 @@ fun AccountDeletionRequests(
                                 if (success) {
                                     // Sign out the user
                                     auth.signOut()
-                                    navController.navigate("splashscreen")
+                                    navController.navigate("splashScreen")
                                 }
                             })
                         }
