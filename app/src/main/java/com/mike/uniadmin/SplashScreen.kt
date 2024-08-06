@@ -125,7 +125,7 @@ fun SplashScreen(navController: NavController, context: Context) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Uni Konnect",
+                text = "Uni Admin",
                 style = CC.titleTextStyle(context)
             )
             Spacer(modifier = Modifier.height(8.dp))
