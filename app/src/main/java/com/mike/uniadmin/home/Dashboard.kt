@@ -92,6 +92,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -103,30 +104,30 @@ fun Dashboard(navController: NavController, context: Context) {
         factory = ChatViewModel.ChatViewModelFactory(chatRepository)
     )
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
+    val dashboardAdmin = context.applicationContext as? UniAdmin
+    val userRepository = remember { dashboardAdmin?.userRepository }
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(
             userRepository ?: throw IllegalStateException("UserRepository is null")
         )
     )
 
-    val announcementAdmin = context.applicationContext as? UniAdmin
 
-    val courseRepository = remember { announcementAdmin?.courseRepository }
+    val courseRepository = remember { dashboardAdmin?.courseRepository }
     val courseViewModel: CourseViewModel = viewModel(
         factory = CourseViewModelFactory(
             courseRepository ?: throw IllegalStateException("CourseRepository is null")
         )
     )
 
-    val announcementRepository = remember { announcementAdmin?.announcementRepository }
+    val announcementRepository = remember { dashboardAdmin?.announcementRepository }
     val announcementViewModel: AnnouncementViewModel = viewModel(
         factory = AnnouncementViewModelFactory(
             announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
         )
     )
-    val timetableRepository = remember { announcementAdmin?.courseTimetableRepository }
+
+    val timetableRepository = remember { dashboardAdmin?.courseTimetableRepository }
     val timetableViewModel: CourseTimetableViewModel = viewModel(
         factory = CourseTimetableViewModelFactory(
             timetableRepository ?: throw IllegalStateException("TimetableRepository is null")
@@ -138,7 +139,7 @@ fun Dashboard(navController: NavController, context: Context) {
     val notificationViewModel: NotificationViewModel = viewModel(
         factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
     )
-
+    val fetchedCourse by courseViewModel.fetchedCourse.observeAsState()
     val timetables by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
     val user by userViewModel.user.observeAsState()
@@ -150,6 +151,7 @@ fun Dashboard(navController: NavController, context: Context) {
     val timetablesLoading by timetableViewModel.isLoading.observeAsState()
 
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
+    val courseName by remember { mutableStateOf(fetchedCourse?.courseName) }
 
 
 
@@ -159,12 +161,16 @@ fun Dashboard(navController: NavController, context: Context) {
         chatViewModel.fetchGroups()
         userViewModel.getSignedInUser()
         timetableViewModel.getTimetableByDay(CC.currentDay())
+
         timetables?.let { timetableList ->
             timetableList.forEach { timetable ->
-                timetable.courseID.let { courseViewModel.getCourseDetailsByCourseID(courseCode = it) }
-                Log.d("Course", timetable.courseID)
+                // Launch a coroutine for each timetable item to fetch course details
+                launch {
+                    courseViewModel.getCourseDetailsByCourseID(timetable.courseID)
+                }
             }
         }
+
         signedInUser?.email?.let {
             userViewModel.findUserByEmail(it) { fetchedUser ->
                 if (fetchedUser != null) {
@@ -366,7 +372,7 @@ fun Dashboard(navController: NavController, context: Context) {
             } else {
                 LazyRow {
                     items(timetables!!) { timetable ->
-                        TodayTimetable("", timetable, context)
+                        courseName?.let { TodayTimetable(it, timetable, context) }
                     }
                 }
             }
