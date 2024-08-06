@@ -65,7 +65,6 @@ fun ManageAttendanceScreen(context: Context) {
     var refresh by remember { mutableStateOf(false) }
 
     LaunchedEffect(refresh) {
-        
         courseViewModel.fetchAttendanceStates()
     }
 
