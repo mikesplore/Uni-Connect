@@ -167,7 +167,7 @@ fun HomeScreen(
     val signedInUser by userViewModel.signedInUser.observeAsState()
     val fetchedUserDetails by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
-    val users by userViewModel.users.observeAsState(emptyList())
+    val users by userViewModel.users.observeAsState(initial = emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
 
     // Local state
@@ -184,20 +184,27 @@ fun HomeScreen(
 
     // Side effects
     LaunchedEffect(signedInUser, fetchedUserDetails) {
+        // 1. Get signed-in user and fetch details (if needed)
         userViewModel.getSignedInUser()
-        signedInUser?.let {
-            it.email.let { it1 -> userViewModel.findUserByEmail(it1) {} }
+        signedInUser?.email?.let { email ->
+            userViewModel.findUserByEmail(email,) { user -> Log.d("Fetched User details", "$user") }
         }
+
+        // 2. Fetch app version (can run concurrently)
+        launch {
+            getUpdate { fetched ->
+                if (fetched != null) {
+                    update = fetched
+                }
+            }
+        }
+
+        // 3. Perform other data fetching and updates
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
         userViewModel.fetchUsers()
-        fetchedUserDetails?.id?.let { userViewModel.checkUserStateByID(it) }
-
-        //fetch app version
-        getUpdate { fetched ->
-            if (fetched != null) {
-                update = fetched
-            }
+        fetchedUserDetails?.id?.let { userId ->
+            userViewModel.checkUserStateByID(userId)
         }
     }
 
@@ -210,6 +217,8 @@ fun HomeScreen(
             }
         }, containerColor = CC.primary(), sheetState = sheetState, content = {
             fetchedUserDetails?.let {
+                userViewModel.fetchUsers()
+                Log.d("Fetched User details","fetched details are ${users.size}")
                 ModalDrawerItem(
                     signedInUser = it,
                     user = fetchedUserDetails!!,
@@ -227,7 +236,6 @@ fun HomeScreen(
     }
     CheckUpdate(context)
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
-        userStatus?.let {
             ModalNavigationDrawerItem(
                 drawerState = drawerState,
                 scope = coroutineScope,
@@ -239,11 +247,11 @@ fun HomeScreen(
                 signedInUser = signedInUser,
                 fetchedUserDetails = fetchedUserDetails,
                 showBottomSheet = {value -> showBottomSheet = value },
-                userStatus = it,
+                userStatus = userStatus,
                 update = update
 
             )
-        }
+
 
     }) {
         Scaffold(
@@ -295,7 +303,7 @@ fun ModalNavigationDrawerItem(
     signedInUser: SignedInUser?,
     fetchedUserDetails: UserEntity?,
     showBottomSheet:(Boolean) -> Unit,
-    userStatus: UserStateEntity,
+    userStatus: UserStateEntity?,
     update: Update
 
 ){
@@ -417,7 +425,7 @@ fun ModalNavigationDrawerItem(
                     drawerState.close()
                 }
                 userStatus.let {
-                    MyDatabase.writeUserActivity(it.copy(
+                    MyDatabase.writeUserActivity(it!!.copy(
                         online = "offline", lastTime = getCurrentTimeInAmPm()
                     ), onSuccess = {
                         userViewModel.deleteAllTables()
