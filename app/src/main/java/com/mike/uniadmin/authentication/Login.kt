@@ -58,8 +58,6 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import com.mike.uniadmin.chat.getCurrentDate
-import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
@@ -283,7 +281,7 @@ fun LoginScreen(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(20.dp))
 
             AnimatedVisibility(visible = !isSigningUp) {
-                TextButton(onClick = { navController.navigate("passwordreset") }) {
+                TextButton(onClick = { navController.navigate("passwordReset") }) {
                     Text(
                         text = "Forgot Password? Reset",
                         style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
@@ -338,7 +336,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                     id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
                 )
             )
-            navController.navigate("homescreen") {
+            navController.navigate("homeScreen") {
                 popUpTo("login") { inclusive = true }
             }
         } else {
@@ -390,8 +388,8 @@ fun handleSignUp(
                                 id = id,
                                 title = "$firstName $lastName has Joined Uni Admin!",
                                 description = "Start a conversation by sending  a 👋",
-                                date = getCurrentDate(),
-                                time = getCurrentTimeInAmPm()
+                                date = CC.getCurrentDate(CC.getTimeStamp()),
+                                time = CC.getCurrentTime(CC.getTimeStamp())
                             )
                         )
                         notificationViewModel.fetchNotifications()
@@ -426,7 +424,7 @@ fun handleSignIn(
                 firebaseAuth.currentUser?.email?.let { current ->
                     userViewModel.findUserByEmail(current) { user ->
                         if (user != null) {
-                            navController.navigate("homescreen")
+                            navController.navigate("homeScreen")
                             Toast.makeText(
                                 context,
                                 "Welcome back to UniAdmin, ${user.firstName}!",
