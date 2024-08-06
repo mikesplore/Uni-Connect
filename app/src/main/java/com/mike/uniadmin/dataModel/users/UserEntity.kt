@@ -58,7 +58,8 @@ data class UserStateEntity(
     val userID: String = "",
     val online: String = "",
     val lastTime: String = "",
+    val lastDate: String = ""
 ){
-    constructor(): this("", "", "", "")
+    constructor(): this("", "", "", "", "")
 
 }
