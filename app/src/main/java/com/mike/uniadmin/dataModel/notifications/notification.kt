@@ -11,7 +11,8 @@ data class NotificationEntity(
     val userId: String = "",
     val description: String = "",
     val date: String = "",
-    val time: String = ""
+    val time: String = "",
+    val category: String = "",
 ){
-    constructor(): this("", "", "", "", "", "", "")
+    constructor(): this("", "", "", "", "", "", "", "")
 }
