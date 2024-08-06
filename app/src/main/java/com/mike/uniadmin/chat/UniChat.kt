@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,6 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,10 +71,6 @@ import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFac
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -118,8 +116,7 @@ fun UniChat(navController: NavController, context: Context) {
 // Filter and sort users
     val filteredUsers = userMessages.filter { (user, _) ->
         user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
-            searchQuery,
-            ignoreCase = true
+            searchQuery, ignoreCase = true
         )
     }.sortedWith(compareByDescending<Pair<UserEntity, MessageEntity?>> {
         it.second?.timeStamp ?: -1L // Sort by timestamp, use -1L for users with no messages
@@ -128,7 +125,13 @@ fun UniChat(navController: NavController, context: Context) {
     }).map { it.first } // Extract only the user part
 
     Scaffold(topBar = {
-        TopAppBar(title = {}, actions = {
+        TopAppBar(title = {}, navigationIcon = {
+            IconButton(onClick = { navController.navigate("homeScreen") }) {
+                Icon(
+                    Icons.Default.ArrowBackIosNew, contentDescription = "Back"
+                )
+            }
+        }, actions = {
             IconButton(onClick = { searchVisible = !searchVisible }) {
                 Icon(
                     imageVector = Icons.Default.Search, contentDescription = "Search"
@@ -146,8 +149,8 @@ fun UniChat(navController: NavController, context: Context) {
         ) {
             AnimatedVisibility(visible = searchVisible) {
                 TextField(value = searchQuery,
-                    onValueChange = { newValue ->  searchQuery = newValue },
-                    placeholder = { Text("Search Participants") },
+                    onValueChange = { newValue -> searchQuery = newValue },
+                    placeholder = { Text("Search User") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
@@ -165,6 +168,20 @@ fun UniChat(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Uni Chat",
+                    style = CC.titleTextStyle(context)
+                        .copy(fontSize = 30.sp, fontWeight = FontWeight.Bold),
+                    color = CC.textColor()
+                )
+            }
 
 
             when {
@@ -177,10 +194,14 @@ fun UniChat(navController: NavController, context: Context) {
                 }
 
                 filteredUsers.isEmpty() -> {
-                    Text(
-                        text = "No participants found.",
-                        style = CC.descriptionTextStyle(context)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "No user found.", style = CC.descriptionTextStyle(context)
+                        )
+                    }
                 }
 
                 else -> {
@@ -290,24 +311,25 @@ fun ProfileCard(
                             userState.online == "online" -> Color.Green
                             else -> Color.Red
                         }
+
                         Text(
                             text = when {
                                 userState == null -> "Never online"
                                 userState.online == "online" -> "Online"
-                                else -> "Last seen ${userState.lastTime}"
+                                userState.lastDate == CC.getCurrentDate(CC.getTimeStamp()) -> "Last seen today at ${userState.lastTime}"
+                                else -> "Last seen ${userState.lastDate} at ${userState.lastTime}"
                             },
                             style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
                             color = textColor
                         )
-                        val formattedTime = latestMessage?.timeStamp?.let { Date(it) }?.let {
-                            SimpleDateFormat("hh:mm a", Locale.getDefault()).format(it)
-                        }
-                        if (formattedTime != null) {
-                            Text(
-                                text = formattedTime,
-                                style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                            )
-                        }
+
+                        val time: String =
+                            if (latestMessage?.timeStamp != null) CC.getCurrentTime(latestMessage.timeStamp) else ""
+
+                        Text(
+                            text = time,
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        )
                     }
                 }
 
