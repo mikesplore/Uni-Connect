@@ -57,14 +57,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.mike.uniadmin.chat.getCurrentDate
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.notifications.NotificationEntity
+import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.notification.showNotification
 
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -89,6 +91,14 @@ fun AnnouncementsScreen(context: Context) {
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(
             userRepository ?: throw IllegalStateException("UserRepository is null")
+        )
+    )
+
+    //viewModel for notifications
+    val notificationRepository = remember { announcementAdmin?.notificationRepository }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(
+            notificationRepository ?: throw IllegalStateException("AnnouncementRepository is null")
         )
     )
 
@@ -156,7 +166,8 @@ fun AnnouncementsScreen(context: Context) {
                     context,
                     onComplete = { addAnnouncement = false },
                     userViewModel,
-                    announcementViewModel
+                    announcementViewModel,
+                    notificationViewModel
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -180,12 +191,15 @@ fun AnnouncementsScreen(context: Context) {
                     // Display announcements list
                     LazyColumn(modifier = Modifier.fillMaxWidth(0.9f)) {
                         announcements?.let { announcements ->
-                            val sortedAnnouncements = announcements.sortedByDescending { sortedAnn -> sortedAnn.id }
+                            val sortedAnnouncements =
+                                announcements.sortedByDescending { sortedAnn -> sortedAnn.id }
                             items(sortedAnnouncements) { announcement ->
                                 val isEditing = editingAnnouncementId == announcement.id
-                                AnnouncementCard(
-                                    announcement = announcement,
-                                    onEdit = { editingAnnouncementId = if (isEditing) null else announcement.id },
+                                AnnouncementCard(announcement = announcement,
+                                    onEdit = {
+                                        editingAnnouncementId =
+                                            if (isEditing) null else announcement.id
+                                    },
                                     onDelete = { id ->
                                         announcementViewModel.deleteAnnouncement(id) { success ->
                                             if (success) {
@@ -220,7 +234,8 @@ fun AddAnnouncement(
     context: Context,
     onComplete: (Boolean) -> Unit,
     userViewModel: UserViewModel,
-    announcementViewModel: AnnouncementViewModel
+    announcementViewModel: AnnouncementViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
 
     var title by remember { mutableStateOf("") }
@@ -297,7 +312,7 @@ fun AddAnnouncement(
                 }
             }
 
-            Text(getCurrentDate(), style = CC.descriptionTextStyle(context))
+            Text(CC.getCurrentDate(CC.getTimeStamp()), style = CC.descriptionTextStyle(context))
         }
 
         Text("Enter announcement title", style = CC.descriptionTextStyle(context))
@@ -333,19 +348,30 @@ fun AddAnnouncement(
                             id = id,
                             title = title,
                             description = description,
-                            date = getCurrentDate(),
+                            date = CC.getCurrentDate(CC.getTimeStamp()),
                             authorName = author,
                             authorID = senderId,
                             imageLink = profileLink
                         )
                         if (title != "" && description != "") {
-                            announcementViewModel.saveAnnouncement(
-                                newAnnouncement,
+                            announcementViewModel.saveAnnouncement(newAnnouncement,
                                 onComplete = { success ->
                                     if (success) {
+                                        showNotification(context, title, description)
+                                        notificationViewModel.writeNotification(
+                                            notificationEntity = NotificationEntity(
+                                                name = author,
+                                                userId = senderId,
+                                                id = id,
+                                                category = "Announcements",
+                                                title = title,
+                                            )
+                                        )
+                                        notificationViewModel.fetchNotifications()
                                         title = ""
                                         description = ""
                                         onComplete(true)
+
                                     }
                                 })
                         } else {
@@ -462,20 +488,16 @@ fun EditAnnouncement(
             }
 
             // Display the current date
-            Text(getCurrentDate(), style = CC.descriptionTextStyle(context))
+            Text(CC.getCurrentDate(CC.getTimeStamp()), style = CC.descriptionTextStyle(context))
         }
 
         // Title input section
         Text("Enter announcement title", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
-            value = title,
-            onValueChange = { newTitle ->
+            value = title, onValueChange = { newTitle ->
                 title = newTitle
-            },
-            singleLine = true,
-            placeholder = "Title",
-            context = context
+            }, singleLine = true, placeholder = "Title", context = context
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -484,13 +506,9 @@ fun EditAnnouncement(
         Text("Enter announcement description", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
-            value = description,
-            onValueChange = { newDescription ->
+            value = description, onValueChange = { newDescription ->
                 description = newDescription
-            },
-            singleLine = false,
-            placeholder = "Description",
-            context = context
+            }, singleLine = false, placeholder = "Description", context = context
         )
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -499,18 +517,15 @@ fun EditAnnouncement(
             Button(
                 onClick = {
                     // Save the edited announcement through the ViewModel
-                    announcementViewModel.saveAnnouncement(
-                        announcement.copy(
-                            title = title,
-                            description = description,
-                            date = getCurrentDate()
-                        ),
-                        onComplete = { success ->
-                            if (success) {
-                                onComplete() // Call the onComplete callback if save is successful
-                            }
+                    announcementViewModel.saveAnnouncement(announcement.copy(
+                        title = title,
+                        description = description,
+                        date = CC.getCurrentDate(CC.getTimeStamp())
+                    ), onComplete = { success ->
+                        if (success) {
+                            onComplete() // Call the onComplete callback if save is successful
                         }
-                    )
+                    })
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
@@ -622,8 +637,9 @@ fun AnnouncementCard(
                     style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
                     color = CC.textColor().copy(alpha = 0.6f),
                 )
+
                 Text(
-                    text = announcement.date,
+                    text = CC.getRelativeDate(announcement.date),
                     style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
                     color = CC.textColor().copy(alpha = 0.6f),
                 )
@@ -633,8 +649,7 @@ fun AnnouncementCard(
 
             // Edit and Delete buttons
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
             ) {
                 Button(
                     onClick = { onEdit() },
@@ -660,12 +675,9 @@ fun AnnouncementCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 EditAnnouncement(
-                    announcement = announcement,
-                    context = context,
-                    onComplete = {
+                    announcement = announcement, context = context, onComplete = {
                         onEditComplete()
-                    },
-                    announcementViewModel = announcementViewModel
+                    }, announcementViewModel = announcementViewModel
                 )
             }
         }
