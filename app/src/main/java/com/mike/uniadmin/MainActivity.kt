@@ -25,7 +25,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.model.Global
@@ -37,6 +36,8 @@ import com.mike.uniadmin.ui.theme.UniAdminTheme
 import java.io.File
 import kotlin.text.endsWith
 import kotlin.text.substringBeforeLast
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
+
 
 object DeviceTheme {
     private lateinit var sharedPreferences: SharedPreferences
@@ -141,7 +142,8 @@ class MainActivity : AppCompatActivity() {
             userID = userId,
             id = "${userId}2024",
             online = "online",
-            lastTime = getCurrentTimeInAmPm()
+            lastTime = CC.getCurrentTime(CC.getTimeStamp()),
+            lastDate = CC.getCurrentDate(CC.getTimeStamp())
         )
         userStatusRef.setValue(userState) // Set the whole UserStateEntity object
         userStatusRef.onDisconnect().setValue(userState.copy(online = "offline")) // Set offline on disconnect
@@ -159,7 +161,8 @@ class MainActivity : AppCompatActivity() {
             userID = userId,
             id = "${userId}2024",
             online = "offline",
-            lastTime = getCurrentTimeInAmPm()
+            lastTime = CC.getCurrentTime(CC.getTimeStamp()),
+            lastDate = CC.getCurrentDate(CC.getTimeStamp())
         )
         userStatusRef.setValue(userState) // Set the whole UserStateEntity object
         Log.d("User status", "Offline: $userState")
