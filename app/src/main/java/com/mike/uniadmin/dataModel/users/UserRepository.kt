@@ -56,38 +56,62 @@ class UserRepository
         }
     }
 
-    private fun startUserListener() {
-        database.child("Users").addValueEventListener(object : ValueEventListener {
+    private fun <T> startDatabaseListener(
+        path: String,
+        convert: (DataSnapshot) -> T?,
+        onResult: suspend (List<T>) -> Unit
+    ) {
+        database.child(path).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val users = mutableListOf<UserEntity>()
+                val items = mutableListOf<T>()
                 for (childSnapshot in snapshot.children) {
-                    val user = childSnapshot.getValue(UserEntity::class.java)
-                    user?.let { users.add(it) }
+                    val item = convert(childSnapshot)
+                    item?.let { items.add(it) }
                 }
                 viewModelScope.launch {
-                    userDao.insertUsers(users)
+                    onResult(items)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle the read error (e.g., log the error)
-                println("Error reading users: ${error.message}")
+                println("Error reading $path: ${error.message}")
             }
         })
     }
 
+    private fun startUserListener() {
+        startDatabaseListener("Users",
+            convert = { it.getValue(UserEntity::class.java) },
+            onResult = { users ->
+                userDao.insertUsers(users)
+            }
+        )
+    }
 
+    private fun startUserStateListener() {
+        startDatabaseListener("Users Online Status",
+            convert = { it.getValue(UserStateEntity::class.java) },
+            onResult = { userStates ->
+                userStateDao.insertUserStates(userStates)
+            }
+        )
+    }
 
     fun fetchUsers(onResult: (List<UserEntity>) -> Unit) {
         viewModelScope.launch {
+            // 1. Fetch users from local database first
+            val localUsers = userDao.getUsers()
+            onResult(localUsers)
+
+            // 2. Then, fetch from remote and update local if needed
             try {
                 val remoteUsers = fetchUsersFromRemoteDatabase()
-                userDao.insertUsers(remoteUsers) // Update local database
-                onResult(remoteUsers)
+                if (remoteUsers != localUsers) { // Check for differences
+                    userDao.insertUsers(remoteUsers)
+                    onResult(remoteUsers) // Update UI if there are changes
+                }
             } catch (e: Exception) {
                 println("Error fetching users from remote database: ${e.message}")
-                val localUsers = userDao.getUsers()
-                onResult(localUsers)
             }
         }
     }
@@ -111,25 +135,6 @@ class UserRepository
         }
     }
 
-    private fun startUserStateListener() {
-        database.child("Users Online Status").addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val userStates = mutableListOf<UserStateEntity>()
-                for (childSnapshot in snapshot.children) {
-                    val userState = childSnapshot.getValue(UserStateEntity::class.java)
-                    userState?.let { userStates.add(it) }
-                }
-                viewModelScope.launch {
-                    userStateDao.insertUserStates(userStates)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the read error (e.g., log the error)
-                println("Error reading user states: ${error.message}")
-            }
-        })
-    }
 
     fun saveUser(user: UserEntity, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -232,7 +237,7 @@ class UserRepository
     }
 
     fun writePreferences(preferences: UserPreferencesEntity, onSuccess: (Boolean) -> Unit) {
-        preferences.studentID?.let {
+        preferences.studentID.let {
             viewModelScope.launch {
                 userPreferencesDao.insertUserPreferences(preferences)
                 onSuccess(true)
