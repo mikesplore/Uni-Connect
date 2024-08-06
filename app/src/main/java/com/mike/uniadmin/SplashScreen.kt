@@ -65,7 +65,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     )
 
     val currentUser by userViewModel.signedInUser.observeAsState()
-    val destination = if (currentUser?.email != null) "homescreen" else "login"
+    val destination = if (currentUser?.email != null) "homeScreen" else "login"
 
     LaunchedEffect(currentUser) {
         if (!isDatabaseChecked) {
@@ -88,7 +88,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     LaunchedEffect(userLoaded) {
         if (userLoaded) {
             navController.navigate(destination) {
-                popUpTo("splashscreen") { inclusive = true }
+                popUpTo("splashScreen") { inclusive = true }
             }
         }
     }
