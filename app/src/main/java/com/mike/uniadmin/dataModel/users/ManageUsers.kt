@@ -73,7 +73,7 @@ fun ManageUsers(navController: NavController, context: Context) {
                 title = {},
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.navigate("homescreen")
+                        navController.navigate("homeScreen")
                     }) {
                         Icon(Icons.Default.ArrowBackIosNew,"back",
                             tint = CC.textColor())
