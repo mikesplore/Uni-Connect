@@ -38,7 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.ui.theme.CommonComponents.primary
 import com.mike.uniadmin.ui.theme.CommonComponents.secondary
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
+import kotlin.text.format
+import kotlin.text.lowercase
 
 
 object CommonComponents {
@@ -253,6 +262,38 @@ object CommonComponents {
             focusedTextColor = textColor(),
             unfocusedTextColor = textColor()
         )
+    }
+
+    // Function to get the current timestamp
+    fun getTimeStamp(): String {
+        return System.currentTimeMillis().toString()
+    }
+
+
+    fun getCurrentTime(timestamp: String): String {
+        val instant = Instant.ofEpochMilli(timestamp.toLong())
+        val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+        val timeFormat = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault())
+        return timeFormat.format(dateTime).lowercase(Locale.getDefault())
+    }
+
+    fun getCurrentDate(timestamp: String): String {
+        val instant = Instant.ofEpochMilli(timestamp.toLong())
+        val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+        val dateFormat = DateTimeFormatter.ofPattern("dd/MMM/yyyy", Locale.getDefault())
+        return dateFormat.format(dateTime)
+    }
+
+
+    fun getRelativeDate(date: String): String {
+        val todayTimestamp = getTimeStamp()
+        val yesterdayTimestamp = todayTimestamp.toLong() - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
+
+        return when (date) {
+            getCurrentDate(todayTimestamp) -> "Today"
+            getCurrentDate(yesterdayTimestamp.toString()) -> "Yesterday"
+            else -> date
+        }
     }
 }
 
