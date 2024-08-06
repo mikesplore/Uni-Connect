@@ -115,7 +115,6 @@ import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
-import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
@@ -356,7 +355,7 @@ fun ModalNavigationDrawerItem(
                     }
                     userViewModel.fetchUsers()
                     chatViewModel.fetchGroups()
-                    navController.navigate("unichat")
+                    navController.navigate("uniChat")
                 })
             SideBarItem(icon = Icons.Default.Groups,
                 text = "Groups",
@@ -426,7 +425,7 @@ fun ModalNavigationDrawerItem(
                 }
                 userStatus.let {
                     MyDatabase.writeUserActivity(it!!.copy(
-                        online = "offline", lastTime = getCurrentTimeInAmPm()
+                        online = "offline", lastDate = CC.getCurrentDate(CC.getTimeStamp()), lastTime = CC.getCurrentTime(CC.getTimeStamp())
                     ), onSuccess = {
                         userViewModel.deleteAllTables()
                         userViewModel.deleteSignedInUser()
@@ -436,7 +435,7 @@ fun ModalNavigationDrawerItem(
                         FirebaseAuth.getInstance().signOut()
 
                         navController.navigate("login") {
-                            popUpTo("homescreen") { inclusive = true }
+                            popUpTo("homeScreen") { inclusive = true }
                         }
                         Toast.makeText(
                             context, "Signed Out Successfully!", Toast.LENGTH_SHORT

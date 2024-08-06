@@ -46,8 +46,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.chat.getCurrentDate
-import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
@@ -56,6 +54,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.notification.showNotification
 
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -181,26 +180,28 @@ fun MoreDetails(context: Context, navController: NavController) {
                             )
                             userViewModel.setSignedInUser(signedInUser = SignedInUser(id = "userID", email = email.toString()))
                             userViewModel.writeUser(newUser, onSuccess = {
-                                addLoading = false
                                 MyDatabase.generateNotificationID { id ->
                                     notificationViewModel.writeNotification(
                                         notificationEntity = NotificationEntity(
                                             name = firstName,
                                             userId = userId ,
                                             id = id,
-                                            title = "$firstName $lastName has Joined Uni Admin!",
+                                            category = "New User",
+                                            title = "$firstName Joined Uni Admin!",
                                             description = "Say hi and get the conversation started!",
-                                            date = getCurrentDate(),
-                                            time = getCurrentTimeInAmPm()
+                                            date = CC.getCurrentDate(CC.getTimeStamp()),
+                                            time = CC.getCurrentTime(CC.getTimeStamp())
                                         )
                                     )
                                     notificationViewModel.fetchNotifications()
+                                    showNotification(context, "Welcome", "Welcome to Uni Admin, $firstName!")
                                 }
-                                navController.navigate("homescreen") {
+                                navController.navigate("homeScreen") {
                                     popUpTo("moreDetails") {
                                         inclusive = true
                                     }
                                 }
+                                addLoading = false
                             })
                         }}
 
