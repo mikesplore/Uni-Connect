@@ -97,7 +97,6 @@ import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
 import com.mike.uniadmin.model.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.FontPreferences
-
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -151,7 +150,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     Scaffold(
         topBar = {
             TopAppBar(title = {}, navigationIcon = {
-                IconButton(onClick = { navController.navigate("homescreen") }) {
+                IconButton(onClick = { navController.navigate("homeScreen") }) {
                     Icon(
                         Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
                     )
