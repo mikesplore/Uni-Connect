@@ -2,6 +2,7 @@ package com.mike.uniadmin.notification
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,13 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.chat.getCurrentDate
-import com.mike.uniadmin.chat.getCurrentTimeInAmPm
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -41,9 +42,6 @@ import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-
-import java.text.SimpleDateFormat
-import java.util.*
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,17 +62,24 @@ fun PhoneNotifications(navController: NavController, context: Context) {
         factory = UserViewModelFactory(userRepository)
     )
 
-
+    // Keep track of previous notifications
+    var previousNotifications by remember { mutableStateOf<List<NotificationEntity>>(emptyList()) }
     val notifications by notificationViewModel.notifications.observeAsState(emptyList())
     var refresh by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        
+    LaunchedEffect(refresh) {
         notificationViewModel.fetchNotifications()
     }
 
-    val groupedNotifications = remember(notifications) {
-        notifications.groupBy { it.getFormattedDateForGrouping() }
+    // Check for new notifications
+    LaunchedEffect(notifications) {
+        val newNotifications = notifications.filterNot { previousNotifications.contains(it) }
+        if (newNotifications.isNotEmpty()) {
+            newNotifications.forEach { notification ->
+                showNotification(context, notification.title, notification.description)
+            }
+        }
+        previousNotifications = notifications
     }
 
     Scaffold(
@@ -92,7 +97,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("homescreen") }) {
+                    IconButton(onClick = { navController.navigate("homeScreen") }) {
                         Icon(
                             Icons.Default.ArrowBackIosNew, "Refresh",
                             tint = CC.textColor()
@@ -133,29 +138,39 @@ fun PhoneNotifications(navController: NavController, context: Context) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                groupedNotifications.forEach { (date, notificationsForDate) ->
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Box(
-                                modifier = Modifier.background(
-                                    CC.secondary(),
-                                    RoundedCornerShape(10.dp)
-                                )
-                            ) {
-                                Text(
-                                    text = date,
-                                    style = CC.descriptionTextStyle(context),
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            }
-                        }
-                    }
-                    items(notificationsForDate) { notification ->
-                        NotificationItem(notification = notification, context = context, chatViewModel, userViewModel)
+                // Group notifications by category
+                val groupedNotifications = notifications.groupBy { categorizedNotification -> categorizedNotification.category }
 
+                // Sort notifications within each category by date in descending order
+                groupedNotifications.forEach { (category, notificationsForCategory) ->
+                    val sortedNotifications = notificationsForCategory.sortedByDescending { it.date }
+
+                    item {
+                        // Display category header only once
+                        Text(
+                            text = when (category) {
+                                "Announcement" -> "Announcements"
+                                else -> "New Users"
+                            },
+                            style = CC.descriptionTextStyle(context)
+                                .copy(fontWeight = FontWeight.Bold, fontSize = 25.sp),
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        )
+                    }
+
+                    items(sortedNotifications) { notification ->
+                        when (notification.category) {
+                            "Announcement" -> AnnouncementNotification(notification, context)
+                            else -> NotificationItem(
+                                notification = notification,
+                                context = context,
+                                chatViewModel,
+                                userViewModel
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
@@ -163,9 +178,11 @@ fun PhoneNotifications(navController: NavController, context: Context) {
     }
 }
 
+
 @Composable
 fun NotificationItem(notification: NotificationEntity, context: Context, chatViewModel: ChatViewModel, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
+    var loading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         FirebaseAuth.getInstance().currentUser?.email?.let { userViewModel.findUserByEmail(it) {} }
@@ -212,6 +229,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                     style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
             }
             IconButton(onClick = {
+                loading = true
                 MyDatabase.generateChatID { id ->
                     user?.let { currentUser ->
                         notification.userId.let { notificationUserId ->
@@ -220,17 +238,19 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                                 path = conversationId,
                                 chat = ChatEntity(
                                     id = id,
-                                    message = "Hi ${notification.name} 👋",
+                                    message = "Hi, ${notification.name} 👋",
                                     senderName = currentUser.firstName,
                                     senderID = currentUser.id,
-                                    time = getCurrentTimeInAmPm(),
-                                    date = getCurrentDate(),
+                                    time = CC.getCurrentTime(CC.getTimeStamp()),
+                                    date = CC.getCurrentDate(CC.getTimeStamp()),
                                     profileImageLink = currentUser.profileImageLink
                                 ),
                                 onSuccess = { success ->
                                     if (success) {
+                                        loading = false
                                         Toast.makeText(context, "Sent!", Toast.LENGTH_SHORT).show()
                                     } else {
+                                        loading = false
                                         Toast.makeText(context, "Failed!", Toast.LENGTH_SHORT).show()
                                     }
                                 }
@@ -241,6 +261,9 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                     }
                 }
             }) {
+                AnimatedVisibility(loading) {
+                    CircularProgressIndicator(color = CC.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(30.dp))
+                }
                 Icon(
                     Icons.AutoMirrored.Filled.Send, // Use a wave hand icon from your resources
                     contentDescription = "Wave",
@@ -252,18 +275,23 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
 }
 
 
-private fun NotificationEntity.getFormattedDateForGrouping(): String {
-    val today = Calendar.getInstance()
-    val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+@Composable
+fun AnnouncementNotification(notification: NotificationEntity, context: Context) {
+    Column(modifier = Modifier
+        .border(1.dp, CC.secondary(), RoundedCornerShape(10.dp))
+        .heightIn(50.dp)
+        .fillMaxWidth(0.9f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center) {
+        Text(notification.title, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(notification.description, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(notification.date, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
 
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val notificationDate = Calendar.getInstance().apply {
-        time = this@getFormattedDateForGrouping.date.let { dateFormat.parse(it) }!!
     }
 
-    return when {
-        dateFormat.format(notificationDate.time) == dateFormat.format(today.time) -> "Today"
-        dateFormat.format(notificationDate.time) == dateFormat.format(yesterday.time) -> "Yesterday"
-        else -> this.date
-    }
 }
+
+
+
