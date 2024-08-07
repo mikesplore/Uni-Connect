@@ -56,11 +56,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -92,13 +90,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
-import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -125,8 +117,6 @@ fun DiscussionScreen(
     val group by chatViewModel.group.observeAsState(initial = null)
     val users by userViewModel.users.observeAsState(emptyList())
 
-    val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var timeSpent by remember { mutableLongStateOf(0L) }
     var messageText by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showUsers by remember { mutableStateOf(false) }
@@ -135,26 +125,9 @@ fun DiscussionScreen(
 
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
-    val screenID = "SC6"
     val scrollState = rememberLazyListState()
     val groupPath = "Group Chat/$targetGroupID"
 
-
-    LaunchedEffect(Unit) {
-        
-        while (true) {
-            timeSpent = System.currentTimeMillis() - startTime
-            delay(1000)
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            ExitScreen(
-                context = context, screenID = screenID, timeSpent = timeSpent
-            )
-        }
-    }
 
     LaunchedEffect(currentUser?.email) {
         currentUser?.email?.let { email ->
@@ -185,7 +158,7 @@ fun DiscussionScreen(
         }
     }, snackbarHost = { SnackbarHost(snackbarHostState) }, content = { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Background(context)
+            Background()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -212,7 +185,8 @@ fun DiscussionScreen(
                             .animateContentSize()
                             .weight(1f)
                     ) {
-                        val groupedChats = chats.groupBy { it.date }
+
+                        val groupedChats = chats.groupBy { CC.getCurrentDate(it.date) }
 
                         groupedChats.forEach { (_, chatsForDate) ->
                             item {
@@ -409,8 +383,6 @@ fun SearchBar(
 
 @Composable
 fun DateHeader(context: Context) {
-    val currentDateString = getFormattedDate() // Get the formatted date string
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -423,7 +395,7 @@ fun DateHeader(context: Context) {
                 .padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = currentDateString,
+                text = CC.getRelativeDate(CC.getCurrentDate(CC.getTimeStamp())),
                 style = CC.descriptionTextStyle(context),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
@@ -432,19 +404,6 @@ fun DateHeader(context: Context) {
     }
 }
 
-fun getFormattedDate(): String {
-    val calendar = Calendar.getInstance()
-    val today = calendar.time
-    calendar.add(Calendar.DAY_OF_YEAR, -1) // Go back one day
-    val yesterday = calendar.time
-
-    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
-    return when (dateFormat.format(today)) {
-        dateFormat.format(Date()) -> "Today"
-        dateFormat.format(yesterday) -> "Yesterday"
-        else -> dateFormat.format(Date())
-    }
-}
 
 
 @Composable
@@ -564,7 +523,7 @@ fun ChatBubble(
                     )
                 }
                 Text(
-                    text = chat.time,
+                    text = CC.getCurrentTime(chat.time),
                     style = CC.descriptionTextStyle(context),
                     fontSize = 12.sp,
                     textAlign = TextAlign.End,
