@@ -53,12 +53,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -93,11 +91,10 @@ import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.Feedback
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
 import com.mike.uniadmin.model.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.FontPreferences
-import kotlinx.coroutines.delay
+
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,8 +103,6 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
     val fontPrefs = remember { FontPreferences(context) }
-    val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var timeSpent by remember { mutableLongStateOf(0L) }
     var savedFont by remember { mutableStateOf("system") }
 
     val userAdmin = context.applicationContext as? UniAdmin
@@ -119,27 +114,16 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     )
 
     val currentUser by userViewModel.user.observeAsState()
-    val screenID = "SC8"
+
+
     LaunchedEffect(Unit) {
         
         savedFont = fontPrefs.getSelectedFont().toString()
         userViewModel.findUserByEmail(user?.email!!) {}
 
-        while (true) {
-            timeSpent = System.currentTimeMillis() - startTime
-            delay(1000)
-        }
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            ExitScreen(
-                context = context,
-                screenID = screenID,
-                timeSpent = timeSpent
-            )
-        }
-    }
+
 
     // Fetch user data when the composable is launched
     LaunchedEffect(auth.currentUser?.email) {
@@ -150,7 +134,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     Scaffold(
         topBar = {
             TopAppBar(title = {}, navigationIcon = {
-                IconButton(onClick = { navController.navigate("homeScreen") }) {
+                IconButton(onClick = { navController.navigate("homescreen") }) {
                     Icon(
                         Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
                     )
