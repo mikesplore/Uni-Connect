@@ -180,16 +180,13 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     fun sendMessage(messageContent: String) {
         try {
             MyDatabase.generateChatID { chatId ->
-                val currentTime = System.currentTimeMillis() // Save the current time as a Long
                 val newMessage = MessageEntity(
                     id = chatId,
                     message = messageContent,
-                    senderName = user?.firstName.orEmpty(),
                     senderID = user?.id.orEmpty(),
                     recipientID = targetUserId,
-                    timeStamp = CC.getTimeStamp(), // Save timestamp as Long
-                    date = CC.getCurrentDate(CC.getTimeStamp()),
-                    profileImageLink = user?.profileImageLink.orEmpty()
+                    timeStamp = CC.getTimeStamp(),
+                    date = CC.getTimeStamp(),
                 )
                 messageViewModel.saveMessage(newMessage, conversationId) { success ->
                     if (!success) {
@@ -227,7 +224,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 .padding(innerPadding)
                 .imePadding()
         ) {
-            Background(context)
+            Background()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
