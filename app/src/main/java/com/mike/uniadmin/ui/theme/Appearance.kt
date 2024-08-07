@@ -1,7 +1,6 @@
 package com.mike.uniadmin.ui.theme
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,10 +40,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,9 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.ScreenTime
-import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,54 +63,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun Appearance(navController: NavController, context: Context) {
     var currentFont by remember { mutableStateOf<FontFamily?>(null) }
     var fontUpdated by remember { mutableStateOf(false) }
-    val startTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var timeSpent by remember { mutableLongStateOf(0L) }
-    val screenID = "SC2"
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            timeSpent = System.currentTimeMillis() - startTime
-            delay(1000) // Update every second (adjust as needed)
-        }
-    }
-
-    DisposableEffect(Unit) {
-
-        onDispose {
-            // Fetch the screen details
-            MyDatabase.getScreenDetails(screenID) { screenDetails ->
-                if (screenDetails != null) {
-                    MyDatabase.writeScren(courseScreen = screenDetails) {}
-                    // Fetch existing screen time
-                    MyDatabase.getScreenTime(screenID) { existingScreenTime ->
-                        val totalScreenTime = if (existingScreenTime != null) {
-                            Log.d("Screen Time", "Retrieved Screen time: $existingScreenTime")
-                            existingScreenTime.time + timeSpent
-                        } else {
-                            timeSpent
-                        }
-
-                        // Create a new ScreenTime object
-                        val screentime = ScreenTime(
-                            id = screenID,
-                            screenName = screenDetails.screenName,
-                            time = totalScreenTime
-                        )
-
-                        // Save the updated screen time
-                        MyDatabase.saveScreenTime(screenTime = screentime, onSuccess = {
-                            Log.d("Screen Time", "Saved $totalScreenTime to the database")
-                        }, onFailure = {
-                            Log.d("Screen Time", "Failed to save $totalScreenTime to the database")
-                        })
-                    }
-
-                } else {
-                    Log.d("Screen Time", "Screen details not found for ID: $screenID")
-                }
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -272,7 +219,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Debugging the complex algorithm required a thorough review of every line of code.",
+                text = "Debugging the complex algorithm requires a thorough review of every line of code.",
                 fontFamily = selectedFontFamily,
                 fontSize = 16.sp,
                 color = CC.textColor(),
@@ -286,7 +233,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
             onClick = {
                 fontPrefs.saveSelectedFont(fontFamilies.entries.find { it.value == selectedFontFamily }?.key)
                 selectedFontFamily?.let { onFontSelected(it) }
-                fontUpdated = !fontUpdated // Trigger recomposition in parent
+                fontUpdated = !fontUpdated
                 Toast.makeText(context, "Font updated", Toast.LENGTH_SHORT).show()
             },
             colors = ButtonDefaults.buttonColors(CC.secondary()),
@@ -301,25 +248,21 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
 }
 
 
-
-
-
-
 class FontPreferences(context: Context) {
-    private val prefs = context.getSharedPreferences("font_prefs", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("font_preference", Context.MODE_PRIVATE)
 
     fun saveSelectedFont(fontName: String?) {
-        prefs.edit().putString("selected_font", fontName).apply()
+        prefs.edit().putString("font_style", fontName).apply()
     }
 
     fun getSelectedFont(): String? {
-        return prefs.getString("selected_font", null) // Default to null (system font)
+        return prefs.getString("font_style", "System") // Default to null (system font)
     }
 
 }
 
 @Composable
-fun Background(context: Context) {
+fun Background() {
     val icons = listOf(
         Icons.Outlined.Home,
         Icons.AutoMirrored.Outlined.Assignment,
@@ -333,7 +276,7 @@ fun Background(context: Context) {
 
     }
     // Calculate the number of repetitions needed to fill the screen
-    val repetitions = 1000 // Adjust this value as needed
+    val repetitions = 1000
     val repeatedIcons = mutableListOf<ImageVector>()
     repeat(repetitions) {
         repeatedIcons.addAll(icons.shuffled())
