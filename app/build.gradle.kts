@@ -58,6 +58,16 @@ dependencies {
     ksp(libs.androidx.room.compiler.v250) {
         exclude(group = "com.intellij", module = "annotations")
     }
+
+    //camera and QR code scanning dependencies
+    implementation(libs.zxing.core)
+    implementation (libs.barcode.scanning)
+    implementation (libs.androidx.camera.core)
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.lifecycle)
+    implementation (libs.androidx.camera.view)
+
+
     implementation(libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
