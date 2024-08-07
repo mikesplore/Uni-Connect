@@ -32,6 +32,7 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
         }
     }
 
+
     fun getCardMessages(conversationId: String): LiveData<List<MessageEntity>> {
         return messagesMap.map { it[conversationId] ?: emptyList() }
     }
