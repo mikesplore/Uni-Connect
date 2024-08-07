@@ -7,13 +7,11 @@ import androidx.room.PrimaryKey
 data class MessageEntity(
     @PrimaryKey var id: String,
     var message: String = "",
-    var senderName: String = "",
     var senderID: String = "",
     var timeStamp: String = "",
     var date: String = "",
     var recipientID: String = "",
-    var profileImageLink: String = ""
 
 ){
-    constructor(): this("", "", "", "", "", "", "", "")
+    constructor(): this("", "", "", "", "", "")
 }
