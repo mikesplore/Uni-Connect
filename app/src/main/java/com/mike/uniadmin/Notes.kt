@@ -39,12 +39,12 @@ package com.mike.uniadmin
 //the modal drawer is blinking then disappearing ✅
 //the profile icon is showing null at start before loading the image ✅
 //the timetable is null initially, which requires you to
-// open the course content for it to load
+// open the course content for it to load✅
 
 //GROUP CHAT SCREEN
 //the users list to have some padding both on top and bottom✅
 //the animated to appear and disappear only from one direction✅
-//fix the date display, there is wrong date title
+//fix the date display, there is wrong date title✅
 
 //USER CHAT LIST
 //the chats are not opening on time when you click on them✅
@@ -53,5 +53,13 @@ package com.mike.uniadmin
 //fix the text fields for new assignments (imepadding()) needed ✅
 
 //COURSE CONTENT SCREEN
-//add scrollable column property to display all the course details content
-//the course name is not displaying properly
+//add scrollable column property to display all the course details content✅
+//the course name is not displaying properly✅
+
+
+//Data encryption
+//the user to user messages is yet to be encrypted, its halfway done
+//the QR code scanning and generation is done
+//only the implementation remaining.
+//before opening a chat, we should check our file if it has the key in shared preferences on the device. after that we should open the chat
+//more tomorrow
