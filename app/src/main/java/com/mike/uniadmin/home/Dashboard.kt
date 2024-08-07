@@ -663,7 +663,7 @@ fun CourseBox(
                     }
                 }
 
-                Text(visits, style = CC.descriptionTextStyle(context))
+                Text(visits, style = CC.descriptionTextStyle(context).copy(color = CC.tertiary()))
                 IconButton(onClick = {
                     onClicked(course)
                     CourseName.name.value = course.courseName
@@ -756,7 +756,7 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
         Column(
             modifier = Modifier
                 .background(CC.extraColor1())
-                .fillMaxSize()
+                .weight(1f)
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -828,7 +828,7 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = announcement.date,
+                    text = CC.getRelativeDate(announcement.date),
                     style = CC.descriptionTextStyle(context)
                         .copy(color = CC.textColor().copy(alpha = 0.7f))
                 )
