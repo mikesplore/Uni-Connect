@@ -4,8 +4,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.groupchat.ChatEntity
-import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,35 +15,41 @@ class MessageRepository(private val messageDao: MessageDao) {
 
     fun fetchMessages(path: String, onResult: (List<MessageEntity>) -> Unit) {
         viewModelScope.launch {
+            // Fetch messages from the local database first
             val cachedChats = messageDao.getMessages(path)
             if (cachedChats.isNotEmpty()) {
                 onResult(cachedChats)
-            } else {
-                    database.child(path).addValueEventListener(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val messages = mutableListOf<MessageEntity>()
-                            for (childSnapshot in snapshot.children) {
-                                val message = childSnapshot.getValue(MessageEntity::class.java)
-                                message?.let { messages.add(it) }
-                            }
-                            com.mike.uniadmin.dataModel.groupchat.viewModelScope.launch {
-                                messageDao.insertMessages(messages)
-                                onResult(messages)
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            // Handle the read error (e.g., log the error)
-                            println("Error reading messages: ${error.message}")
-                        }
-                    })
             }
+
+            // Set up a listener for real-time updates from Firebase
+            database.child(path).addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val messages = mutableListOf<MessageEntity>()
+                    for (childSnapshot in snapshot.children) {
+                        val message = childSnapshot.getValue(MessageEntity::class.java)
+                        message?.let { messages.add(it) }
+                    }
+                    viewModelScope.launch {
+                        // Update local database with the new data from Firebase
+                        messageDao.insertMessages(messages)
+                        // Update the UI with the latest messages from Firebase
+                        onResult(messages)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle the read error (e.g., log the error)
+                    println("Error reading messages: ${error.message}")
+                }
+            })
         }
     }
 
     fun saveMessage(message: MessageEntity, path: String, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
+            // Save the message to the local database first
             messageDao.insertMessages(listOf(message))
+            // Then save the message to Firebase
             database.child(path).push().setValue(message)
                 .addOnCompleteListener {
                     onComplete(true)
@@ -58,13 +62,16 @@ class MessageRepository(private val messageDao: MessageDao) {
 
     fun deleteMessage(messageId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
         viewModelScope.launch {
-        messageDao.deleteMessage(messageId)
-        database.child(messageId).removeValue() // Use the consistent database reference
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener { exception ->
-                onFailure(exception)
-            }
-    }}
+            // Delete the message from the local database
+            messageDao.deleteMessage(messageId)
+            // Then delete the message from Firebase
+            database.child(messageId).removeValue()
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener { exception ->
+                    onFailure(exception)
+                }
+        }
+    }
 }
