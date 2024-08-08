@@ -12,11 +12,14 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     private val _messages = MutableLiveData<List<MessageEntity>>()
     val messages: LiveData<List<MessageEntity>> = _messages
 
+    private val _cardMessages = MutableLiveData<List<MessageEntity>>()
+    val cardMessages: LiveData<List<MessageEntity>> = _cardMessages
+
     private val _isLoading = MutableLiveData<Boolean>(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     private val _messagesMap = MutableLiveData<Map<String, List<MessageEntity>>>()
-    val messagesMap: LiveData<Map<String, List<MessageEntity>>> get() = _messagesMap
+    private val messagesMap: LiveData<Map<String, List<MessageEntity>>> get() = _messagesMap
 
     init {
         _messagesMap.value = emptyMap()
