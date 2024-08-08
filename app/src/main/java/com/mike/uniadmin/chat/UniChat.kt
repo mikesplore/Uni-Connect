@@ -1,12 +1,22 @@
 package com.mike.uniadmin.chat
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,33 +31,33 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -55,12 +65,14 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -69,315 +81,535 @@ import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
 import com.mike.uniadmin.dataModel.users.UserEntity
+import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import java.time.Instant
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
+object TargetUser{
+    var targetUserId: MutableState<String> = mutableStateOf("")
+}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UniChat(navController: NavController, context: Context) {
-
-    val uniAdmin = context.applicationContext as? UniAdmin
-    val messageRepository = remember { uniAdmin?.messageRepository }
+    val messageAdmin = context.applicationContext as UniAdmin
+    val messageRepository = remember { messageAdmin.messageRepository }
     val messageViewModel: MessageViewModel = viewModel(
         factory = MessageViewModelFactory(
-            messageRepository ?: throw IllegalStateException("ChatRepository is null")
+            messageRepository
         )
     )
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
+
+    val userRepository = remember { messageAdmin.userRepository }
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
+            userRepository
         )
     )
 
-    val auth = FirebaseAuth.getInstance()
-    val users by userViewModel.users.observeAsState(initial = emptyList())
-    val messages by messageViewModel.messages.observeAsState(initial = emptyList()) // Assume you have a list of messages
-    val errorMessage by remember { mutableStateOf<String?>(null) }
-    var searchVisible by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
+    var columnExpanded by remember { mutableStateOf(false) }
+    val columnSize by animateDpAsState(
+        targetValue = if (columnExpanded) 200.dp else 70.dp,
+        animationSpec = tween(500), label = ""
+    )
+
+    val currentUser by userViewModel.user.observeAsState()
+    val users by userViewModel.users.observeAsState()
+    val usersLoading by userViewModel.isLoading.observeAsState(false)
     LaunchedEffect(key1 = Unit) {
-        auth.currentUser?.email?.let { email ->
-            userViewModel.findUserByEmail(email) {}
-        }
+       userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email!!){}
     }
 
-    // Map users to their latest message timestamp
-    val userMessages = users.map { user ->
-        user to messages.filter { message ->
-            message.senderID == user.id || message.recipientID == user.id
-        }.maxByOrNull { it.timeStamp } // Safely get the latest message for each user
-    }
-
-// Filter and sort users
-    val filteredUsers = userMessages.filter { (user, _) ->
-        user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
-            searchQuery, ignoreCase = true
-        )
-    }.sortedWith(compareByDescending<Pair<UserEntity, MessageEntity?>> {
-        it.second?.timeStamp ?: -1L // Sort by timestamp, use -1L for users with no messages
-    }.thenBy {
-        it.first.firstName // Secondary sort by first name to ensure stable sorting
-    }).map { it.first } // Extract only the user part
-
-    Scaffold(topBar = {
-        TopAppBar(title = {}, navigationIcon = {
-            IconButton(onClick = { navController.navigate("homeScreen") }) {
-                Icon(
-                    Icons.Default.ArrowBackIosNew, contentDescription = "Back"
-                )
-            }
-        }, actions = {
-            IconButton(onClick = { searchVisible = !searchVisible }) {
-                Icon(
-                    imageVector = Icons.Default.Search, contentDescription = "Search"
-                )
-            }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = CC.primary(), titleContentColor = CC.textColor()
-        )
-        )
-    }, content = {
-        Column(
+    Scaffold(content = {
+        Row(
             modifier = Modifier
-                .padding(it)
                 .fillMaxSize()
+                .background(CC.primary())
+                .padding(it)
         ) {
-            AnimatedVisibility(visible = searchVisible) {
-                TextField(value = searchQuery,
-                    onValueChange = { newValue -> searchQuery = newValue },
-                    placeholder = { Text("Search User") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = CC.primary(),
-                        unfocusedIndicatorColor = CC.textColor(),
-                        focusedIndicatorColor = CC.secondary(),
-                        unfocusedContainerColor = CC.primary(),
-                        focusedTextColor = CC.textColor(),
-                        unfocusedTextColor = CC.textColor(),
-                        focusedLabelColor = CC.secondary(),
-                        unfocusedLabelColor = CC.textColor()
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
+            // Column for users
+            ExpandingColumn(
+                userViewModel = userViewModel,
+                messageViewModel = messageViewModel,
+                modifier = Modifier.widthIn(max = columnSize),
+                context = context,
+                columnSize = columnSize,
+                columnExpanded = columnExpanded,
+                onColumnClick = { columnExpanded = !columnExpanded },
+                currentUser = currentUser,
+                onHomeClick = {navController.navigate("homeScreen")}
+
+            )
+
+            // Column for chats
+            Column(
                 modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .background(CC.extraColor1())
+                    .weight(1f)
+                    .fillMaxHeight()
             ) {
-                Text(
-                    text = "Uni Chat",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontSize = 30.sp, fontWeight = FontWeight.Bold),
-                    color = CC.textColor()
-                )
-            }
-
-
-            when {
-                errorMessage != null -> {
-                    Text(
-                        text = errorMessage!!,
-                        color = Color.Red,
-                        style = CC.descriptionTextStyle(context)
-                    )
-                }
-
-                filteredUsers.isEmpty() -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                Column(modifier = Modifier.fillMaxSize()) {
+                    AnimatedVisibility(
+                        visible = TargetUser.targetUserId.value.isEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut()
                     ) {
-                        Text(
-                            text = "No user found.", style = CC.descriptionTextStyle(context)
+                        Column(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .fillMaxSize()
+                                .padding(16.dp), // Add padding for better spacing
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.logo),
+                                contentDescription = "App Logo" // Add content description
+                            )
+                            Spacer(modifier = Modifier.height(16.dp)) // Add space after logo
+
+                            Text(
+                                text = "Uni Chat 🎓",
+                                style = CC.titleTextStyle(context).copy(fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp)) // Add space after title
+
+                            Text(
+                                text = "Select a user to start chatting! 📱",
+                                style = CC.descriptionTextStyle(context).copy(fontSize = 16.sp)
+                            )
+                            Spacer(modifier = Modifier.height(24.dp)) // Add space before subtitles
+
+                            // User Status Indicators
+                            Text("User Status Indicators", style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            StatusIndicatorRow(color = CC.secondary(), text = "Recently Online", context)
+                            StatusIndicatorRow(color = Color.Green, text = "Currently Online", context)
+                            StatusIndicatorRow(color = Color.Red, text = "Never Been Online ", context)
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            // Chat Feature Information
+                            Text("Chat Features", style = CC.titleTextStyle(context).copy(fontSize = 18.sp), fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text("• Click a user to open the chat. 💬", style = CC.descriptionTextStyle(context))
+                            Text("• Long press a user to close the current chat. 🔒", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center))
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                "Note: To optimize Firebase storage, this chat feature currently supports text messages only. 📄",
+                                style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+                            )
+                            Spacer(modifier = Modifier.height(24.dp)) // Add space after chat features
+
+                            Text(
+                                "• Perhaps you may need to select a random user below to start chatting! 😀🗨️",
+                                style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+                            )
+                            Spacer(modifier = Modifier.height(24.dp)) // Add space after chat features
+
+                            if (usersLoading) {
+                                CircularProgressIndicator(
+                                    color = CC.textColor(),
+                                    strokeWidth = 1.dp,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            } else {
+                                LazyRow(
+                                    modifier = Modifier.height(50.dp),
+                                    horizontalArrangement = Arrangement.spacedBy((-8).dp)
+                                ) {
+                                    items(users ?: emptyList()) { user -> // Handle null or empty list
+                                        Box(
+                                            modifier = Modifier
+                                                .clickable { TargetUser.targetUserId.value = user.id }
+                                                .size(50.dp)
+                                                .border(1.dp, CC.textColor(), CircleShape)
+                                                .clip(CircleShape)
+                                        ) {
+                                            ProfileImage(currentUser = user)
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp)) // Add space after LazyRow
+
+                            Text("Happy Chatting! 🎉", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+
+
+
+
+                    AnimatedVisibility(
+                        visible = TargetUser.targetUserId.value.isNotEmpty(),
+                        enter = slideInHorizontally(
+                            animationSpec = tween(500),
+                            initialOffsetX = { fullWidth -> -fullWidth } // Slide in from left
+                        ),
+                        exit = slideOutHorizontally(
+                            animationSpec = tween(500),
+                            targetOffsetX = { fullWidth -> fullWidth } // Slide out to right
+                        )
+                    ) {
+                        UserChatScreen(
+                            navController = navController,
+                            context = context,
+                            targetUserId = TargetUser.targetUserId.value
                         )
                     }
                 }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxSize()
-                    ) {
-                        items(filteredUsers) { user ->
-                            ProfileCard(
-                                user, navController, context, userViewModel, messageViewModel
-                            )
-                        }
-                    }
-                }
             }
         }
+    })
+}
 
-    }, containerColor = CC.primary()
-    )
+// Helper Composable for Status Indicator Rows
+@Composable
+fun StatusIndicatorRow(color: Color, text: String, context: Context) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .height(30.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(text, style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp))
+    }
 }
 
 
 @Composable
-fun ProfileCard(
-    user: UserEntity,
-    navController: NavController,
+fun ExpandingColumn(
+    modifier: Modifier = Modifier,
     context: Context,
-    viewModel: UserViewModel,
+    currentUser: UserEntity?,
+    columnSize: Dp,
+    columnExpanded: Boolean,
+    onColumnClick: () -> Unit,
+    onHomeClick: () -> Unit, // Add a lambda for home navigation
+    userViewModel: UserViewModel,
     messageViewModel: MessageViewModel
 ) {
-    val currentMe by viewModel.user.observeAsState()
-    val admissionNumber = currentMe?.id
-    val userStates by viewModel.userStates.observeAsState(emptyMap())
-    val userState = userStates[user.id]
+    val userLoading by userViewModel.isLoading.observeAsState(false)
+    val users by userViewModel.users.observeAsState(emptyList())
+    val userStates by userViewModel.userStates.observeAsState(emptyMap())
 
-    val conversationId =
-        "Direct Messages/${admissionNumber?.let { generateConversationId(it, user.id) }}"
-
-    val messages by messageViewModel.getCardMessages(conversationId).observeAsState()
-
-    LaunchedEffect(conversationId) {
-        viewModel.checkAllUserStatuses()
-        messageViewModel.fetchCardMessages(conversationId)
-        Log.d("ProfileCard", "Fetching messages for $conversationId")
+    // Fetch user statuses and users
+    LaunchedEffect(Unit) {
+        userViewModel.checkAllUserStatuses()
+        userViewModel.fetchUsers()
     }
 
-    val latestMessage = messages?.lastOrNull()
-    val messageCount = messages?.size ?: 0
+    // Gradient background brush
+    val brush = Brush.verticalGradient(
+        colors = listOf(CC.primary(), CC.secondary())
+    )
 
-    Card(modifier = Modifier
-        .clickable { navController.navigate("chat/${user.id}") }
-        .padding(start = 10.dp)
-        .fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = CC.primary())) {
-        Row(
-            modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.Top
+    Box(
+        modifier = modifier
+            .background(brush)
+            .width(columnSize)
+            .fillMaxHeight()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Box(modifier = Modifier.size(50.dp)) {
-                if (user.profileImageLink.isNotBlank()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(user.profileImageLink),
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(Color.Gray),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.student),
-                        contentDescription = "Profile Icon",
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center
+            Box(
+                modifier = Modifier
+                    .height(100.dp)
+                    .width(columnSize)
+                    .background(
+                        CC.primary().copy(0.5f)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(CC.secondary())
+                        .border(1.dp, CC.secondary(), CircleShape)
+                        .clickable { onColumnClick() }
                 ) {
-                    val displayName =
-                        if (user.id == currentMe?.id) "${user.firstName} (You)" else "${user.firstName} ${user.lastName}"
-                    Text(
-                        text = displayName,
-                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp),
-                        color = CC.textColor()
-                    )
-                    Column(
-                        modifier = Modifier.fillMaxHeight(),
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.SpaceAround
-                    ) {
-                        val textColor = when {
-                            userState == null -> CC.textColor().copy(alpha = 0.5f)
-                            userState.online == "online" -> Color.Green
-                            else -> Color.Red
-                        }
-
-                        Text(
-                            text = when {
-                                userState == null -> "Never online"
-                                userState.online == "online" -> "Online"
-                                userState.lastDate == CC.getCurrentDate(CC.getTimeStamp()) -> "Last seen today at ${userState.lastTime}"
-                                else -> "Last seen ${userState.lastDate} at ${userState.lastTime}"
-                            },
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                            color = textColor
+                    if (userLoading) {
+                        CircularProgressIndicator(
+                            color = CC.textColor(),
+                            strokeWidth = 1.dp,
+                            modifier = Modifier.size(30.dp)
                         )
-
-                        val time: String =
-                            if (latestMessage?.timeStamp != null) CC.getCurrentTime(latestMessage.timeStamp) else ""
-
-                        Text(
-                            text = time,
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                        )
+                    } else {
+                        ProfileImage(currentUser)
                     }
                 }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val messageText = latestMessage?.let {
-                        val senderName = if (it.senderID == currentMe?.id) "You" else it.senderName
-                        "$senderName: ${it.message}"
-                    } ?: ""
-                    Text(
-                        text = createAnnotatedMessage(createAnnotatedText(messageText).toString()),
-                        style = CC.descriptionTextStyle(context),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Log.d(
-                        "Message Content",
-                        "The last message for $conversationId is ${latestMessage?.message}"
-                    )
-                    if (messageCount >= 1) {
-                        Box(
-                            modifier = Modifier
-                                .widthIn(min = 20.dp)
-                                .clip(CircleShape)
-                                .background(CC.extraColor2(), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
+                    AnimatedVisibility(visible = columnExpanded) {
+                        currentUser?.firstName?.let {
                             Text(
-                                text = messageCount.toString(),
-                                style = CC.descriptionTextStyle(context),
-                                modifier = Modifier.padding(2.dp),
-                                color = CC.textColor()
+                                text = it,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
                 }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
 
-                Spacer(modifier = Modifier.height(4.dp))
+            // Header for users with messages
+            Text(
+                "Continue Chatting",
+                style = CC.descriptionTextStyle(context).copy(
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // LazyColumn to display user messages
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxSize()
+            ) {
+                // Display users with messages
+                items(users) { user ->
+                    val conversationId =
+                        "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
+
+                    // Observe messages for this user
+                    val messages by messageViewModel.getCardMessages(conversationId).observeAsState(emptyList())
+
+                    // Fetch messages for each user when the conversation ID changes
+                    LaunchedEffect(conversationId) {
+                        messageViewModel.fetchCardMessages(conversationId)
+                        Log.d("ExpandingColumn", "Fetching messages for $conversationId")
+                    }
+
+                    // Sort messages by timestamp
+                    val sortedMessages = messages.sortedBy { it.timeStamp }
+
+                    if (sortedMessages.isNotEmpty()) {
+                        val latestMessage = sortedMessages.lastOrNull()
+                        UserMessageCard(
+                            userEntity = user,
+                            latestMessage = latestMessage,
+                            userState = userStates[user.id],
+                            columnExpanded = columnExpanded,
+                            columnSize = columnSize,
+                            onColumnClick = onColumnClick,
+                            context = context,
+                            userViewModel = userViewModel
+                        )
+                    }
+                }
+
+                // Divider and "Start Chat" section
+                item {
+                    HorizontalDivider(
+                        color = CC.textColor().copy(alpha = 0.5f),
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    Text(
+                        text = "Start Chat",
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    )
+                }
+
+                // Display users without messages
+                items(users) { user ->
+                    val conversationId =
+                        "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
+
+                    val messages by messageViewModel.getCardMessages(conversationId).observeAsState(emptyList())
+
+                    if (messages.isEmpty()) {
+                        UserMessageCard(
+                            userEntity = user,
+                            latestMessage = null,
+                            userState = userStates[user.id],
+                            columnExpanded = columnExpanded,
+                            columnSize = columnSize,
+                            onColumnClick = onColumnClick,
+                            context = context,
+                            userViewModel = userViewModel
+                        )
+                    }
+                }
+            }
+        }
+
+        // Fixed TextButton at the bottom for navigating to the home screen
+        TextButton(
+            onClick = onHomeClick,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(CC.primary())
+                .padding(16.dp)
+        ) {
+            if (columnExpanded) {
+            Text(
+                "Go to Home",
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                color = CC.textColor()
+            )}
+            else {
+                Icon(Icons.Default.Home, contentDescription = "Go to Home", tint = CC.textColor(),
+                    modifier = Modifier.size(50.dp))
             }
         }
     }
 }
+
+
+
+
+
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun UserMessageCard(
+    userEntity: UserEntity,
+    latestMessage: MessageEntity?,
+    userState: UserStateEntity?,
+    columnExpanded: Boolean,
+    columnSize: Dp,
+    onColumnClick: () -> Unit,
+    context: Context,
+    userViewModel: UserViewModel
+) {
+    val currentUser by userViewModel.user.observeAsState()
+
+    Row(
+        modifier = Modifier
+            .width(columnSize)
+            .height(80.dp)
+            .padding(8.dp)
+            .background(CC.primary(), shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier
+            .combinedClickable(
+                onLongClick = {
+                    TargetUser.targetUserId.value = ""
+                }
+            ) {
+                TargetUser.targetUserId.value = userEntity.id
+                onColumnClick()
+            }
+            .border(
+                1.dp,
+                CC.secondary(),
+                CircleShape
+            )
+            .clip(CircleShape)
+            .size(if (columnExpanded) 40.dp else 30.dp)) {
+            ProfileImage(currentUser = userEntity)
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        // Use AnimatedVisibility to animate the visibility of the expanded content
+        AnimatedVisibility(visible = columnExpanded) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .size(5.dp)
+            ){
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = if (userEntity.id == currentUser?.id) "You" else userEntity.firstName,
+                    style = CC.descriptionTextStyle(context),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                latestMessage?.message?.let {
+                    Text(
+                        text = createAnnotatedMessage(createAnnotatedText(it).toString()),
+                        style = CC.descriptionTextStyle(context).copy(
+                            color = CC.textColor().copy(0.5f),
+                            fontSize = 12.sp
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                val currentTime = System.currentTimeMillis()
+                val messageTime = latestMessage?.timeStamp?.toLongOrNull() ?: 0L
+
+                val timeDifference = java.time.Duration.between(
+                    Instant.ofEpochMilli(messageTime),
+                    Instant.ofEpochMilli(currentTime)
+                )
+                val timeText = when {
+                    timeDifference.toMinutes() < 60 -> "${timeDifference.toMinutes()} mins ago"
+                    timeDifference.toHours() < 24 -> "${timeDifference.toHours()} hour${if (timeDifference.toHours() > 1) "s" else ""} ago"
+                    else -> CC.getCurrentTime(messageTime.toString()) // Display the actual time if older than a day
+                }
+
+                Text(
+                    text = timeText, style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp)
+                )
+            }
+                val backColor by animateColorAsState(
+                    targetValue = if (userState?.online == "online") Color.Green else if (userState?.online == "offline") CC.secondary() else Color.Red,
+                    animationSpec = tween(durationMillis = 500), label = ""
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(10.dp)
+                        .align(Alignment.TopEnd)
+                        .background(backColor)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+    }
+}
+
+
+
+
+@Composable
+fun ProfileImage(currentUser: UserEntity?) {
+    if (currentUser?.profileImageLink?.isNotBlank() == true) {
+        AsyncImage(
+            model = currentUser.profileImageLink,
+            contentDescription = "Profile Image",
+            modifier = Modifier
+                .clip(CircleShape)
+                .fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Image(
+            painter = painterResource(id = R.drawable.student),
+            contentDescription = "Profile Image",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
 
 // Function to create AnnotatedString
 fun createAnnotatedText(message: String): AnnotatedString {
@@ -413,11 +645,3 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
         ) // Apply color to non-emoji text
     }
 }
-
-
-
-
-
-
-
-
