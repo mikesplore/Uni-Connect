@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,15 +16,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -57,7 +61,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -82,9 +88,6 @@ import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -126,16 +129,15 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     val scrollState = rememberLazyListState()
 
     var myUserState by remember { mutableStateOf("") }
-    if (userState != null) {
-        myUserState = if (userState!!.online == "online") {
-            "Online"
-        } else {
-            "Last seen ${userState!!.lastTime}"
-        }
+
+    myUserState = when{
+        userState == null -> "Never online"
+        userState!!.online == "online" -> "Online"
+        userState!!.lastDate == CC.getCurrentDate(CC.getTimeStamp()) -> "Last seen today at ${userState!!.lastTime}"
+        else -> "Last seen ${userState!!.lastDate} at ${userState!!.lastTime}"
     }
 
     LaunchedEffect(targetUserId) {
-        
         currentUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) {}
         }
@@ -186,7 +188,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     senderID = user?.id.orEmpty(),
                     recipientID = targetUserId,
                     timeStamp = CC.getTimeStamp(),
-                    date = CC.getTimeStamp(),
+                    date = CC.getCurrentDate(CC.getTimeStamp()),
                 )
                 messageViewModel.saveMessage(newMessage, conversationId) { success ->
                     if (!success) {
@@ -298,24 +300,18 @@ fun MessageBubble(
         Box(
             modifier = Modifier
                 .background(backgroundColor, bubbleShape)
+                .widthIn(max = with(LocalDensity.current) { (constraints.maxWidth * 0.75f).toDp() })
                 .padding(8.dp)
                 .align(alignment)
         ) {
             Column {
                 Text(
-                    text = message.message, style = CC.descriptionTextStyle(context)
+                    text = message.message, style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
                 )
-                // Convert the timestamp to a formatted time string
-                val formattedTime =
-                    Date(message.timeStamp).let {
-                        SimpleDateFormat("hh:mm a", Locale.getDefault())
-                            .format(it)
-                    }
-
                 Text(
-                    text = formattedTime,
+                    text = CC.getCurrentTime(message.timeStamp),
                     style = CC.descriptionTextStyle(context),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .align(Alignment.End)
@@ -394,8 +390,8 @@ fun TopAppBarComponent(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(name, style = CC.titleTextStyle(context))
-                Text(userState, style = CC.descriptionTextStyle(context))
+                Text(name, style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
+                Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 8.sp))
             }
         }
     },
@@ -423,15 +419,6 @@ fun TopAppBarComponent(
                 )
             }
         },
-        navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "",
-                    tint = CC.textColor()
-                )
-            }
-        },
         modifier = Modifier.height(70.dp),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
     )
@@ -445,43 +432,58 @@ fun ChatInput(
     sendMessage: (String) -> Unit,
     context: Context
 ) {
-
     var input by remember { mutableStateOf(TextFieldValue("")) }
-    val textEmpty by remember {
-        derivedStateOf { input.text.isEmpty() }
-    }
 
     Row(
         modifier = modifier
-            .padding(horizontal = 5.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.Bottom
+            .fillMaxWidth()
+            .padding(8.dp), // Consistent padding
+        verticalAlignment = Alignment.CenterVertically // Align items to center
     ) {
-
-        ChatTextField(
-            modifier = modifier.weight(1f),
-            context,
-            input = input,
-            onValueChange = {
-                input = it
+        // Text Field
+        BasicTextField(
+            value = input,
+            onValueChange = { input = it },
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp) // Add padding to the right
+                .background(CC.secondary(), RoundedCornerShape(24.dp)) // Use surface color
+                .heightIn(min = 40.dp), // Minimum height
+            textStyle = CC.descriptionTextStyle(context),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier.padding(16.dp), // Increased padding
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    if (input.text.isEmpty()) {
+                        Text(
+                            text = "Message",
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        )
+                    }
+                    innerTextField()
+                }
             },
+            cursorBrush = SolidColor(CC.textColor())
         )
 
-        Spacer(modifier = Modifier.width(6.dp))
-
-        FloatingActionButton(modifier = Modifier.size(48.dp),
-            containerColor = CC.extraColor1(),
+        // Send Button
+        IconButton(
             onClick = {
-                if (!textEmpty) {
+                if (input.text.isNotBlank()) { // Check for non-blank messages
                     onMessageChange(input.text)
                     sendMessage(input.text)
                     input = TextFieldValue("")
                 }
-            }) {
-            androidx.compose.material.Icon(
-                tint = CC.textColor(),
+            },
+            modifier = Modifier
+                .clip(CircleShape) // Circular button
+                .background(CC.secondary()) // Button background color
+        ) {
+            Icon(
                 imageVector = Icons.AutoMirrored.Filled.Send,
-                contentDescription = null
+                contentDescription = "Send",
+                tint = CC.extraColor2() // Icon color on secondary background
             )
         }
     }
@@ -494,30 +496,38 @@ fun ChatTextField(
     input: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit
 ) {
-
-    OutlinedTextField(
+    BasicTextField(
         value = input,
-        textStyle = CC.descriptionTextStyle(context),
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
-            .height(56.dp),
-        placeholder = { Text(text = "Message", style = CC.descriptionTextStyle(context)) },
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = CC.primary(),
-            unfocusedIndicatorColor = CC.textColor(),
-            focusedIndicatorColor = CC.secondary(),
-            focusedTextColor = CC.textColor(),
-            unfocusedTextColor = CC.textColor(),
-            unfocusedContainerColor = CC.primary(),
-
-            ),
-        shape = RoundedCornerShape(24.dp),
-        singleLine = true
+            .heightIn(min = 40.dp, max = 200.dp)
+            .background(CC.primary(), RoundedCornerShape(24.dp)), // Add background here
+        textStyle = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = CC.textColor(),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .padding(8.dp), // Add padding within the box
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (input.text.isEmpty()) {
+                    Text(
+                        text = "Message",
+                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                    )
+                }
+                innerTextField()  // Render the actual text field
+            }
+        },
+        cursorBrush = SolidColor(CC.textColor()) // Set cursor color
     )
 }
-
 
 @Composable
 fun RowMessage(context: Context) {
@@ -534,9 +544,8 @@ fun RowMessage(context: Context) {
             Text(
                 text = "Chats are end-to-end encrypted",
                 modifier = Modifier.padding(5.dp),
-                style = CC.descriptionTextStyle(context),
-                textAlign = TextAlign.Center,
-                color = CC.textColor()
+                style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
+
             )
         }
     }
@@ -544,18 +553,6 @@ fun RowMessage(context: Context) {
 
 @Composable
 fun RowDate(date: String, context: Context) {
-    fun formatDate(dateString: String): String {
-        val today = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
-        val yesterday = SimpleDateFormat(
-            "dd-MM-yyyy", Locale.getDefault()
-        ).format(Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)) // Yesterday's date
-
-        return when (dateString) {
-            today -> "Today"
-            yesterday -> "Yesterday"
-            else -> dateString
-        }
-    }
     Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
     ) {
@@ -567,7 +564,7 @@ fun RowDate(date: String, context: Context) {
                 .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = formatDate(date),
+                text = CC.getRelativeDate(date),
                 modifier = Modifier.padding(5.dp),
                 style = CC.descriptionTextStyle(context),
                 fontSize = 13.sp,
