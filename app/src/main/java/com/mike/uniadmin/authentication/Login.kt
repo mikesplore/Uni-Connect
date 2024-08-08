@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -158,7 +159,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     GoogleAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
-                        handleAuthSuccess(navController, userViewModel)
+                        handleAuthSuccess(navController, userViewModel, notificationViewModel)
                     }, onSignInFailure = { failure ->
                         Toast.makeText(context, "Sign-in failed: $failure", Toast.LENGTH_SHORT)
                             .show()
@@ -166,7 +167,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     })
 
                     GitAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
-                        handleAuthSuccess(navController, userViewModel)
+                        handleAuthSuccess(navController, userViewModel, notificationViewModel)
                     }, onSignInFailure = { failure ->
                         Toast.makeText(context, "Sign-in failed: $failure", Toast.LENGTH_SHORT)
                             .show()
@@ -328,14 +329,29 @@ fun LoginScreen(navController: NavController, context: Context) {
 }
 
 
-fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel) {
-    userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {
-        if (it != null) {
+fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel, notificationViewModel: NotificationViewModel) {
+    userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") { user ->
+        if (user != null) {
             userViewModel.setSignedInUser(
                 SignedInUser(
                     id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
                 )
             )
+            MyDatabase.generateNotificationID { id ->
+                notificationViewModel.writeNotification(
+                    notificationEntity = NotificationEntity(
+                        name = user.firstName,
+                        userId = user.id,
+                        id = id,
+                        title = "${user.firstName} ${user.lastName} has Joined Uni Admin!",
+                        description = "Start a conversation by sending  a 👋",
+                        date = CC.getCurrentDate(CC.getTimeStamp()),
+                        time = CC.getCurrentTime(CC.getTimeStamp())
+                    )
+                )
+                notificationViewModel.fetchNotifications()
+            }
+
             navController.navigate("homeScreen") {
                 popUpTo("login") { inclusive = true }
             }

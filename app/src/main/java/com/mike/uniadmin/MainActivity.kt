@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     private fun fetchUserDataByEmail(email: String, onUserFetched: (UserEntity?) -> Unit) {
-        MyDatabase.database.child("Users").orderByChild("email").equalTo(email)
+        MyDatabase.database.child("Admins").orderByChild("email").equalTo(email)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val userSnapshot = snapshot.children.firstOrNull()

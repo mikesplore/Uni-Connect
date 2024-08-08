@@ -30,7 +30,7 @@ class UserRepository
     }
 
 
-    fun getSignedInUser(onSuccess: (SignedInUser?) -> Unit){
+    fun getSignedInUser(onSuccess: (SignedInUser?) -> Unit) {
         viewModelScope.launch {
             val signedInUser = userDao.getSignedInUser()
             onSuccess(signedInUser)
@@ -38,28 +38,26 @@ class UserRepository
     }
 
 
-    fun setSignedInUser(signedInUser: SignedInUser){
+    fun setSignedInUser(signedInUser: SignedInUser) {
         viewModelScope.launch {
             userDao.insertSignedInUser(signedInUser)
         }
     }
 
-    fun deleteSignedInUser(){
+    fun deleteSignedInUser() {
         viewModelScope.launch {
             userDao.deleteSignedInUser()
         }
     }
 
-    fun deleteAllTables(){
+    fun deleteAllTables() {
         viewModelScope.launch {
             databaseDao.deleteAllTables()
         }
     }
 
     private fun <T> startDatabaseListener(
-        path: String,
-        convert: (DataSnapshot) -> T?,
-        onResult: suspend (List<T>) -> Unit
+        path: String, convert: (DataSnapshot) -> T?, onResult: suspend (List<T>) -> Unit
     ) {
         database.child(path).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -84,8 +82,7 @@ class UserRepository
             convert = { it.getValue(UserEntity::class.java) },
             onResult = { users ->
                 userDao.insertUsers(users)
-            }
-        )
+            })
     }
 
     private fun startUserStateListener() {
@@ -93,8 +90,7 @@ class UserRepository
             convert = { it.getValue(UserStateEntity::class.java) },
             onResult = { userStates ->
                 userStateDao.insertUserStates(userStates)
-            }
-        )
+            })
     }
 
     fun fetchUsers(onResult: (List<UserEntity>) -> Unit) {
@@ -118,14 +114,31 @@ class UserRepository
 
     private suspend fun fetchUsersFromRemoteDatabase(): List<UserEntity> {
         return suspendCoroutine { continuation ->
+            val allUsers = mutableListOf<UserEntity>()
+
+            // Fetch users from "Users" node
             database.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val users = mutableListOf<UserEntity>()
                     for (childSnapshot in snapshot.children) {
                         val user = childSnapshot.getValue(UserEntity::class.java)
-                        user?.let { users.add(it) }
+                        user?.let { allUsers.add(it) }
                     }
-                    continuation.resume(users)
+
+                    // Fetch users from "Admins" node after fetching from "Users"
+                    database.child("Admins")
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                for (childSnapshot in snapshot.children) {
+                                    val admin = childSnapshot.getValue(UserEntity::class.java)
+                                    admin?.let { allUsers.add(it) }
+                                }
+                                continuation.resume(allUsers) // Resume with combined list
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                continuation.resumeWithException(Exception("Error reading admins: ${error.message}"))
+                            }
+                        })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -139,7 +152,7 @@ class UserRepository
     fun saveUser(user: UserEntity, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             userDao.insertUser(user)
-            database.child("Users").child(user.id).setValue(user).addOnCompleteListener { task ->
+            database.child("Admins").child(user.id).setValue(user).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
         }
@@ -151,7 +164,7 @@ class UserRepository
             if (databaseUser != null) {
                 callback(databaseUser)
             } else {
-                database.child("Users").orderByChild("email").equalTo(email)
+                database.child("Admins").orderByChild("email").equalTo(email)
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val userSnapshot =
@@ -174,19 +187,36 @@ class UserRepository
             if (databaseUser != null) {
                 callback(databaseUser)
             } else {
-                database.child("Users").orderByChild("id").equalTo(admissionNumber)
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val userSnapshot =
-                                snapshot.children.firstOrNull() // Get the first matching user
-                            val user = userSnapshot?.getValue(UserEntity::class.java)
-                            callback(user) // Return the User object or null if not found
-                        }
+                // Check Users node
+                val usersQuery = database.child("Users").orderByChild("id").equalTo(admissionNumber)
+                usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val userSnapshot = snapshot.children.firstOrNull()
+                        val user = userSnapshot?.getValue(UserEntity::class.java)
+                        if (user != null) {
+                            callback(user) // Found in Users node
+                        } else {
+                            // Check Admins node if not found in Users
+                            val adminsQuery =
+                                database.child("Admins").orderByChild("id").equalTo(admissionNumber)
+                            adminsQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    val adminSnapshot = snapshot.children.firstOrNull()
+                                    val admin = adminSnapshot?.getValue(UserEntity::class.java)
+                                    callback(admin) // Return admin or null
+                                }
 
-                        override fun onCancelled(error: DatabaseError) {
-                            callback(null) // Handle or log the error as needed
+                                override fun onCancelled(error: DatabaseError) {
+                                    callback(null) // Handle or log the error
+                                }
+                            })
                         }
-                    })
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        callback(null) // Handle or log the error
+                    }
+                })
             }
         }
     }
@@ -196,11 +226,11 @@ class UserRepository
         viewModelScope.launch {
             userDao.deleteUser(userId)
             database.child("Users").child(userId).removeValue().addOnSuccessListener {
-                    onSuccess(true)
-                }.addOnFailureListener { exception ->
-                    onSuccess(false)
-                    Log.e("Error", "$exception")
-                }
+                onSuccess(true)
+            }.addOnFailureListener { exception ->
+                onSuccess(false)
+                Log.e("Error", "$exception")
+            }
         }
     }
 
@@ -293,7 +323,6 @@ class UserRepository
                 }
             })
     }
-
 
 
 }

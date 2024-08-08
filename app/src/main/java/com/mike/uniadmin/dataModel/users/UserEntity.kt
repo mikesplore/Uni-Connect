@@ -13,7 +13,7 @@ data class SignedInUser(
 }
 
 
-@Entity(tableName = "users")
+@Entity(tableName = "admins")
 data class UserEntity(
     @PrimaryKey val id: String = "",
     val firstName: String = "",
