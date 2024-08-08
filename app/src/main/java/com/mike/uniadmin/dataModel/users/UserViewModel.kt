@@ -46,6 +46,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         repository.getSignedInUser { fetchedUser ->
             _signedInUser.value = fetchedUser
             _isLoading.value = false // Set loading to false after fetching
+            Log.d("UserViewModel", "Fetched user: $fetchedUser")
         }
     }
 
