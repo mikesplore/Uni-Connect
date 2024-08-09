@@ -241,8 +241,8 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                                     message = "Hi, ${notification.name} 👋",
                                     senderName = currentUser.firstName,
                                     senderID = currentUser.id,
-                                    time = CC.getCurrentTime(CC.getTimeStamp()),
-                                    date = CC.getCurrentDate(CC.getTimeStamp()),
+                                    time = CC.getTimeStamp(),
+                                    date = CC.getTimeStamp(),
                                     profileImageLink = currentUser.profileImageLink
                                 ),
                                 onSuccess = { success ->
@@ -287,7 +287,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
         Spacer(modifier = Modifier.height(5.dp))
         Text(notification.description, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
         Spacer(modifier = Modifier.height(5.dp))
-        Text(notification.date, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
+        Text(CC.getCurrentDate(notification.date), style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
 
     }
 
