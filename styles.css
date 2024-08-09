@@ -1,43 +1,78 @@
 /* General Styles */
+
+:root {
+    --dark-navy: #15202B;
+    --deep-blue: #1B4F72;
+    --bright-blue: #117A65;
+    --light-gray: #E1E8ED;
+    --turquoise: #1C2833;
+    --black: #2980B9;
+    --main-bg-color: #FF15202B; /* Assuming this is a custom color */
+    --primary-color: #007bff; /* Assuming this is a custom color */
+}
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color:var(--dark-navy);
     color: #333;
     margin: 0;
     padding: 0;
 }
 
 header {
-    background-color: #343a40;
-    color: #fff;
+    background-color: var(--light-gray);
+    color: var(--light-gray);
     border-bottom: 3px solid #007bff;
 }
 
+.header-bg {
+    background-color:var(--deep-blue); /* Change this to your desired background color */
+    width: 100%;
+}
+
+.header-image {
+    width: 50px; /* Adjust the size as needed */
+    height: auto;
+}
+
 .main-title {
-    font-size: 2.5rem;
+    font-size: 2.5rem; /* Adjust the font size as needed */
     font-weight: bold;
+    color: var(--light-gray); /* Change this to your desired text color */
 }
 
 .nav-link {
     font-size: 1.1rem;
 }
 
+.sidebar {
+    background-color: #343a40; /* Change this to your desired sidebar background color */
+    color: #fff;
+}
+
+.sidebar .nav-link {
+    color: #fff;
+}
+
+.sidebar .nav-link.active {
+    background-color: #495057; /* Change this to your desired active link background color */
+}
+
 /* Sidebar */
 .sidebar {
     position: fixed;
     top: 0;
-    right: -250px; /* Start hidden off-screen */
-    width: 250px;
+    right: -200px; /* Initially hidden */
+    width: 200px;
     height: 100%;
-    background-color: #343a40;
-    color: #fff;
+    background: #343a40;
+    color: white;
     transition: right 0.3s ease;
     z-index: 1000;
-    overflow-y: auto;
 }
 
 .sidebar.active {
-    right: 0; /* Slide in */
+    right: 0; /* Show sidebar */
 }
 
 .sidebar-content {
@@ -56,10 +91,30 @@ header {
     color: #007bff;
 }
 
+/* Loading Indicator Styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    display: none; /* Hidden by default */
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
 /* Main Content */
 main {
     padding: 20px;
-    background-color: #fff;
+    background-color: var(--main-bg-color);
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-right: 250px; /* Adjusted for sidebar */
@@ -70,6 +125,6 @@ section {
 }
 
 section h2 {
-    color: #007bff;
+    color: var(--primary-color);
     margin-bottom: 15px;
 }
