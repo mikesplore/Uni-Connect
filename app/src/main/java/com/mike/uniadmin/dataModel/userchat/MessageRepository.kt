@@ -49,8 +49,9 @@ class MessageRepository(private val messageDao: MessageDao) {
         viewModelScope.launch {
             // Save the message to the local database first
             messageDao.insertMessages(listOf(message))
-            // Then save the message to Firebase
-            database.child(path).push().setValue(message)
+
+            // Then save the message to Firebase using the message ID
+            database.child(path).child(message.id).setValue(message)
                 .addOnCompleteListener {
                     onComplete(true)
                 }
