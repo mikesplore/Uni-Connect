@@ -3,9 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>UNI ADMIN Documentation</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Hello, World!</h1>
+<div class="container">
+    <header>
+        <h1>UNI ADMIN</h1>
+        <nav>
+            <ul>
+                <li><a href="#authentication">Authentication</a></li>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#google-authentication">Google Authentication</a></li>
+                    <li><a href="#github-authentication">GitHub Authentication</a></li>
+                    <li><a href="#authentication-screen">Authentication Screen</a></li>
+                    <li><a href="#moreDetails-composable">MoreDetails Composable</a></li>
+                    <li><a href="#password-reset">Password Reset</a></li>
+                </ul>
+                <li><a href="#visuals">Visuals</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="authentication">
+        <h2>Authentication</h2>
+
+        <article id="overview">
+            <h3>Overview</h3>
+            <p>This section provides a detailed overview of the components and functionality related to user authentication within Uni Admin...</p>
+        </article>
+
+        <article id="google-authentication">
+            <h3>Google Authentication</h3>
+            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt">GoogleAuth.kt</a></p>
+            <p><strong>Functionality</strong></p>
+            <p>The <code>GoogleAuth</code> composable function handles Google authentication using Firebase...</p>
+        </article>
+
+        <article id="github-authentication">
+            <h3>GitHub Authentication</h3>
+            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/GithubAuth.kt">GithubAuth.kt</a></p>
+            <p><strong>Functionality</strong></p>
+            <p>The <code>GitAuth</code> composable function handles GitHub authentication using Firebase...</p>
+        </article>
+
+        <article id="authentication-screen">
+            <h3>Authentication Screen</h3>
+            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/Login.kt">Login.kt</a></p>
+            <p>This section explains the initialization of Firebase Authentication instances...</p>
+        </article>
+
+        <article id="moreDetails-composable">
+            <h3>MoreDetails Composable</h3>
+            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/ExtraDetails.kt">MoreDetails.kt</a></p>
+            <p>The <code>MoreDetails</code> composable function displays a form for users to enter additional details...</p>
+        </article>
+
+        <article id="password-reset">
+            <h3>Password Reset</h3>
+            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/PasswordReset.kt">PasswordReset.kt</a></p>
+            <p>The <code>PasswordReset</code> composable function provides a screen for users to reset their forgotten passwords...</p>
+        </article>
+    </section>
+
+    <section id="visuals">
+        <h2>Visuals</h2>
+        <div class="visuals-container">
+            <div>
+                <h3>Sign In Screen</h3>
+                <img src="Images/SignIn.png" alt="Sign In Screen">
+            </div>
+            <div>
+                <h3>Sign Up Screen</h3>
+                <img src="Images/SignUp.png" alt="Sign Up Screen">
+            </div>
+            <div>
+                <h3>Password Reset Screen</h3>
+                <img src="Images/passwordReset.png" alt="Password Reset Screen">
+            </div>
+        </div>
+    </section>
+</div>
 </body>
 </html>
