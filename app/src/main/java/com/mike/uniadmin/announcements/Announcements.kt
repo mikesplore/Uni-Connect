@@ -3,8 +3,12 @@ package com.mike.uniadmin.announcements
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,13 +29,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -49,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -242,6 +251,7 @@ fun AddAnnouncement(
     var description by remember { mutableStateOf("") }
     val signedInUser by userViewModel.signedInUser.observeAsState()
     val user by userViewModel.user.observeAsState()
+    var loading by remember { mutableStateOf(false) }
 
     //these will be filled automatically (if the data exists that is)
     val profileLink = user?.profileImageLink ?: ""
@@ -343,12 +353,13 @@ fun AddAnnouncement(
             // save the announcement
             Button(
                 onClick = {
+                    loading = true
                     MyDatabase.generateAnnouncementID { id ->
                         val newAnnouncement = AnnouncementEntity(
                             id = id,
                             title = title,
                             description = description,
-                            date = CC.getCurrentDate(CC.getTimeStamp()),
+                            date = CC.getTimeStamp(),
                             authorName = author,
                             authorID = senderId,
                             imageLink = profileLink
@@ -360,8 +371,11 @@ fun AddAnnouncement(
                                         showNotification(context, title, description)
                                         notificationViewModel.writeNotification(
                                             notificationEntity = NotificationEntity(
+                                                time = CC.getTimeStamp(),
+                                                date = CC.getTimeStamp(),
                                                 name = author,
                                                 userId = senderId,
+                                                description = description,
                                                 id = id,
                                                 category = "Announcements",
                                                 title = title,
@@ -370,21 +384,29 @@ fun AddAnnouncement(
                                         notificationViewModel.fetchNotifications()
                                         title = ""
                                         description = ""
+                                        loading = false
                                         onComplete(true)
 
                                     }
                                 })
                         } else {
+                            loading = false
                             Toast.makeText(
+
                                 context, "Please enter title and description", Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
-                }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.extraColor2()
+                }, modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CC.extraColor2(),
                 )
             ) {
+                if (loading) {
+                    CircularProgressIndicator(color = CC.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(20.dp))
+                }else{
                 Text("Post", style = CC.descriptionTextStyle(context))
+                }
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -408,7 +430,7 @@ fun AnnouncementTextField(
         colors = TextFieldDefaults.colors(
             focusedTextColor = CC.textColor(),
             unfocusedTextColor = CC.textColor(),
-            focusedContainerColor = CC.extraColor2(),
+            focusedContainerColor = CC.primary(),
             unfocusedContainerColor = CC.primary(),
             focusedIndicatorColor = CC.extraColor2(),
             unfocusedIndicatorColor = CC.textColor(),
@@ -520,7 +542,7 @@ fun EditAnnouncement(
                     announcementViewModel.saveAnnouncement(announcement.copy(
                         title = title,
                         description = description,
-                        date = CC.getCurrentDate(CC.getTimeStamp())
+                        date = CC.getTimeStamp()
                     ), onComplete = { success ->
                         if (success) {
                             onComplete() // Call the onComplete callback if save is successful
@@ -550,139 +572,161 @@ fun AnnouncementCard(
 ) {
     // State to track whether the card is expanded or not
     var expanded by remember { mutableStateOf(false) }
-    val text = if (expanded) "Close" else "Open"
+    val iconRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "")
+    val cardElevation by animateDpAsState(targetValue = if (expanded) 8.dp else 2.dp, label = "")
+    val descriptionAlpha by animateFloatAsState(targetValue = if (expanded) 1f else 0.8f,
+        label = ""
+    )
 
-    Column(
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(cardElevation),
+        shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(CC.secondary(), shape = RoundedCornerShape(8.dp))
-            .padding(16.dp)
-            .imePadding()
+            .padding(vertical = 8.dp)
+            .clickable { expanded = !expanded }
+            .animateContentSize() // Animate size changes
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .background(CC.secondary(), shape = RoundedCornerShape(8.dp))
+                .padding(16.dp)
+                .imePadding()
         ) {
-            // Profile image or author's initial
-            Box(
-                modifier = Modifier
-                    .border(1.dp, CC.textColor(), CircleShape)
-                    .clip(CircleShape)
-                    .background(CC.secondary(), CircleShape)
-                    .size(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (announcement.imageLink.isNotEmpty()) {
-                    // Load image asynchronously if the link is available
-                    AsyncImage(
-                        model = announcement.imageLink,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    // Display author's initial if no image is available
-                    Text(
-                        "${announcement.authorName[0]}",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Announcement title
-            Text(
-                text = announcement.title,
-                style = CC.descriptionTextStyle(context),
-                fontWeight = FontWeight.Bold,
-                color = CC.textColor(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            // Button to toggle expansion of the card
-            Button(
-                onClick = { expanded = !expanded },
-                colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
-            ) {
-                Text(text, style = CC.descriptionTextStyle(context))
-            }
-        }
-
-        if (expanded) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Announcement description
-            Text(
-                text = announcement.description,
-                style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
-                color = CC.textColor().copy(alpha = 0.8f),
-                maxLines = if (expanded) Int.MAX_VALUE else 3,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Author name and date
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = announcement.authorName,
-                    style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                    color = CC.textColor().copy(alpha = 0.6f),
-                )
-
-                Text(
-                    text = CC.getRelativeDate(announcement.date),
-                    style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                    color = CC.textColor().copy(alpha = 0.6f),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Edit and Delete buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
-            ) {
-                Button(
-                    onClick = { onEdit() },
-                    colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
+                // Profile image or author's initial
+                Box(
+                    modifier = Modifier
+                        .border(1.dp, CC.textColor(), CircleShape)
+                        .clip(CircleShape)
+                        .background(CC.secondary(), CircleShape)
+                        .size(40.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Edit", style = CC.descriptionTextStyle(context))
+                    if (announcement.imageLink.isNotEmpty()) {
+                        // Load image asynchronously if the link is available
+                        AsyncImage(
+                            model = announcement.imageLink,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        // Display author's initial if no image is available
+                        Text(
+                            "${announcement.authorName[0]}",
+                            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        )
+                    }
                 }
+
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = { onDelete(announcement.id) },
-                    colors = ButtonDefaults.buttonColors(containerColor = CC.tertiary())
+
+                // Announcement title
+                Text(
+                    text = announcement.title,
+                    style = CC.descriptionTextStyle(context),
+                    fontWeight = FontWeight.Bold,
+                    color = CC.textColor(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Button to toggle expansion of the card
+                IconButton(
+                    onClick = { expanded = !expanded },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = CC.primary().copy(0.3f),
+                        contentColor = CC.textColor()
+                    )
                 ) {
-                    Text("Delete", style = CC.descriptionTextStyle(context))
+                    Icon(
+                        Icons.Default.ArrowDownward,
+                        "Expand",
+                        modifier = Modifier.rotate(iconRotation)
+                    )
                 }
             }
-        }
 
-        // Inline editing form when the card is in editing mode
-        if (isEditing) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                EditAnnouncement(
-                    announcement = announcement, context = context, onComplete = {
-                        onEditComplete()
-                    }, announcementViewModel = announcementViewModel
-                )
+            AnimatedVisibility(visible = expanded) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Announcement description
+                    Text(
+                        text = announcement.description,
+                        style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
+                        color = CC.textColor().copy(alpha = descriptionAlpha),
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Author name and date
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = announcement.authorName,
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                            color = CC.textColor().copy(alpha = 0.6f),
+                        )
+
+                        Text(
+                            text = CC.getRelativeDate(CC.getCurrentDate(announcement.date)),
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                            color = CC.textColor().copy(alpha = 0.6f),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Edit and Delete buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = { onEdit() },
+                            colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
+                        ) {
+                            Text("Edit", style = CC.descriptionTextStyle(context))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { onDelete(announcement.id) },
+                            colors = ButtonDefaults.buttonColors(containerColor = CC.tertiary())
+                        ) {
+                            Text("Delete", style = CC.descriptionTextStyle(context))
+                        }
+                    }
+                }
+            }
+
+            // Inline editing form when the card is in editing mode
+            if (isEditing) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    EditAnnouncement(
+                        announcement = announcement, context = context, onComplete = {
+                            onEditComplete()
+                        }, announcementViewModel = announcementViewModel
+                    )
+                }
             }
         }
     }
 }
+
 
 
 @Preview
