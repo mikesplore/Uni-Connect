@@ -159,7 +159,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     GoogleAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
-                        handleAuthSuccess(navController, userViewModel, notificationViewModel)
+                        handleAuthSuccess(navController, userViewModel)
                     }, onSignInFailure = { failure ->
                         Toast.makeText(context, "Sign-in failed: $failure", Toast.LENGTH_SHORT)
                             .show()
@@ -167,7 +167,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     })
 
                     GitAuth(firebaseAuth = firebaseAuth, onSignInSuccess = {
-                        handleAuthSuccess(navController, userViewModel, notificationViewModel)
+                        handleAuthSuccess(navController, userViewModel)
                     }, onSignInFailure = { failure ->
                         Toast.makeText(context, "Sign-in failed: $failure", Toast.LENGTH_SHORT)
                             .show()
@@ -329,7 +329,7 @@ fun LoginScreen(navController: NavController, context: Context) {
 }
 
 
-fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel, notificationViewModel: NotificationViewModel) {
+fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel) {
     userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") { user ->
         if (user != null) {
             userViewModel.setSignedInUser(
@@ -337,21 +337,6 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                     id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
                 )
             )
-            MyDatabase.generateNotificationID { id ->
-                notificationViewModel.writeNotification(
-                    notificationEntity = NotificationEntity(
-                        name = user.firstName,
-                        userId = user.id,
-                        id = id,
-                        title = "${user.firstName} ${user.lastName} has Joined Uni Admin!",
-                        description = "Start a conversation by sending  a 👋",
-                        date = CC.getCurrentDate(CC.getTimeStamp()),
-                        time = CC.getCurrentTime(CC.getTimeStamp())
-                    )
-                )
-                notificationViewModel.fetchNotifications()
-            }
-
             navController.navigate("homeScreen") {
                 popUpTo("login") { inclusive = true }
             }
@@ -399,13 +384,14 @@ fun handleSignUp(
                     MyDatabase.generateNotificationID { id ->
                         notificationViewModel.writeNotification(
                             notificationEntity = NotificationEntity(
+                                category = "New User",
                                 name = firstName,
                                 userId = userID,
                                 id = id,
                                 title = "$firstName $lastName has Joined Uni Admin!",
                                 description = "Start a conversation by sending  a 👋",
-                                date = CC.getCurrentDate(CC.getTimeStamp()),
-                                time = CC.getCurrentTime(CC.getTimeStamp())
+                                date = CC.getTimeStamp(),
+                                time = CC.getTimeStamp()
                             )
                         )
                         notificationViewModel.fetchNotifications()
