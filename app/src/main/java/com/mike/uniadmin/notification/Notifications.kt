@@ -215,7 +215,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = notification.time,
+                text = "${CC.getCurrentDate(notification.date)} at ${CC.getCurrentTime(notification.time)}",
                 style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
