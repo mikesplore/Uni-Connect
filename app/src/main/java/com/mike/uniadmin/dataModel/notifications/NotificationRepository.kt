@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dataModel.notifications
 
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -13,7 +14,8 @@ val viewModelScope = CoroutineScope(Dispatchers.Main)
 class NotificationRepository(private val notificationDao: NotificationDao) {
 
     private val database = FirebaseDatabase.getInstance().reference.child("Notifications")
-    private val listeners = mutableMapOf<String, ValueEventListener>() // Store listeners
+    private val valueListeners = mutableMapOf<String, ValueEventListener>()
+    private val childListeners = mutableMapOf<String, ChildEventListener>()
 
     init {
         // Add a listener to keep the local database updated
@@ -26,6 +28,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
             if (cachedData.isNotEmpty()) {
                 onComplete(cachedData)
             } else {
+                // Use ValueEventListener for initial data load
                 val listener = object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val notifications = mutableListOf<NotificationEntity>()
@@ -35,9 +38,9 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
                         }
                         viewModelScope.launch {
                             notificationDao.insertNotifications(notifications)
+                            onComplete(notifications)
                         }
-                        onComplete(notifications)
-                        stopListening("getNotifications") // Stop the listener after initial load
+                        stopListening("initialLoad") // Stop the listener after initial load
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -45,30 +48,48 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
                     }
                 }
                 database.addListenerForSingleValueEvent(listener)
-                listeners["getNotifications"] = listener // Store listener with a key
+                valueListeners["initialLoad"] = listener // Store listener with a key
             }
         }
     }
 
     private fun addRealtimeListener() {
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val notifications = mutableListOf<NotificationEntity>()
-                for (childSnapshot in snapshot.children) {
-                    val notification = childSnapshot.getValue(NotificationEntity::class.java)
-                    notification?.let { notifications.add(it) }
+        val childEventListener = object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val notification = snapshot.getValue(NotificationEntity::class.java)
+                notification?.let {
+                    viewModelScope.launch {
+                        notificationDao.insertNotification(it)
+                    }
                 }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val notification = snapshot.getValue(NotificationEntity::class.java)
+                notification?.let {
+                    viewModelScope.launch {
+                        notificationDao.insertNotification(it)
+                    }
+                }
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val notificationId = snapshot.key
                 viewModelScope.launch {
-                    notificationDao.insertNotifications(notifications)
+                    notificationId?.let { notificationDao.deleteNotification(it) }
                 }
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                // Handle moves if needed
             }
 
             override fun onCancelled(error: DatabaseError) {
                 // Handle error
             }
         }
-        database.addValueEventListener(listener)
-        listeners["realtimeUpdates"] = listener // Store listener with a key
+        database.addChildEventListener(childEventListener)
+        childListeners["realtimeUpdates"] = childEventListener // Store listener with a key
     }
 
     fun writeNotification(notificationEntity: NotificationEntity, onComplete: (Boolean) -> Unit) {
@@ -84,10 +105,13 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
     }
 
     fun stopListening(key: String) {
-        val listener = listeners[key]
-        listener?.let {
+        valueListeners[key]?.let {
             database.removeEventListener(it)
-            listeners.remove(key)
+            valueListeners.remove(key)
+        }
+        childListeners[key]?.let {
+            database.removeEventListener(it)
+            childListeners.remove(key)
         }
     }
 }
