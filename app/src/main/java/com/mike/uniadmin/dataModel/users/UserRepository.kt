@@ -115,34 +115,42 @@ class UserRepository
     private suspend fun fetchUsersFromRemoteDatabase(): List<UserEntity> {
         return suspendCoroutine { continuation ->
             val allUsers = mutableListOf<UserEntity>()
+            val adminIds = mutableSetOf<String>()
 
-            // Fetch users from "Users" node
-            database.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
+            // Fetch users from "Admins" node first to capture all admin IDs
+            database.child("Admins").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     for (childSnapshot in snapshot.children) {
-                        val user = childSnapshot.getValue(UserEntity::class.java)
-                        user?.let { allUsers.add(it) }
+                        val admin = childSnapshot.getValue(UserEntity::class.java)
+                        admin?.let {
+                            allUsers.add(it)
+                            adminIds.add(it.id) // Store admin IDs for later comparison
+                        }
                     }
 
-                    // Fetch users from "Admins" node after fetching from "Users"
-                    database.child("Admins")
-                        .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                for (childSnapshot in snapshot.children) {
-                                    val admin = childSnapshot.getValue(UserEntity::class.java)
-                                    admin?.let { allUsers.add(it) }
+                    // Fetch users from "Users" node after fetching from "Admins"
+                    database.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            for (childSnapshot in snapshot.children) {
+                                val user = childSnapshot.getValue(UserEntity::class.java)
+                                user?.let {
+                                    // Add user only if not present in adminIds
+                                    if (!adminIds.contains(it.id)) {
+                                        allUsers.add(it)
+                                    }
                                 }
-                                continuation.resume(allUsers) // Resume with combined list
                             }
+                            continuation.resume(allUsers) // Resume with filtered list
+                        }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                continuation.resumeWithException(Exception("Error reading admins: ${error.message}"))
-                            }
-                        })
+                        override fun onCancelled(error: DatabaseError) {
+                            continuation.resumeWithException(Exception("Error reading users: ${error.message}"))
+                        }
+                    })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    continuation.resumeWithException(Exception("Error reading users: ${error.message}"))
+                    continuation.resumeWithException(Exception("Error reading admins: ${error.message}"))
                 }
             })
         }
