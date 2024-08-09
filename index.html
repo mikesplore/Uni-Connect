@@ -4,88 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNI ADMIN Documentation</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Debugging styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -250px; /* Initially hidden */
+            width: 250px;
+            height: 100%;
+            background: #343a40;
+            color: white;
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            right: 0; /* Show sidebar */
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>UNI ADMIN</h1>
-        <nav>
-            <ul>
-                <li><a href="#authentication">Authentication</a></li>
-                <ul>
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#google-authentication">Google Authentication</a></li>
-                    <li><a href="#github-authentication">GitHub Authentication</a></li>
-                    <li><a href="#authentication-screen">Authentication Screen</a></li>
-                    <li><a href="#moreDetails-composable">MoreDetails Composable</a></li>
-                    <li><a href="#password-reset">Password Reset</a></li>
-                </ul>
-                <li><a href="#visuals">Visuals</a></li>
-            </ul>
-        </nav>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebarMenu">
+    <div class="sidebar-content">
+        <button type="button" class="close-btn" id="sidebarClose">&times;</button>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="Components/home.html" id="homescreen">HomeScreen</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="Components/Authentication/authentication.html" id="authentication">Authentication</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="Components/Course%20Contents/courseContent.html" id="courseContent">Course Content</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <header class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom">
+        <h1 class="main-title">UNI ADMIN</h1>
+        <button class="btn btn-primary" id="sidebarToggle">Menu</button>
     </header>
 
-    <section id="authentication">
-        <h2>Authentication</h2>
-
-        <article id="overview">
-            <h3>Overview</h3>
-            <p>This section provides a detailed overview of the components and functionality related to user authentication within Uni Admin...</p>
-        </article>
-
-        <article id="google-authentication">
-            <h3>Google Authentication</h3>
-            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/GoogleAuth.kt">GoogleAuth.kt</a></p>
-            <p><strong>Functionality</strong></p>
-            <p>The <code>GoogleAuth</code> composable function handles Google authentication using Firebase...</p>
-        </article>
-
-        <article id="github-authentication">
-            <h3>GitHub Authentication</h3>
-            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/GithubAuth.kt">GithubAuth.kt</a></p>
-            <p><strong>Functionality</strong></p>
-            <p>The <code>GitAuth</code> composable function handles GitHub authentication using Firebase...</p>
-        </article>
-
-        <article id="authentication-screen">
-            <h3>Authentication Screen</h3>
-            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/Login.kt">Login.kt</a></p>
-            <p>This section explains the initialization of Firebase Authentication instances...</p>
-        </article>
-
-        <article id="moreDetails-composable">
-            <h3>MoreDetails Composable</h3>
-            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/ExtraDetails.kt">MoreDetails.kt</a></p>
-            <p>The <code>MoreDetails</code> composable function displays a form for users to enter additional details...</p>
-        </article>
-
-        <article id="password-reset">
-            <h3>Password Reset</h3>
-            <p><strong>File</strong>: <a href="app/src/main/java/com/mike/uniadmin/authentication/PasswordReset.kt">PasswordReset.kt</a></p>
-            <p>The <code>PasswordReset</code> composable function provides a screen for users to reset their forgotten passwords...</p>
-        </article>
-    </section>
-
-    <section id="visuals">
-        <h2>Visuals</h2>
-        <div class="visuals-container">
-            <div>
-                <h3>Sign In Screen</h3>
-                <img src="Images/SignIn.png" alt="Sign In Screen">
-            </div>
-            <div>
-                <h3>Sign Up Screen</h3>
-                <img src="Images/SignUp.png" alt="Sign Up Screen">
-            </div>
-            <div>
-                <h3>Password Reset Screen</h3>
-                <img src="Images/passwordReset.png" alt="Password Reset Screen">
-            </div>
-        </div>
-    </section>
+    <main id="mainContent">
+        <!-- Placeholders for dynamic content -->
+        <section id="content-placeholder" style="display: block;">
+            <!-- Content will be dynamically loaded here -->
+        </section>
+    </main>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Load initial content
+        loadContent('Components/home.html');
+
+        $("#sidebarToggle").click(function() {
+            $("#sidebarMenu").toggleClass("active");
+        });
+
+        $("#sidebarClose").click(function() {
+            $("#sidebarMenu").removeClass("active");
+        });
+
+        $(".nav-link").click(function(event) {
+            event.preventDefault(); // Prevent default link behavior
+
+            // Determine which section to load content into
+            let page = $(this).attr("href");
+
+            // Load the corresponding content
+            loadContent(page);
+
+            // Remove 'active' class from all nav links
+            $(".nav-link").removeClass("active");
+
+            // Add 'active' class to the clicked link
+            $(this).addClass("active");
+
+            // Close the sidebar menu
+            $("#sidebarMenu").removeClass("active");
+        });
+
+        function loadContent(page) {
+            $("#content-placeholder").load(page, function(response, status, xhr) {
+                if (status == "error") {
+                    console.log("Error loading page: " + xhr.status + " " + xhr.statusText);
+                }
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
-
-
