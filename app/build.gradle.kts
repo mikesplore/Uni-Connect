@@ -13,7 +13,7 @@ android {
         applicationId = "com.mike.uniadmin"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
+        versionCode = 20
         versionName = "1.2.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
