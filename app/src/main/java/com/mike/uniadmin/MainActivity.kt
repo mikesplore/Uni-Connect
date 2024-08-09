@@ -142,8 +142,8 @@ class MainActivity : AppCompatActivity() {
             userID = userId,
             id = "${userId}2024",
             online = "online",
-            lastTime = CC.getCurrentTime(CC.getTimeStamp()),
-            lastDate = CC.getCurrentDate(CC.getTimeStamp())
+            lastTime = CC.getTimeStamp(),
+            lastDate = CC.getTimeStamp()
         )
         userStatusRef.setValue(userState) // Set the whole UserStateEntity object
         userStatusRef.onDisconnect().setValue(userState.copy(online = "offline")) // Set offline on disconnect
@@ -161,8 +161,8 @@ class MainActivity : AppCompatActivity() {
             userID = userId,
             id = "${userId}2024",
             online = "offline",
-            lastTime = CC.getCurrentTime(CC.getTimeStamp()),
-            lastDate = CC.getCurrentDate(CC.getTimeStamp())
+            lastTime = CC.getTimeStamp(),
+            lastDate = CC.getTimeStamp()
         )
         userStatusRef.setValue(userState) // Set the whole UserStateEntity object
         Log.d("User status", "Offline: $userState")
