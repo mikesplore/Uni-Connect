@@ -31,8 +31,7 @@ header {
 }
 
 .header-image {
-    width: 50px; /* Adjust the size as needed */
-    height: 50.px;
+    size: 50.px;
 }
 
 .main-title {
