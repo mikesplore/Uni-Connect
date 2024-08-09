@@ -32,7 +32,7 @@ header {
 
 .header-image {
     width: 50px; /* Adjust the size as needed */
-    height: auto;
+    height: 50.px;
 }
 
 .main-title {
