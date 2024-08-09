@@ -828,7 +828,7 @@ fun AnnouncementCard(announcement: AnnouncementEntity, context: Context) {
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = CC.getRelativeDate(announcement.date),
+                    text = CC.getRelativeDate(CC.getCurrentDate(announcement.date)),
                     style = CC.descriptionTextStyle(context)
                         .copy(color = CC.textColor().copy(alpha = 0.7f))
                 )
