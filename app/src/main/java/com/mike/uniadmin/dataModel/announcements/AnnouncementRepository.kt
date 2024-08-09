@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dataModel.announcements
 
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -19,28 +20,47 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
     }
 
     private fun startAnnouncementsListener() {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val announcements = mutableListOf<AnnouncementEntity>()
-                for (childSnapshot in snapshot.children) {
-                    val announcement = childSnapshot.getValue(AnnouncementEntity::class.java)
-                    announcement?.let { announcements.add(it) }
-                }
-
-                viewModelScope.launch {
-                    announcementsDao.insertAnnouncements(announcements)
+        database.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val announcement = snapshot.getValue(AnnouncementEntity::class.java)
+                announcement?.let {
+                    announcementViewModelScope.launch {
+                        announcementsDao.insertAnnouncements(listOf(it))
+                    }
                 }
             }
 
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val announcement = snapshot.getValue(AnnouncementEntity::class.java)
+                announcement?.let {
+                    announcementViewModelScope.launch {
+                        announcementsDao.insertAnnouncement(it) // Make sure you have an update method
+                    }
+                }
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val announcementId = snapshot.key
+                announcementId?.let {
+                    announcementViewModelScope.launch {
+                        announcementsDao.deleteAnnouncement(it)
+                    }
+                }
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                // Handle moves if needed
+            }
+
             override fun onCancelled(error: DatabaseError) {
-                // Handle the read error (e.g., log the error)
-                println("Error reading users: ${error.message}")
+                // Handle the error (e.g., log it)
+                println("Error listening to announcements: ${error.message}")
             }
         })
     }
 
     fun fetchAnnouncements(onResult: (List<AnnouncementEntity>) -> Unit) {
-        viewModelScope.launch {
+        announcementViewModelScope.launch {
             val cachedData = announcementsDao.getAnnouncements()
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
@@ -50,20 +70,19 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val announcements = mutableListOf<AnnouncementEntity>()
                         for (childSnapshot in snapshot.children) {
-                            val announcement =
-                                childSnapshot.getValue(AnnouncementEntity::class.java)
+                            val announcement = childSnapshot.getValue(AnnouncementEntity::class.java)
                             announcement?.let { announcements.add(it) }
                         }
 
-                        viewModelScope.launch {
+                        announcementViewModelScope.launch {
                             announcementsDao.insertAnnouncements(announcements)
                             onResult(announcements)
                         }
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        // Handle the read error (e.g., log the error)
-                        println("Error reading users: ${error.message}")
+                        // Handle the error (e.g., log it)
+                        println("Error reading announcements: ${error.message}")
                     }
                 })
             }
@@ -87,10 +106,10 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
         announcementViewModelScope.launch {
             announcementsDao.deleteAnnouncement(announcementId)
             database.child(announcementId).removeValue().addOnSuccessListener {
-                    onSuccess()
-                }.addOnFailureListener { exception ->
-                    onFailure(exception)
-                }
+                onSuccess()
+            }.addOnFailureListener { exception ->
+                onFailure(exception)
+            }
         }
     }
 }
