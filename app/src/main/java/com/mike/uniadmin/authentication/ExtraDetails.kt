@@ -189,8 +189,8 @@ fun MoreDetails(context: Context, navController: NavController) {
                                             category = "New User",
                                             title = "$firstName Joined Uni Admin!",
                                             description = "Say hi and get the conversation started!",
-                                            date = CC.getCurrentDate(CC.getTimeStamp()),
-                                            time = CC.getCurrentTime(CC.getTimeStamp())
+                                            date = CC.getTimeStamp(),
+                                            time = CC.getTimeStamp()
                                         )
                                     )
                                     notificationViewModel.fetchNotifications()
