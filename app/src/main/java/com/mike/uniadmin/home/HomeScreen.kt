@@ -115,6 +115,7 @@ import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
+import com.mike.uniadmin.chat.TargetUser
 import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
@@ -215,22 +216,13 @@ fun HomeScreen(
                 showBottomSheet = false
             }
         }, containerColor = CC.primary(), sheetState = sheetState, content = {
-            fetchedUserDetails?.let {
-                userViewModel.fetchUsers()
-                Log.d("Fetched User details","fetched details are ${users.size}")
                 ModalDrawerItem(
-                    signedInUser = it,
-                    user = fetchedUserDetails!!,
                     context = context,
                     navController = navController,
-                    users = users,
                     userViewModel = userViewModel,
                     chatViewModel = chatViewModel,
-                    userGroups = userGroups,
                     activity = activity
                 )
-            }
-
         })
     }
     CheckUpdate(context)
@@ -425,7 +417,7 @@ fun ModalNavigationDrawerItem(
                 }
                 userStatus.let {
                     MyDatabase.writeUserActivity(it!!.copy(
-                        online = "offline", lastDate = CC.getCurrentDate(CC.getTimeStamp()), lastTime = CC.getCurrentTime(CC.getTimeStamp())
+                        online = "offline", lastDate = CC.getTimeStamp(), lastTime = CC.getTimeStamp()
                     ), onSuccess = {
                         userViewModel.deleteAllTables()
                         userViewModel.deleteSignedInUser()
@@ -603,18 +595,25 @@ fun SideProfile(user: UserEntity, context: Context) {
 
 @Composable
 fun ModalDrawerItem(
-    signedInUser: UserEntity,
-    user: UserEntity,
     context: Context,
     navController: NavController,
-    users: List<UserEntity>,
     userViewModel: UserViewModel,
     chatViewModel: ChatViewModel,
-    userGroups: List<GroupEntity>,
     activity: MainActivity
 ) {
+    val signedInUser by userViewModel.user.observeAsState()
+    val currentUser by userViewModel.signedInUser.observeAsState()
+    val users by userViewModel.users.observeAsState(emptyList())
+    val groups by chatViewModel.groups.observeAsState(emptyList())
 
-
+    LaunchedEffect(Unit) {
+        userViewModel.getSignedInUser()
+        currentUser?.email?.let { email ->
+            userViewModel.findUserByEmail(email) {}
+        }
+        userViewModel.fetchUsers()
+        chatViewModel.fetchGroups()
+    }
     Column(
         modifier = Modifier
             .padding(10.dp)
@@ -639,16 +638,16 @@ fun ModalDrawerItem(
                     .size(70.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.profileImageLink.isNotEmpty()) {
+                if (signedInUser?.profileImageLink?.isNotEmpty() == true) {
                     AsyncImage(
-                        model = user.profileImageLink,
+                        model = signedInUser?.profileImageLink,
                         contentDescription = "Profile Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Text(
-                        "${user.firstName[0]}${user.lastName[0]}",
+                        "${signedInUser?.firstName?.get(0)}${signedInUser?.lastName?.get(0)}",
                         style = CC.titleTextStyle(context)
                             .copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
                     )
@@ -659,12 +658,12 @@ fun ModalDrawerItem(
                 modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    user.firstName + " " + user.lastName,
+                    signedInUser?.firstName + " " + signedInUser?.lastName,
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     maxLines = 2
                 )
-                Text(user.email, style = CC.descriptionTextStyle(context))
-                Text(user.id, style = CC.descriptionTextStyle(context))
+                signedInUser?.email?.let { Text(it, style = CC.descriptionTextStyle(context)) }
+                signedInUser?.id?.let { Text(it, style = CC.descriptionTextStyle(context)) }
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -680,9 +679,9 @@ fun ModalDrawerItem(
         ) {
             items(users, key = { it.id }) { user ->
                 UserItem(user, context, navController, userViewModel)
-
             }
         }
+
         Spacer(modifier = Modifier.height(20.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(20.dp))
@@ -697,7 +696,7 @@ fun ModalDrawerItem(
         )
         Spacer(modifier = Modifier.height(20.dp))
 
-        if (userGroups.isEmpty()) {
+        if (groups.isEmpty()) {
             Text(
                 text = "No groups available",
                 style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp),
@@ -707,16 +706,18 @@ fun ModalDrawerItem(
             LazyColumn(
                 modifier = Modifier.animateContentSize()
             ) {
-                items(userGroups) { group ->
+                items(groups, key = { it.id }) { group ->
                     if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
-                        GroupItem(
-                            group,
-                            context,
-                            navController,
-                            chatViewModel,
-                            userViewModel,
-                            signedInUser
-                        )
+                        signedInUser?.let {
+                            GroupItem(
+                                group,
+                                context,
+                                navController,
+                                chatViewModel,
+                                userViewModel,
+                                it
+                            )
+                        }
                     }
                 }
             }
@@ -865,7 +866,8 @@ fun UserItem(
                 .background(CC.tertiary(), CircleShape)
                 .clip(CircleShape)
                 .combinedClickable(onClick = {
-                    navController.navigate("chat/${user.id}")
+                    TargetUser.targetUserId.value = user.id
+                    navController.navigate("uniChat")
                 }, onLongClick = {
                     visible = !visible
                 })
@@ -918,10 +920,15 @@ fun UserItem(
             style = CC.descriptionTextStyle(context),
             maxLines = 1
         )
+        val date = if (userState?.lastDate?.let { CC.getCurrentDate(it) } == CC.getCurrentDate(CC.getTimeStamp())) {
+            "Today at ${userState.lastTime.let { CC.getCurrentTime(it) }}"
+        } else {
+            "${userState?.lastDate?.let { CC.getCurrentDate(it) } ?: ""} at ${userState?.lastTime?.let { CC.getCurrentTime(it) } ?: ""}"
+        }
 
         val state = when (userState?.online) {
             "online" -> "Online"
-            "offline" -> "Last Seen ${userState.lastTime}"
+            "offline" -> date
             else -> "Never Online"
         }
         Spacer(modifier = Modifier.height(10.dp))
