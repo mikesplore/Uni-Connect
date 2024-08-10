@@ -118,7 +118,6 @@ import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.chat.TargetUser
 import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
@@ -167,8 +166,6 @@ fun HomeScreen(
     val signedInUser by userViewModel.signedInUser.observeAsState()
     val fetchedUserDetails by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
-    val users by userViewModel.users.observeAsState(initial = emptyList())
-    val groups by chatViewModel.groups.observeAsState(emptyList())
 
     // Local state
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -179,15 +176,13 @@ fun HomeScreen(
 
     val signedInUserLoading by userViewModel.isLoading.observeAsState()
 
-    // Derived state
-    val userGroups = groups.filter { it.members.contains(fetchedUserDetails?.id)}
 
     // Side effects
     LaunchedEffect(signedInUser, fetchedUserDetails) {
         // 1. Get signed-in user and fetch details (if needed)
         userViewModel.getSignedInUser()
         signedInUser?.email?.let { email ->
-            userViewModel.findUserByEmail(email,) { user -> Log.d("Fetched User details", "$user") }
+            userViewModel.findUserByEmail(email) { user -> Log.d("Fetched User details", "$user") }
         }
 
         // 2. Fetch app version (can run concurrently)

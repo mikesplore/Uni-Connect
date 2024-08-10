@@ -414,7 +414,7 @@ fun InputDialogTextField(
 
 @Composable
 fun VideoCard(link: String, context: Context) {
-    var fullScreen by remember { mutableStateOf(false) }
+   // var fullScreen by remember { mutableStateOf(false) }
     val myVideoId = extractVideoId(link)
     if (myVideoId == null) {
         Toast.makeText(context, "Invalid YouTube link", Toast.LENGTH_SHORT).show()

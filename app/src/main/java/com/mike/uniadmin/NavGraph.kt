@@ -182,7 +182,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }, exitTransition = {
             fadeOut(animationSpec = tween(500))
         }) {
-            Appearance(navController = navController, context)
+            Appearance(navController = navController)
         }
 
         composable("homeScreen", enterTransition = {

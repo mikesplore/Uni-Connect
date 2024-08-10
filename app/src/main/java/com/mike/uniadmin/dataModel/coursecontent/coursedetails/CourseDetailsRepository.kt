@@ -28,7 +28,7 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
-                val courseID = snapshot.key ?: return
+               // val courseID = snapshot.key ?: return
                 val details = snapshot.child("Course Details").children.mapNotNull { it.getValue(CourseDetail::class.java) }
                 viewModelScope.launch {
                     details.forEach { courseDetailDao.deleteCourseDetail(it.detailID) }
@@ -41,7 +41,7 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
             }
 
             private fun updateLocalDatabase(snapshot: DataSnapshot) {
-                val courseID = snapshot.key ?: return
+               // val courseID = snapshot.key ?: return
                 val details = snapshot.child("Course Details").children.mapNotNull { it.getValue(CourseDetail::class.java) }
                 viewModelScope.launch {
                     details.forEach { courseDetailDao.insertCourseDetail(it) }

@@ -129,6 +129,7 @@ object MyDatabase {
                 onResult(null) // Handle the case where no update data exists
             }
         }.addOnFailureListener { exception ->
+            Log.e("FirebaseError", "Error fetching update data: ${exception.message}")
             // Handle potential errors during data retrieval
             onResult(null)
         }
@@ -167,6 +168,7 @@ object MyDatabase {
                 // Data successfully written
             }
             .addOnFailureListener { exception ->
+                Log.e("FirebaseError", "Error writing item: ${exception.message}")
                 // Handle the write error
             }
     }
@@ -195,6 +197,7 @@ object MyDatabase {
                                 // Item successfully deleted
                             }
                             .addOnFailureListener { exception ->
+                                Log.e("FirebaseError", "Error deleting item: ${exception.message}")
                                 // Handle the deletion error
                             }
                         break
@@ -337,43 +340,6 @@ object MyDatabase {
         records.map { record ->
             val key = batch.push().key ?: ""
             batch.child(key).setValue(record)
-        }
-    }
-
-    fun ExitScreen(context: Context, screenID: String, timeSpent: Long){
-
-        
-        // Fetch the screen details
-        getScreenDetails(screenID) { screenDetails ->
-            if (screenDetails != null) {
-                writeScren(courseScreen = screenDetails) {}
-                // Fetch existing screen time
-                getScreenTime(screenID) { existingScreenTime ->
-                    val totalScreenTime = if (existingScreenTime != null) {
-                        Log.d("Screen Time", "Retrieved Screen time: $existingScreenTime")
-                        existingScreenTime.time + timeSpent
-                    } else {
-                        timeSpent
-                    }
-
-                    // Create a new ScreenTime object
-                    val screenTime = ScreenTime(
-                        id = screenID,
-                        screenName = screenDetails.screenName,
-                        time = totalScreenTime
-                    )
-
-                    // Save the updated screen time
-                    saveScreenTime(screenTime = screenTime, onSuccess = {
-                        Log.d("Screen Time", "Saved $totalScreenTime to the database")
-                    }, onFailure = {
-                        Log.d("Screen Time", "Failed to save $totalScreenTime to the database")
-                    })
-                }
-
-            } else {
-                Log.d("Screen Time", "Screen details not found for ID: $screenID")
-            }
         }
     }
 

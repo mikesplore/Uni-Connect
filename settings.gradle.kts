@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "UniAdmin"
 include(":app")
+ 

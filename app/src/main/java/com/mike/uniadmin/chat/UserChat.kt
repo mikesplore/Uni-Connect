@@ -84,9 +84,7 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.MyDatabase.ExitScreen
 import com.mike.uniadmin.ui.theme.Background
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -122,10 +120,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
-    val startTime = remember { System.currentTimeMillis() }
-    var timeSpent by remember { mutableLongStateOf(0L) }
-    val screenID = "SC5"
     val scrollState = rememberLazyListState()
 
     var myUserState by remember { mutableStateOf("") }
@@ -144,18 +138,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
         userViewModel.findUserByAdmissionNumber(targetUserId)
         userViewModel.checkUserStateByID(targetUserId)
-        while (true) {
-            timeSpent = System.currentTimeMillis() - startTime
-            delay(1000)
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            ExitScreen(
-                context = context, screenID = screenID, timeSpent = timeSpent
-            )
-        }
     }
 
     // Generate a unique conversation ID only if user and user2 are not null
@@ -210,7 +192,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
         topBar = {
             if (user2 != null) {
                 TopAppBarComponent(name = user2!!.firstName,
-                    navController = navController,
                     context = context,
                     user = user2!!,
                     userState = myUserState,
@@ -353,7 +334,6 @@ fun SearchTextField(
 @Composable
 fun TopAppBarComponent(
     name: String,
-    navController: NavController,
     context: Context,
     user: UserEntity,
     userState: String,

@@ -140,7 +140,7 @@ fun UserCard(user: UserEntity, context: Context, userViewModel: UserViewModel) {
                     .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.profileImageLink?.isNotEmpty() == true) {
+                if (user.profileImageLink.isNotEmpty()) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = "Profile Image",
@@ -149,7 +149,7 @@ fun UserCard(user: UserEntity, context: Context, userViewModel: UserViewModel) {
                     )
                 } else {
                     Text(
-                        "${user.profileImageLink?.get(0)}",
+                        "${user.profileImageLink[0]}",
                         style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
