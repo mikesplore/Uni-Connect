@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -149,7 +150,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
                         // Display category header only once
                         Text(
                             text = when (category) {
-                                "Announcement" -> "Announcements"
+                                "Announcements" -> "Announcements"
                                 else -> "New Users"
                             },
                             style = CC.descriptionTextStyle(context)
@@ -162,7 +163,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 
                     items(sortedNotifications) { notification ->
                         when (notification.category) {
-                            "Announcement" -> AnnouncementNotification(notification, context)
+                            "Announcements" -> AnnouncementNotification(notification, context)
                             else -> NotificationItem(
                                 notification = notification,
                                 context = context,
@@ -216,7 +217,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
         ) {
             Text(
                 text = "${CC.getCurrentDate(notification.date)} at ${CC.getCurrentTime(notification.time)}",
-                style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
+                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f), fontSize = 12.sp)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier
@@ -224,7 +225,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                 .background(CC.extraColor1(), RoundedCornerShape(10.dp))
                 .padding(end = 5.dp),
                 contentAlignment = Alignment.Center){
-                Text("Hi ${notification.name} 👋",
+                Text("Hi, ${notification.name} 👋",
                     modifier = Modifier.padding(start = 10.dp),
                     style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
             }
@@ -265,7 +266,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
                     CircularProgressIndicator(color = CC.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(30.dp))
                 }
                 Icon(
-                    Icons.AutoMirrored.Filled.Send, // Use a wave hand icon from your resources
+                    Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Wave",
                     tint = CC.secondary()
                 )
@@ -277,20 +278,48 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
 
 @Composable
 fun AnnouncementNotification(notification: NotificationEntity, context: Context) {
-    Column(modifier = Modifier
-        .border(1.dp, CC.secondary(), RoundedCornerShape(10.dp))
-        .heightIn(50.dp)
-        .fillMaxWidth(0.9f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-        Text(notification.title, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(notification.description, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(CC.getCurrentDate(notification.date), style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)))
+    Column(
+        modifier = Modifier
+            .border(1.dp, CC.extraColor2(), RoundedCornerShape(12.dp))
+            .padding(12.dp)
+            .fillMaxWidth(0.95f)
+            .background(CC.primary(), RoundedCornerShape(12.dp))
+    ) {
+        Text(
+            text = notification.title,
+            style = CC.descriptionTextStyle(context).copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
+        )
 
+        Text(
+            text = notification.description,
+            style = CC.descriptionTextStyle(context).copy(
+                color = CC.textColor().copy(0.7f),
+                fontSize = 14.sp
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = CC.getRelativeDate(CC.getCurrentDate(notification.date)),
+            style = CC.descriptionTextStyle(context).copy(
+                color = CC.textColor().copy(0.7f),
+                fontSize = 12.sp
+            ),
+            modifier = Modifier.align(Alignment.End)
+        )
     }
-
 }
 
 

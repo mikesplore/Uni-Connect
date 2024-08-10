@@ -4,8 +4,12 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +38,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -48,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -171,29 +178,49 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
     val currentUser by viewModel.user.observeAsState()
     var showImageLinkBox by remember { mutableStateOf(false) }
     var link by remember { mutableStateOf("") }
+    var imageClicked by remember { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = Unit) {
-        
-    }
+    val boxSize by animateDpAsState(
+        targetValue = if (imageClicked) 160.dp else 100.dp, label = "",
+        animationSpec = tween(200)
+    )
+    val size by animateDpAsState(
+        targetValue = if (imageClicked) 150.dp else 70.dp, label = "",
+        animationSpec = tween(200)
+    )
 
-    Row(modifier = Modifier.fillMaxWidth(0.9f)) {
-        Text("Profile Picture", style = CC.descriptionTextStyle(context))
-    }
 
     Column(
         modifier = Modifier.fillMaxWidth(0.9f),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
+        Box(modifier = Modifier
+            .background(CC.secondary(), RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
+            .height(boxSize)
+            .fillMaxWidth(),
+            contentAlignment = Alignment.Center) {
+            AsyncImage(
+                model = currentUser?.profileImageLink,
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .blur(30.dp)
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                onError = { R.drawable.notification },
+                onLoading = { R.drawable.logo }
+            )
+        IconButton(onClick = {
+            imageClicked = !imageClicked
+        },
             modifier = Modifier
                 .border(
                     1.dp, CC.textColor(), CircleShape
                 )
                 .clip(CircleShape)
                 .background(CC.secondary(), CircleShape)
-                .size(130.dp),
-            contentAlignment = Alignment.Center
+                .size(size),
         ) {
             if (currentUser?.profileImageLink?.isNotEmpty() == true) {
                 AsyncImage(model = currentUser?.profileImageLink,
@@ -212,43 +239,26 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            "You can add or change the image by adding an image link",
-            style = CC.descriptionTextStyle(context)
-                .copy(
-                    color = CC.textColor().copy(0.5f),
-                    textAlign = TextAlign.Center
-                )
-        )
-        Button(
-            onClick = { showImageLinkBox = !showImageLinkBox },
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = CC.secondary()
-            ),
-        ) {
-            Text("Add image link", style = CC.descriptionTextStyle(context))
         }
-    }
 
-    // Store image URI in SharedPreferences when it changes
-    AnimatedVisibility(visible = showImageLinkBox) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+    }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(0.9f),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             CC.SingleLinedTextField(
                 value = link,
                 onValueChange = { link = it },
                 label = "Image Link",
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier
+                    .weight(1f),
                 context = context,
                 singleLine = true
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.width(5.dp))
             Button(
                 onClick = {
                     currentUser?.let {
@@ -264,10 +274,10 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
                 ), enabled = link.isNotEmpty()
 
             ) {
-                Text("Save", style = CC.descriptionTextStyle(context))
+                Text("Save", style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp))
             }
         }
-    }
+
 
 }
 
@@ -285,16 +295,11 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
         viewModel.getSignedInUser()
         signedUser?.let {
             it.email.let { email ->
-                Log.d("Profile Screen", "Fetching user by email: $email")
                 viewModel.findUserByEmail(email, onUserFetched = { fetchedUser ->
-
                     firstName = fetchedUser?.firstName.toString()
-
                     lastName = fetchedUser?.lastName.toString()
-
                     phoneNumber = fetchedUser?.phoneNumber.toString()
 
-                    Log.d("Profile Screen", "Fetched User: $fetchedUser")
                 })
             }
         }
@@ -322,7 +327,12 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
                 }
                 isEditing = !isEditing
                 onUpdateChange(updated)
-            }) {
+            },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = CC.secondary(),
+                    contentColor = CC.textColor()
+
+                )) {
                 Icon(
                     if (isEditing) Icons.Filled.Check else Icons.Default.Edit,
                     contentDescription = "save",
@@ -343,9 +353,6 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
                     isEditing = isEditing
                 )
 
-
-            Spacer(modifier = Modifier.height(10.dp))
-
             MyDetails(
                 title = "Last Name",
                 value = lastName,
@@ -353,8 +360,6 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
                 context = context,
                 isEditing = isEditing
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
 
             MyDetails(
                 title = "Email",
@@ -365,10 +370,17 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
                 fontSize = 15.sp
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            MyDetails(
+                title = "Admission Number",
+                value = user.id,
+                onValueChange = {},
+                context = context,
+                isEditing = false, // Admission Number is not editable
+                fontSize = 15.sp
+            )
 
             MyDetails(
-                title = "First Name",
+                title = "Phone Number",
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it},
                 context = context,
@@ -401,7 +413,7 @@ fun MyDetails(
 
         TextField(
             value = value,
-            textStyle = CC.titleTextStyle(context).copy(fontSize = fontSize),
+            textStyle = CC.titleTextStyle(context).copy(fontSize = fontSize, color = if (isEditing) CC.textColor() else CC.textColor().copy(0.5f)),
             onValueChange = onValueChange,
             colors = TextFieldDefaults.colors(
                 unfocusedIndicatorColor = CC.tertiary(),

@@ -4,7 +4,8 @@ import android.content.Context
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
@@ -45,74 +46,56 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "splashScreen") {
+    NavHost(navController = navController, startDestination = "homeScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
         }
 
-        composable("login", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
-        }
-
-        ) {
+        composable("login",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+        }) {
             LoginScreen(navController = navController, context)
         }
 
-        composable("assignments", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("assignments",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             AssignmentScreen(context)
         }
 
-        composable("timetable", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("timetable",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             TimetableScreen(context)
         }
 
-        composable("dashboard", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("dashboard",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             Dashboard(navController = navController, context)
         }
 
-        composable("profile", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("profile",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             ProfileScreen(navController = navController, context)
         }
 
-        composable("settings", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("settings",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             Settings(navController = navController, context, mainActivity)
         }
 
-        composable("uniChat", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("uniChat",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             UniChat(navController = navController, context)
         }
 
-        composable("chat/{userId}", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("chat/{userId}",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }, arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
             UserChatScreen(
@@ -120,10 +103,8 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             )
         }
 
-        composable("GroupChat/{groupId}", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("GroupChat/{groupId}",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }, arguments = listOf(navArgument("groupId") { type = NavType.StringType })
         ) { backStackEntry ->
             DiscussionScreen(
@@ -131,72 +112,56 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             )
         }
 
-        composable("groups", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("groups",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             UniGroups(context, navController)
         }
 
-        composable("moreDetails", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("moreDetails",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             MoreDetails(context, navController)
         }
 
-        composable("announcements", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("announcements",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             AnnouncementsScreen(context)
         }
 
-        composable("manageUsers", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("manageUsers",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             ManageUsers(navController, context)
         }
 
-        composable("notifications", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("notifications",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             PhoneNotifications(navController, context)
         }
 
-        composable("passwordReset", enterTransition = {
-            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(500))
+        composable("passwordReset",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             PasswordReset(navController = navController, context)
         }
 
-        composable("appearance", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("appearance",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             Appearance(navController = navController)
         }
 
-        composable("homeScreen", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("homeScreen",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             HomeScreen(navController, context, pagerState, mainActivity, screens, coroutineScope)
         }
 
-        composable("courseResource/{courseCode}", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("courseResource/{courseCode}",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }, arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseResources(
@@ -204,10 +169,8 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             )
         }
 
-        composable("courseContent/{courseId}", enterTransition = {
-            fadeIn(animationSpec = tween(500))
-        }, exitTransition = {
-            fadeOut(animationSpec = tween(500))
+        composable("courseContent/{courseId}",  exitTransition = {
+            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }, arguments = listOf(navArgument("courseId") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseContent(

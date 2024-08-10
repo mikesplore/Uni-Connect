@@ -76,6 +76,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -85,6 +86,8 @@ import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.notifications.NotificationEntity
+import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserPreferencesEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
@@ -94,7 +97,6 @@ import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
 import com.mike.uniadmin.model.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.FontPreferences
-
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,18 +107,25 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     val fontPrefs = remember { FontPreferences(context) }
     var savedFont by remember { mutableStateOf("system") }
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
+    val userAdmin = context.applicationContext as UniAdmin
+    val userRepository = remember { userAdmin.userRepository }
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
+            userRepository
+        )
+    )
+
+    val notificationRepository = remember { userAdmin.notificationRepository }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModel.NotificationViewModelFactory(
+            notificationRepository
         )
     )
 
     val currentUser by userViewModel.user.observeAsState()
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(savedFont) {
         
         savedFont = fontPrefs.getSelectedFont().toString()
         userViewModel.findUserByEmail(user?.email!!) {}
@@ -251,7 +260,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
             Spacer(modifier = Modifier.height(20.dp))
             Biometrics(context, mainActivity, userViewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            PasswordUpdateSection(context)
+            PasswordUpdateSection(context, notificationViewModel)
             Spacer(modifier = Modifier.height(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(0.9f),
@@ -517,7 +526,7 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
 
 
 @Composable
-fun PasswordUpdateSection(context: Context) {
+fun PasswordUpdateSection(context: Context, notificationViewModel: NotificationViewModel) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -612,6 +621,18 @@ fun PasswordUpdateSection(context: Context) {
                                     updatePassword(newPassword, onSuccess = {
                                         // Handle success (e.g., show a success message)
                                         loading = false
+                                        MyDatabase.generateNotificationID { id ->
+                                            notificationViewModel.writeNotification(
+                                                notificationEntity = NotificationEntity(
+                                                    id = id,
+                                                    title = "Account Updated",
+                                                    description = "You have successfully updated your password",
+                                                    date = CC.getTimeStamp(),
+                                                    time = CC.getTimeStamp(),
+                                                    category = "Announcements",
+                                                )
+                                            )
+                                        }
                                         Toast.makeText(
                                             context,
                                             "Password updated successfully",
@@ -631,7 +652,7 @@ fun PasswordUpdateSection(context: Context) {
 
                                     })
                                 } else {
-                                    // Handle reauthentication failure
+                                    // Handle authentication failure
                                     loading = false
                                     Toast.makeText(
                                         context,
@@ -723,6 +744,7 @@ fun MyAbout(context: Context) {
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
+
             //Phone Icon
             IconButton(onClick = {
                 val intent = Intent(
@@ -734,7 +756,8 @@ fun MyAbout(context: Context) {
                 .size(35.dp)) {
                 Icon(Icons.Default.Call, "Call", tint = CC.textColor())
             }
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(10.dp))
+
             // GitHub Icon with Link
             IconButton(
                 onClick = { uriHandler.openUri("https://github.com/mikesplore") },
@@ -746,6 +769,30 @@ fun MyAbout(context: Context) {
                     painter = painterResource(id = R.drawable.github),
                     tint = CC.textColor(),
                     contentDescription = "GitHub Profile", modifier = Modifier.size(30.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+
+            // Google Icon with Link
+            IconButton(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:") // Only email apps should handle this
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("mikepremium8@gmail.com")) // Recipients
+                        putExtra(Intent.EXTRA_SUBJECT, "Email Subject")
+                        putExtra(Intent.EXTRA_TEXT, "Email body text")
+                    }
+                    ContextCompat.startActivity(context, intent, null) // Start the activity
+                },
+                modifier = Modifier
+                    .background(CC.extraColor1(), CircleShape)
+                    .size(35.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = com.google.android.gms.base.R.drawable.googleg_standard_color_18),
+                    tint = CC.textColor(),
+                    contentDescription = "Open Gmail",
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -814,7 +861,7 @@ fun Star(
     ) {
         drawPath(
             path = path,
-            color = if (filled) color else Color.Gray,
+            color = if (filled) color else com.mike.uniadmin.ui.theme.BrightBlue,
             style = if (filled) Stroke(width = 8f) else Stroke(
                 width = 8f, cap = StrokeCap.Round, join = StrokeJoin.Round
             )
