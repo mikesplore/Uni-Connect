@@ -142,10 +142,11 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 }
             }, colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = CC.primary().copy(0.1f)
-            ))
+            )
+            )
         }, containerColor = CC.primary()
     ) {
-        val backGround  = Brush.verticalGradient(
+        val backGround = Brush.verticalGradient(
             colors = listOf(CC.primary(), CC.secondary())
         )
 
@@ -154,8 +155,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 .background(backGround)
                 .verticalScroll(rememberScrollState())
                 .padding(it)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier
@@ -273,9 +273,8 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 IconButton(
                     onClick = { navController.navigate("appearance") },
                     modifier = Modifier.background(
-                            CC.secondary(),
-                            RoundedCornerShape(10.dp)
-                        )
+                        CC.secondary(), RoundedCornerShape(10.dp)
+                    )
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowForwardIos,
@@ -318,7 +317,8 @@ fun MyIconButton(icon: ImageVector, navController: NavController, route: String)
 @Composable
 fun DarkMode(context: Context) {
     val icon = if (DeviceTheme.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
-    val iconDescription = if (DeviceTheme.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
+    val iconDescription =
+        if (DeviceTheme.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
 
     Row(
         modifier = Modifier
@@ -334,9 +334,7 @@ fun DarkMode(context: Context) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = iconDescription,
-                tint = CC.extraColor2()
+                imageVector = icon, contentDescription = iconDescription, tint = CC.extraColor2()
             )
         }
         Text("Dark Mode", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
@@ -345,8 +343,7 @@ fun DarkMode(context: Context) {
                 DeviceTheme.darkMode.value = it
                 DeviceTheme.saveDarkModePreference(it)
 
-            }, checked = DeviceTheme.darkMode.value,
-            colors = SwitchDefaults.colors(
+            }, checked = DeviceTheme.darkMode.value, colors = SwitchDefaults.colors(
                 checkedThumbColor = CC.extraColor1(),
                 uncheckedThumbColor = CC.extraColor2(),
                 checkedTrackColor = CC.extraColor2(),
@@ -382,8 +379,7 @@ fun Notifications(context: Context, viewModel: UserViewModel) {
             generateSharedPreferencesID { id ->
                 val myPreferences = UserPreferencesEntity(
                     studentID = currentUser!!.id, // Now safe to access currentUser.id
-                    id = id,
-                    notifications = if (isEnabled) "enabled" else "disabled"
+                    id = id, notifications = if (isEnabled) "enabled" else "disabled"
                 )
                 viewModel.writePreferences(myPreferences) {
                     Log.d("Preferences", "Preferences successfully updated: $myPreferences")
@@ -408,9 +404,7 @@ fun Notifications(context: Context, viewModel: UserViewModel) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = iconDescription,
-                tint = CC.extraColor2()
+                imageVector = icon, contentDescription = iconDescription, tint = CC.extraColor2()
             )
         }
         Text("Notifications", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
@@ -456,9 +450,8 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
             generateSharedPreferencesID { id ->
                 val myPreferences = UserPreferencesEntity(
                     studentID = currentUser!!.id, // Now safe to access currentUser.id
-                    id = id,
-                    notifications = if (isEnabled) "enabled" else "disabled"
-                ) 
+                    id = id, notifications = if (isEnabled) "enabled" else "disabled"
+                )
                 viewModel.writePreferences(myPreferences) {
                     Log.d("Preferences", "Preferences successfully updated: $myPreferences")
                 }
@@ -764,7 +757,8 @@ fun MyAbout(context: Context) {
                 Icon(
                     painter = painterResource(id = R.drawable.github),
                     tint = CC.textColor(),
-                    contentDescription = "GitHub Profile", modifier = Modifier.size(30.dp)
+                    contentDescription = "GitHub Profile",
+                    modifier = Modifier.size(30.dp)
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
@@ -774,13 +768,15 @@ fun MyAbout(context: Context) {
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:") // Only email apps should handle this
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("mikepremium8@gmail.com")) // Recipients
+                        putExtra(
+                            Intent.EXTRA_EMAIL,
+                            arrayOf("mikepremium8@gmail.com")
+                        ) // Recipients
                         putExtra(Intent.EXTRA_SUBJECT, "Email Subject")
                         putExtra(Intent.EXTRA_TEXT, "Email body text")
                     }
                     ContextCompat.startActivity(context, intent, null) // Start the activity
-                },
-                modifier = Modifier
+                }, modifier = Modifier
                     .background(CC.extraColor1(), CircleShape)
                     .size(35.dp)
             ) {
@@ -799,9 +795,7 @@ fun MyAbout(context: Context) {
 
 @Composable
 fun StarRating(
-    currentRating: Int,
-    onRatingChanged: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    currentRating: Int, onRatingChanged: (Int) -> Unit, modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier,
@@ -894,7 +888,8 @@ fun RatingAndFeedbackScreen(context: Context) {
         )
 
         StarRating(
-            currentRating = currentRating, onRatingChanged = { rating ->
+            currentRating = currentRating,
+            onRatingChanged = { rating ->
                 currentRating = rating
                 showFeedbackForm = true
             },
@@ -961,8 +956,7 @@ fun RatingAndFeedbackScreen(context: Context) {
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CC.extraColor1(),
-                        contentColor = CC.secondary()
+                        containerColor = CC.extraColor1(), contentColor = CC.secondary()
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {

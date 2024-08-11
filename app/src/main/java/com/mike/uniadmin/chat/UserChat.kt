@@ -537,7 +537,7 @@ fun RowDate(date: String, context: Context) {
                 .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = CC.getRelativeDate(date),
+                text = CC.getRelativeDate(CC.getCurrentDate(date)),
                 modifier = Modifier.padding(5.dp),
                 style = CC.descriptionTextStyle(context),
                 fontSize = 13.sp,

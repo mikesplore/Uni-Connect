@@ -3,4 +3,5 @@ _site
 .jekyll-cache
 .jekyll-metadata
 google-services.json
+Notes.kt
 vendor
