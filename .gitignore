@@ -17,4 +17,6 @@ local.properties
 .jekyll-metadata
 google-services.json
 Notes.kt
+/buildOutputCleanup/buildOutputCleanup.lock
+/executionHistory.lock
 vendor
