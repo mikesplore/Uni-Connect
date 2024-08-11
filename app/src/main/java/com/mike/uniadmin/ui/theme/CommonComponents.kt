@@ -301,11 +301,11 @@ object CommonComponents {
 
         return when {
             timestamp.toLong() >= todayTimestamp - (12 * 60 * 60 * 1000) -> { // Within the last 12 hours
-                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(timestamp)) // Display time
+                getFormattedTime(timestamp) // Display time
             }
             isSameDay(timestamp.toLong(), todayTimestamp) -> "Today"
             isSameDay(timestamp.toLong(), yesterdayTimestamp) -> "Yesterday"
-            else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp)) // Display date
+            else -> getCurrentDate(timestamp) // Display date
         }
     }
 
