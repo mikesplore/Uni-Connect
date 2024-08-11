@@ -19,4 +19,17 @@ google-services.json
 Notes.kt
 /buildOutputCleanup/buildOutputCleanup.lock
 /executionHistory.lock
+diff --git a/.gradle/buildOutputCleanup/buildOutputCleanup.lock b/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+index 98413d2771f43b5ca109295891b7861b9310ba6d..bd22da629108aeaca6b826fec57313dc75f7afb6
+GIT binary patch
+literal 17
+Uc${NSR%JN-I5ser0Su%V04OvAUjP6A
+
+diff --git a/.gradle/8.8/executionHistory/executionHistory.lock b/.gradle/8.8/executionHistory/executionHistory.lock
+index 31082b10ba23c07c655e2eb58dd547eed77006ed..e50b384b676e40fab6cac9472e291c933e5165d4
+GIT binary patch
+literal 17
+Uc${NiX=14w5pTMW0Ss7d0VEj%DgXcg
+
+
 vendor
