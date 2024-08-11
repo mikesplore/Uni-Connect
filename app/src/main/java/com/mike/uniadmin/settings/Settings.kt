@@ -63,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -126,36 +127,31 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
 
 
     LaunchedEffect(savedFont) {
-        
         savedFont = fontPrefs.getSelectedFont().toString()
         userViewModel.findUserByEmail(user?.email!!) {}
 
     }
 
-
-
-    // Fetch user data when the composable is launched
-    LaunchedEffect(auth.currentUser?.email) {
-
-    }
-
-    Log.d("Authenticated User", "The user is: $user")
     Scaffold(
         topBar = {
             TopAppBar(title = {}, navigationIcon = {
-                IconButton(onClick = { navController.navigate("homescreen") }) {
+                IconButton(onClick = { navController.navigate("homeScreen") }) {
                     Icon(
                         Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
                     )
                 }
             }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = CC.primary()
-            )
-            )
+                containerColor = CC.primary().copy(0.1f)
+            ))
         }, containerColor = CC.primary()
     ) {
+        val backGround  = Brush.verticalGradient(
+            colors = listOf(CC.primary(), CC.secondary())
+        )
+
         Column(
             modifier = Modifier
+                .background(backGround)
                 .verticalScroll(rememberScrollState())
                 .padding(it)
                 .fillMaxSize(),

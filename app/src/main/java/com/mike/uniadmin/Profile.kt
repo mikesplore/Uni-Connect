@@ -162,7 +162,14 @@ fun ProfileScreen(navController: NavController, context: Context) {
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                DisplayImage(context, userViewModel, updated, onUpdateChange = { updated = !updated })
+                DisplayImage(context, userViewModel, updated, onUpdateChange = { update ->
+                    if (update){
+                        userViewModel.getSignedInUser()
+                        userViewModel.fetchUsers()
+                        Toast.makeText(context,"Updated!, please relaunch the screen", Toast.LENGTH_SHORT).show()
+                    }
+
+                    updated = !updated })
                 Spacer(modifier = Modifier.height(20.dp))
                 ProfileDetails(context, userViewModel, updated, onUpdateChange = { updated = !updated })
                 Spacer(modifier = Modifier.height(50.dp))

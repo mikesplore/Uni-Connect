@@ -270,7 +270,7 @@ object CommonComponents {
     }
 
 
-    fun getCurrentTime(timestamp: String): String {
+    fun getFormattedTime(timestamp: String): String {
         val instant = Instant.ofEpochMilli(timestamp.toLong())
         val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         val timeFormat = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault())
@@ -280,7 +280,7 @@ object CommonComponents {
     fun getCurrentDate(timestamp: String): String {
         val instant = Instant.ofEpochMilli(timestamp.toLong())
         val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        val dateFormat = DateTimeFormatter.ofPattern("dd/MMM/yyyy", Locale.getDefault())
+        val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.getDefault())
         return dateFormat.format(dateTime)
     }
 
@@ -295,7 +295,30 @@ object CommonComponents {
             else -> date
         }
     }
+    fun getRelativeTime(timestamp: String): String {
+        val todayTimestamp = System.currentTimeMillis()
+        val yesterdayTimestamp = todayTimestamp - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
+
+        return when {
+            timestamp.toLong() >= todayTimestamp - (12 * 60 * 60 * 1000) -> { // Within the last 12 hours
+                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(timestamp)) // Display time
+            }
+            isSameDay(timestamp.toLong(), todayTimestamp) -> "Today"
+            isSameDay(timestamp.toLong(), yesterdayTimestamp) -> "Yesterday"
+            else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp)) // Display date
+        }
+    }
+
+    // Helper function to check if two timestamps are on the same day
+    private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
+        val calendar1 = Calendar.getInstance().apply { timeInMillis = timestamp1 }
+        val calendar2 = Calendar.getInstance().apply { timeInMillis = timestamp2 }
+        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
+                calendar1.get(Calendar.DAY_OF_YEAR) == calendar2.get(Calendar.DAY_OF_YEAR)
+    }
+
 }
+
 
 
 

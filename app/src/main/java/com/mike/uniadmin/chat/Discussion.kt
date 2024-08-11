@@ -523,7 +523,7 @@ fun ChatBubble(
                     )
                 }
                 Text(
-                    text = CC.getCurrentTime(chat.time),
+                    text = CC.getFormattedTime(chat.time),
                     style = CC.descriptionTextStyle(context),
                     fontSize = 12.sp,
                     textAlign = TextAlign.End,

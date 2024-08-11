@@ -31,14 +31,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,12 +44,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -127,8 +121,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     myUserState = when{
         userState == null -> "Never online"
         userState!!.online == "online" -> "Online"
-        userState!!.lastDate == CC.getCurrentDate(CC.getTimeStamp()) -> "Last seen today at ${userState!!.lastTime}"
-        else -> "Last seen ${userState!!.lastDate} at ${userState!!.lastTime}"
+        else -> "Last seen ${CC.getRelativeDate(CC.getCurrentDate(userState!!.lastDate))} at ${CC.getFormattedTime(userState!!.lastTime)}"
     }
 
     LaunchedEffect(targetUserId) {
@@ -170,7 +163,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     senderID = user?.id.orEmpty(),
                     recipientID = targetUserId,
                     timeStamp = CC.getTimeStamp(),
-                    date = CC.getCurrentDate(CC.getTimeStamp()),
+                    date = CC.getTimeStamp(),
                 )
                 messageViewModel.saveMessage(newMessage, conversationId) { success ->
                     if (!success) {
@@ -290,7 +283,7 @@ fun MessageBubble(
                     text = message.message, style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
                 )
                 Text(
-                    text = CC.getCurrentTime(message.timeStamp),
+                    text = CC.getFormattedTime(message.timeStamp),
                     style = CC.descriptionTextStyle(context),
                     fontSize = 10.sp,
                     textAlign = TextAlign.End,
