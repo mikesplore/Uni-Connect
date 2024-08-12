@@ -8,130 +8,180 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.Main)
+val chatViewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDao) {
-val database = FirebaseDatabase.getInstance().getReference()
+    private val database = FirebaseDatabase.getInstance().getReference()
 
     fun fetchChats(path: String, onResult: (List<ChatEntity>) -> Unit) {
-        viewModelScope.launch {
+        chatViewModelScope.launch {
+            // Fetch from Room database first
             val cachedChats = chatDao.getChats(path)
             if (cachedChats.isNotEmpty()) {
                 onResult(cachedChats)
-            } else {
-                database.child(path).addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val chats = mutableListOf<ChatEntity>()
-                        for (childSnapshot in snapshot.children) {
-                            val chat = childSnapshot.getValue(ChatEntity::class.java)
-                            chat?.let { chats.add(it) }
-                        }
-                        viewModelScope.launch {
-                            chatDao.insertChats(chats)
-                            onResult(chats)
-                        }
+            }
+
+            // Fetch from Firebase and update Room database
+            database.child(path).addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val chats = mutableListOf<ChatEntity>()
+                    for (childSnapshot in snapshot.children) {
+                        val chat = childSnapshot.getValue(ChatEntity::class.java)
+                        chat?.let { chats.add(it) }
                     }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        // Handle the read error (e.g., log the error)
-                        println("Error reading chats: ${error.message}")
+                    // Update Room database and notify UI with fresh data
+                    chatViewModelScope.launch {
+                        chatDao.insertChats(chats)
+                        onResult(chats)
                     }
-                })
-            }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    println("Error reading chats: ${error.message}")
+                }
+            })
         }
     }
 
-    fun saveGroup(group: GroupEntity, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            groupDao.insertGroups(listOf(group))
-            database.child("Groups").child(group.id).setValue(group).addOnCompleteListener { success ->
-                if (success.isSuccessful) {
-                    onComplete(true)
-                } else {
-                    onComplete(false)
-                }
+    fun saveChat(chat: ChatEntity, path: String, onComplete: (Boolean) -> Unit) {
+        chatViewModelScope.launch {
+            try {
+                // Save to Room database first
+                chatDao.insertChats(listOf(chat))
+
+                // Then save to Firebase
+                database.child(path).push().setValue(chat)
+                    .addOnCompleteListener { task ->
+                        onComplete(task.isSuccessful)
+                    }
+                    .addOnFailureListener { exception ->
+                        println("Error saving chat: ${exception.message}")
+                        onComplete(false)
+                    }
+            } catch (e: Exception) {
+                println("Error saving chat locally: ${e.message}")
+                onComplete(false)
             }
         }
     }
 
     fun fetchGroups(onResult: (List<GroupEntity>) -> Unit) {
-        database.child("Groups").addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val groups = mutableListOf<GroupEntity>()
-                for (childSnapshot in snapshot.children) {
-                    val group = childSnapshot.getValue(GroupEntity::class.java)
-                    group?.let { groups.add(it) }
-                }
-                viewModelScope.launch {
-                    groupDao.insertGroups(groups) // Update the cache
-                    onResult(groups)
-                }
+        chatViewModelScope.launch {
+            // Fetch from Room database first
+            val cachedGroups = groupDao.getGroups()
+            if (cachedGroups.isNotEmpty()) {
+                onResult(cachedGroups)
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                println("Error reading groups: ${error.message}")
-            }
-        })
+            // Fetch from Firebase and update Room database
+            database.child("Groups").addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val groups = mutableListOf<GroupEntity>()
+                    for (childSnapshot in snapshot.children) {
+                        val group = childSnapshot.getValue(GroupEntity::class.java)
+                        group?.let { groups.add(it) }
+                    }
+
+                    // Update Room database and notify UI with fresh data
+                    chatViewModelScope.launch {
+                        groupDao.insertGroups(groups)
+                        onResult(groups)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    println("Error reading groups: ${error.message}")
+                }
+            })
+        }
     }
 
-    fun fetchGroupByID(groupID: String, onResult: (GroupEntity?) -> Unit) {
-        viewModelScope.launch {
-            val cachedGroup = groupDao.getGroups().find { it.id == groupID }
-            if (cachedGroup != null) {
-                onResult(cachedGroup)
-            } else {
-                database.child("Groups").child(groupID).get().addOnSuccessListener { snapshot ->
-                    val group = snapshot.getValue(GroupEntity::class.java)
-                    viewModelScope.launch {
-                        if (group != null) {
-                            groupDao.insertGroups(listOf(group))
-                        }
-                        onResult(group)
+    fun saveGroup(group: GroupEntity, onComplete: (Boolean) -> Unit) {
+        chatViewModelScope.launch {
+            try {
+                // Save to Room database first
+                groupDao.insertGroups(listOf(group))
+
+                // Then save to Firebase
+                database.child("Groups").child(group.id).setValue(group)
+                    .addOnCompleteListener { task ->
+                        onComplete(task.isSuccessful)
                     }
-                }.addOnFailureListener { exception ->
-                    println("Error fetching group: ${exception.message}")
-                    onResult(null)
-                }
+                    .addOnFailureListener { exception ->
+                        println("Error saving group: ${exception.message}")
+                        onComplete(false)
+                    }
+            } catch (e: Exception) {
+                println("Error saving group locally: ${e.message}")
+                onComplete(false)
             }
         }
     }
 
-    fun saveChat(chat: ChatEntity, path: String, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            chatDao.insertChats(listOf(chat))
-            database.child(path).push().setValue(chat)
-                .addOnCompleteListener {
-                    onComplete(true)
+    fun fetchGroupByID(groupID: String, onResult: (GroupEntity?) -> Unit) {
+        chatViewModelScope.launch {
+            // Fetch from Room database first
+            val cachedGroup = groupDao.getGroups().find { it.id == groupID }
+            if (cachedGroup != null) {
+                onResult(cachedGroup)
+            }
+
+            // Fetch from Firebase and update Room database
+            database.child("Groups").child(groupID).get().addOnSuccessListener { snapshot ->
+                val group = snapshot.getValue(GroupEntity::class.java)
+                chatViewModelScope.launch {
+                    if (group != null) {
+                        groupDao.insertGroups(listOf(group))
+                    }
+                    onResult(group)
                 }
-                .addOnFailureListener {
-                    onComplete(false)
-                }
+            }.addOnFailureListener { exception ->
+                println("Error fetching group: ${exception.message}")
+                onResult(null)
+            }
         }
     }
 
     fun deleteChat(chatId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        viewModelScope.launch {
-            chatDao.deleteChat(chatId)
-            database.child(chatId).removeValue()
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener { exception ->
-                    onFailure(exception)
-                }
+        chatViewModelScope.launch {
+            try {
+                // Delete from Room database first
+                chatDao.deleteChat(chatId)
+
+                // Then delete from Firebase
+                database.child(chatId).removeValue()
+                    .addOnSuccessListener {
+                        onSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
+            } catch (e: Exception) {
+                println("Error deleting chat locally: ${e.message}")
+                onFailure(e)
+            }
         }
     }
 
-    fun deleteGroup(groupId: String, oComplete: () -> Unit) {
-        viewModelScope.launch {
-            groupDao.deleteGroup(groupId)
-            database.child("Groups").child(groupId).removeValue()
-                .addOnSuccessListener {
-                    oComplete()
-                }
-                .addOnFailureListener { exception ->
-                    println("Error deleting group: ${exception.message}")
-                }
+    fun deleteGroup(groupId: String, onComplete: () -> Unit) {
+        chatViewModelScope.launch {
+            try {
+                // Delete from Room database first
+                groupDao.deleteGroup(groupId)
+
+                // Then delete from Firebase
+                database.child("Groups").child(groupId).removeValue()
+                    .addOnSuccessListener {
+                        onComplete()
+                    }
+                    .addOnFailureListener { exception ->
+                        println("Error deleting group: ${exception.message}")
+                    }
+            } catch (e: Exception) {
+                println("Error deleting group locally: ${e.message}")
+            }
         }
     }
 }
+
