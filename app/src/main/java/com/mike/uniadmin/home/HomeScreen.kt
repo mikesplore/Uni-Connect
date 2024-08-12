@@ -115,7 +115,6 @@ import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
-import com.mike.uniadmin.chat.TargetUser
 import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
@@ -844,6 +843,9 @@ fun UserItem(
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
     val signedInUser by viewModel.signedInUser.observeAsState()
+    LaunchedEffect(Unit) {
+        viewModel.getSignedInUser()
+    }
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -861,8 +863,7 @@ fun UserItem(
                 .background(CC.tertiary(), CircleShape)
                 .clip(CircleShape)
                 .combinedClickable(onClick = {
-                    TargetUser.targetUserId.value = user.id
-                    navController.navigate("uniChat")
+                    navController.navigate("chat/${user.id}")
                 }, onLongClick = {
                     visible = !visible
                 })
