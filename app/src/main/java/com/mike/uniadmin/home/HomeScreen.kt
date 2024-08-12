@@ -343,17 +343,6 @@ fun ModalNavigationDrawerItem(
                     chatViewModel.fetchGroups()
                     navController.navigate("uniChat")
                 })
-            SideBarItem(icon = Icons.Default.Groups,
-                text = "Groups",
-                context,
-                onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    userViewModel.fetchUsers()
-                    chatViewModel.fetchGroups()
-                    navController.navigate("groups")
-                })
             SideBarItem(icon = Icons.Default.Notifications,
                 text = "Notifications",
                 context,
