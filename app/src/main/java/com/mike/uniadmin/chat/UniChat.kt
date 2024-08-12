@@ -1,6 +1,8 @@
 package com.mike.uniadmin.chat
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,8 +26,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -46,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -290,7 +302,7 @@ fun UserMessageCard(
                     .clip(CircleShape)
                     .size(50.dp)
             ) {
-                ProfileImage(currentUser = userEntity)
+                ProfileImage(currentUser = userEntity, context, navController)
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -363,22 +375,99 @@ fun UserMessageCard(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileImage(currentUser: UserEntity?) {
+fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavController) {
+    var showDialog by remember { mutableStateOf(false) }
+
     if (currentUser?.profileImageLink?.isNotBlank() == true) {
         AsyncImage(
             model = currentUser.profileImageLink,
             contentDescription = "Profile Image",
             modifier = Modifier
                 .clip(CircleShape)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clickable { showDialog = true }, // Make the image clickable
             contentScale = ContentScale.Crop
         )
     } else {
         Image(
             painter = painterResource(id = R.drawable.student),
             contentDescription = "Profile Image",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { showDialog = true } // Make the image clickable
+        )
+    }
+
+    if (showDialog) {
+        BasicAlertDialog(
+            onDismissRequest = { showDialog = false },
+            content = {
+                Column(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .width(200.dp)
+                        .height(250.dp)
+                        .background(Color.Transparent)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ){
+                        AsyncImage(
+                            model = currentUser?.profileImageLink ?: "", // Handle null image
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Row(
+                            modifier = Modifier
+                                .height(30.dp)
+                                .background(CC.primary().copy(0.5f))
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            currentUser?.let { user ->
+                                Text("${user.firstName} ${user.lastName}", style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                                    modifier = Modifier.padding(start = 10.dp))
+                            }
+                        }
+
+                        Row(modifier = Modifier
+                            .fillMaxWidth()
+                            .background(CC.primary())
+                            .align(Alignment.BottomCenter),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceAround) {
+
+                            IconButton(onClick = {
+                                navController.navigate("chat/${currentUser?.id}")
+                                showDialog = false // Close dialog after navigating
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Message,
+                                    contentDescription = "Chat",
+                                    tint = CC.textColor() // Use a custom color from your theme
+                                )
+                            }
+                            IconButton(onClick = {
+                                val phoneNumber = currentUser?.phoneNumber ?: "" // Handle null phone number
+                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+                                context.startActivity(intent)
+                                showDialog = false // Close dialog after initiating call
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Call,
+                                    contentDescription = "Call",
+                                    tint = CC.textColor() // Use a custom color from your theme
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         )
     }
 }
@@ -419,90 +508,3 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
     }
 }
 
-//@Composable
-//fun ClosedChat(context: Context,  usersLoading: Boolean, users: List<UserEntity>?){
-//        Column(
-//            modifier = Modifier
-//                .verticalScroll(rememberScrollState())
-//                .fillMaxSize()
-//                .padding(16.dp), // Add padding for better spacing
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Image(
-//                painter = painterResource(R.drawable.logo),
-//                contentDescription = "App Logo" // Add content description
-//            )
-//            Spacer(modifier = Modifier.height(16.dp)) // Add space after logo
-//
-//            Text(
-//                text = "Uni Chat",
-//                style = CC.titleTextStyle(context).copy(fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-//            )
-//            Spacer(modifier = Modifier.height(8.dp)) // Add space after title
-//
-//            Text(
-//                text = "Select a user profile to start chatting! 📱",
-//                style = CC.descriptionTextStyle(context).copy(fontSize = 16.sp)
-//            )
-//            Spacer(modifier = Modifier.height(24.dp)) // Add space before subtitles
-//
-//            // User Status Indicators
-//            Text("User Status Indicators", style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
-//            Spacer(modifier = Modifier.height(12.dp))
-//
-//            StatusIndicatorRow(color = CC.secondary(), text = "Recently Online", context)
-//            StatusIndicatorRow(color = Color.Green, text = "Currently Online", context)
-//            StatusIndicatorRow(color = Color.Red, text = "Never Been Online ", context)
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            // Chat Feature Information
-//            Text("Chat Features", style = CC.titleTextStyle(context).copy(fontSize = 18.sp), fontWeight = FontWeight.Bold)
-//            Spacer(modifier = Modifier.height(12.dp))
-//
-//            Text("• Click a user to open the chat. 💬", style = CC.descriptionTextStyle(context))
-//            Text("• Long press a user to close the current chat. 🔒", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center))
-//            Spacer(modifier = Modifier.height(8.dp))
-//
-//            Text(
-//                "Note: To optimize Firebase storage, this chat feature currently supports text messages only. 📄",
-//                style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
-//            )
-//            Spacer(modifier = Modifier.height(24.dp)) // Add space after chat features
-//
-//            Text(
-//                "• Perhaps you may need to select a random user below to start chatting! 😀🗨️",
-//                style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
-//            )
-//            Spacer(modifier = Modifier.height(24.dp)) // Add space after chat features
-//
-//            if (usersLoading) {
-//                CircularProgressIndicator(
-//                    color = CC.textColor(),
-//                    strokeWidth = 1.dp,
-//                    modifier = Modifier.size(30.dp)
-//                )
-//            } else {
-//                LazyRow(
-//                    modifier = Modifier.height(50.dp),
-//                    horizontalArrangement = Arrangement.spacedBy((-8).dp)
-//                ) {
-//                    items(users ?: emptyList()) { user -> // Handle null or empty list
-//                        Box(
-//                            modifier = Modifier
-//                                .clickable {
-//                                    TargetUser.targetUserId.value = user.id
-//                                }
-//                                .size(50.dp)
-//                                .border(1.dp, CC.textColor(), CircleShape)
-//                                .clip(CircleShape)
-//                        ) {
-//                            ProfileImage(currentUser = user)
-//                        }
-//                    }
-//                }
-//            }
-//            Spacer(modifier = Modifier.height(24.dp)) // Add space after LazyRow
-//
-//            Text("Happy Chatting! 🎉", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
-//        }
-//}
