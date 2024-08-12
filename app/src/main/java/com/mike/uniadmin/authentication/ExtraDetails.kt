@@ -184,7 +184,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                                     notificationViewModel.writeNotification(
                                         notificationEntity = NotificationEntity(
                                             name = firstName,
-                                            userId = userId ,
+                                            userId = userId,
                                             id = id,
                                             category = "New User",
                                             title = "$firstName Joined Uni Admin!",

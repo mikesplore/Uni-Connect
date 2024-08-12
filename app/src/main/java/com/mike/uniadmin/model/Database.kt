@@ -1,6 +1,5 @@
 package com.mike.uniadmin.model
 
-import android.content.Context
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -13,9 +12,7 @@ import java.util.Calendar
 import java.util.Locale
 
 data class Update(
-    val id: String = "",
-    val version: String = "",
-    val updateLink: String = ""
+    val id: String = "", val version: String = "", val updateLink: String = ""
 )
 
 
@@ -112,13 +109,6 @@ object MyDatabase {
         }
     }
 
-    fun generateScreenTimeID(onLastDateGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
-            val dateCode = "ST$newCode$year"
-            onLastDateGenerated(dateCode) // Pass the generated index number to the callback
-        }
-    }
-
     fun getUpdate(onResult: (Update?) -> Unit) {
         val updatesRef = database.child("Updates")
         updatesRef.get().addOnSuccessListener { snapshot ->
@@ -166,24 +156,24 @@ object MyDatabase {
         database.child("Course Resources").child(courseId).child(section.name).push().setValue(item)
             .addOnSuccessListener {
                 // Data successfully written
-            }
-            .addOnFailureListener { exception ->
+            }.addOnFailureListener { exception ->
                 Log.e("FirebaseError", "Error writing item: ${exception.message}")
                 // Handle the write error
             }
     }
 
     fun readItems(courseId: String, section: Section, onItemsRead: (List<GridItem>) -> Unit) {
-        database.child("Course Resources").child(courseId).child(section.name).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val items = snapshot.children.mapNotNull { it.getValue(GridItem::class.java) }
-                onItemsRead(items)
-            }
+        database.child("Course Resources").child(courseId).child(section.name)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val items = snapshot.children.mapNotNull { it.getValue(GridItem::class.java) }
+                    onItemsRead(items)
+                }
 
-            override fun onCancelled(error: DatabaseError) {
-                onItemsRead(emptyList())
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    onItemsRead(emptyList())
+                }
+            })
     }
 
     fun deleteItem(courseId: String, section: Section, item: GridItem) {
@@ -192,11 +182,9 @@ object MyDatabase {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (child in snapshot.children) {
                     if (child.getValue(GridItem::class.java) == item) {
-                        child.ref.removeValue()
-                            .addOnSuccessListener {
+                        child.ref.removeValue().addOnSuccessListener {
                                 // Item successfully deleted
-                            }
-                            .addOnFailureListener { exception ->
+                            }.addOnFailureListener { exception ->
                                 Log.e("FirebaseError", "Error deleting item: ${exception.message}")
                                 // Handle the deletion error
                             }
@@ -211,69 +199,6 @@ object MyDatabase {
         })
     }
 
-
-
-    fun saveScreenTime(
-        screenTime: ScreenTime,
-        onSuccess: () -> Unit,
-        onFailure: (Exception?) -> Unit
-    ) {
-        val screenTimeRef = database.child("ScreenTime").child(screenTime.id)
-        screenTimeRef.setValue(screenTime).addOnSuccessListener {
-            onSuccess()
-        }.addOnFailureListener { exception ->
-            onFailure(exception)
-        }
-    }
-
-    fun writeScren(courseScreen: Screens, onSuccess: () -> Unit) {
-        database.child("Screens").child(courseScreen.screenId).setValue(courseScreen)
-            .addOnSuccessListener {
-                onSuccess()
-            }.addOnFailureListener {}
-    }
-
-    fun getScreenTime(screenID: String, onScreenTimeFetched: (ScreenTime?) -> Unit) {
-        val screenTimeRef = database.child("ScreenTime").child(screenID)
-        screenTimeRef.get().addOnSuccessListener { snapshot ->
-            if (snapshot.exists()) {
-                val retrievedScreenTime = snapshot.getValue(ScreenTime::class.java)
-                onScreenTimeFetched(retrievedScreenTime)
-            } else {
-                onScreenTimeFetched(null)
-            }
-        }.addOnFailureListener {
-            onScreenTimeFetched(null)
-        }
-    }
-
-    fun getAllScreenTimes(onScreenTimesFetched: (List<ScreenTime>) -> Unit) {
-        val screenTimeRef = database.child("ScreenTime")
-        screenTimeRef.get().addOnSuccessListener { snapshot ->
-            val screenTimes = mutableListOf<ScreenTime>()
-            for (childSnapshot in snapshot.children) {
-                val screenTime = childSnapshot.getValue(ScreenTime::class.java)
-                screenTime?.let { screenTimes.add(it) }
-            }
-            onScreenTimesFetched(screenTimes)
-        }.addOnFailureListener {
-            onScreenTimesFetched(emptyList()) // Return an empty list on failure
-        }
-    }
-
-    fun getScreenDetails(screenID: String, onScreenDetailsFetched: (Screens?) -> Unit) {
-        val screenDetailsRef = database.child("Screens").child(screenID)
-        screenDetailsRef.get().addOnSuccessListener { snapshot ->
-            if (snapshot.exists()) {
-                val screenDetails = snapshot.getValue(Screens::class.java)
-                onScreenDetailsFetched(screenDetails)
-            } else {
-                onScreenDetailsFetched(null)
-            }
-        }.addOnFailureListener {
-            onScreenDetailsFetched(null)
-        }
-    }
 
     fun updatePassword(newPassword: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser
@@ -304,15 +229,11 @@ object MyDatabase {
     }
 
 
-
-
     fun writeFeedback(feedback: Feedback, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
         val feedbackRef = database.child("Feedback").child(feedback.id)
-        feedbackRef.setValue(feedback)
-            .addOnSuccessListener {
+        feedbackRef.setValue(feedback).addOnSuccessListener {
                 onSuccess() // Callback on successful write
-            }
-            .addOnFailureListener { exception ->
+            }.addOnFailureListener { exception ->
                 onFailure(exception) // Callback on failure with exception
             }
     }
@@ -324,10 +245,10 @@ object MyDatabase {
     }
 
 
-
     fun loadAttendanceRecords(onAttendanceRecordsLoaded: (List<AttendanceRecord>?) -> Unit) {
         database.child("attendanceRecords").get().addOnSuccessListener { snapshot ->
-            val attendanceRecords = snapshot.children.mapNotNull { it.getValue(AttendanceRecord::class.java) }
+            val attendanceRecords =
+                snapshot.children.mapNotNull { it.getValue(AttendanceRecord::class.java) }
             onAttendanceRecordsLoaded(attendanceRecords)
         }.addOnFailureListener {
             onAttendanceRecordsLoaded(null)
@@ -345,7 +266,7 @@ object MyDatabase {
 
 
     fun writeUserActivity(userState: UserStateEntity, onSuccess: (Boolean) -> Unit) {
-        userState.userID?.let {
+        userState.userID.let {
             database.child("Users Online Status").child(it).setValue(userState)
                 .addOnSuccessListener {
                     onSuccess(true)

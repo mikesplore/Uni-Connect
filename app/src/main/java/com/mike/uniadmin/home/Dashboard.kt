@@ -148,8 +148,6 @@ fun Dashboard(navController: NavController, context: Context) {
     var currentUser by remember { mutableStateOf(UserEntity()) }
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
     val coursesLoading by courseViewModel.isLoading.observeAsState()
-    val timetablesLoading by timetableViewModel.isLoading.observeAsState()
-
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     val courseName by remember { mutableStateOf(fetchedCourse?.courseName) }
 

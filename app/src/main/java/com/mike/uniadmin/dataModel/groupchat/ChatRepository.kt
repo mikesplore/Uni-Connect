@@ -51,7 +51,7 @@ class ChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDa
                 chatDao.insertChats(listOf(chat))
 
                 // Then save to Firebase
-                database.child(path).push().setValue(chat)
+                database.child(path).setValue(chat)
                     .addOnCompleteListener { task ->
                         onComplete(task.isSuccessful)
                     }
