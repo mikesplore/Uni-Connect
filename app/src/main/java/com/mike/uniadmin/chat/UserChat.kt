@@ -285,7 +285,7 @@ fun MessageBubble(
                 Text(
                     text = CC.getFormattedTime(message.timeStamp),
                     style = CC.descriptionTextStyle(context),
-                    fontSize = 10.sp,
+                    fontSize = 13.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .align(Alignment.End)
@@ -364,7 +364,7 @@ fun TopAppBarComponent(
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(name, style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
-                Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 8.sp))
+                Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp))
             }
         }
     },
@@ -517,7 +517,7 @@ fun RowMessage(context: Context) {
             Text(
                 text = "Chats are end-to-end encrypted",
                 modifier = Modifier.padding(5.dp),
-                style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
+                style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
 
             )
         }
