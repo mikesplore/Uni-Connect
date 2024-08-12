@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -184,13 +186,16 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     Scaffold(
         topBar = {
             if (user2 != null) {
-                TopAppBarComponent(name = user2!!.firstName,
+                TopAppBarComponent(
+                    navController = navController,
+                    name = user2!!.firstName,
                     context = context,
                     user = user2!!,
                     userState = myUserState,
                     onValueChange = {
                         isSearchVisible = !isSearchVisible
-                    })
+                    }
+                )
             }
         }, containerColor = CC.primary()
     ) { innerPadding ->
@@ -326,6 +331,7 @@ fun SearchTextField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarComponent(
+    navController: NavController,
     name: String,
     context: Context,
     user: UserEntity,
@@ -338,6 +344,19 @@ fun TopAppBarComponent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 8.dp)
         ) {
+            IconButton(onClick = {
+                navController.navigate("uniChat"){
+                    popUpTo("chat/${user.id}"){
+                        inclusive = true
+                    }
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Back",
+                    tint = CC.textColor()
+                )
+            }
             Box(
                 contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)
             ) {
@@ -362,8 +381,12 @@ fun TopAppBarComponent(
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight(),
+            ) {
                 Text(name, style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp))
             }
         }
@@ -462,45 +485,6 @@ fun ChatInput(
     }
 }
 
-@Composable
-fun ChatTextField(
-    modifier: Modifier = Modifier,
-    context: Context,
-    input: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit
-) {
-    BasicTextField(
-        value = input,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .heightIn(min = 40.dp, max = 200.dp)
-            .background(CC.primary(), RoundedCornerShape(24.dp)), // Add background here
-        textStyle = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
-        decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = CC.textColor(),
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                    .padding(8.dp), // Add padding within the box
-                contentAlignment = Alignment.CenterStart
-            ) {
-                if (input.text.isEmpty()) {
-                    Text(
-                        text = "Message",
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                    )
-                }
-                innerTextField()  // Render the actual text field
-            }
-        },
-        cursorBrush = SolidColor(CC.textColor()) // Set cursor color
-    )
-}
 
 @Composable
 fun RowMessage(context: Context) {
