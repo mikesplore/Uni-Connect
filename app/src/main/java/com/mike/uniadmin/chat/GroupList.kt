@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.AlertDialog
@@ -57,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -69,7 +71,6 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
-
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object GroupDetails {
@@ -111,18 +112,14 @@ fun UniGroups(context: Context, navController: NavController) {
 
     val userGroups = groups.filter { it.members.contains(fetchedUserDetails?.id) }
     Scaffold(topBar = {
-        TopAppBar(title = {}, actions = {
-            IconButton(onClick = { showAddGroup = !showAddGroup}) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Add Group",
-                    tint = CC.textColor()
-                )
-            }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = CC.primary(), titleContentColor = CC.textColor()
-        )
-        )
+        IconButton(
+            onClick = {showAddGroup = !showAddGroup}) {
+            Icon(
+                imageVector = if (showAddGroup) Icons.Default.Close else Icons.Default.Add,
+                contentDescription = "Add Group",
+                tint = CC.textColor()
+            )
+        }
     }) {
         Column(
             modifier = Modifier
@@ -145,23 +142,6 @@ fun UniGroups(context: Context, navController: NavController) {
                         onComplete = { showAddGroup = false })
                 }
             }
-            Row(
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-
-            ) {
-                Text(
-                    "Uni Groups",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 35.sp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             if (userGroups.isEmpty()) {
                 Text(
                     text = "No groups available",
@@ -183,6 +163,7 @@ fun UniGroups(context: Context, navController: NavController) {
                                     userViewModel,
                                     it1
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }
@@ -202,8 +183,7 @@ fun AddGroupSection(
 ) {
     var groupName by remember { mutableStateOf("") }
     var groupDescription by remember { mutableStateOf("") }
-    var selectedMembers by remember { mutableStateOf(setOf<String>()) }
-    var expanded by remember { mutableStateOf(false) }
+    var selectedMembers by remember { mutableStateOf(setOf(signedInUser.id)) } // Include the admin by default
     var imageLink by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -211,9 +191,28 @@ fun AddGroupSection(
         modifier = Modifier
             .background(CC.primary())
             .padding(16.dp)
+            .fillMaxWidth()
     ) {
+        // Title for the group creation section
+        Text(
+            text = "Create New Group",
+            style = CC.titleTextStyle(context).copy(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = CC.textColor()
+            ),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Group Name Input
         CC.SingleLinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(CC.secondary(), shape = RoundedCornerShape(10.dp))
+                .padding(8.dp),
             value = groupName,
             onValueChange = { groupName = it },
             label = "Group Name",
@@ -222,9 +221,15 @@ fun AddGroupSection(
             context = context
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Group Description Input
         CC.SingleLinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(CC.secondary(), shape = RoundedCornerShape(10.dp))
+                .padding(8.dp),
             value = groupDescription,
             onValueChange = { groupDescription = it },
             label = "Description",
@@ -233,57 +238,65 @@ fun AddGroupSection(
             context = context
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Group Image Link Input
         CC.SingleLinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(CC.secondary(), shape = RoundedCornerShape(10.dp))
+                .padding(8.dp),
             value = imageLink,
             onValueChange = { imageLink = it },
-            label = "Image link",
+            label = "Image Link",
             enabled = true,
             singleLine = true,
             context = context
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { expanded = !expanded },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = CC.extraColor2(), contentColor = CC.textColor()
+
+        // Members Selection Title
+        Text(
+            text = "Choose Your Members",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                color = CC.textColor()
             ),
-            shape = RoundedCornerShape(10.dp),
-            modifier = Modifier.width(180.dp)
-        ) {
-            Text(
-                "Select Members",
-                modifier = Modifier.padding(8.dp),
-                style = CC.descriptionTextStyle(context)
-            )
-        }
+            modifier = Modifier.align(Alignment.Start)
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
-        if (expanded) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(users) { user ->
-                    UserSelectionItem(
-                        context = context,
-                        user = user,
-                        isSelected = selectedMembers.contains(user.id),
-                        onClick = {
-                            selectedMembers = if (selectedMembers.contains(user.id)) {
-                                selectedMembers - user.id
-                            } else {
-                                selectedMembers + user.id
-                            }
+
+        // Users LazyRow for member selection
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(CC.secondary(), shape = RoundedCornerShape(10.dp))
+                .padding(8.dp)
+        ) {
+            items(users) { user ->
+                UserSelectionItem(
+                    context = context,
+                    user = user,
+                    isSelected = selectedMembers.contains(user.id),
+                    onClick = {
+                        selectedMembers = if (selectedMembers.contains(user.id)) {
+                            selectedMembers - user.id
+                        } else {
+                            selectedMembers + user.id
                         }
-                    )
-                }
+                    }
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Create Group Button
         Button(
             onClick = {
                 if (groupName.isBlank() || groupDescription.isBlank()) {
@@ -302,26 +315,30 @@ fun AddGroupSection(
                         description = groupDescription,
                         groupImageLink = imageLink,
                         admin = signedInUser.id,
-                        members = selectedMembers.toList()
+                        members = selectedMembers.toList() // The admin is already included
                     )
                     chatViewModel.saveGroup(newGroup, onSuccess = {
                         isLoading = false
-                        expanded = false
                         groupDescription = ""
                         onComplete(true)
                         groupName = ""
                         imageLink = ""
+                        selectedMembers = setOf(signedInUser.id) // Reset with admin included
                         if (it) {
                             chatViewModel.fetchGroups()
                         }
                     })
                 }
             },
-            modifier = Modifier.align(Alignment.End),
+            modifier = Modifier
+                .align(Alignment.End)
+                .clip(RoundedCornerShape(10.dp))
+                .background(CC.extraColor1(), shape = RoundedCornerShape(10.dp))
+                .padding(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = CC.extraColor1(), contentColor = CC.textColor()
-            ),
-            shape = RoundedCornerShape(10.dp)
+                containerColor = CC.extraColor1(),
+                contentColor = CC.textColor()
+            )
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -333,6 +350,8 @@ fun AddGroupSection(
         }
     }
 }
+
+
 
 @Composable
 fun UserSelectionItem(
@@ -568,10 +587,12 @@ fun GroupItem(
                 modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = group.name, style = CC.titleTextStyle(context)
+                    text = group.name, style = CC.titleTextStyle(context), maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = group.description, style = CC.descriptionTextStyle(context)
+                    text = group.description, style = CC.descriptionTextStyle(context),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
         }
