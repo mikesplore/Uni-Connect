@@ -44,7 +44,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "uniChat") {
+    NavHost(navController = navController, startDestination = "homeScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
@@ -108,12 +108,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             DiscussionScreen(
                 navController, context, backStackEntry.arguments?.getString("groupId") ?: ""
             )
-        }
-
-        composable("groups",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
-        }) {
-            UniGroups(context, navController)
         }
 
         composable("moreDetails",  exitTransition = {
