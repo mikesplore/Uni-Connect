@@ -10,15 +10,19 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,30 +33,23 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.ui.theme.CommonComponents.primary
-import com.mike.uniadmin.ui.theme.CommonComponents.secondary
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Locale
-import kotlin.text.format
-import kotlin.text.lowercase
 
 
 object CommonComponents {
     private val calendar: Calendar = Calendar.getInstance()
     private val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+
     @Composable
     fun PasswordTextField(
         modifier: Modifier = Modifier,
@@ -72,7 +69,7 @@ object CommonComponents {
             value = value,
             onValueChange = onValueChange,
             textStyle = TextStyle(fontFamily = selectedFontFamily),
-            placeholder = {Text(text = label, fontFamily = selectedFontFamily, fontSize = 14.sp)},
+            placeholder = { Text(text = label, fontFamily = selectedFontFamily, fontSize = 14.sp) },
             singleLine = true,
             enabled = enabled,
             isError = isError,
@@ -126,7 +123,7 @@ object CommonComponents {
             value = value,
             onValueChange = onValueChange,
             textStyle = TextStyle(fontFamily = selectedFontFamily),
-            placeholder = {Text(text = label, fontFamily = selectedFontFamily, fontSize = 14.sp)},
+            placeholder = { Text(text = label, fontFamily = selectedFontFamily, fontSize = 14.sp) },
             singleLine = singleLine,
             enabled = enabled,
             isError = isError,
@@ -142,13 +139,13 @@ object CommonComponents {
 
     @Composable
     fun primary(): Color {
-        val  color = MaterialTheme.colorScheme.primary
+        val color = MaterialTheme.colorScheme.primary
         return color
     }
 
     @Composable
     fun secondary(): Color {
-        val  color = MaterialTheme.colorScheme.secondary
+        val color = MaterialTheme.colorScheme.secondary
         return color
     }
 
@@ -179,9 +176,7 @@ object CommonComponents {
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
-            fontFamily = selectedFontFamily,
-            color = color,
-            fontSize = 15.sp
+            fontFamily = selectedFontFamily, color = color, fontSize = 15.sp
         )
     }
 
@@ -199,30 +194,24 @@ object CommonComponents {
     }
 
 
-
     @Composable
     fun titleTextStyle(context: Context): TextStyle {
         val color = textColor()
         val currentFont = currentFontFamily(context) // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
-            fontFamily = selectedFontFamily,
-            color = color,
-            fontSize = 25.sp
+            fontFamily = selectedFontFamily, color = color, fontSize = 25.sp
         )
     }
+
     @Composable
     fun ColorProgressIndicator(modifier: Modifier = Modifier) {
         val infiniteTransition = rememberInfiniteTransition(label = "")
         val offsetX by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
+            initialValue = 0f, targetValue = 1f, animationSpec = infiniteRepeatable(
                 animation = tween(
-                    durationMillis = 1900,
-                    easing = LinearEasing
-                ),
-                repeatMode = RepeatMode.Restart
+                    durationMillis = 1900, easing = LinearEasing
+                ), repeatMode = RepeatMode.Restart
             ), label = ""
         )
 
@@ -248,7 +237,6 @@ object CommonComponents {
     }
 
 
-    
     @Composable
     fun appTextFieldColors(): TextFieldColors {
         return TextFieldDefaults.colors(
@@ -273,8 +261,9 @@ object CommonComponents {
     fun getFormattedTime(timestamp: String): String {
         val instant = Instant.ofEpochMilli(timestamp.toLong())
         val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        val timeFormat = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault())
-        return timeFormat.format(dateTime).lowercase(Locale.getDefault())
+        val timeFormat =
+            DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()) // Change pattern to "h:mm a"
+        return timeFormat.format(dateTime).uppercase(Locale.getDefault())
     }
 
     fun getCurrentDate(timestamp: String): String {
@@ -287,7 +276,8 @@ object CommonComponents {
 
     fun getRelativeDate(date: String): String {
         val todayTimestamp = getTimeStamp()
-        val yesterdayTimestamp = todayTimestamp.toLong() - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
+        val yesterdayTimestamp =
+            todayTimestamp.toLong() - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
 
         return when (date) {
             getCurrentDate(todayTimestamp) -> "Today"
@@ -295,14 +285,17 @@ object CommonComponents {
             else -> date
         }
     }
+
     fun getRelativeTime(timestamp: String): String {
         val todayTimestamp = System.currentTimeMillis()
-        val yesterdayTimestamp = todayTimestamp - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
+        val yesterdayTimestamp =
+            todayTimestamp - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
 
         return when {
             timestamp.toLong() >= todayTimestamp - (12 * 60 * 60 * 1000) -> { // Within the last 12 hours
                 getFormattedTime(timestamp) // Display time
             }
+
             isSameDay(timestamp.toLong(), todayTimestamp) -> "Today"
             isSameDay(timestamp.toLong(), yesterdayTimestamp) -> "Yesterday"
             else -> getCurrentDate(timestamp) // Display date
@@ -313,8 +306,9 @@ object CommonComponents {
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         val calendar1 = Calendar.getInstance().apply { timeInMillis = timestamp1 }
         val calendar2 = Calendar.getInstance().apply { timeInMillis = timestamp2 }
-        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
-                calendar1.get(Calendar.DAY_OF_YEAR) == calendar2.get(Calendar.DAY_OF_YEAR)
+        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) && calendar1.get(
+            Calendar.DAY_OF_YEAR
+        ) == calendar2.get(Calendar.DAY_OF_YEAR)
     }
 
 }
