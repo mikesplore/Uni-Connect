@@ -45,8 +45,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
@@ -61,6 +63,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -98,6 +102,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -111,7 +116,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
-import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
@@ -267,7 +271,6 @@ fun HomeScreen(
                         Screen.Home -> Dashboard(navController, context)
                         Screen.Assignments -> AssignmentScreen(context)
                         Screen.Announcements -> AnnouncementsScreen(context)
-                        Screen.Timetable -> TimetableScreen(context)
                         Screen.Attendance -> ManageAttendanceScreen(context)
                     }
                 }
@@ -603,52 +606,67 @@ fun ModalDrawerItem(
             .background(CC.primary())
             .fillMaxSize()
     ) {
-        Row(
+        Card(
             modifier = Modifier
-                .height(100.dp)
                 .fillMaxWidth()
                 .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+            elevation = CardDefaults.cardElevation(4.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = CC.extraColor1())
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .border(
-                        1.dp, CC.textColor(), CircleShape
-                    )
-                    .clip(CircleShape)
-                    .background(CC.secondary(), CircleShape)
-                    .size(70.dp),
-                contentAlignment = Alignment.Center
+                    .height(100.dp)
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (signedInUser?.profileImageLink?.isNotEmpty() == true) {
-                    AsyncImage(
-                        model = signedInUser?.profileImageLink,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
+                Box(
+                    modifier = Modifier
+                        .border(1.dp, CC.textColor(), CircleShape)
+                        .clip(CircleShape)
+                        .background(CC.secondary(), CircleShape)
+                        .size(70.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (signedInUser?.profileImageLink?.isNotEmpty() == true) {
+                        AsyncImage(
+                            model = signedInUser?.profileImageLink,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = "${signedInUser?.firstName?.get(0)}${signedInUser?.lastName?.get(0)}",
+                            style = CC.titleTextStyle(context)
+                                .copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        "${signedInUser?.firstName?.get(0)}${signedInUser?.lastName?.get(0)}",
-                        style = CC.titleTextStyle(context)
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
+                        text = "${signedInUser?.firstName} ${signedInUser?.lastName}",
+                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    signedInUser?.email?.let {
+                        Text(it, style = CC.descriptionTextStyle(context))
+                    }
+                    signedInUser?.id?.let {
+                        Text(it, style = CC.descriptionTextStyle(context))
+                    }
                 }
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(
-                modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    signedInUser?.firstName + " " + signedInUser?.lastName,
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                    maxLines = 2
-                )
-                signedInUser?.email?.let { Text(it, style = CC.descriptionTextStyle(context)) }
-                signedInUser?.id?.let { Text(it, style = CC.descriptionTextStyle(context)) }
-            }
         }
+
         Spacer(modifier = Modifier.height(20.dp))
         Text("Chat", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
         Spacer(modifier = Modifier.height(10.dp))
@@ -669,7 +687,7 @@ fun ModalDrawerItem(
         HorizontalDivider()
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            "Class Discussions",
+            "Group Discussions",
             style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -700,6 +718,7 @@ fun ModalDrawerItem(
                                 userViewModel,
                                 it
                             )
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
@@ -747,7 +766,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                 )
             }
 
-            Text("App theme", style = CC.descriptionTextStyle(context))
+            Text("Dark theme ", style = CC.descriptionTextStyle(context))
             Switch(
                 onCheckedChange = {
                     DeviceTheme.darkMode.value = it

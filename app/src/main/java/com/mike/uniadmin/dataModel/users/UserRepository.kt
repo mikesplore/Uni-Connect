@@ -244,35 +244,65 @@ class UserRepository
 
 
     fun writeAccountDeletionData(
-        accountDeletion: AccountDeletionEntity, onSuccess: (Boolean) -> Unit
+        accountDeletion: AccountDeletionEntity,
+        onSuccess: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
-            accountDeletionDao.insertAccountDeletion(accountDeletion)
-            database.child("Account Deletion").child(accountDeletion.id).setValue(accountDeletion)
-                .addOnSuccessListener {
-                    onSuccess(true)
-                }.addOnFailureListener {
-                    onSuccess(false)
-                }
+            try {
+                // Insert the account deletion data into the local database first
+                accountDeletionDao.insertAccountDeletion(accountDeletion)
+                Log.d("AccountDeletionStatus", "Inserted account deletion data into local database for userId: ${accountDeletion.id}")
+
+                // Write to Firebase
+                database.child("Account Deletion").child(accountDeletion.admissionNumber).setValue(accountDeletion)
+                    .addOnSuccessListener {
+                        Log.d("AccountDeletionStatus", "Account deletion data written to Firebase successfully for userId: ${accountDeletion.id}")
+                        onSuccess(true)
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("AccountDeletionStatus", "Failed to write account deletion data to Firebase: ${exception.message}")
+                        onSuccess(false)
+                    }
+            } catch (e: Exception) {
+                Log.e("AccountDeletionStatus", "Error during account deletion write operation: ${e.message}")
+                onSuccess(false)
+            }
         }
     }
 
     fun checkAccountDeletionData(userId: String, onComplete: (AccountDeletionEntity?) -> Unit) {
         viewModelScope.launch {
-            val cachedData = accountDeletionDao.getAccountDeletion(userId)
-            if (cachedData != null) {
-                onComplete(cachedData)
-            } else {
-                database.child("Account Deletion").child(userId).get()
-                    .addOnSuccessListener { snapshot ->
-                        val accountDeletion = snapshot.getValue(AccountDeletionEntity::class.java)
-                        accountDeletion?.let { onComplete(it) }
-                    }.addOnFailureListener {
-                        println("Error reading account deletion: ${it.message}")
-                    }
+            try {
+                // Attempt to retrieve the account deletion data from the local database first
+                val cachedData = accountDeletionDao.getAccountDeletion(userId)
+                if (cachedData != null) {
+                    Log.d("AccountDeletionStatus", "Fetched account deletion data from local database for userId: $userId")
+                    onComplete(cachedData)
+                } else {
+                    // Fetch from Firebase if not found locally
+                    database.child("Account Deletion").child(userId).get()
+                        .addOnSuccessListener { snapshot ->
+                            val accountDeletion = snapshot.getValue(AccountDeletionEntity::class.java)
+                            if (accountDeletion != null) {
+                                Log.d("AccountDeletionStatus", "Fetched account deletion data from Firebase for userId: $userId")
+                                onComplete(accountDeletion)
+                            } else {
+                                Log.d("AccountDeletionStatus", "No account deletion data found in Firebase for userId: $userId")
+                                onComplete(null)
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e("AccountDeletionStatus", "Error reading account deletion from Firebase: ${exception.message}")
+                            onComplete(null)
+                        }
+                }
+            } catch (e: Exception) {
+                Log.e("AccountDeletionStatus", "Error during account deletion fetch operation: ${e.message}")
+                onComplete(null)
             }
         }
     }
+
 
     fun writePreferences(preferences: UserPreferencesEntity, onSuccess: (Boolean) -> Unit) {
         preferences.studentID.let {

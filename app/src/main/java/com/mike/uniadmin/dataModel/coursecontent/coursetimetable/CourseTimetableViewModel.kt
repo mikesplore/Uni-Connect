@@ -17,8 +17,8 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
     private val _courseTimetables = MutableLiveData<List<CourseTimetable>>()
     val courseTimetables: LiveData<List<CourseTimetable>> = _courseTimetables
 
-    private val _timetablesToday = MutableLiveData<List<CourseTimetable>?>()
-    val timetablesToday: LiveData<List<CourseTimetable>?> = _timetablesToday
+    private val _timetablesToday = MutableLiveData<CourseTimetable?>()
+    val timetablesToday: MutableLiveData<CourseTimetable?> = _timetablesToday
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -59,8 +59,8 @@ class CourseTimetableViewModel(private val repository: CourseTimetableRepository
 
     fun getTimetableByDay(day: String) {
         _isLoading.value = true
-        repository.getTimetableByDay(day) { timetables ->
-            _timetablesToday.postValue(timetables) // Use postValue for background updates
+        repository.getTimetableByDay(day) { timetable ->
+            _timetablesToday.postValue(timetable?.firstOrNull()) // Use postValue for background updates
             _isLoading.postValue(false)
         }
     }

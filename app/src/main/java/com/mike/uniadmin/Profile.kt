@@ -142,14 +142,11 @@ fun ProfileScreen(navController: NavController, context: Context) {
             },
             containerColor = CC.primary()
         ) {
-            val brush  = Brush.verticalGradient(
-                colors = listOf(CC.primary(), CC.secondary())
-            )
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(it)
-                    .background(brush)
+                    .background(CC.primary())
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -451,13 +448,15 @@ fun MyDetails(
 fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavController) {
     val accountStatus by viewModel.accountStatus.observeAsState()
     val currentUser by viewModel.user.observeAsState()
-    LaunchedEffect(Unit) {
-        currentUser?.id?.let { viewModel.fetchAccountDeletionStatus(it) }
 
+    LaunchedEffect(currentUser?.id) {
+        Log.d("AccountDeletion", "Fetching account status for user: ${currentUser?.id}")
+        currentUser?.id?.let { viewModel.checkAccountDeletionData(it) }
+        Log.d("AccountDeletion", "Account Status: $accountStatus")
     }
-    
+
     if (accountStatus?.status == "pending") {
-        AccountDeletionRequests(userViewModel = viewModel, context = context, navController, auth = FirebaseAuth.getInstance())
+        AccountDeletionRequests(viewModel, context, navController, accountStatus!!, currentUser!!)
     } else {
         var showPuzzle by remember { mutableStateOf(false) }
         var puzzleWords by remember { mutableStateOf(generateRandomNonsenseWord()) }
@@ -467,15 +466,12 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
         var loading by remember { mutableStateOf(false) }
         var isError by remember { mutableStateOf(false) }
 
-
-
-
-
         Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
                 .imePadding()
-                .fillMaxWidth(0.9f), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth(0.9f),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row {
                 Text(
@@ -490,9 +486,9 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
             Button(
                 onClick = {
                     showPuzzle = !showPuzzle
-                }, colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.secondary()
-                ), shape = RoundedCornerShape(10.dp)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text("Solve a Puzzle before proceeding", style = CC.descriptionTextStyle(context))
             }
@@ -509,12 +505,17 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 TextField(
-                    value = userInput, textStyle = CC.titleTextStyle(context).copy(
-                        fontSize = 18.sp, color = if (isError) Color.Red else CC.textColor()
-                    ), onValueChange = {
+                    value = userInput,
+                    textStyle = CC.titleTextStyle(context).copy(
+                        fontSize = 18.sp,
+                        color = if (isError) Color.Red else CC.textColor()
+                    ),
+                    onValueChange = {
                         isError = false
                         userInput = it
-                    }, isError = isError, colors = TextFieldDefaults.colors(
+                    },
+                    isError = isError,
+                    colors = TextFieldDefaults.colors(
                         unfocusedIndicatorColor = CC.tertiary(),
                         focusedIndicatorColor = CC.tertiary(),
                         focusedContainerColor = Color.Transparent,
@@ -524,7 +525,9 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                         errorIndicatorColor = Color.Red,
                         errorContainerColor = CC.primary(),
                         cursorColor = CC.textColor()
-                    ), singleLine = true, modifier = Modifier
+                    ),
+                    singleLine = true,
+                    modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(60.dp)
                 )
@@ -543,21 +546,22 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                                 isError = true
                                 puzzleWords = generateRandomNonsenseWord()
                             }
-                        }, colors = ButtonDefaults.buttonColors(
-                            containerColor = CC.secondary()
-                        ), shape = RoundedCornerShape(10.dp)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text("Proceed", style = CC.descriptionTextStyle(context))
                     }
                     Button(
-                        onClick = { showPuzzle = false }, colors = ButtonDefaults.buttonColors(
-                            containerColor = CC.secondary()
-                        ), shape = RoundedCornerShape(10.dp)
+                        onClick = { showPuzzle = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text("Abort", style = CC.descriptionTextStyle(context))
                     }
                 }
-                if (showWarning) {
+
+                if (showWarning && !deleteConfirmed) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -609,45 +613,42 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                     Button(
                         onClick = {
                             deleteConfirmed = true
-                        }, colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Red
-                        ), shape = RoundedCornerShape(10.dp), modifier = Modifier.fillMaxWidth(0.9f)
+                            loading = true
+                                val account = currentUser?.let {
+                                    AccountDeletionEntity(
+                                        id = it.id,
+                                        email = it.email,
+                                        admissionNumber = it.id,
+                                        date = CC.getTimeStamp(),
+                                        status = "pending"
+                                    )
+                                }
+                                if (account != null) {
+                                    viewModel.writeAccountDeletionData(account, onSuccess = { success ->
+                                        loading = false
+                                        if (success) {
+                                            Log.d("ProfileScreen", "Account deletion data written successfully")
+                                            showWarning = false
+                                            showPuzzle = false
+                                        } else {
+                                            Log.d("ProfileScreen", "Failed to write account deletion data")
+                                            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
+                                        }
+                                    })
+                                }
+
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth(0.9f)
                     ) {
                         if (loading) {
                             CircularProgressIndicator(
                                 color = CC.primary(), modifier = Modifier.size(24.dp)
                             )
                         } else {
-                            Text(
-                                "Send Account Deletion Request",
-                                style = CC.descriptionTextStyle(context)
-                            )
+                            Text("Send Account Deletion Request", style = CC.descriptionTextStyle(context))
                         }
-                    }
-                }
-            }
-
-            if (deleteConfirmed) {
-                loading = true
-                generateAccountDeletionID { id ->
-                    val account = currentUser?.let {
-                        AccountDeletionEntity(
-                            id = id, admissionNumber = it.id, email = currentUser!!.email,
-                            status = "pending",
-
-                        )
-                    }
-                    if (account != null) {
-                        viewModel.writeAccountDeletionData(account, onSuccess = { success ->
-                            if (success) {
-                                loading = false
-                                showWarning = false
-                                showPuzzle = false
-                            } else {
-                                Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
-                            }
-
-                        })
                     }
                 }
             }
@@ -657,16 +658,16 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
 
 
 
+
 @Composable
 fun AccountDeletionRequests(
     userViewModel: UserViewModel,
     context: Context,
     navController: NavController,
-    auth: FirebaseAuth
+    accountStatus: AccountDeletionEntity,
+    user: UserEntity
 ) {
-    val accountStatus by userViewModel.accountStatus.observeAsState()
-    val user by userViewModel.user.observeAsState()
-
+    val auth = FirebaseAuth.getInstance()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -684,14 +685,14 @@ fun AccountDeletionRequests(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "You have a pending account deletion request that was initiated on ${accountStatus?.date}. Your account will be permanently deleted on ${accountStatus?.date?.plus(30)}.",
+                "You have a pending account deletion request that was initiated on ${CC.getCurrentDate(accountStatus.date)}. Your account will be permanently deleted after 30 days from this date.",
                 style = CC.descriptionTextStyle(context)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            if (accountStatus?.status == "pending") {
+            if (accountStatus.status == "pending") {
                 Button(
                     onClick = {
-                        user?.id?.let {
+                        user.id.let {
                             userViewModel.deleteAccount(it, onSuccess = { success ->
                                 if (success) {
                                     // Sign out the user

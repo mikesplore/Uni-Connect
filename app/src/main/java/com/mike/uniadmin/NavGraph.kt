@@ -20,17 +20,14 @@ import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
 import com.mike.uniadmin.chat.DiscussionScreen
 import com.mike.uniadmin.chat.UniChat
-import com.mike.uniadmin.chat.UniGroups
 import com.mike.uniadmin.chat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
 import com.mike.uniadmin.courseResources.CourseResources
-import com.mike.uniadmin.dataModel.users.ManageUsers
 import com.mike.uniadmin.home.Dashboard
 import com.mike.uniadmin.home.HomeScreen
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.settings.Settings
-import com.mike.uniadmin.timetable.TimetableScreen
 import com.mike.uniadmin.ui.theme.Appearance
 
 @OptIn(ExperimentalPagerApi::class)
@@ -41,7 +38,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val coroutineScope = rememberCoroutineScope()
 
     val screens = listOf(
-        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Timetable, Screen.Attendance
+        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
     )
 
     NavHost(navController = navController, startDestination = "homeScreen") {
@@ -62,11 +59,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             AssignmentScreen(context)
         }
 
-        composable("timetable",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
-        }) {
-            TimetableScreen(context)
-        }
 
         composable("dashboard",  exitTransition = {
             fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
@@ -120,12 +112,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
         }) {
             AnnouncementsScreen(context)
-        }
-
-        composable("manageUsers",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
-        }) {
-            ManageUsers(navController, context)
         }
 
         composable("notifications",  exitTransition = {

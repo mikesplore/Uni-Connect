@@ -141,18 +141,15 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                     )
                 }
             }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = CC.primary().copy(0.1f)
+                containerColor = CC.primary()
             )
             )
         }, containerColor = CC.primary()
     ) {
-        val backGround = Brush.verticalGradient(
-            colors = listOf(CC.primary(), CC.secondary())
-        )
 
         Column(
             modifier = Modifier
-                .background(backGround)
+                .background(CC.primary())
                 .verticalScroll(rememberScrollState())
                 .padding(it)
                 .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally

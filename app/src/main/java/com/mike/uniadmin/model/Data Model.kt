@@ -116,8 +116,6 @@ sealed class Screen(
         Icons.Filled.Home, Icons.Outlined.Home, "Home"
     )
 
-    data object Timetable :
-        Screen(Icons.Filled.CalendarToday, Icons.Outlined.CalendarToday, "Events")
 
     data object Assignments : Screen(
         Icons.AutoMirrored.Filled.Assignment, Icons.AutoMirrored.Outlined.Assignment, "Work"
@@ -146,30 +144,3 @@ val randomColor = listOf(
 
 
 
-//upon course click, we will get the course code that
-// will navigate us to the Course Screen
-//using this course code, we will fetch the course details
-//in the Courses Node(Course name and visits)
-//using the same code, we will search the course content in the
-// courseData Node (all the fields in the CourseAnnouncement)
-//then display them in the UI
-
-//defining our Node
-//root directory will be CourseData
-//under CourseData, we will have the course code as the key
-//under this node we will have the course data contents as defined
-// in our data class (CourseAnnouncement)
-//CourseData -> Root Node
-//CourseCode -> Key
-//CourseAnnouncements -> Sub Node
-//AnnouncementID ->Key
-//Title
-//Description
-//Date
-//Author
-
-// Data structure employed here is Hierarchical🌲 data structure
-//So the path to the courseAnnouncements data will be
-//CourseContent -> CourseCode -> CourseAnnouncements  -> AnnouncementID -> Announcement Content
-
-//the same logic applies to all other Sections of the Course

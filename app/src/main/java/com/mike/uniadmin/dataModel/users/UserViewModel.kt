@@ -134,12 +134,11 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
                         "Failed to write writeAccountDeletionData data"
                     )
                 }
-
             })
         }
     }
 
-    fun fetchAccountDeletionStatus(userID: String) {
+    fun checkAccountDeletionData(userID: String) {
         viewModelScope.launch {
             repository.checkAccountDeletionData(userID, onComplete = { fetchedAccountStatus ->
                 _accountStatus.value = fetchedAccountStatus

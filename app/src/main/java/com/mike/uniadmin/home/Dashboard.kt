@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -139,7 +140,7 @@ fun Dashboard(navController: NavController, context: Context) {
         factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
     )
     val fetchedCourse by courseViewModel.fetchedCourse.observeAsState()
-    val timetables by timetableViewModel.timetablesToday.observeAsState()
+    val timetable by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
     val user by userViewModel.user.observeAsState()
     val courses by courseViewModel.courses.observeAsState(emptyList())
@@ -161,13 +162,10 @@ fun Dashboard(navController: NavController, context: Context) {
         userViewModel.getSignedInUser()
         timetableViewModel.getTimetableByDay(CC.currentDay())
 
-        timetables?.let { timetableList ->
-            timetableList.forEach { timetable ->
-                // Launch a coroutine for each timetable item to fetch course details
-                launch {
-                    courseViewModel.getCourseDetailsByCourseID(timetable.courseID)
-                }
-            }
+        timetable?.let {
+            Log.d("TIMETABLE", it.toString())
+            courseViewModel.getCourseDetailsByCourseID(it.courseID)
+            Log.d("TIMETABLE", courseName.toString())
         }
 
         signedInUser?.email?.let {
@@ -345,168 +343,8 @@ fun Dashboard(navController: NavController, context: Context) {
                     AnnouncementCard(announcement, context)
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "${CC.currentDay()}'s timetable",
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-
-            if (timetablesLoading == true) {
-                LoadingTodayTimetable()
-            } else if (timetables==null) {
-                Row(
-                    modifier = Modifier
-                        .background(CC.extraColor1(), RoundedCornerShape(10.dp))
-                        .height(200.dp)
-                        .fillMaxWidth(0.9f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text("No timetable found for today", style = CC.descriptionTextStyle(context))
-                }
-            } else {
-                LazyRow {
-                    items(timetables!!) { timetable ->
-                        courseName?.let { TodayTimetable(it, timetable, context) }
-                    }
-                }
-            }
         }
     }
-}
-
-@Composable
-fun TodayTimetable(courseName: String, timetable: CourseTimetable, context: Context) {
-    Card(
-        modifier = Modifier
-            .padding(start = 20.dp, end = 20.dp)
-            .border(
-                1.dp,
-                CC.extraColor2().copy(0.5f),
-                RoundedCornerShape(10.dp)
-            )
-            .height(200.dp)
-            .padding(start = 10.dp, end = 10.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(
-            4.dp
-        ),
-        colors = CardDefaults.cardColors(
-            containerColor = CC.extraColor1()
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxSize()
-        ) {
-            Text(
-                courseName,
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Timelapse, "time", tint = CC.textColor()
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    "${timetable.startTime} to ${timetable.endTime}",
-                    style = CC.descriptionTextStyle(context)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.LocationOn, "Location", tint = CC.textColor()
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(timetable.venue, style = CC.descriptionTextStyle(context))
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxSize(1f), verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(10.dp))
-                Text("Please Keep Time!", style = CC.titleTextStyle(context))
-            }
-
-        }
-    }
-
-}
-
-@Composable
-fun LoadingTodayTimetable() {
-    Card(
-        modifier = Modifier
-            .padding(start = 20.dp, end = 20.dp)
-            .border(
-                1.dp,
-                CC
-                    .extraColor2()
-                    .copy(0.5f),
-                RoundedCornerShape(10.dp)
-            )
-            .height(200.dp)
-            .width(350.dp), elevation = CardDefaults.elevatedCardElevation(
-            4.dp
-        ), colors = CardDefaults.cardColors(
-            containerColor = CC.extraColor1()
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxSize()
-        ) {
-            CC.ColorProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(20.dp)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(30.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                CC.ColorProgressIndicator(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(30.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                CC.ColorProgressIndicator(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxSize(1f), verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(10.dp))
-                CC.ColorProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
-            }
-
-        }
-    }
-
 }
 
 
