@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -66,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -146,11 +148,11 @@ fun DiscussionScreen(
 
 
     Scaffold(topBar = {
-        GroupDetails.groupName.value?.let {
-            GroupDetails.groupImageLink.value?.let { it1 ->
+        GroupDetails.groupName.value?.let { groupName ->
+            GroupDetails.groupImageLink.value?.let { imageLink ->
                 ChatTopAppBar(navController = navController,
-                    name = it,
-                    link = it1,
+                    name = groupName,
+                    link = imageLink,
                     context = context,
                     onSearchClick = { isSearchVisible = !isSearchVisible },
                     onShowUsersClick = { showUsers = !showUsers })
@@ -307,7 +309,11 @@ fun ChatTopAppBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("homeScreen") }) {
+            IconButton(onClick = { navController.navigate("uniChat"){
+                popUpTo("GroupChat/${GroupDetails.groupName.value}"){
+                    inclusive = true
+                }
+            } }) {
                 Icon(
                     Icons.Default.ArrowBackIosNew,
                     contentDescription = "Back",
@@ -417,34 +423,47 @@ fun MessageInputRow(
             .imePadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedTextField(
+        BasicTextField(
             value = message,
-            textStyle = CC.descriptionTextStyle(context),
-            onValueChange = onMessageChange,
+            onValueChange =  onMessageChange,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp)
-                .heightIn(min = 0.dp, max = 100.dp),
-            placeholder = { Text(text = "Message", style = CC.descriptionTextStyle(context)) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = CC.primary(),
-                unfocusedIndicatorColor = CC.textColor(),
-                focusedIndicatorColor = CC.secondary(),
-                focusedTextColor = CC.textColor(),
-                unfocusedTextColor = CC.textColor(),
-                unfocusedContainerColor = CC.primary(),
-
-                ),
-            shape = RoundedCornerShape(24.dp),
-            singleLine = false
+                .padding(end = 8.dp) // Add padding to the right
+                .background(CC.secondary(), RoundedCornerShape(24.dp)) // Use surface color
+                .heightIn(min = 40.dp), // Minimum height
+            textStyle = CC.descriptionTextStyle(context),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier.padding(16.dp), // Increased padding
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    if (message.isEmpty()) {
+                        Text(
+                            text = "Message",
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        )
+                    }
+                    innerTextField()
+                }
+            },
+            cursorBrush = SolidColor(CC.textColor())
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(
-            onClick = onSendClick,
-            colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2()),
-            shape = RoundedCornerShape(10.dp)
+        IconButton(
+            onClick = {
+                if (message.isNotBlank()) { // Check for non-blank messages
+                    onMessageChange(message)
+                    onSendClick()
+                }
+            },
+            modifier = Modifier
+                .clip(CircleShape) // Circular button
+                .background(CC.secondary()) // Button background color
         ) {
-            Icon(Icons.AutoMirrored.Filled.Send, "Send")
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Send,
+                contentDescription = "Send",
+                tint = CC.extraColor2() // Icon color on secondary background
+            )
         }
     }
 }
@@ -537,7 +556,11 @@ fun ChatBubble(
             // Icon with first letter of sender's name, positioned outside the bubble
             Box(modifier = Modifier
                 .clickable {
-                    navController.navigate("chat/${chat.senderID}")
+                    navController.navigate("chat/${chat.senderID}"){
+                        popUpTo("chat/${chat.senderID}"){
+                            inclusive = true
+                        }
+                    }
                 }
                 .offset(x = (-16).dp, y = (-16).dp)
                 .size(24.dp)
