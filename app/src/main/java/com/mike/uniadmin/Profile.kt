@@ -56,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -141,10 +142,14 @@ fun ProfileScreen(navController: NavController, context: Context) {
             },
             containerColor = CC.primary()
         ) {
+            val brush  = Brush.verticalGradient(
+                colors = listOf(CC.primary(), CC.secondary())
+            )
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(it)
+                    .background(brush)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
