@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,26 +22,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Message
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,11 +59,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,7 +74,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
@@ -83,11 +83,12 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.home.UserItem
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun UniChat(navController: NavController, context: Context) {
     val messageAdmin = context.applicationContext as UniAdmin
@@ -121,8 +122,7 @@ fun UniChat(navController: NavController, context: Context) {
 
     val filteredUsers = users?.filter { user ->
         user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
-            searchQuery,
-            ignoreCase = true
+            searchQuery, ignoreCase = true
         ) || user.email.contains(searchQuery, ignoreCase = true)
     } ?: emptyList()
 
@@ -130,7 +130,23 @@ fun UniChat(navController: NavController, context: Context) {
         colors = listOf(CC.secondary(), CC.primary())
     )
 
-    Scaffold(containerColor = CC.secondary()) {
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    Scaffold(
+        containerColor = CC.secondary()
+    ) {
+        if (showBottomSheet) {
+            ModalBottomSheet(tonalElevation = 4.dp, sheetState = sheetState, onDismissRequest = {
+                scope.launch {
+                    sheetState.hide()
+                    showBottomSheet = false
+                }
+            }, containerColor = CC.primary()) {
+                UniChatReadME(context)
+            }
+        }
         Column(
             modifier = Modifier
                 .background(CC.primary())
@@ -138,14 +154,26 @@ fun UniChat(navController: NavController, context: Context) {
                 .padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .background(brush)
                     .height(100.dp)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+
             ) {
+                Row(
+                    modifier = Modifier.padding(start = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+
+                ) {
+                    IconButton(onClick = { navController.navigate("homeScreen") }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "Profile",
+                            tint = CC.textColor())
+                    }
                 Text(
                     text = "Uni Chat", style = CC.titleTextStyle(context).copy(
                         fontSize = 30.sp,
@@ -153,8 +181,15 @@ fun UniChat(navController: NavController, context: Context) {
                         brush = Brush.verticalGradient(
                             colors = listOf(CC.extraColor2(), CC.textColor(), CC.extraColor1())
                         )
-                    ), modifier = Modifier.fillMaxWidth(0.9f)
-                )
+                    ), modifier = Modifier.padding(start = 15.dp)
+                )}
+                IconButton(onClick = { showBottomSheet = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Book,
+                        contentDescription = "Documentation",
+                        tint = CC.textColor()
+                    )
+                }
             }
 
             val pagerState = rememberPagerState()
@@ -173,12 +208,11 @@ fun UniChat(navController: NavController, context: Context) {
                     contentColor = CC.textColor(),
                     selectedTabIndex = pagerState.currentPage,
                     indicator = { tabPositions ->
-                        // Custom animated indicator
                         val currentTabPosition = tabPositions[pagerState.currentPage]
                         Box(
                             Modifier
                                 .tabIndicatorOffset(currentTabPosition)
-                                .padding(4.dp)
+                                .padding(10.dp)
                                 .fillMaxHeight()
                                 .clip(RoundedCornerShape(10.dp))
                         )
@@ -193,13 +227,16 @@ fun UniChat(navController: NavController, context: Context) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(if (pagerState.currentPage == 0) CC.secondary() else CC.primary())
-                            .padding(16.dp)
+                            .height(40.dp)
+                            .fillMaxWidth(1f)
                     ) {
+
                         Text(
                             "Chats",
                             style = CC.descriptionTextStyle(context)
                                 .copy(if (pagerState.currentPage == 0) CC.textColor() else CC.secondary())
                         )
+
                     }
                     Tab(
                         selected = pagerState.currentPage == 1,
@@ -207,13 +244,24 @@ fun UniChat(navController: NavController, context: Context) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(if (pagerState.currentPage == 1) CC.secondary() else CC.primary())
-                            .padding(16.dp)
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight()
                     ) {
-                        Text("Groups", style = CC.descriptionTextStyle(context))
+                        Box(
+                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                        ) {
+                            Text("Groups", style = CC.descriptionTextStyle(context))
+                        }
                     }
                 }
             }
-
+            AnimatedVisibility(pagerState.currentPage == 0, enter = fadeIn(), exit = fadeOut()) {
+                LazyRow(modifier = Modifier.padding(start = 15.dp)) {
+                    items(users ?: emptyList()) { user ->
+                        UserItem(user, context, navController, userViewModel)
+                    }
+                }
+            }
             HorizontalPager(count = 2, state = pagerState) { page ->
                 when (page) {
                     0 -> {
@@ -391,84 +439,110 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
             contentScale = ContentScale.Crop
         )
     } else {
-        Image(
-            painter = painterResource(id = R.drawable.student),
-            contentDescription = "Profile Image",
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { showDialog = true } // Make the image clickable
-        )
+        Box(modifier = Modifier
+            .clickable { showDialog = true }
+            .background(CC.extraColor1())
+            .fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (currentUser != null) {
+                Text(
+                    (currentUser.firstName[0].toString()) + currentUser.lastName[0],
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        }
     }
 
     if (showDialog) {
-        BasicAlertDialog(
-            onDismissRequest = { showDialog = false },
-            content = {
-                Column(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .width(200.dp)
-                        .height(250.dp)
-                        .background(Color.Transparent)
+        BasicAlertDialog(onDismissRequest = { showDialog = false }, content = {
+            Column(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .width(200.dp)
+                    .height(250.dp)
+                    .background(Color.Transparent)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ){
+                    if (currentUser?.profileImageLink?.isNotBlank() == true) {
                         AsyncImage(
-                            model = currentUser?.profileImageLink ?: "", // Handle null image
+                            model = currentUser.profileImageLink,
                             contentDescription = "Profile Image",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
-                        Row(
+                    } else {
+                        Box(
                             modifier = Modifier
-                                .height(30.dp)
-                                .background(CC.primary().copy(0.5f))
-                                .fillMaxWidth()
-                                .align(Alignment.TopCenter),
-                            verticalAlignment = Alignment.CenterVertically
+                                .background(CC.extraColor1())
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            currentUser?.let { user ->
-                                Text("${user.firstName} ${user.lastName}", style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                                    modifier = Modifier.padding(start = 10.dp))
-                            }
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Profile Image",
+                                tint = CC.textColor()
+                            )
                         }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .height(30.dp)
+                            .background(
+                                CC
+                                    .primary()
+                                    .copy(0.5f)
+                            )
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        currentUser?.let { user ->
+                            Text(
+                                "${user.firstName} ${user.lastName}",
+                                style = CC.descriptionTextStyle(context)
+                                    .copy(fontWeight = FontWeight.Bold),
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                        }
+                    }
 
-                        Row(modifier = Modifier
+                    Row(
+                        modifier = Modifier
                             .fillMaxWidth()
                             .background(CC.primary())
                             .align(Alignment.BottomCenter),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceAround) {
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
 
-                            IconButton(onClick = {
-                                navController.navigate("chat/${currentUser?.id}")
-                                showDialog = false // Close dialog after navigating
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Message,
-                                    contentDescription = "Chat",
-                                    tint = CC.textColor() // Use a custom color from your theme
-                                )
-                            }
-                            IconButton(onClick = {
-                                val phoneNumber = currentUser?.phoneNumber ?: "" // Handle null phone number
-                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
-                                context.startActivity(intent)
-                                showDialog = false // Close dialog after initiating call
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Call,
-                                    contentDescription = "Call",
-                                    tint = CC.textColor() // Use a custom color from your theme
-                                )
-                            }
+                        IconButton(onClick = {
+                            navController.navigate("chat/${currentUser?.id}")
+                            showDialog = false // Close dialog after navigating
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Message,
+                                contentDescription = "Chat",
+                                tint = CC.textColor() // Use a custom color from your theme
+                            )
+                        }
+                        IconButton(onClick = {
+                            val phoneNumber =
+                                currentUser?.phoneNumber ?: "" // Handle null phone number
+                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+                            context.startActivity(intent)
+                            showDialog = false // Close dialog after initiating call
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Call,
+                                contentDescription = "Call",
+                                tint = CC.textColor() // Use a custom color from your theme
+                            )
                         }
                     }
                 }
             }
-        )
+        })
     }
 }
 
@@ -508,3 +582,80 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
     }
 }
 
+
+@Composable
+fun UniChatReadME(context: Context) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "✨ UNI CHAT ✨", style = CC.titleTextStyle(context).copy(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Welcome to Uni Chat, a streamlined chat experience designed to enhance communication between students.",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 16.sp,
+            )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "🔥 Key Features:", style = CC.descriptionTextStyle(context).copy(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "• ✉️ Text Messaging: Enjoy seamless text conversations with your fellow students.",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 14.sp,
+            )
+        )
+        Text(
+            text = "• 🟢 Online Status Indicators: Easily identify who's currently online (green), recently active (deep blue), or has never been online (red).",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 14.sp,
+            )
+        )
+        Text(
+            text = "• 👥 Group Creation and Management: Create new groups or join existing ones to connect with your peers.",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 14.sp,
+
+                )
+        )
+        Text(
+            text = "• 🔍 User Discovery: Find all users within the app, even if you haven't chatted with them before.",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 14.sp,
+            )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "⚠️ Note: Due to the use of a free version of Firebase, Uni Chat currently supports text messaging only. You may experience slight delays when opening user chats.",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 14.sp, fontStyle = Italic
+            )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "💬 We value your feedback! If you encounter any bugs or have suggestions for improvement, please let us know through the feedback channel.",
+            style = CC.descriptionTextStyle(context).copy(
+                fontSize = 14.sp,
+            )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "😊 Happy chatting!", style = CC.descriptionTextStyle(context).copy(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        )
+    }
+}
