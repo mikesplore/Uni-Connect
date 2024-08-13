@@ -60,6 +60,7 @@ import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -295,6 +296,7 @@ fun ModalNavigationDrawerItem(
     update: Update
 
 ){
+    var showSignOutDialog by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .background(
@@ -401,31 +403,104 @@ fun ModalNavigationDrawerItem(
                 scope.launch {
                     drawerState.close()
                 }
-                userStatus.let {
-                    MyDatabase.writeUserActivity(it!!.copy(
-                        online = "offline", lastDate = CC.getTimeStamp(), lastTime = CC.getTimeStamp()
-                    ), onSuccess = {
-                        userViewModel.deleteAllTables()
-                        userViewModel.deleteSignedInUser()
-                        clearAllPreferences(context)
-
-                        // Sign out AFTER clearing data
-                        FirebaseAuth.getInstance().signOut()
-
-                        navController.navigate("login") {
-                            popUpTo("homeScreen") { inclusive = true }
-                        }
-                        Toast.makeText(
-                            context, "Signed Out Successfully!", Toast.LENGTH_SHORT
-                        ).show()
-                    })
-                }
+                    showSignOutDialog = true
 
             }) {
                 Text(
                     "Sign Out",
                     style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
                 )
+            }
+            if (showSignOutDialog) {
+            SignOut(
+                userStatus = userStatus,
+                onVisibleChange = {visible -> showSignOutDialog = visible},
+                context = context,
+                navController = navController,
+                userViewModel = userViewModel
+
+            )}
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SignOut(
+    userStatus: UserStateEntity?,
+    onVisibleChange: (Boolean) -> Unit,
+    context: Context,
+    navController: NavController,
+    userViewModel: UserViewModel
+) {
+    BasicAlertDialog(onDismissRequest = { onVisibleChange(false) }) {
+        Column(
+            modifier = Modifier
+                .background(CC.primary(), RoundedCornerShape(10.dp))
+                .width(300.dp)
+                .height(200.dp)
+                .padding(16.dp) // Added padding for better spacing
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Are you sure you want to sign out?",
+                    style = CC.titleTextStyle(context),
+                    textAlign = TextAlign.Center // Center-align the text
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Signing out will clear the app database.",
+                style = CC.descriptionTextStyle(context),
+                modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = {
+                    userStatus?.copy(
+                        online = "offline",
+                        lastDate = CC.getTimeStamp(),
+                        lastTime = CC.getTimeStamp()
+                    )?.let { updatedUserStatus ->
+                        MyDatabase.writeUserActivity(updatedUserStatus, onSuccess = { success ->
+                            if (success) {
+                                userViewModel.deleteAllTables()
+                                userViewModel.deleteSignedInUser()
+                                clearAllPreferences(context)
+                                FirebaseAuth.getInstance().signOut()
+                                navController.navigate("login") {
+                                    popUpTo("homeScreen") { inclusive = true }
+                                }
+                                Toast.makeText(
+                                    context,
+                                    "Signed Out Successfully!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                onVisibleChange(false)
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Error signing out. Please try again.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
+                    }
+                }) {
+                    Text("Sign Out", style = CC.descriptionTextStyle(context))
+                }
+
+                TextButton(onClick = { onVisibleChange(false) }) {
+                    Text("Cancel", style = CC.descriptionTextStyle(context))
+                }
             }
         }
     }
@@ -547,7 +622,7 @@ fun SideProfile(user: UserEntity, context: Context) {
                     1.dp, CC.textColor(), CircleShape
                 )
                 .clip(CircleShape)
-                .background(CC.secondary(), CircleShape)
+                .background(CC.extraColor1(), CircleShape)
                 .size(100.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -868,7 +943,7 @@ fun UserItem(
                 .border(
                     1.dp, CC.textColor(), CircleShape
                 )
-                .background(CC.tertiary(), CircleShape)
+                .background(CC.extraColor1(), CircleShape)
                 .clip(CircleShape)
                 .combinedClickable(onClick = {
                     navController.navigate("chat/${user.id}")
@@ -887,12 +962,11 @@ fun UserItem(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    val name =
-                        if (signedInUser?.email == user.email) "You" else "${user.firstName[0]}${
+                    val name = "${user.firstName[0]}${
                             user.lastName[0]
                         }"
                     Text(
-                        name, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                        name, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     )
                 }
             }
@@ -916,9 +990,9 @@ fun UserItem(
             )
         }
         Spacer(modifier = Modifier.height(5.dp))
-
+        val displayName = if(signedInUser?.id == user.id) "You" else user.firstName
         Text(
-            text = user.firstName.let {
+            text = displayName.let {
                 if (it.length > 10) it.substring(0, 10) + "..." else it
             },
             style = CC.descriptionTextStyle(context),
