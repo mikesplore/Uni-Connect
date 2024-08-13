@@ -5,18 +5,13 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.AddAlert
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.AddAlert
 import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import java.util.UUID
-
-
-
 
 data class GridItem(
     val title: String = "",
@@ -29,19 +24,6 @@ enum class Section {
     NOTES, PAST_PAPERS, RESOURCES,
 }
 
-
-
-
-data class Timetable(
-    val id: String = "",
-    val startTime: String = "",
-    val endTime: String = "",
-    val unitName: String = "",
-    val venue: String = "",
-    val lecturer: String = "",
-    val dayId: String = ""
-)
-
 data class Feedback(
     val id: String = "",
     val rating: Int = 0,
@@ -51,53 +33,10 @@ data class Feedback(
 )
 
 
-data class AttendanceRecord(
-    val studentId: String = "",
-    val dayOfWeek: String = "",
-    val isPresent: Boolean = false,
-    val lesson: String = ""
-)
-
-
-
-
-data class Assignment(
-    val id: String = "",
-    val name: String = "",
-    val description: String = "",
-    val dueDate: String = "",
-    val courseCode: String = ""
-)
-
-data class Day(
-    val id: String = "",
-    val name: String = ""
-)
-
-
-
 data class Fcm(
     val id: String = "",
     val token: String = ""
 )
-
-data class Course(
-    val courseCode: String = "",
-    val courseName: String = "",
-    var visits: Int = 0
-
-)
-
-data class ScreenTime(
-    val id: String = "", val screenName: String = "", val time: Long = 0
-)
-
-data class Screens(
-    val screenId: String = "",
-    val screenName: String = "",
-
-    )
-
 
 
 data class MyCode(
@@ -108,14 +47,12 @@ data class MyCode(
 
 
 //these are the Bottom icons of the Bottom Nav
-
 sealed class Screen(
     val selectedIcon: ImageVector, val unselectedIcon: ImageVector, val name: String
 ) {
     data object Home : Screen(
         Icons.Filled.Home, Icons.Outlined.Home, "Home"
     )
-
 
     data object Assignments : Screen(
         Icons.AutoMirrored.Filled.Assignment, Icons.AutoMirrored.Outlined.Assignment, "Work"
