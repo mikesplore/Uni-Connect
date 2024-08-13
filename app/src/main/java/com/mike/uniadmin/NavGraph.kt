@@ -48,44 +48,44 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }
 
         composable("login",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             LoginScreen(navController = navController, context)
         }
 
         composable("assignments",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             AssignmentScreen(context)
         }
 
 
         composable("dashboard",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             Dashboard(navController = navController, context)
         }
 
         composable("profile",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             ProfileScreen(navController = navController, context)
         }
 
         composable("settings",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             Settings(navController = navController, context, mainActivity)
         }
 
         composable("uniChat",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             UniChat(navController = navController, context)
         }
 
         composable("chat/{userId}",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }, arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
             UserChatScreen(
@@ -94,7 +94,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }
 
         composable("GroupChat/{groupId}",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }, arguments = listOf(navArgument("groupId") { type = NavType.StringType })
         ) { backStackEntry ->
             DiscussionScreen(
@@ -103,43 +103,43 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }
 
         composable("moreDetails",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             MoreDetails(context, navController)
         }
 
         composable("announcements",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             AnnouncementsScreen(context)
         }
 
         composable("notifications",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             PhoneNotifications(navController, context)
         }
 
         composable("passwordReset",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             PasswordReset(navController = navController, context)
         }
 
         composable("appearance",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             Appearance(navController = navController)
         }
 
         composable("homeScreen",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }) {
             HomeScreen(navController, context, pagerState, mainActivity, screens, coroutineScope)
         }
 
         composable("courseResource/{courseCode}",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }, arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseResources(
@@ -148,7 +148,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }
 
         composable("courseContent/{courseId}",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+            fadeOut(animationSpec = tween(300)) 
         }, arguments = listOf(navArgument("courseId") { type = NavType.StringType })
         ) { backStackEntry ->
             CourseContent(
