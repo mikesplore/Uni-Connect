@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dataModel.userchat
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -62,13 +63,16 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
         }
     }
 
-    fun deleteMessage(messageId: String, path: String) {
+    fun deleteMessage(messageId: String, path: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
-            repository.deleteMessage(messageId,
+            repository.deleteMessage(messageId, path,
                 onSuccess = {
-                    fetchMessages(path) // Refresh the message list after deleting
+                    onSuccess(true)
+                    Log.d("MessageViewModel", "Message deleted successfully")
                 },
                 onFailure = {
+                    onSuccess(false)
+                    Log.e("MessageViewModel", "Failed to delete message", it)
                     // Handle delete failure if needed
                 }
             )
