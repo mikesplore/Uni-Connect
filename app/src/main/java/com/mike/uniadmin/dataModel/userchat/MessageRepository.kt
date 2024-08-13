@@ -61,14 +61,16 @@ class MessageRepository(private val messageDao: MessageDao) {
         }
     }
 
-    fun deleteMessage(messageId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
+    fun deleteMessage(messageId: String, path: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
         viewModelScope.launch {
             // Delete the message from the local database
             messageDao.deleteMessage(messageId)
             // Then delete the message from Firebase
-            database.child(messageId).removeValue()
+            database.child(path).child(messageId).removeValue()
                 .addOnSuccessListener {
-                    onSuccess()
+                    fetchMessages(path){
+                        onSuccess()
+                    }
                 }
                 .addOnFailureListener { exception ->
                     onFailure(exception)
