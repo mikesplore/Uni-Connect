@@ -2,8 +2,6 @@ package com.mike.uniadmin.chat
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInHorizontally
@@ -23,11 +21,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,19 +33,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -66,16 +60,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -83,7 +74,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
-import com.mike.uniadmin.home.UserItem
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
@@ -91,6 +81,7 @@ import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.home.UserItem
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -103,7 +94,9 @@ fun DiscussionScreen(
     val uniAdmin = context.applicationContext as? UniAdmin
     val chatRepository = remember { uniAdmin?.chatRepository }
     val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository ?: throw IllegalStateException("ChatRepository is null"))
+        factory = ChatViewModel.ChatViewModelFactory(
+            chatRepository ?: throw IllegalStateException("ChatRepository is null")
+        )
     )
     val userAdmin = context.applicationContext as? UniAdmin
     val userRepository = remember { userAdmin?.userRepository }
@@ -200,8 +193,7 @@ fun DiscussionScreen(
 
                             items(chatsForDate.filter {
                                 it.message.contains(
-                                    searchQuery.text,
-                                    ignoreCase = true
+                                    searchQuery.text, ignoreCase = true
                                 )
                             }) { chat ->
                                 ChatBubble(
@@ -309,11 +301,13 @@ fun ChatTopAppBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("uniChat"){
-                popUpTo("GroupChat/${GroupDetails.groupName.value}"){
-                    inclusive = true
+            IconButton(onClick = {
+                navController.navigate("uniChat") {
+                    popUpTo("GroupChat/${GroupDetails.groupName.value}") {
+                        inclusive = true
+                    }
                 }
-            } }) {
+            }) {
                 Icon(
                     Icons.Default.ArrowBackIosNew,
                     contentDescription = "Back",
@@ -344,9 +338,7 @@ fun GroupUsersList(
         exit = slideOutHorizontally(targetOffsetX = { it })
     ) {
         LazyRow(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             items(filteredUsers) { user ->  // Use the filtered list
                 UserItem(user, context, navController, viewModel)
@@ -411,7 +403,6 @@ fun DateHeader(context: Context) {
 }
 
 
-
 @Composable
 fun MessageInputRow(
     message: String, onMessageChange: (String) -> Unit, onSendClick: () -> Unit, context: Context
@@ -425,7 +416,7 @@ fun MessageInputRow(
     ) {
         BasicTextField(
             value = message,
-            onValueChange =  onMessageChange,
+            onValueChange = onMessageChange,
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp) // Add padding to the right
@@ -454,8 +445,7 @@ fun MessageInputRow(
                     onMessageChange(message)
                     onSendClick()
                 }
-            },
-            modifier = Modifier
+            }, modifier = Modifier
                 .clip(CircleShape) // Circular button
                 .background(CC.secondary()) // Button background color
         ) {
@@ -481,7 +471,6 @@ fun ChatBubble(
     chat: ChatEntity, isUser: Boolean, context: Context, navController: NavController
 ) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
-    val backgroundColor = if (isUser) CC.extraColor1() else CC.extraColor2()
     val bubbleShape = RoundedCornerShape(
         bottomStart = 16.dp,
         bottomEnd = 16.dp,
@@ -489,102 +478,105 @@ fun ChatBubble(
         topEnd = if (isUser) 0.dp else 16.dp
     )
 
+    val senderBrush = Brush.linearGradient(
+        colors = listOf(CC.extraColor1(), CC.extraColor2())
+    )
+    val receiverBrush = Brush.linearGradient(
+        colors = listOf(CC.tertiary(), CC.extraColor1())
+    )
+    val backgroundColor = if (isUser) senderBrush else receiverBrush
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
         contentAlignment = alignment
     ) {
-        Box(
-            modifier = Modifier
-                .background(backgroundColor, bubbleShape)
-                .padding(8.dp)
-                .align(alignment)
+        val maxBubbleWidth = maxWidth * 0.75f
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column {
-                if (!isUser) {
-                    Row(
-                        horizontalArrangement = Arrangement.Start
-                    ) {
+            if (!isUser) {
+
+                Box(modifier = Modifier
+                    .clickable {
+                        navController.navigate("chat/${chat.senderID}") {
+                            popUpTo("chat/${chat.senderID}") {
+                                inclusive = true
+                            }
+                        }
+                    }
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(CC.primary(), CircleShape)
+                    .padding(4.dp), contentAlignment = Alignment.Center) {
+                    if (chat.profileImageLink.isNotBlank()) {
+                        AsyncImage(
+                            model = chat.profileImageLink,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(id = R.drawable.logo),
+                            error = painterResource(id = R.drawable.logo)
+                        )
+                    } else {
+                        Text(
+                            text = chat.senderName[0].toString(),
+                            style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
+                        )
+                    }
+                }
+            }
+            if (isUser) {
+                Text(
+                    text = CC.getFormattedTime(chat.time),
+                    style = CC.descriptionTextStyle(context),
+                    fontSize = 10.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 8.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .background(backgroundColor, bubbleShape)
+                    .widthIn(max = maxBubbleWidth)
+                    .padding(12.dp)
+            ) {
+                Column {
+                    if (!isUser) {
                         Text(
                             text = chat.senderName,
                             style = CC.descriptionTextStyle(context),
                             fontWeight = FontWeight.Bold,
                             color = CC.primary()
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    SelectionContainer {
+                        Text(
+                            text = chat.message,
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        )
                     }
                 }
-                SelectionContainer {
-                    ClickableText(text = buildAnnotatedString {
-                        val linkStyle = SpanStyle(
-                            color = Color.Blue, textDecoration = TextDecoration.Underline
-                        )
-                        append(chat.message)
-                        // Use a regex or any other method to detect links and apply linkStyle
-                        val regex = Regex("(https?://[\\w./?=#]+)")
-                        chat.message.let {
-                            regex.findAll(it).forEach { result ->
-                                val start = result.range.first
-                                val end = result.range.last + 1
-                                addStyle(linkStyle, start, end)
-                                addStringAnnotation(
-                                    tag = "URL", annotation = result.value, start = start, end = end
-                                )
-                            }
-                        }
-                    }, onClick = { offset ->
-                        val annotations = chat.message.substring(offset)
-                        annotations.let {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotations))
-                            context.startActivity(intent)
-                        }
-                    }, style = CC.descriptionTextStyle(context)
-                    )
-                }
+            }
+            if (!isUser) {
                 Text(
                     text = CC.getFormattedTime(chat.time),
                     style = CC.descriptionTextStyle(context),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(top = 4.dp)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 8.dp)
                 )
-            }
-        }
-        if (!isUser) {
-            // Icon with first letter of sender's name, positioned outside the bubble
-            Box(modifier = Modifier
-                .clickable {
-                    navController.navigate("chat/${chat.senderID}"){
-                        popUpTo("chat/${chat.senderID}"){
-                            inclusive = true
-                        }
-                    }
-                }
-                .offset(x = (-16).dp, y = (-16).dp)
-                .size(24.dp)
-                .clip(CircleShape)
-                .background(CC.primary(), CircleShape)
-                .padding(4.dp),
-                contentAlignment = Alignment.Center) {
-                if (chat.profileImageLink.isNotBlank()) {
-                    AsyncImage(
-                        model = chat.profileImageLink,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.logo),
-                        error = painterResource(id = R.drawable.logo)
-                    )
-                } else {
-                    Text(
-                        text = chat.senderName[0].toString(),
-                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
-                    )
-                }
             }
         }
     }
