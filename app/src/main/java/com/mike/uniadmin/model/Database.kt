@@ -183,11 +183,11 @@ object MyDatabase {
                 for (child in snapshot.children) {
                     if (child.getValue(GridItem::class.java) == item) {
                         child.ref.removeValue().addOnSuccessListener {
-                                // Item successfully deleted
-                            }.addOnFailureListener { exception ->
-                                Log.e("FirebaseError", "Error deleting item: ${exception.message}")
-                                // Handle the deletion error
-                            }
+                            // Item successfully deleted
+                        }.addOnFailureListener { exception ->
+                            Log.e("FirebaseError", "Error deleting item: ${exception.message}")
+                            // Handle the deletion error
+                        }
                         break
                     }
                 }
@@ -232,36 +232,16 @@ object MyDatabase {
     fun writeFeedback(feedback: Feedback, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
         val feedbackRef = database.child("Feedback").child(feedback.id)
         feedbackRef.setValue(feedback).addOnSuccessListener {
-                onSuccess() // Callback on successful write
-            }.addOnFailureListener { exception ->
-                onFailure(exception) // Callback on failure with exception
-            }
+            onSuccess() // Callback on successful write
+        }.addOnFailureListener { exception ->
+            onFailure(exception) // Callback on failure with exception
+        }
     }
 
     //send the token to the database
 
     fun writeFcmToken(token: Fcm) {
         database.child("FCM").child(token.id).setValue(token)
-    }
-
-
-    fun loadAttendanceRecords(onAttendanceRecordsLoaded: (List<AttendanceRecord>?) -> Unit) {
-        database.child("attendanceRecords").get().addOnSuccessListener { snapshot ->
-            val attendanceRecords =
-                snapshot.children.mapNotNull { it.getValue(AttendanceRecord::class.java) }
-            onAttendanceRecordsLoaded(attendanceRecords)
-        }.addOnFailureListener {
-            onAttendanceRecordsLoaded(null)
-        }
-    }
-
-
-    fun saveAttendanceRecords(records: List<AttendanceRecord>, onComplete: (Boolean) -> Unit) {
-        val batch = database.child("attendanceRecords")
-        records.map { record ->
-            val key = batch.push().key ?: ""
-            batch.child(key).setValue(record)
-        }
     }
 
 
