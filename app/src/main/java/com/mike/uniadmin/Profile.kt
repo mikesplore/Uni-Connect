@@ -3,13 +3,10 @@ package com.mike.uniadmin
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -67,14 +63,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.model.MyDatabase.generateAccountDeletionID
-
 import kotlin.random.Random
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -95,7 +88,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(signedInUser) {
-        
+
         userViewModel.fetchUsers()
         userViewModel.getSignedInUser()
 
@@ -126,21 +119,17 @@ fun ProfileScreen(navController: NavController, context: Context) {
         // Display the profile screen content
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = {},
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigate("settings") }) {
-                            Icon(
-                                Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = CC.primary()
-                    )
+                TopAppBar(title = {}, navigationIcon = {
+                    IconButton(onClick = { navController.navigate("settings") }) {
+                        Icon(
+                            Icons.Default.ArrowBackIosNew, "Back", tint = CC.textColor()
+                        )
+                    }
+                }, colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = CC.primary()
                 )
-            },
-            containerColor = CC.primary()
+                )
+            }, containerColor = CC.primary()
         ) {
             Column(
                 modifier = Modifier
@@ -165,17 +154,26 @@ fun ProfileScreen(navController: NavController, context: Context) {
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 DisplayImage(context, userViewModel, updated, onUpdateChange = { update ->
-                    if (update){
+                    if (update) {
                         userViewModel.getSignedInUser()
                         userViewModel.fetchUsers()
-                        Toast.makeText(context,"Updated!, please relaunch the screen", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Updated!, please relaunch the screen",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
-                    updated = !updated })
+                    updated = !updated
+                })
                 Spacer(modifier = Modifier.height(20.dp))
-                ProfileDetails(context, userViewModel, updated, onUpdateChange = { updated = !updated })
+                ProfileDetails(
+                    context,
+                    userViewModel,
+                    updated,
+                    onUpdateChange = { updated = !updated })
                 Spacer(modifier = Modifier.height(50.dp))
-                DangerZone(context, userViewModel, navController)
+                DangerZone(context, userViewModel)
             }
         }
     }
@@ -183,19 +181,22 @@ fun ProfileScreen(navController: NavController, context: Context) {
 
 
 @Composable
-fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, onUpdateChange:(Boolean) -> Unit) {
+fun DisplayImage(
+    context: Context,
+    viewModel: UserViewModel,
+    updated: Boolean,
+    onUpdateChange: (Boolean) -> Unit
+) {
     val currentUser by viewModel.user.observeAsState()
     var showImageLinkBox by remember { mutableStateOf(false) }
     var link by remember { mutableStateOf("") }
     var imageClicked by remember { mutableStateOf(false) }
 
     val boxSize by animateDpAsState(
-        targetValue = if (imageClicked) 160.dp else 100.dp, label = "",
-        animationSpec = tween(200)
+        targetValue = if (imageClicked) 160.dp else 100.dp, label = "", animationSpec = tween(200)
     )
     val size by animateDpAsState(
-        targetValue = if (imageClicked) 150.dp else 70.dp, label = "",
-        animationSpec = tween(200)
+        targetValue = if (imageClicked) 150.dp else 70.dp, label = "", animationSpec = tween(200)
     )
 
 
@@ -204,95 +205,100 @@ fun DisplayImage(context: Context, viewModel: UserViewModel, updated: Boolean, o
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier
-            .background(CC.secondary(), RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
-            .height(boxSize)
-            .fillMaxWidth(),
-            contentAlignment = Alignment.Center) {
-            AsyncImage(
-                model = currentUser?.profileImageLink,
+        Box(
+            modifier = Modifier
+                .background(CC.secondary(), RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(10.dp))
+                .height(boxSize)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(model = currentUser?.profileImageLink,
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .blur(30.dp)
                     .fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 onError = { R.drawable.notification },
-                onLoading = { R.drawable.logo }
-            )
-        IconButton(onClick = {
-            imageClicked = !imageClicked
-        },
-            modifier = Modifier
-                .border(
-                    1.dp, CC.textColor(), CircleShape
-                )
-                .clip(CircleShape)
-                .background(CC.secondary(), CircleShape)
-                .size(size),
-        ) {
-            if (currentUser?.profileImageLink?.isNotEmpty() == true) {
-                AsyncImage(model = currentUser?.profileImageLink,
-                    contentDescription = "Profile Image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    onError = { R.drawable.notification },
-                    onLoading = { R.drawable.logo }
+                onLoading = { R.drawable.logo })
+            IconButton(
+                onClick = {
+                    imageClicked = !imageClicked
+                },
+                modifier = Modifier
+                    .border(
+                        1.dp, CC.textColor(), CircleShape
+                    )
+                    .clip(CircleShape)
+                    .background(CC.secondary(), CircleShape)
+                    .size(size),
+            ) {
+                if (currentUser?.profileImageLink?.isNotEmpty() == true) {
+                    AsyncImage(model = currentUser?.profileImageLink,
+                        contentDescription = "Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        onError = { R.drawable.notification },
+                        onLoading = { R.drawable.logo }
 
-                )
-            } else {
-                Text(
-                    "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
-                )
+                    )
+                } else {
+                    Text(
+                        "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
+                    )
+                }
             }
-        }
         }
 
     }
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth(0.9f),
-            verticalAlignment = Alignment.CenterVertically
+    Spacer(modifier = Modifier.height(10.dp))
+    Row(
+        modifier = Modifier
+            .height(50.dp)
+            .fillMaxWidth(0.9f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CC.SingleLinedTextField(
+            value = link,
+            onValueChange = { link = it },
+            label = "Image Link",
+            modifier = Modifier.weight(1f),
+            context = context,
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Button(
+            onClick = {
+                currentUser?.let {
+                    viewModel.writeUser(it.copy(profileImageLink = link), onSuccess = {
+                        viewModel.getSignedInUser()
+                        showImageLinkBox = false
+                        onUpdateChange(updated)
+                    })
+                }
+            }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(
+                containerColor = CC.extraColor2(), disabledContainerColor = CC.tertiary()
+
+            ), enabled = link.isNotEmpty()
+
         ) {
-            CC.SingleLinedTextField(
-                value = link,
-                onValueChange = { link = it },
-                label = "Image Link",
-                modifier = Modifier
-                    .weight(1f),
-                context = context,
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.width(5.dp))
-            Button(
-                onClick = {
-                    currentUser?.let {
-                        viewModel.writeUser(it.copy(profileImageLink = link), onSuccess = {
-                            viewModel.getSignedInUser()
-                            showImageLinkBox = false
-                            onUpdateChange(updated)
-                        })
-                    }
-                }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.extraColor2(), disabledContainerColor = CC.tertiary()
-
-                ), enabled = link.isNotEmpty()
-
-            ) {
-                Text("Save", style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp))
-            }
+            Text("Save", style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp))
         }
+    }
 
 
 }
 
 
 @Composable
-fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, onUpdateChange:(Boolean) -> Unit) {
+fun ProfileDetails(
+    context: Context,
+    viewModel: UserViewModel,
+    updated: Boolean,
+    onUpdateChange: (Boolean) -> Unit
+) {
     val signedUser by viewModel.signedInUser.observeAsState()
     val currentUser by viewModel.user.observeAsState()
     var firstName by remember { mutableStateOf("") }
@@ -316,9 +322,14 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
 
     fun saveUserData() {
         currentUser?.let { user ->
-            viewModel.writeUser(user.copy(firstName = firstName, lastName = lastName, phoneNumber = phoneNumber), onSuccess = {
-                isEditing = false
-            })
+            viewModel.writeUser(
+                user.copy(
+                    firstName = firstName,
+                    lastName = lastName,
+                    phoneNumber = phoneNumber
+                ), onSuccess = {
+                    isEditing = false
+                })
         }
     }
 
@@ -330,18 +341,18 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
-            IconButton(onClick = {
-                if (isEditing) {
-                    saveUserData()
-                }
-                isEditing = !isEditing
-                onUpdateChange(updated)
-            },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = CC.secondary(),
-                    contentColor = CC.textColor()
+            IconButton(
+                onClick = {
+                    if (isEditing) {
+                        saveUserData()
+                    }
+                    isEditing = !isEditing
+                    onUpdateChange(updated)
+                }, colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = CC.secondary(), contentColor = CC.textColor()
 
-                )) {
+                )
+            ) {
                 Icon(
                     if (isEditing) Icons.Filled.Check else Icons.Default.Edit,
                     contentDescription = "save",
@@ -354,18 +365,18 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
 
         currentUser?.let { user ->
 
-                MyDetails(
-                    title = "First Name",
-                    value = firstName,
-                    onValueChange = { firstName = it},
-                    context = context,
-                    isEditing = isEditing
-                )
+            MyDetails(
+                title = "First Name",
+                value = firstName,
+                onValueChange = { firstName = it },
+                context = context,
+                isEditing = isEditing
+            )
 
             MyDetails(
                 title = "Last Name",
                 value = lastName,
-                onValueChange = { lastName = it},
+                onValueChange = { lastName = it },
                 context = context,
                 isEditing = isEditing
             )
@@ -391,7 +402,7 @@ fun ProfileDetails(context: Context, viewModel: UserViewModel,updated: Boolean, 
             MyDetails(
                 title = "Phone Number",
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it},
+                onValueChange = { phoneNumber = it },
                 context = context,
                 isEditing = isEditing
             )
@@ -422,7 +433,10 @@ fun MyDetails(
 
         TextField(
             value = value,
-            textStyle = CC.titleTextStyle(context).copy(fontSize = fontSize, color = if (isEditing) CC.textColor() else CC.textColor().copy(0.5f)),
+            textStyle = CC.titleTextStyle(context).copy(
+                fontSize = fontSize,
+                color = if (isEditing) CC.textColor() else CC.textColor().copy(0.5f)
+            ),
             onValueChange = onValueChange,
             colors = TextFieldDefaults.colors(
                 unfocusedIndicatorColor = CC.tertiary(),
@@ -445,7 +459,7 @@ fun MyDetails(
 
 
 @Composable
-fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavController) {
+fun DangerZone(context: Context, viewModel: UserViewModel) {
     val accountStatus by viewModel.accountStatus.observeAsState()
     val currentUser by viewModel.user.observeAsState()
 
@@ -456,7 +470,7 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
     }
 
     if (accountStatus?.status == "pending") {
-        AccountDeletionRequests(viewModel, context, navController, accountStatus!!, currentUser!!)
+        AccountDeletionRequests(context, accountStatus!!)
     } else {
         var showPuzzle by remember { mutableStateOf(false) }
         var puzzleWords by remember { mutableStateOf(generateRandomNonsenseWord()) }
@@ -475,7 +489,8 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
         ) {
             Row {
                 Text(
-                    "Danger Zone", style = CC.titleTextStyle(context).copy(color = Color.Red.copy(0.7f))
+                    "Danger Zone",
+                    style = CC.titleTextStyle(context).copy(color = Color.Red.copy(0.7f))
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
@@ -505,17 +520,12 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 TextField(
-                    value = userInput,
-                    textStyle = CC.titleTextStyle(context).copy(
-                        fontSize = 18.sp,
-                        color = if (isError) Color.Red else CC.textColor()
-                    ),
-                    onValueChange = {
+                    value = userInput, textStyle = CC.titleTextStyle(context).copy(
+                        fontSize = 18.sp, color = if (isError) Color.Red else CC.textColor()
+                    ), onValueChange = {
                         isError = false
                         userInput = it
-                    },
-                    isError = isError,
-                    colors = TextFieldDefaults.colors(
+                    }, isError = isError, colors = TextFieldDefaults.colors(
                         unfocusedIndicatorColor = CC.tertiary(),
                         focusedIndicatorColor = CC.tertiary(),
                         focusedContainerColor = Color.Transparent,
@@ -525,9 +535,7 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                         errorIndicatorColor = Color.Red,
                         errorContainerColor = CC.primary(),
                         cursorColor = CC.textColor()
-                    ),
-                    singleLine = true,
-                    modifier = Modifier
+                    ), singleLine = true, modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(60.dp)
                 )
@@ -614,28 +622,34 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                         onClick = {
                             deleteConfirmed = true
                             loading = true
-                                val account = currentUser?.let {
-                                    AccountDeletionEntity(
-                                        id = it.id,
-                                        email = it.email,
-                                        admissionNumber = it.id,
-                                        date = CC.getTimeStamp(),
-                                        status = "pending"
-                                    )
-                                }
-                                if (account != null) {
-                                    viewModel.writeAccountDeletionData(account, onSuccess = { success ->
-                                        loading = false
-                                        if (success) {
-                                            Log.d("ProfileScreen", "Account deletion data written successfully")
-                                            showWarning = false
-                                            showPuzzle = false
-                                        } else {
-                                            Log.d("ProfileScreen", "Failed to write account deletion data")
-                                            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
-                                        }
-                                    })
-                                }
+                            val account = currentUser?.let {
+                                AccountDeletionEntity(
+                                    id = it.id,
+                                    email = it.email,
+                                    admissionNumber = it.id,
+                                    date = CC.getTimeStamp(),
+                                    status = "pending"
+                                )
+                            }
+                            if (account != null) {
+                                viewModel.writeAccountDeletionData(account, onSuccess = { success ->
+                                    loading = false
+                                    if (success) {
+                                        Log.d(
+                                            "ProfileScreen",
+                                            "Account deletion data written successfully"
+                                        )
+                                        showWarning = false
+                                        showPuzzle = false
+                                    } else {
+                                        Log.d(
+                                            "ProfileScreen",
+                                            "Failed to write account deletion data"
+                                        )
+                                        Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show()
+                                    }
+                                })
+                            }
 
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
@@ -647,7 +661,10 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
                                 color = CC.primary(), modifier = Modifier.size(24.dp)
                             )
                         } else {
-                            Text("Send Account Deletion Request", style = CC.descriptionTextStyle(context))
+                            Text(
+                                "Send Account Deletion Request",
+                                style = CC.descriptionTextStyle(context)
+                            )
                         }
                     }
                 }
@@ -657,17 +674,11 @@ fun DangerZone(context: Context, viewModel: UserViewModel, navController: NavCon
 }
 
 
-
-
 @Composable
 fun AccountDeletionRequests(
-    userViewModel: UserViewModel,
     context: Context,
-    navController: NavController,
     accountStatus: AccountDeletionEntity,
-    user: UserEntity
 ) {
-    val auth = FirebaseAuth.getInstance()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -675,8 +686,7 @@ fun AccountDeletionRequests(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 "Pending Account Deletion Request",
@@ -685,37 +695,13 @@ fun AccountDeletionRequests(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "You have a pending account deletion request that was initiated on ${CC.getCurrentDate(accountStatus.date)}. Your account will be permanently deleted after 30 days from this date.",
+                "You have a pending account deletion request that was initiated on ${
+                    CC.getCurrentDate(
+                        accountStatus.date
+                    )
+                }. Your account will be permanently deleted after 30 days from this date.",
                 style = CC.descriptionTextStyle(context)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            if (accountStatus.status == "pending") {
-                Button(
-                    onClick = {
-                        user.id.let {
-                            userViewModel.deleteAccount(it, onSuccess = { success ->
-                                if (success) {
-                                    // Sign out the user
-                                    auth.signOut()
-                                    navController.navigate("splashScreen")
-                                }
-                            })
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CC.extraColor1()
-                    )
-                ) {
-                    Text("Delete Account Now", style = CC.descriptionTextStyle(context))
-                }
-            } else {
-                Text(
-                    "Your account has been deleted.",
-                    style = CC.descriptionTextStyle(context),
-                    color = Color.Red
-                )
-            }
         }
     }
 }
