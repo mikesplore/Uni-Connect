@@ -1,7 +1,6 @@
 package com.mike.uniadmin.courseResources
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -208,8 +207,6 @@ fun CourseResources(courseCode: String, context: Context) {
                         showAddSection = null
                     }
                 }
-
-                VideoCard("https://www.youtube.com/watch?v=uLDcOCZhZII", context)
             }
         }
     }
@@ -410,22 +407,4 @@ fun InputDialogTextField(
         ),
         modifier = Modifier.fillMaxWidth()
     )
-}
-
-@Composable
-fun VideoCard(link: String, context: Context) {
-   // var fullScreen by remember { mutableStateOf(false) }
-    val myVideoId = extractVideoId(link)
-    if (myVideoId == null) {
-        Toast.makeText(context, "Invalid YouTube link", Toast.LENGTH_SHORT).show()
-        return
-    }
-}
-
-fun extractVideoId(youtubeLink: String): String? {
-    val pattern =
-        "(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\u200C\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?]*"
-    val compiledPattern = Regex(pattern)
-    val match = compiledPattern.find(youtubeLink)
-    return match?.value
 }
