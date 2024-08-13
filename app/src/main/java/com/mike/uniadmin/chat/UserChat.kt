@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,21 +29,25 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -56,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -221,13 +229,18 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 LazyColumn(
                     modifier = Modifier.weight(1f), state = scrollState
                 ) {
-                    val groupedMessages = messages.groupBy { it.date }
+                    // Group messages by formatted date string
+                    val groupedMessages = messages.groupBy { message ->
+                        CC.getCurrentDate(message.date) // Format the timestamp to a date string
+                    }
 
-                    groupedMessages.forEach { (date, chatsForDate) ->
+                    // Iterate over each group of messages by date
+                    groupedMessages.forEach { (_, chatsForDate) ->
+                        // Get the original timestamp for the first message in the group
+                        val originalTimestamp = chatsForDate.first().date
+
                         item {
-                            RowMessage(context)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            RowDate(date, context)
+                            RowDate(originalTimestamp, context) // Pass the original timestamp to RowDate
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
@@ -237,12 +250,16 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                             MessageBubble(
                                 message = chat,
                                 isUser = chat.senderID == user?.id,
-                                context = context
+                                context = context,
+                                messageViewModel = messageViewModel,
+                                path = conversationId,
+                                senderID = user?.id.orEmpty()
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
+
                 ChatInput(modifier = Modifier.fillMaxWidth(),
                     onMessageChange = { message = it },
                     sendMessage = { sendMessage(message) },
@@ -254,15 +271,18 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MessageBubble(
     message: MessageEntity,
     isUser: Boolean,
     context: Context,
+    messageViewModel: MessageViewModel,
+    path: String,
+    senderID: String
 ) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
-    val backgroundColor = if (isUser) CC.extraColor1() else CC.extraColor2()
     val bubbleShape = RoundedCornerShape(
         bottomStart = 16.dp,
         bottomEnd = 16.dp,
@@ -270,36 +290,115 @@ fun MessageBubble(
         topEnd = if (isUser) 0.dp else 16.dp
     )
 
+    val senderBrush = Brush.linearGradient(
+        colors = listOf(CC.extraColor1(), CC.extraColor2())
+    )
+
+    val receiverBrush = Brush.linearGradient(
+        colors = listOf(CC.tertiary(), CC.extraColor1())
+    )
+    val backgroundColor = if (isUser) senderBrush else receiverBrush
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    fun deleteMessage() {
+        messageViewModel.deleteMessage(message.id, path, onSuccess = {
+            Toast.makeText(context, "Message deleted", Toast.LENGTH_SHORT).show()
+        })
+    }
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .combinedClickable(
+                onClick = {},
+                onLongClick = {
+                    if (message.senderID != senderID)
+                        return@combinedClickable
+                    showDeleteDialog = true
+                }
+            ),
         contentAlignment = alignment
     ) {
-        Box(
-            modifier = Modifier
-                .background(backgroundColor, bubbleShape)
-                .widthIn(max = with(LocalDensity.current) { (constraints.maxWidth * 0.75f).toDp() })
-                .padding(8.dp)
-                .align(alignment)
+        val maxBubbleWidth = with(LocalDensity.current) { (maxWidth * 0.75f) }
+
+        Row(
+            modifier = Modifier.align(alignment),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = message.message, style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                )
+            // Time on the left for the sender
+            if (isUser) {
                 Text(
                     text = CC.getFormattedTime(message.timeStamp),
                     style = CC.descriptionTextStyle(context),
-                    fontSize = 13.sp,
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                )
+            }
+
+            // Message bubble
+            Box(
+                modifier = Modifier
+                    .background(backgroundColor, bubbleShape)
+                    .widthIn(max = maxBubbleWidth)
+                    .padding(8.dp)
+            ) {
+                SelectionContainer { // Wrap the Text composable with SelectionContainer
+                    Text(
+                        text = message.message,
+                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                    )
+                }
+            }
+
+            // Time on the right for the user
+            if (!isUser) {
+                Text(
+                    text = CC.getFormattedTime(message.timeStamp),
+                    style = CC.descriptionTextStyle(context),
+                    fontSize = 11.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(top = 4.dp)
+                        .padding(start = 4.dp)
                 )
             }
         }
     }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            containerColor = CC.primary(),
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(text = "Delete Message", style = CC.titleTextStyle(context)) },
+            text = { Text(text = "Are you sure you want to delete this message?", style = CC.descriptionTextStyle(context)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deleteMessage()
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Delete", style = CC.descriptionTextStyle(context))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancel", style = CC.descriptionTextStyle(context))
+                }
+            }
+        )
+    }
 }
+
+
+
+
 
 @Composable
 fun SearchTextField(
