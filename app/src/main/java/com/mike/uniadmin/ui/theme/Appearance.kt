@@ -22,11 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.BorderColor
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -265,14 +267,11 @@ fun Background() {
         Icons.Outlined.Home,
         Icons.AutoMirrored.Outlined.Assignment,
         Icons.Outlined.School,
-        Icons.Outlined.AccountCircle,
+        Icons.AutoMirrored.Outlined.Message,
         Icons.Outlined.BorderColor,
         Icons.Outlined.Book,
     )
-    LaunchedEffect(Unit) {
-        
 
-    }
     // Calculate the number of repetitions needed to fill the screen
     val repetitions = 1000
     val repeatedIcons = mutableListOf<ImageVector>()
@@ -292,7 +291,7 @@ fun Background() {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = CC.textColor().copy(0.3f),
+                tint = CC.textColor().copy(0.2f),
                 modifier = Modifier
                     .padding(8.dp)
             )
