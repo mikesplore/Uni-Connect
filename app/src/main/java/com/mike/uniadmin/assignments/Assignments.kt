@@ -137,6 +137,7 @@ fun AssignmentScreen(context: Context) {
                                     Text(text = "No assignments available", color = CC.textColor())
                                 }
                             } else {
+                                Spacer(modifier = Modifier.height(16.dp))
                                 LazyColumn {
                                     items(assignmentList) { assignment ->
                                         AssignmentCard(assignment = assignment, context)
