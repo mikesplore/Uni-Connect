@@ -20,3 +20,10 @@ local.properties
 google-services.json
 Notes.kt
 vendor
+/debug
+/release
+.android
+.vscode
+gradlew
+gradlew.bat
+/app/src/main/java/com/mike/uniadmin/Notes.kt
