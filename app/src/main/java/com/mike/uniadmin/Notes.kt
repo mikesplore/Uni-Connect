@@ -24,7 +24,7 @@ package com.mike.uniadmin
 
 
 //ADDITIONAL OPTIONAL FEATURES
-//feature for enabling offline mode
+//feature for enabling offline mode❌
 //feature for liking announcements
 //feature for showing previous feedback of a current signed in user
 
