@@ -5,7 +5,16 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,11 +30,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,12 +47,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.dataModel.groupchat.ChatEntity
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
+import com.mike.uniadmin.dataModel.userchat.MessageEntity
+import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
@@ -54,10 +67,11 @@ fun PhoneNotifications(navController: NavController, context: Context) {
     val notificationViewModel: NotificationViewModel = viewModel(
         factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
     )
-    val chatRepository = remember { notificationAdmin.chatRepository }
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
+    val messageRepository = remember { notificationAdmin.messageRepository }
+    val messageViewModel: MessageViewModel = viewModel(
+        factory = MessageViewModel.MessageViewModelFactory(messageRepository)
     )
+
     val userRepository = remember { notificationAdmin.userRepository }
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(userRepository)
@@ -85,38 +99,32 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {},
-                actions = {
-                    IconButton(onClick = {
-                        refresh = !refresh
-                    }) {
-                        Icon(
-                            Icons.Default.Refresh, "Refresh",
-                            tint = CC.textColor()
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigate("homeScreen") }) {
-                        Icon(
-                            Icons.Default.ArrowBackIosNew, "Refresh",
-                            tint = CC.textColor()
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CC.primary()
-                )
+            TopAppBar(title = {}, actions = {
+                IconButton(onClick = {
+                    refresh = !refresh
+                }) {
+                    Icon(
+                        Icons.Default.Refresh, "Refresh", tint = CC.textColor()
+                    )
+                }
+            }, navigationIcon = {
+                IconButton(onClick = { navController.navigate("homeScreen") }) {
+                    Icon(
+                        Icons.Default.ArrowBackIosNew, "Refresh", tint = CC.textColor()
+                    )
+                }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = CC.primary()
+            )
             )
 
-        },
-        containerColor = CC.primary()
+        }, containerColor = CC.primary()
     ) {
         Column(
             modifier = Modifier
                 .padding(it)
-                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Row(
@@ -140,11 +148,13 @@ fun PhoneNotifications(navController: NavController, context: Context) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Group notifications by category
-                val groupedNotifications = notifications.groupBy { categorizedNotification -> categorizedNotification.category }
+                val groupedNotifications =
+                    notifications.groupBy { categorizedNotification -> categorizedNotification.category }
 
                 // Sort notifications within each category by date in descending order
                 groupedNotifications.forEach { (category, notificationsForCategory) ->
-                    val sortedNotifications = notificationsForCategory.sortedByDescending { it.date }
+                    val sortedNotifications =
+                        notificationsForCategory.sortedByDescending { notification -> notification.date }
 
                     item {
                         // Display category header only once
@@ -167,7 +177,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
                             else -> NotificationItem(
                                 notification = notification,
                                 context = context,
-                                chatViewModel,
+                                messageViewModel,
                                 userViewModel
                             )
                         }
@@ -181,7 +191,12 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 
 
 @Composable
-fun NotificationItem(notification: NotificationEntity, context: Context, chatViewModel: ChatViewModel, userViewModel: UserViewModel) {
+fun NotificationItem(
+    notification: NotificationEntity,
+    context: Context,
+    messageViewModel: MessageViewModel,
+    userViewModel: UserViewModel
+) {
     val user by userViewModel.user.observeAsState()
     var loading by remember { mutableStateOf(false) }
 
@@ -202,7 +217,7 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
             style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = 8.dp),
             maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis
         )
         Text(
             text = notification.description,
@@ -216,61 +231,83 @@ fun NotificationItem(notification: NotificationEntity, context: Context, chatVie
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${CC.getCurrentDate(notification.date)} at ${CC.getFormattedTime(notification.time)}",
-                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f), fontSize = 12.sp)
+                text = "${CC.getCurrentDate(notification.date)} at ${
+                    CC.getFormattedTime(
+                        notification.time
+                    )
+                }",
+                style = CC.descriptionTextStyle(context)
+                    .copy(color = CC.textColor().copy(0.5f), fontSize = 12.sp)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier
-                .height(30.dp)
-                .background(CC.extraColor1(), RoundedCornerShape(10.dp))
-                .padding(end = 5.dp),
-                contentAlignment = Alignment.Center){
-                Text("Hi, ${notification.name} 👋",
-                    modifier = Modifier.padding(start = 10.dp),
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
-            }
-            IconButton(onClick = {
-                loading = true
-                MyDatabase.generateChatID { id ->
-                    user?.let { currentUser ->
-                        notification.userId.let { notificationUserId ->
-                            val conversationId = "Direct Messages/${generateConversationId(userId1 = currentUser.id, userId2 = notificationUserId)}"
-                            chatViewModel.saveChat(
-                                path = conversationId,
-                                chat = ChatEntity(
+                Box(
+                    modifier = Modifier
+                        .height(30.dp)
+                        .background(CC.extraColor1(), RoundedCornerShape(10.dp))
+                        .padding(end = 5.dp), contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Hi, ${notification.name} 👋",
+                        modifier = Modifier.padding(start = 10.dp),
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+                IconButton(onClick = {
+                    loading = true
+                    MyDatabase.generateChatID { id ->
+                        user?.let { currentUser ->
+                            notification.userId.let { notificationUserId ->
+                                val conversationId = "Direct Messages/${
+                                    generateConversationId(
+                                        userId1 = currentUser.id,
+                                        userId2 = notificationUserId
+                                    )
+                                }"
+                                messageViewModel.saveMessage(message = MessageEntity(
                                     id = id,
                                     message = "Hi, ${notification.name} 👋",
-                                    senderName = currentUser.firstName,
                                     senderID = currentUser.id,
-                                    time = CC.getTimeStamp(),
-                                    date = CC.getTimeStamp(),
-                                    profileImageLink = currentUser.profileImageLink
-                                ),
-                                onSuccess = { success ->
+                                    recipientID = notificationUserId,
+                                    timeStamp = CC.getTimeStamp(),
+                                    date = CC.getTimeStamp()
+
+                                ), path = conversationId, onSuccess = { success ->
+                                    loading = false
                                     if (success) {
-                                        loading = false
-                                        Toast.makeText(context, "Sent!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Message sent",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } else {
-                                        loading = false
-                                        Toast.makeText(context, "Failed!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Message failed to send",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
-                                }
-                            )
+                                })
+                            }
+                        } ?: run {
+                            Toast.makeText(context, "Current user is null", Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    } ?: run {
-                        Toast.makeText(context, "Current user is null", Toast.LENGTH_SHORT).show()
                     }
+                }) {
+                    AnimatedVisibility(loading) {
+                        CircularProgressIndicator(
+                            color = CC.textColor(),
+                            strokeWidth = 1.dp,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.Send,
+                        contentDescription = "Wave",
+                        tint = CC.secondary()
+                    )
                 }
-            }) {
-                AnimatedVisibility(loading) {
-                    CircularProgressIndicator(color = CC.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(30.dp))
-                }
-                Icon(
-                    Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Wave",
-                    tint = CC.secondary()
-                )
-            }}
+            }
         }
     }
 }
@@ -288,8 +325,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
         Text(
             text = notification.title,
             style = CC.descriptionTextStyle(context).copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontWeight = FontWeight.Bold, fontSize = 16.sp
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -301,8 +337,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
         Text(
             text = notification.description,
             style = CC.descriptionTextStyle(context).copy(
-                color = CC.textColor().copy(0.7f),
-                fontSize = 14.sp
+                color = CC.textColor().copy(0.7f), fontSize = 14.sp
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -314,8 +349,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
         Text(
             text = CC.getRelativeDate(CC.getCurrentDate(notification.date)),
             style = CC.descriptionTextStyle(context).copy(
-                color = CC.textColor().copy(0.7f),
-                fontSize = 12.sp
+                color = CC.textColor().copy(0.7f), fontSize = 12.sp
             ),
             modifier = Modifier.align(Alignment.End)
         )
