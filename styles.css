@@ -7,22 +7,21 @@
     --light-gray: #E1E8ED;
     --turquoise: #1C2833;
     --black: #2980B9;
-    --main-bg-color: #FF15202B; /* Assuming this is a custom color */
     --primary-color: #007bff; /* Assuming this is a custom color */
 }
 
 body {
     font-family: Arial, sans-serif;
     background-color:var(--dark-navy);
-    color: #333;
+    color: var(--light-gray);
     margin: 0;
     padding: 0;
 }
 
 header {
-    background-color: var(--light-gray);
+    background-color: var(--dark-navy);
     color: var(--light-gray);
-    border-bottom: 3px solid #007bff;
+    border-bottom: 3px solid var(--primary-color);
 }
 
 .header-bg {
@@ -30,9 +29,6 @@ header {
     width: 100%;
 }
 
-.header-image {
-    size: 50.px;
-}
 
 .main-title {
     font-size: 2.5rem; /* Adjust the font size as needed */
@@ -113,7 +109,7 @@ header {
 /* Main Content */
 main {
     padding: 20px;
-    background-color: var(--main-bg-color);
+    background-color: var(--dark-navy);
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-right: 250px; /* Adjusted for sidebar */
@@ -173,4 +169,6 @@ section h2 {
     .title-container {
         text-align: left;
     }
+
+    
 }

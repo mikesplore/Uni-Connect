@@ -6,7 +6,6 @@
     <title>UNI ADMIN DOCUMENTATION</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    
 </head>
 <body>
 
@@ -16,13 +15,13 @@
         <button type="button" class="close-btn" id="sidebarClose">&times;</button>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" href="Components/home.html" id="homescreen">HomeScreen</a>
+                <a class="nav-link active" href="Components/home.html" id="homescreen">Home Screen</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="Components/Authentication/authentication.html" id="authentication">Authentication</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="Components/Course%20Contents/courseContent.html" id="courseContent">Course Content</a>
+                <a class="nav-link" href="Components/Course Contents/CourseContent.html" id="courseContent">Course Content</a>
             </li>
         </ul>
     </div>
@@ -32,28 +31,15 @@
     <header class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom header-bg">
         <div class="d-flex align-items-center">
             <div class="title-container ml-3">
-                <h1 class="main-title">UNI ADMIN DOCUMENTATION</h1>
-                <h3 class="subtitle">Your Ultimate Education Companion</h3>
+                <h1 class="main-title">UNI ADMIN</h1>
+                <h3 class="subtitle">Detailed Documentation</h3>
             </div>
         </div>
         <button class="btn btn-primary" id="sidebarToggle">Menu</button>
-        <style>
-            .header-bg {
-                position: relative;
-            }
-    
-            #sidebarToggle {
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                margin: 10px; /* Adjust the margin as needed */
-            }
-        </style>
     </header>
 
     <main id="mainContent">
-        <!-- Placeholders for dynamic content -->
-        <section id="content-placeholder" style="display: block;">
+        <section id="content-placeholder">
             <!-- Content will be dynamically loaded here -->
         </section>
     </main>
@@ -84,31 +70,25 @@
         });
 
         $(".nav-link").click(function(event) {
-            event.preventDefault(); // Prevent default link behavior
+            event.preventDefault();
 
-            // Determine which section to load content into
             let page = $(this).attr("href");
 
-            // Load the corresponding content
             loadContent(page);
 
-            // Remove 'active' class from all nav links
             $(".nav-link").removeClass("active");
-
-            // Add 'active' class to the clicked link
             $(this).addClass("active");
 
-            // Close the sidebar menu
             $("#sidebarMenu").removeClass("active");
         });
 
         function loadContent(page) {
-            $("#loadingOverlay").show(); // Show loading indicator
+            $("#loadingOverlay").show();
             $("#content-placeholder").load(page, function(response, status, xhr) {
-                if (status == "error") {
-                    console.log("Error loading page: " + xhr.status + " " + xhr.statusText);
+                if (status === "error") {
+                    console.error("Error loading page: " + xhr.status + " " + xhr.statusText);
                 }
-                $("#loadingOverlay").hide(); // Hide loading indicator
+                $("#loadingOverlay").hide();
             });
         }
     });
