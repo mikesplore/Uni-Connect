@@ -76,7 +76,7 @@ fun MoreDetails(context: Context, navController: NavController) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     val email = loggedInUser?.email
-    val imageLink = loggedInUser?.photoUrl
+    val imageLink = if (loggedInUser?.photoUrl != null) loggedInUser.photoUrl else ""
 
 
     val brush = Brush.verticalGradient(
@@ -92,9 +92,7 @@ fun MoreDetails(context: Context, navController: NavController) {
     )
 
     LaunchedEffect(Unit) {
-        
         userViewModel.findUserByEmail(loggedInUser?.email!!) {}
-
     }
 
     Scaffold(topBar = {
@@ -137,7 +135,9 @@ fun MoreDetails(context: Context, navController: NavController) {
             }
 
             Column(
-                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CC.SingleLinedTextField(
                     value = firstName,
