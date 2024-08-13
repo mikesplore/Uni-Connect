@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -374,18 +375,24 @@ fun UserSelectionItem(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Box(modifier = Modifier
+                    .background(CC.extraColor1(), CircleShape)
+                    .border(1.dp, CC.primary(), CircleShape)
+                    .clip(CircleShape)
+                    .size(50.dp),
+                    contentAlignment = Alignment.Center){
                 if (user.profileImageLink.isNotBlank()) {
                     AsyncImage(
                         model = user.profileImageLink,
                         contentDescription = "Profile Image",
                         modifier = Modifier
                             .clip(CircleShape)
-                            .size(50.dp),
+                            .fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Text("${user.firstName[0]}${user.lastName[0]}")
-                }
+                }}
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = user.firstName,
@@ -591,7 +598,7 @@ fun GroupItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = group.description, style = CC.descriptionTextStyle(context),
+                    text = group.description, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f)),
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
