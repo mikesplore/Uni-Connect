@@ -66,6 +66,7 @@ class MessageRepository(private val messageDao: MessageDao) {
             // Delete the message from the local database
             messageDao.deleteMessage(messageId)
             // Then delete the message from Firebase
+            //the user may get delayed feedback
             database.child(path).child(messageId).removeValue()
                 .addOnSuccessListener {
                     fetchMessages(path){
@@ -77,4 +78,24 @@ class MessageRepository(private val messageDao: MessageDao) {
                 }
         }
     }
+
+
+    fun updateTypingStatus(path: String, userID: String, isTyping: Boolean) {
+        database.child(path).child(userID).child("typingStatus").setValue(isTyping)
+    }
+
+    fun listenForTypingStatus(path: String, userID: String, onTypingStatusChanged: (Boolean) -> Unit) {
+        database.child(path).child(userID).child("typingStatus").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isTyping = snapshot.getValue(Boolean::class.java) ?: false
+                onTypingStatusChanged(isTyping)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error if needed
+            }
+        })
+    }
+
+
 }
