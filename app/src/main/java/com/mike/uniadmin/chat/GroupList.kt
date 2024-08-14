@@ -587,14 +587,13 @@ fun GroupItem(
                         )
                     }
                 }
-
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = group.name, style = CC.titleTextStyle(context), maxLines = 1,
+                    text = group.name, style = CC.titleTextStyle(context), maxLines = 1, fontSize = 20.sp,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
