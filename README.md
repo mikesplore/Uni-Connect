@@ -72,6 +72,7 @@ Enter the password you set during the keystore creation. Copy the displayed SHA-
 
 With the `google-services.json` file in place and the SHA-1 keys added to Firebase, you can now build and run the project as intended.
 
+***
 
 ## Authentication
 
