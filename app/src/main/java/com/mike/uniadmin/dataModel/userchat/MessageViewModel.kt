@@ -22,6 +22,21 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     private val _messagesMap = MutableLiveData<Map<String, List<MessageEntity>>>()
     private val messagesMap: LiveData<Map<String, List<MessageEntity>>> get() = _messagesMap
 
+    private val _isTyping = MutableLiveData<Boolean>()
+    val isTyping: LiveData<Boolean> = _isTyping
+
+
+    fun updateTypingStatus(path: String, userId: String, isTyping: Boolean) {
+        repository.updateTypingStatus(path, userId, isTyping)
+    }
+
+    fun listenForTypingStatus(path: String, userId: String) {
+        repository.listenForTypingStatus(path, userId) { isUserTyping ->
+            _isTyping.value = isUserTyping
+        }
+    }
+
+
     init {
         _messagesMap.value = emptyMap()
     }
@@ -78,6 +93,9 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
             )
         }
     }
+
+
+
 
     class MessageViewModelFactory(private val repository: MessageRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
