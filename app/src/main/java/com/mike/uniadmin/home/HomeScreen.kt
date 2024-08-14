@@ -122,6 +122,7 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.chat.GroupItem
 import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
+import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
@@ -677,6 +678,7 @@ fun ModalDrawerItem(
     }
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .padding(10.dp)
             .background(CC.primary())
             .fillMaxSize()
@@ -779,7 +781,7 @@ fun ModalDrawerItem(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         } else {
-            LazyColumn(
+            LazyRow(
                 modifier = Modifier.animateContentSize()
             ) {
                 items(groups, key = { it.id }) { group ->
@@ -793,7 +795,7 @@ fun ModalDrawerItem(
                                 userViewModel,
                                 it
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
                         }
                     }
                 }
@@ -810,6 +812,7 @@ fun ModalDrawerItem(
 
     }
 }
+
 
 @Composable
 fun QuickSettings(context: Context, activity: MainActivity) {
