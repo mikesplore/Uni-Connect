@@ -223,7 +223,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 if (isSearchVisible) {
                     SearchTextField(
                         searchQuery = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = {searchQuery = it},
                     )
                 }
                 LazyColumn(
@@ -406,20 +406,21 @@ fun SearchTextField(
     onValueChange: (String) -> Unit,
 ) {
     TextField(value = searchQuery,
-        onValueChange = { onValueChange(searchQuery) },
-        label = { Text("Search Chats") },
+        onValueChange = { onValueChange(it) },
+        placeholder = { Text("Search Chats") },
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = CC.primary(),
             unfocusedIndicatorColor = CC.textColor(),
-            focusedIndicatorColor = CC.secondary(),
+            focusedIndicatorColor = CC.textColor(),
             unfocusedContainerColor = CC.primary(),
             focusedTextColor = CC.textColor(),
             unfocusedTextColor = CC.textColor(),
-            focusedLabelColor = CC.secondary(),
-            unfocusedLabelColor = CC.textColor()
+            focusedLabelColor = CC.textColor(),
+            unfocusedLabelColor = CC.textColor(),
+            cursorColor = CC.textColor()
         ),
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -485,7 +486,7 @@ fun TopAppBarComponent(
                     .fillMaxHeight(),
             ) {
                 Text(name, style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(5.dp))
                 Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp))
             }
         }
