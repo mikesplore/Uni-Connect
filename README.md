@@ -11,6 +11,68 @@
     - [Password Reset](#password-reset)
 - [Visuals](#visuals)
 
+## Firebase Setup Guide for Uni Admin
+
+This guide will help you set up Firebase for the project you've cloned. The necessary Firebase dependencies are already included. Follow these steps to create signing keys, generate SHA-1 keys, and configure Firebase.
+
+## 1. Create a Firebase Project
+
+1. **Go to the Firebase Console**: [Firebase Console](https://console.firebase.google.com/).
+2. **Create a New Project**:
+  - Click on "Add Project" and follow the prompts.
+  - Once the project is created, click "Continue" to go to the project overview.
+3. **Add an Android App**:
+  - In your project overview, click the Android icon.
+  - Enter the Android package name found in the `build.gradle` file under `applicationId`.
+  - Leave the SHA-1 key field blank for now.
+  - Click "Register App" and download the `google-services.json` file.
+4. **Add the `google-services.json` File**:
+  - Place the `google-services.json` file in the `app/` directory of your cloned project.
+
+## 2. Generate Debug and Release Signing Keys
+
+### Step 1: Generate the Debug Signing Key
+
+1. **Open your terminal** and navigate to the root directory of your cloned project.
+2. **Run the following command** to generate the debug signing key:
+
+##
+    ./gradlew signingReport
+
+**Locate the SHA-1 key:**
+The SHA-1 key will be listed under `Variant: debug`. Copy this key for use in the Firebase Console.
+
+### Step 2: Generate the Release Signing Key
+
+1. **Generate a release keystore** by running the following command:
+
+## 
+     keytool -genkey -v -keystore release-key.keystore -alias release-key -keyalg RSA -keysize 2048 -validity 10000
+
+You'll be prompted to provide information like your name, organization, and location. After completing this step, a `release-key.keystore` file will be created.
+
+2. **Extract the SHA-1 key from the release keystore:**
+
+##
+    keytool -list -v -keystore release-key.keystore -alias release-key
+
+Enter the password you set during the keystore creation. Copy the displayed SHA-1 key for use in Firebase.
+
+## 3. Add SHA-1 Keys to Firebase
+
+1. **Return to the Firebase Console.**
+2. **Go to Project Settings:**
+  - In your project overview, click the gear icon next to "Project Overview" and select "Project settings".
+3. **Under the "Your apps" section, select your Android app.**
+4. **Add the SHA-1 keys:**
+  - Add both the debug and release SHA-1 keys that you generated.
+5. **Save the changes.**
+
+## 4. Run the Project
+
+With the `google-services.json` file in place and the SHA-1 keys added to Firebase, you can now build and run the project as intended.
+
+
 ## Authentication
 
 ### Overview
