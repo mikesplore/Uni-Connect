@@ -4,8 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
+import android.os.CountDownTimer
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,7 +34,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -46,6 +50,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -89,6 +94,7 @@ import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -127,6 +133,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     val scrollState = rememberLazyListState()
 
     var myUserState by remember { mutableStateOf("") }
+    val typing by messageViewModel.isTyping.observeAsState(false)
 
     myUserState = when{
         userState == null -> "Never online"
@@ -152,9 +159,18 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
         }
     }
 
+    val typingStatusID = remember(user, user2) {
+        if (user != null && user2 != null) {
+            "Typing Status/${generateConversationId(user!!.id, targetUserId)}"
+        } else {
+            ""
+        }
+    }
+
     LaunchedEffect(conversationId) {
         if (conversationId.isNotEmpty()) {
             messageViewModel.fetchMessages(conversationId)
+            messageViewModel.listenForTypingStatus(typingStatusID, targetUserId)
         }
     }
 
@@ -256,14 +272,28 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                                 senderID = user?.id.orEmpty()
                             )
                             Spacer(modifier = Modifier.height(10.dp))
+                            AnimatedVisibility(visible = typing,
+                                enter = (slideInHorizontally {
+                                    -it
+                                }),
+                                exit = (slideOutHorizontally { -it })
+
+                            ) {
+                                TypingIndicator()
+                            }
                         }
                     }
                 }
 
-                ChatInput(modifier = Modifier.fillMaxWidth(),
+                ChatInput(
+                    modifier = Modifier.fillMaxWidth(),
                     onMessageChange = { message = it },
                     sendMessage = { sendMessage(message) },
-                    context = context
+                    context = context,
+                    isTypingChange = { isTyping -> user?.id?.let {
+                        messageViewModel.updateTypingStatus(typingStatusID,
+                            it, isTyping)
+                    } }
                 )
             }
         }
@@ -280,8 +310,7 @@ fun MessageBubble(
     context: Context,
     messageViewModel: MessageViewModel,
     path: String,
-    senderID: String
-) {
+    senderID: String) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
     val bubbleShape = RoundedCornerShape(
         bottomStart = 16.dp,
@@ -437,7 +466,8 @@ fun TopAppBarComponent(
     user: UserEntity,
     userState: String,
     isSearchVisible: Boolean = false,
-    onValueChange: (Boolean) -> Unit
+    onValueChange: (Boolean) -> Unit,
+
 ) {
     TopAppBar(title = {
         Row(
@@ -526,29 +556,48 @@ fun ChatInput(
     modifier: Modifier = Modifier,
     onMessageChange: (String) -> Unit,
     sendMessage: (String) -> Unit,
-    context: Context
+    context: Context,
+    isTypingChange: (Boolean) -> Unit
 ) {
     var input by remember { mutableStateOf(TextFieldValue("")) }
+    var typingTimer: CountDownTimer? by remember { mutableStateOf(null) }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp), // Consistent padding
-        verticalAlignment = Alignment.CenterVertically // Align items to center
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         // Text Field
         BasicTextField(
             value = input,
-            onValueChange = { input = it },
+            onValueChange = { message ->
+                input = message
+
+                // Cancel any existing timer
+                typingTimer?.cancel()
+
+                // Set typing status to true
+                isTypingChange(true)
+
+                // Start a new timer to reset typing status after inactivity
+                typingTimer = object : CountDownTimer(3000, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {}
+                    override fun onFinish() {
+                        // Set typing status to false after 3 seconds of inactivity
+                        isTypingChange(false)
+                    }
+                }.start()
+            },
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 8.dp) // Add padding to the right
-                .background(CC.secondary(), RoundedCornerShape(24.dp)) // Use surface color
-                .heightIn(min = 40.dp), // Minimum height
+                .padding(end = 8.dp)
+                .background(CC.secondary(), RoundedCornerShape(24.dp))
+                .heightIn(min = 40.dp),
             textStyle = CC.descriptionTextStyle(context),
             decorationBox = { innerTextField ->
                 Box(
-                    modifier = Modifier.padding(16.dp), // Increased padding
+                    modifier = Modifier.padding(16.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     if (input.text.isEmpty()) {
@@ -566,45 +615,98 @@ fun ChatInput(
         // Send Button
         IconButton(
             onClick = {
-                if (input.text.isNotBlank()) { // Check for non-blank messages
+                if (input.text.isNotBlank()) {
                     onMessageChange(input.text)
                     sendMessage(input.text)
-                    input = TextFieldValue("")
+                    input = TextFieldValue("") // Clear input field
+                    isTypingChange(false) // Set typing status to false after sending message
                 }
             },
             modifier = Modifier
-                .clip(CircleShape) // Circular button
-                .background(CC.secondary()) // Button background color
+                .clip(CircleShape)
+                .background(CC.secondary())
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Send,
                 contentDescription = "Send",
-                tint = CC.extraColor2() // Icon color on secondary background
+                tint = CC.extraColor2()
             )
         }
     }
 }
 
 
-@Composable
-fun RowMessage(context: Context) {
-    Row(
-        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .background(
-                    CC.secondary(), RoundedCornerShape(10.dp)
-                )
-                .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Chats are end-to-end encrypted",
-                modifier = Modifier.padding(5.dp),
-                style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
 
-            )
+
+@Composable
+fun TypingIndicator() {
+    val animationDuration = 500 // duration for each dot animation
+    val delayDuration = 150L // delay between each dot's animation
+
+    // Remembering the states for each dot's color
+    var colorState1 by remember { mutableStateOf(Color.Gray) }
+    var colorState2 by remember { mutableStateOf(Color.Gray) }
+    var colorState3 by remember { mutableStateOf(Color.Gray) }
+
+    // Coroutine to animate color change in sequence
+    LaunchedEffect(Unit) {
+        while (true) {
+            colorState1 = Color.Gray
+            colorState2 = Color.Gray
+            colorState3 = Color.Gray
+
+            colorState1 = Color.Black
+            delay(delayDuration)
+            colorState2 = Color.Black
+            delay(delayDuration)
+            colorState3 = Color.Black
+            delay(delayDuration)
         }
+    }
+
+    // Applying the color animation
+    val animatedColor1 by animateColorAsState(
+        targetValue = colorState1,
+        animationSpec = tween(animationDuration), label = ""
+    )
+    val animatedColor2 by animateColorAsState(
+        targetValue = colorState2,
+        animationSpec = tween(animationDuration), label = ""
+    )
+    val animatedColor3 by animateColorAsState(
+        targetValue = colorState3,
+        animationSpec = tween(animationDuration), label = ""
+    )
+
+    // Row containing the three dots
+    Row(
+        modifier = Modifier
+            .background(CC.secondary(), RoundedCornerShape(10.dp)),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(2.dp)
+                .size(8.dp),
+            shape = CircleShape,
+            color = animatedColor1
+        ) {}
+
+        Surface(
+            modifier = Modifier
+                .padding(2.dp)
+                .size(8.dp),
+            shape = CircleShape,
+            color = animatedColor2
+        ) {}
+
+        Surface(
+            modifier = Modifier
+                .padding(2.dp)
+                .size(8.dp),
+            shape = CircleShape,
+            color = animatedColor3
+        ) {}
     }
 }
 
