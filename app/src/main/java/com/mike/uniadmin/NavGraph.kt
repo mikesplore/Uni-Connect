@@ -3,7 +3,6 @@ package com.mike.uniadmin
 import android.content.Context
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
@@ -41,7 +40,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "splashScreen") {
+    NavHost(navController = navController, startDestination = "homeScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
