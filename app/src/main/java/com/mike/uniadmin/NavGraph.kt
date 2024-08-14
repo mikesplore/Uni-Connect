@@ -40,7 +40,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "homeScreen") {
+    NavHost(navController = navController, startDestination = "uniChat") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
