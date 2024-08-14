@@ -3,11 +3,11 @@
     <font
         android:fontStyle="normal"
         android:fontWeight="300"
-        android:font="@font/eaustralia" />
+        android:font="@font/cooljaz" />
     <font
         android:fontStyle="normal"
         android:fontWeight="400"
-        android:font="@font/shadowintolight" />
+        android:font="@font/chococooky" />
     <font
         android:fontStyle="normal"
         android:fontWeight="400"

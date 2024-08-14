@@ -36,13 +36,13 @@ private val LightColorScheme = lightColorScheme(
 )
 
 
-val EAustralia = FontFamily(
-    Font(R.font.eaustralia, FontWeight.Normal),
+val ChocoCooky = FontFamily(
+    Font(R.font.chococooky, FontWeight.Normal),
 
     )
 
-val ShadowIntoLight = FontFamily(
-    Font(R.font.shadowintolight, FontWeight.Normal)
+val CoolJaz = FontFamily(
+    Font(R.font.cooljaz, FontWeight.Normal)
 )
 
 val DancingScript = FontFamily(

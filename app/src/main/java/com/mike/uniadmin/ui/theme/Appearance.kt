@@ -108,9 +108,9 @@ fun currentFontFamily(context: Context): FontFamily {
     val selectedFontName = fontPrefs.getSelectedFont()
 
     return when (selectedFontName) {
-        "Edu Australia" -> EAustralia
+        "Choco cooky" -> ChocoCooky
         "Dancing Script" -> DancingScript
-        "Shadow Into Light" -> ShadowIntoLight
+        "Cool Jaz" -> CoolJaz
         "Caveat" -> Caveat
         else -> FontFamily.Default // Use system font if no preference is saved
     }
@@ -124,8 +124,8 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
     var fontUpdated by remember { mutableStateOf(false) }
     var selectedFontFamily by remember { mutableStateOf<FontFamily?>(null) }
     val fontFamilies = mapOf(
-        "Edu Australia" to EAustralia,
-        "Shadow Into Light" to ShadowIntoLight,
+        "Choco cooky" to ChocoCooky,
+        "Cool Jaz" to CoolJaz,
         "Dancing Script" to DancingScript,
         "Caveat" to Caveat,
         "System" to FontFamily.Default
