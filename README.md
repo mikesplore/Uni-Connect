@@ -55,8 +55,9 @@ You'll be prompted to provide information like your name, organization, and loca
 
 ##
     keytool -list -v -keystore release-key.keystore -alias release-key
-
+you can replace the `release-key` with your preferred name
 Enter the password you set during the keystore creation. Copy the displayed SHA-1 key for use in Firebase.
+
 
 ## 3. Add SHA-1 Keys to Firebase
 
@@ -72,7 +73,10 @@ Enter the password you set during the keystore creation. Copy the displayed SHA-
 
 With the `google-services.json` file in place and the SHA-1 keys added to Firebase, you can now build and run the project as intended.
 
+If you are lost, you can refer [Generating Signing Key for android project](https://developer.android.com/studio/publish/app-signing) for detailed instructions
 ***
+
+
 
 ## Authentication
 
