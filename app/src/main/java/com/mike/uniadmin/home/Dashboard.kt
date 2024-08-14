@@ -64,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -215,7 +216,7 @@ fun Dashboard(navController: NavController, context: Context) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     "Courses",
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                     modifier = Modifier.padding(start = 15.dp)
                 )
             }
@@ -261,7 +262,7 @@ fun Dashboard(navController: NavController, context: Context) {
 
                 Text(
                     "Course Resources",
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                     modifier = Modifier.padding(start = 15.dp)
                 )
             }
@@ -318,7 +319,7 @@ fun Dashboard(navController: NavController, context: Context) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     "Latest Announcement",
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                     modifier = Modifier.padding(start = 15.dp)
                 )
             }
@@ -352,8 +353,9 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(modifier = Modifier
-            .border(
-                1.dp, CC.textColor(), CircleShape
+            .shadow(
+                elevation = 4.dp,
+                shape = CircleShape
             )
             .background(CC.tertiary(), CircleShape)
             .clip(CircleShape)
@@ -430,8 +432,9 @@ fun CourseBox(
 ) {
     Column(
         modifier = Modifier
-            .border(
-                1.dp, CC.secondary(), RoundedCornerShape(16.dp)
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp)
             )
             .width(200.dp)
             .height(230.dp), horizontalAlignment = Alignment.CenterHorizontally
