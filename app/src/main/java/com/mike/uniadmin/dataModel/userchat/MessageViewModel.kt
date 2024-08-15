@@ -13,10 +13,8 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     private val _messages = MutableLiveData<List<MessageEntity>>()
     val messages: LiveData<List<MessageEntity>> = _messages
 
-    private val _cardMessages = MutableLiveData<List<MessageEntity>>()
-    val cardMessages: LiveData<List<MessageEntity>> = _cardMessages
 
-    private val _isLoading = MutableLiveData<Boolean>(false)
+    private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     private val _messagesMap = MutableLiveData<Map<String, List<MessageEntity>>>()
@@ -25,6 +23,16 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     private val _isTyping = MutableLiveData<Boolean>()
     val isTyping: LiveData<Boolean> = _isTyping
 
+    private val _messageStatus = MutableLiveData<MessageEntity>()
+    val messageStatus: LiveData<MessageEntity> = _messageStatus
+
+
+    fun onMessageReceived(message: MessageEntity, path: String) {
+        viewModelScope.launch {
+            repository.markMessageAsDelivered(message.id, path)
+            _messageStatus.postValue(message)
+        }
+    }
 
     fun updateTypingStatus(path: String, userId: String, isTyping: Boolean) {
         repository.updateTypingStatus(path, userId, isTyping)
