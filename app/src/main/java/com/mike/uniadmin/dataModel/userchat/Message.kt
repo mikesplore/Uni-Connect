@@ -11,7 +11,15 @@ data class MessageEntity(
     var timeStamp: String = "",
     var date: String = "",
     var recipientID: String = "",
+    var path: String = "",
+    var deliveryStatus: DeliveryStatus = DeliveryStatus.SENT,
 
 ){
-    constructor(): this("", "", "", "", "", "")
+    constructor(): this("", "", "", "", "", "", "", DeliveryStatus.SENT)
+}
+
+enum class DeliveryStatus{
+        SENT,
+        DELIVERED,
+
 }
