@@ -17,9 +17,9 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
-import com.mike.uniadmin.chat.DiscussionScreen
-import com.mike.uniadmin.chat.UniChat
-import com.mike.uniadmin.chat.UserChatScreen
+import com.mike.uniadmin.uniChat.DiscussionScreen
+import com.mike.uniadmin.uniChat.UniChat
+import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
 import com.mike.uniadmin.courseResources.CourseResources
 import com.mike.uniadmin.home.Dashboard
@@ -40,7 +40,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "uniChat") {
+    NavHost(navController = navController, startDestination = "homeScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
