@@ -128,8 +128,12 @@ interface DatabaseDao {
     @Query("DELETE FROM SignedInUser")
     suspend fun deleteSignedInUser()
 
+    @Query("DELETE FROM notifications")
+    suspend fun deleteAllNotifications()
+
     @Transaction
     suspend fun deleteAllTables() {
+        deleteAllNotifications()
         deleteAnnouncements()
         deleteNotifications()
         deleteCourseAnnouncements()
