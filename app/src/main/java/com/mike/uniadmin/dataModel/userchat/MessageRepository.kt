@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dataModel.userchat
 
+import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -17,6 +18,7 @@ class MessageRepository(private val messageDao: MessageDao) {
         viewModelScope.launch {
             // Fetch messages from the local database first
             val cachedChats = messageDao.getMessages(path)
+            Log.d("Cached Messages","The messages are not fetched")
             if (cachedChats.isNotEmpty()) {
                 onResult(cachedChats)
             }
@@ -49,6 +51,7 @@ class MessageRepository(private val messageDao: MessageDao) {
         viewModelScope.launch {
             // Save the message to the local database first
             messageDao.insertMessages(listOf(message))
+            Log.d("Message Saved","The message is saved in path $path")
 
             // Then save the message to Firebase using the message ID
             database.child(path).child(message.id).setValue(message)
@@ -93,6 +96,37 @@ class MessageRepository(private val messageDao: MessageDao) {
 
             override fun onCancelled(error: DatabaseError) {
                 // Handle error if needed
+            }
+        })
+    }
+
+    fun markMessageAsDelivered(messageId: String, path: String) {
+        viewModelScope.launch {
+            // Update delivery status to DELIVERED in Firebase
+            database.child(path).child(messageId).child("deliveryStatus")
+                .setValue(DeliveryStatus.DELIVERED.name)
+
+            // Update local database
+            messageDao.updateMessageStatus(messageId, DeliveryStatus.DELIVERED)
+        }
+    }
+
+    fun listenForMessageStatusUpdates(path: String, onStatusUpdate: (MessageEntity) -> Unit) {
+        database.child(path).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (childSnapshot in snapshot.children) {
+                    val message = childSnapshot.getValue(MessageEntity::class.java)
+                    message?.let {
+                        // Update the local database with the latest status
+                        viewModelScope.launch {
+                        messageDao.updateMessageStatus(it.id, it.deliveryStatus)
+                        onStatusUpdate(it)
+                    }}
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle the error
             }
         })
     }
