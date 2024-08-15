@@ -7,7 +7,7 @@ import androidx.room.Query
 
 @Dao
 interface MessageDao {
-    @Query("SELECT * FROM messages WHERE id LIKE '%' || :path || '%'")
+    @Query("SELECT * FROM messages WHERE path = :path")
     suspend fun getMessages(path: String): List<MessageEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -15,4 +15,7 @@ interface MessageDao {
 
     @Query("DELETE FROM messages WHERE id = :messageId")
     suspend fun deleteMessage(messageId: String)
+
+    @Query("UPDATE messages SET deliveryStatus = :newStatus WHERE id = :messageId")
+    suspend fun updateMessageStatus(messageId: String, newStatus: DeliveryStatus)
 }
