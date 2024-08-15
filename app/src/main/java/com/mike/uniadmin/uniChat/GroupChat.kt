@@ -1,4 +1,4 @@
-package com.mike.uniadmin.chat
+package com.mike.uniadmin.uniChat
 
 import android.annotation.SuppressLint
 import android.content.Context
