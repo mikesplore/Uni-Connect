@@ -1,9 +1,13 @@
-package com.mike.uniadmin.chat
+package com.mike.uniadmin.uniChat
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -195,6 +199,16 @@ fun UniChat(navController: NavController, context: Context) {
             val pagerState = rememberPagerState()
             val coroutineScope = rememberCoroutineScope()
 
+            val chatsTabColor by animateColorAsState(
+                targetValue = if (pagerState.currentPage == 0) CC.secondary() else CC.primary(),
+                animationSpec = tween(durationMillis = 300), label = ""
+            )
+
+            val groupTabColor by animateColorAsState(
+                targetValue = if (pagerState.currentPage == 1) CC.secondary() else CC.primary(),
+                animationSpec = tween(durationMillis = 300), label = ""
+            )
+
             // Custom TabRow with shifting container animation
             Box(
                 modifier = Modifier
@@ -226,7 +240,7 @@ fun UniChat(navController: NavController, context: Context) {
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (pagerState.currentPage == 0) CC.secondary() else CC.primary())
+                            .background(chatsTabColor)
                             .height(40.dp)
                             .fillMaxWidth(1f)
                     ) {
@@ -234,7 +248,6 @@ fun UniChat(navController: NavController, context: Context) {
                         Text(
                             "Chats",
                             style = CC.descriptionTextStyle(context)
-                                .copy(if (pagerState.currentPage == 0) CC.textColor() else CC.secondary())
                         )
 
                     }
@@ -243,7 +256,7 @@ fun UniChat(navController: NavController, context: Context) {
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (pagerState.currentPage == 1) CC.secondary() else CC.primary())
+                            .background(groupTabColor)
                             .fillMaxWidth(0.5f)
                             .fillMaxHeight()
                     ) {
@@ -274,13 +287,16 @@ fun UniChat(navController: NavController, context: Context) {
                                     }
                                 }"
                                 LaunchedEffect(conversationId) {
+                                    Log.d("Card Messages","fetching messages for the path: $conversationId")
                                     messageViewModel.fetchCardMessages(conversationId)
                                 }
 
                                 val messages by messageViewModel.getCardMessages(conversationId)
                                     .observeAsState(emptyList())
+                                Log.d("Card Messages", "fetched messages are: $messages")
 
                                 if (messages.isNotEmpty()) {
+
                                     val sortedMessages =
                                         messages.sortedBy { content -> content.timeStamp }
                                     val latestMessage = sortedMessages.lastOrNull()
