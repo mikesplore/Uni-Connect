@@ -80,6 +80,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
+import com.mike.uniadmin.dataModel.userchat.DeliveryStatus
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel
 import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
@@ -90,6 +91,7 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.home.UserItem
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
+
 
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
@@ -112,6 +114,8 @@ fun UniChat(navController: NavController, context: Context) {
 
     val userStates by userViewModel.userStates.observeAsState(emptyMap())
     val currentUser by userViewModel.user.observeAsState()
+
+
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email!!) {}
@@ -281,11 +285,12 @@ fun UniChat(navController: NavController, context: Context) {
                         // Chats Section
                         LazyColumn {
                             items(filteredUsers) { user ->
+
                                 val conversationId = "Direct Messages/${
                                     currentUser?.id?.let { id ->
                                         generateConversationId(id, user.id)
-                                    }
-                                }"
+                                    }}"
+
                                 LaunchedEffect(conversationId) {
                                     Log.d("Card Messages","fetching messages for the path: $conversationId")
                                     messageViewModel.fetchCardMessages(conversationId)
@@ -301,6 +306,8 @@ fun UniChat(navController: NavController, context: Context) {
                                         messages.sortedBy { content -> content.timeStamp }
                                     val latestMessage = sortedMessages.lastOrNull()
 
+                                    val messageCounter  = sortedMessages.count{unreadMessages -> unreadMessages.deliveryStatus == DeliveryStatus.SENT && unreadMessages.senderID == user.id}
+
                                     AnimatedVisibility(
                                         visible = true, enter = fadeIn(), exit = fadeOut()
                                     ) {
@@ -310,8 +317,8 @@ fun UniChat(navController: NavController, context: Context) {
                                             userState = userStates[user.id],
                                             context = context,
                                             userViewModel = userViewModel,
-                                            onUserClicked = {},
-                                            navController = navController
+                                            navController = navController,
+                                            messageCounter = messageCounter
                                         )
                                     }
                                 }
@@ -339,8 +346,8 @@ fun UserMessageCard(
     userState: UserStateEntity?,
     context: Context,
     userViewModel: UserViewModel,
-    onUserClicked: (Boolean) -> Unit,
-    navController: NavController
+    navController: NavController,
+    messageCounter: Int
 ) {
     val currentUser by userViewModel.user.observeAsState()
 
@@ -360,7 +367,7 @@ fun UserMessageCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { onUserClicked(true) },
+                onClick = { },
                 modifier = Modifier
                     .border(1.dp, CC.secondary(), CircleShape)
                     .clip(CircleShape)
@@ -376,6 +383,7 @@ fun UserMessageCard(
                     .padding(end = 8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
+                Row {
                 Text(
                     text = if (userEntity.id == currentUser?.id) "You" else userEntity.firstName,
                     style = CC.descriptionTextStyle(context)
@@ -383,18 +391,30 @@ fun UserMessageCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-
-                latestMessage?.message?.let {
-                    val senderName = if (latestMessage.recipientID == userEntity.id) "You: " else ""
-
-                    Text(
-                        text = "$senderName ${createAnnotatedMessage(createAnnotatedText(it).toString())}",
-                        style = CC.descriptionTextStyle(context)
-                            .copy(fontSize = 14.sp, color = CC.extraColor2().copy(alpha = 0.8f)),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    if (messageCounter.toString() != "0") {
+                        Box(modifier = Modifier.background(CC.secondary(), CircleShape)) {
+                            Text(
+                                messageCounter.toString(),
+                                style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
+                                modifier = Modifier.padding(2.dp)
+                            )
+                        }
+                    }
                 }
+
+                    latestMessage?.message?.let {
+                        val senderName = if (latestMessage.recipientID == userEntity.id) "You: " else ""
+
+                        Text(
+                            text = "$senderName ${createAnnotatedMessage(createAnnotatedText(it).toString())}",
+                            style = CC.descriptionTextStyle(context)
+                                .copy(fontSize = 14.sp, color = CC.extraColor2().copy(alpha = 0.8f)),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
             }
 
             Column(
@@ -402,29 +422,30 @@ fun UserMessageCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                if (userState == null) {
-                    Text(
-                        text = "Never Online",
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
-                        color = Color.Gray // Or any color you prefer for "Never Online"
-                    )
-                } else {
-                    userState.let { status ->
-                        val textColor = if (status.online == "online") Color.Green else Color.Red
+                    if (userState == null) {
                         Text(
-                            text = when {
-                                status.online == "online" -> "Online"
-                                else -> "${CC.getRelativeDate(CC.getCurrentDate(status.lastDate))} at ${
-                                    CC.getFormattedTime(
-                                        status.lastTime
-                                    )
-                                }"
-                            },
+                            text = "Never Online",
                             style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
-                            color = textColor
+                            color = Color.Gray // Or any color you prefer for "Never Online"
                         )
+                    } else {
+                        userState.let { status ->
+                            val textColor = if (status.online == "online") Color.Green else Color.Red
+                            Text(
+                                text = when {
+                                    status.online == "online" -> "Online"
+                                    else -> "${CC.getRelativeDate(CC.getCurrentDate(status.lastDate))} at ${
+                                        CC.getFormattedTime(
+                                            status.lastTime
+                                        )
+                                    }"
+                                },
+                                style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
+                                color = textColor
+                            )
+                        }
                     }
-                }
+
 
                 latestMessage?.timeStamp?.let {
                     Text(
@@ -443,7 +464,8 @@ fun UserMessageCard(
 @Composable
 fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
-
+    Box(modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center){
     if (currentUser?.profileImageLink?.isNotBlank() == true) {
         AsyncImage(
             model = currentUser.profileImageLink,
@@ -466,6 +488,7 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
                 )
             }
         }
+    }
     }
 
     if (showDialog) {

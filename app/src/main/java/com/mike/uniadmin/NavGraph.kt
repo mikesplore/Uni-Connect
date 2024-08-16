@@ -29,6 +29,7 @@ import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
+
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
@@ -40,7 +41,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
     )
 
-    NavHost(navController = navController, startDestination = "homeScreen") {
+    NavHost(navController = navController, startDestination = "splashScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
@@ -57,7 +58,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }) {
             AssignmentScreen(context)
         }
-
 
         composable("dashboard",  exitTransition = {
             fadeOut(animationSpec = tween(300)) 

@@ -51,7 +51,7 @@ data class GroupEntity(
 class UniAdmin : Application() {
     val database by lazy { AppDatabase.getDatabase(this) }
     val chatRepository by lazy { ChatRepository(database.chatDao(), database.groupDao()) }
-    val messageRepository by lazy { MessageRepository(database.messageDao()) }
+    val messageRepository by lazy { MessageRepository(database.messageDao(), database.userDao()) }
     val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao(), database.databaseDao()) }
     val announcementRepository by lazy { AnnouncementRepository(database.announcementsDao()) }
     val notificationRepository by lazy { NotificationRepository(database.notificationDao()) }

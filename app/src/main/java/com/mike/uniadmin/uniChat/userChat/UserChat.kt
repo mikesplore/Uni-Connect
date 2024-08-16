@@ -224,22 +224,18 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 LazyColumn(
                     modifier = Modifier.weight(1f), state = scrollState
                 ) {
-                    // Group messages by formatted date string
                     val groupedMessages = messages.groupBy { message ->
-                        // Format the timestamp to a date string
                         CC.getCurrentDate(message.date)
                     }.also { _ ->
-                        // Iterate over messages and check if the message should be marked as delivered
                         messages.forEach { message ->
                             // If the current user is not the sender (and thus the receiver), or if it's a self-chat
                             if (message.senderID != user?.id || message.senderID == message.recipientID) {
-                                messageViewModel.onMessageReceived(message, conversationId)
+                                messageViewModel.markMessageAsRead(message, conversationId)
                             }
                         }
                     }
 
 
-                    // Iterate over each group of messages by date
                     groupedMessages.forEach { (_, chatsForDate) ->
                         // Get the original timestamp for the first message in the group
                         val originalTimestamp = chatsForDate.first().date

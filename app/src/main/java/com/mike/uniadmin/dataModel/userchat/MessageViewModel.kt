@@ -23,14 +23,11 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     private val _isTyping = MutableLiveData<Boolean>()
     val isTyping: LiveData<Boolean> = _isTyping
 
-    private val _messageStatus = MutableLiveData<MessageEntity>()
-    val messageStatus: LiveData<MessageEntity> = _messageStatus
 
 
-    fun onMessageReceived(message: MessageEntity, path: String) {
+    fun markMessageAsRead(message: MessageEntity, path: String) {
         viewModelScope.launch {
-            repository.markMessageAsDelivered(message.id, path)
-            _messageStatus.postValue(message)
+            repository.markMessageAsRead(message.id, path)
         }
     }
 
@@ -47,6 +44,7 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
 
     init {
         _messagesMap.value = emptyMap()
+        _isTyping.value = false
     }
 
     fun fetchCardMessages(conversationId: String) {
@@ -63,6 +61,8 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     fun getCardMessages(conversationId: String): LiveData<List<MessageEntity>> {
         return messagesMap.map { it[conversationId] ?: emptyList() }
     }
+
+
 
      fun fetchMessages(path: String) {
          _isLoading.value = true

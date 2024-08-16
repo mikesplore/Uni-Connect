@@ -20,6 +20,6 @@ data class MessageEntity(
 
 enum class DeliveryStatus{
         SENT,
-        DELIVERED,
+        READ,
 
 }

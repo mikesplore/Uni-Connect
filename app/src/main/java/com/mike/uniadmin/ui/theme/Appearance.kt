@@ -291,7 +291,7 @@ fun Background() {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = CC.textColor().copy(0.2f),
+                tint = CC.secondary().copy(0.1f),
                 modifier = Modifier
                     .padding(8.dp)
             )

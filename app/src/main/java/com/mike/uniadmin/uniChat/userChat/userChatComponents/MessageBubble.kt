@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,8 +69,6 @@ fun MessageBubble(
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    // Observe message status to update the UI accordingly
-    val messageStatus by messageViewModel.messageStatus.observeAsState()
 
     fun deleteMessage() {
         messageViewModel.deleteMessage(message.id, path, onSuccess = {
@@ -187,10 +183,10 @@ fun DeliveryStatusIcon(
                 modifier = Modifier.size(16.dp)
             )
         }
-        DeliveryStatus.DELIVERED -> {
+        DeliveryStatus.READ -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy((-4).dp) // Slight overlap for double tick
+                horizontalArrangement = Arrangement.spacedBy((-8).dp) // Slight overlap for double tick
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,

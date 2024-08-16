@@ -17,31 +17,43 @@
 
 
     <application
-        android:enableOnBackInvokedCallback="true"
-        android:allowBackup="true"
         android:name=".dataModel.groupchat.UniAdmin"
+        android:allowBackup="true"
+        android:appCategory="productivity"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:appCategory="productivity"
         android:theme="@style/Theme.UniAdmin"
         tools:targetApi="tiramisu">
+
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.impl.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.SplashTheme">
+            android:theme="@style/Theme.SplashTheme"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="app"
-                    android:host="com.mike.unikonnect"
-                    android:pathPattern="/dashboard/.*" />
+                <data android:host="com.mike.unikonnect"
+                    android:pathPattern="/dashboard/.*"
+                    android:scheme="app" />
             </intent-filter>
 
             <intent-filter>

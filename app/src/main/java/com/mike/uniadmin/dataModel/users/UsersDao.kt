@@ -35,8 +35,11 @@ interface UserDao {
 
     @Query("DELETE FROM SignedInUser")
     suspend fun deleteSignedInUser()
-}
 
+    @Query("SELECT id FROM admins")
+    suspend fun getAllUserIds(): List<String>
+
+}
 
 
 @Dao
@@ -55,25 +58,23 @@ interface UserStateDao {
 }
 
 
-
 @Dao
-interface AccountDeletionDao{
-    @Insert (onConflict = OnConflictStrategy.REPLACE)
+interface AccountDeletionDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAccountDeletion(accountDeletion: AccountDeletionEntity)
 
-    @Query ("SELECT * FROM accountDeletion WHERE id = :userID")
+    @Query("SELECT * FROM accountDeletion WHERE id = :userID")
     suspend fun getAccountDeletion(userID: String): AccountDeletionEntity?
 
 }
 
 
-
 @Dao
-interface UserPreferencesDao{
+interface UserPreferencesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserPreferences(userPreferences: UserPreferencesEntity)
 
-    @Query ("SELECT * FROM userPreferences WHERE id = :userID")
+    @Query("SELECT * FROM userPreferences WHERE id = :userID")
     suspend fun getUserPreferences(userID: String): UserPreferencesEntity?
 
 }

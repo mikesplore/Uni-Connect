@@ -13,18 +13,25 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.dataModel.users.UserDao
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.model.Global
@@ -33,7 +40,9 @@ import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
+import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.coroutines.coroutineContext
 import kotlin.text.endsWith
 import kotlin.text.substringBeforeLast
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -49,7 +58,7 @@ object DeviceTheme {
         darkMode.value = loadDarkModePreference()
     }
 
-     fun saveDarkModePreference(isDarkMode: Boolean) {
+    fun saveDarkModePreference(isDarkMode: Boolean) {
         val editor = sharedPreferences.edit()
         editor.putBoolean("DARK_MODE", isDarkMode)
         editor.apply()
@@ -62,7 +71,6 @@ object DeviceTheme {
 
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var auth: FirebaseAuth
     private var currentUser: UserEntity = UserEntity()
@@ -76,15 +84,24 @@ class MainActivity : AppCompatActivity() {
             val userEmail = user.email ?: "" // Handle potential null email
             fetchUserDataByEmail(userEmail) { fetchedUser ->
                 if (fetchedUser == null) {
+                    Log.e("UniAdminMainActivity", "User not found for email: $userEmail")
                     Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
                     return@fetchUserDataByEmail // Exit the callback
                 } else {
+                    Log.d("UniAdminMainActivity", "User found: ${fetchedUser.id}")
                     currentUser = fetchedUser
                     setupLifecycleObservers(currentUser.id)
+
+                    lifecycleScope.launch {
+                        val userDao = (application as UniAdmin).database.userDao()
+                        Log.d("UniAdminMainActivity", "Scheduling fetch messages work for user: ${currentUser.id}")
+                        scheduleFetchMessagesWork(userDao, currentUser.id, applicationContext)
+                    }
                 }
             }
         } else {
             lifecycle.removeObserver(lifecycleObserver)
+            Log.d("UniAdminMainActivity", "No user logged in")
             Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show()
         }
     }
@@ -146,13 +163,15 @@ class MainActivity : AppCompatActivity() {
             lastDate = CC.getTimeStamp()
         )
         userStatusRef.setValue(userState) // Set the whole UserStateEntity object
-        userStatusRef.onDisconnect().setValue(userState.copy(online = "offline")) // Set offline on disconnect
+        userStatusRef.onDisconnect()
+            .setValue(userState.copy(online = "offline")) // Set offline on disconnect
         Log.d("User status", "Online: $userState")
         writeUserActivity(userState) { success ->
             if (!success) {
                 Log.e("MainActivity", "Failed to write user online status")
             }
         }
+
     }
 
     private fun writeUserOfflineStatus(userId: String) {
@@ -209,6 +228,7 @@ class MainActivity : AppCompatActivity() {
                     val user = userSnapshot?.getValue(UserEntity::class.java)
                     onUserFetched(user) // Call the trailing lambda with the fetched user
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     onUserFetched(null) // Handle error by passing null to the callback
                 }
@@ -216,8 +236,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun registerConnectivityListener(context: Context, userId: String) {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerDefaultNetworkCallback(object :
+            ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
                 writeUserOnlineStatus(userId)
@@ -237,7 +259,8 @@ fun clearAllPreferences(context: Context) {
         for (file in prefsDir.listFiles() ?: emptyArray()) {
             if (file.isFile && file.name.endsWith(".xml")) {
                 val prefsName = file.name.substringBeforeLast(".xml")
-                val sharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+                val sharedPreferences =
+                    context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
                 val editor = sharedPreferences.edit()
                 editor.clear()
                 editor.apply()

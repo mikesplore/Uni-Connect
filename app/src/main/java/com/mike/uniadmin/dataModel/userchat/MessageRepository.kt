@@ -5,13 +5,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.dataModel.users.UserDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class MessageRepository(private val messageDao: MessageDao) {
+class MessageRepository(private val messageDao: MessageDao, private val usersDao: UserDao) {
     private val database = FirebaseDatabase.getInstance().reference
 
     fun fetchMessages(path: String, onResult: (List<MessageEntity>) -> Unit) {
@@ -31,10 +32,12 @@ class MessageRepository(private val messageDao: MessageDao) {
                         val message = childSnapshot.getValue(MessageEntity::class.java)
                         message?.let { messages.add(it) }
                     }
-                    viewModelScope.launch {
-                        // Update local database with the new data from Firebase
+                    viewModelScope.launch(Dispatchers.IO) {
                         messageDao.insertMessages(messages)
-                        // Update the UI with the latest messages from Firebase
+                    }
+
+                    // Call onResult on the main thread
+                    viewModelScope.launch(Dispatchers.Main) {
                         onResult(messages)
                     }
                 }
@@ -100,36 +103,15 @@ class MessageRepository(private val messageDao: MessageDao) {
         })
     }
 
-    fun markMessageAsDelivered(messageId: String, path: String) {
+    fun markMessageAsRead(messageId: String, path: String) {
         viewModelScope.launch {
             // Update delivery status to DELIVERED in Firebase
             database.child(path).child(messageId).child("deliveryStatus")
-                .setValue(DeliveryStatus.DELIVERED.name)
+                .setValue(DeliveryStatus.READ.name)
 
             // Update local database
-            messageDao.updateMessageStatus(messageId, DeliveryStatus.DELIVERED)
+            messageDao.updateMessageStatus(messageId, DeliveryStatus.READ)
         }
     }
-
-    fun listenForMessageStatusUpdates(path: String, onStatusUpdate: (MessageEntity) -> Unit) {
-        database.child(path).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (childSnapshot in snapshot.children) {
-                    val message = childSnapshot.getValue(MessageEntity::class.java)
-                    message?.let {
-                        // Update the local database with the latest status
-                        viewModelScope.launch {
-                        messageDao.updateMessageStatus(it.id, it.deliveryStatus)
-                        onStatusUpdate(it)
-                    }}
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle the error
-            }
-        })
-    }
-
 
 }
