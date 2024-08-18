@@ -81,7 +81,7 @@ import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-import com.mike.uniadmin.home.UserItem
+import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
