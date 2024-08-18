@@ -10,8 +10,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.authentication.LoginScreen
@@ -22,19 +20,17 @@ import com.mike.uniadmin.uniChat.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
 import com.mike.uniadmin.courseResources.CourseResources
-import com.mike.uniadmin.home.Dashboard
-import com.mike.uniadmin.home.HomeScreen
+import com.mike.uniadmin.dashboard.Dashboard
+import com.mike.uniadmin.homeScreen.HomeScreen
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
     val screens = listOf(
@@ -134,7 +130,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         composable("homeScreen",  exitTransition = {
             fadeOut(animationSpec = tween(300)) 
         }) {
-            HomeScreen(navController, context, pagerState, mainActivity, screens, coroutineScope)
+            HomeScreen(navController, context, mainActivity, screens, coroutineScope)
         }
 
         composable("courseResource/{courseCode}",  exitTransition = {
