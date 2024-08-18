@@ -1,4 +1,4 @@
-package com.mike.uniadmin.uniChat
+package com.mike.uniadmin.uniChat.groupChat.groupChatComponents
 
 import android.content.Context
 import android.widget.Toast
