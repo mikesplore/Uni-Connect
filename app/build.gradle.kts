@@ -65,8 +65,6 @@ dependencies {
     implementation(libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.google.accompanist.pager)
-    implementation(libs.google.accompanist.pager.indicators)
     implementation(libs.androidx.biometric)
     implementation(libs.firebase.database.ktx)
     implementation(libs.androidx.navigation.compose)
