@@ -57,7 +57,7 @@ import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
-import com.mike.uniadmin.uniChat.GroupItem
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupItem
 
 @Composable
 fun ModalDrawerItem(
