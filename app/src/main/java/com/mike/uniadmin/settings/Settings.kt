@@ -290,11 +290,8 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 Text("About", style = CC.titleTextStyle(context))
             }
             MyAbout(context)
-
-
         }
     }
-
 }
 
 
@@ -872,6 +869,7 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
 
     Column(
         modifier = Modifier
+
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -912,7 +910,8 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
                         .fillMaxWidth()
                         .height(150.dp),
                     textStyle = CC.descriptionTextStyle(context),
-                    maxLines = 5
+                    maxLines = 5,
+                    colors = CC.appTextFieldColors()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
