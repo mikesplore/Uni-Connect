@@ -15,7 +15,7 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
-import com.mike.uniadmin.uniChat.DiscussionScreen
+import com.mike.uniadmin.uniChat.groupChat.DiscussionScreen
 import com.mike.uniadmin.uniChat.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
