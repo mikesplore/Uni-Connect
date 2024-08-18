@@ -56,13 +56,16 @@ fun CourseBox(
             )
         },
         bodyContent = {
-            Text(course.courseCode, style = CC.descriptionTextStyle(context))
+            Text(course.courseCode,
+                style = CC.descriptionTextStyle(context),
+                modifier = Modifier.padding(start = 10.dp))
             Text(
                 course.courseName,
                 style = CC.titleTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 10.dp)
             )
             val visits = when (course.visits) {
                 0 -> "Never visited"
@@ -71,7 +74,7 @@ fun CourseBox(
             }
             Row(
                 modifier = Modifier
-                    .padding(end = 10.dp)
+                    .padding(horizontal = 10.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
