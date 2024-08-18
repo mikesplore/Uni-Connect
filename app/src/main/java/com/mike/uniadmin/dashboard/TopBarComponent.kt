@@ -2,11 +2,9 @@ package com.mike.uniadmin.dashboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,14 +15,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,7 +56,11 @@ import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
-import kotlinx.coroutines.delay
+
+object Sidebar {
+    var showSideBar: MutableState<Boolean> = mutableStateOf(false)
+}
+
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,93 +70,30 @@ fun TopAppBarContent(
     context: Context,
     navController: NavController,
     userViewModel: UserViewModel,
-    notificationViewModel: NotificationViewModel
+    notificationViewModel: NotificationViewModel,
 ) {
     val loading by userViewModel.isLoading.observeAsState()
     val notifications by notificationViewModel.notifications.observeAsState()
-    val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     var expanded by remember { mutableStateOf(false) }
-
-    // periodically check the network status
-    LaunchedEffect(Unit) {
-        while (true) {
-            isOnline.value = isDeviceOnline(context)
-            delay(10000L) // Check every 10 seconds
-        }
-    }
+    val unreadCount = notifications?.size ?: 0
 
     TopAppBar(title = {
         Row(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically
         ) {
-            BoxWithConstraints(
-                modifier = Modifier.padding(end = 10.dp)
-            ) {
-                val size = 50.dp
-                Box(
-                    modifier = Modifier
-                        .border(
-                            1.dp, CC.textColor(), CircleShape
-                        )
-                        .background(CC.secondary(), CircleShape)
-                        .clip(CircleShape)
-                        .size(size),
-                    contentAlignment = Alignment.Center
-                ) {
-
-                    if (loading == true) {
-                        CircularProgressIndicator(color = CC.textColor())
-                    } else if (signedInUser.firstName.isEmpty()) {
-                        Icon(
-                            Icons.Default.AccountCircle, "Location", tint = CC.textColor()
-                        )
-                    } else {
-                        if (signedInUser.profileImageLink.isNotEmpty()) {
-                            AsyncImage(
-                                model = signedInUser.profileImageLink,
-                                contentDescription = signedInUser.firstName,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Text(
-                                "${signedInUser.firstName[0]}${signedInUser.lastName[0]}",
-                                style = CC.titleTextStyle(context)
-                                    .copy(fontWeight = FontWeight.Bold)
-                            )
-                        }
-                    }
-                }
-
-                val onlineStatus by animateColorAsState(
-                    animationSpec = tween(500, easing = LinearEasing),
-                    targetValue = if (isOnline.value) Color.Green else Color.Red,
-                    label = ""
-                )
-                // the small dot
-                Box(
-                    modifier = Modifier
-                        .border(
-                            1.dp, CC.secondary(), CircleShape
-                        )
-                        .size(12.dp)
-                        .background(
-                            onlineStatus, CircleShape
-                        )
-                        .align(Alignment.TopEnd)
-                        .offset(x = (-6).dp, y = (-6).dp)
+            // Menu Button
+            IconButton(onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value }) {
+                Icon(
+                    Icons.Default.Menu, contentDescription = null, tint = CC.textColor()
                 )
             }
+
+            // Greeting and Name
             Column(
                 modifier = Modifier
-                    .padding(start = 10.dp, end = 20.dp)
+                    .padding(start = 10.dp)
                     .weight(1f),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = CC.getGreetingMessage(),
@@ -164,35 +104,31 @@ fun TopAppBarContent(
                     text = signedInUser.firstName,
                     style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
                 )
-
             }
         }
     }, actions = {
-        BoxWithConstraints(modifier = Modifier.padding(end = 5.dp)) {
-            IconButton(onClick = {
-                notificationViewModel.fetchNotifications()
-                expanded = !expanded
-            }, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    Icons.Default.Notifications,
-                    contentDescription = null,
-                    tint = CC.secondary(),
-                    modifier = Modifier.fillMaxSize()
-                )
-                Box(
-                    modifier = Modifier
-                        .border(
-                            1.dp, CC.secondary(), CircleShape
-                        )
-                        .size(10.dp)
-                        .background(
-                            if (notifications?.isNotEmpty() == true) Color.Green else Color.Red,
-                            CircleShape
-                        )
-                        .align(Alignment.TopCenter)
-                        .offset(y = (10).dp, x = (8).dp)
-                )
+        // Notifications
+        BoxWithConstraints(modifier = Modifier.padding(end = 10.dp)) {
+            Box(modifier = Modifier
+                .clickable { expanded = !expanded }
+
+            ) {
+                BadgedBox(badge = {
+                    if (unreadCount > 0) {
+                        Badge {
+                            Text(text = unreadCount.toString())
+                        }
+                    }
+                }) {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        tint = CC.secondary(),
+                        modifier = Modifier.size(35.dp)
+                    )
+                }
             }
+
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
@@ -223,21 +159,63 @@ fun TopAppBarContent(
                 }
             }
         }
+
+        // Profile Image
+        BoxWithConstraints(modifier = Modifier.padding(end = 10.dp)) {
+            val size = 50.dp
+            Box(
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .border(1.dp, CC.textColor(), CircleShape)
+                    .background(CC.secondary(), CircleShape)
+                    .clip(CircleShape)
+                    .size(size),
+                contentAlignment = Alignment.Center
+            ) {
+                if (loading == true) {
+                    CircularProgressIndicator(color = CC.textColor())
+                } else if (signedInUser.firstName.isEmpty()) {
+                    Icon(
+                        Icons.Default.AccountCircle,
+                        contentDescription = null,
+                        tint = CC.textColor()
+                    )
+                } else {
+                    if (signedInUser.profileImageLink.isNotEmpty()) {
+                        AsyncImage(
+                            model = signedInUser.profileImageLink,
+                            contentDescription = signedInUser.firstName,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            "${signedInUser.firstName[0]}${signedInUser.lastName[0]}",
+                            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+            }
+        }
     }, colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = CC.primary(),
+        containerColor = CC.primary()
     )
     )
 }
-
 
 @Composable
 fun NotificationTitleContent(
     notification: NotificationEntity, context: Context
 ) {
-    Row(modifier = Modifier
-        .height(30.dp)
-        .padding(5.dp)
-        .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+    Row(
+        modifier = Modifier
+            .height(30.dp)
+            .padding(5.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start
+    ) {
         Text(
             text = notification.title,
             style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
