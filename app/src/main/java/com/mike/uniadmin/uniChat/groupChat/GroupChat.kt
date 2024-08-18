@@ -1,4 +1,4 @@
-package com.mike.uniadmin.uniChat
+package com.mike.uniadmin.uniChat.groupChat
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -84,6 +84,8 @@ import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatBubble
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupDetails
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -465,122 +467,6 @@ fun sendMessage(
 }
 
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
-@Composable
-fun ChatBubble(
-    chat: ChatEntity, isUser: Boolean, context: Context, navController: NavController
-) {
-    val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
-    val bubbleShape = RoundedCornerShape(
-        bottomStart = 16.dp,
-        bottomEnd = 16.dp,
-        topStart = if (isUser) 16.dp else 0.dp,
-        topEnd = if (isUser) 0.dp else 16.dp
-    )
-
-    val senderBrush = Brush.linearGradient(
-        colors = listOf(CC.extraColor1(), CC.extraColor2())
-    )
-    val receiverBrush = Brush.linearGradient(
-        colors = listOf(CC.tertiary(), CC.extraColor1())
-    )
-    val backgroundColor = if (isUser) senderBrush else receiverBrush
-
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        contentAlignment = alignment
-    ) {
-        val maxBubbleWidth = maxWidth * 0.75f
-        Row(
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (!isUser) {
-
-                Box(modifier = Modifier
-                    .clickable {
-                        navController.navigate("chat/${chat.senderID}") {
-                            popUpTo("chat/${chat.senderID}") {
-                                inclusive = true
-                            }
-                        }
-                    }
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(CC.primary(), CircleShape)
-                    .padding(4.dp), contentAlignment = Alignment.Center) {
-                    if (chat.profileImageLink.isNotBlank()) {
-                        AsyncImage(
-                            model = chat.profileImageLink,
-                            contentDescription = "Profile Image",
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            placeholder = painterResource(id = R.drawable.logo),
-                            error = painterResource(id = R.drawable.logo)
-                        )
-                    } else {
-                        Text(
-                            text = chat.senderName[0].toString(),
-                            style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
-                        )
-                    }
-                }
-            }
-            if (isUser) {
-                Text(
-                    text = CC.getFormattedTime(chat.time),
-                    style = CC.descriptionTextStyle(context),
-                    fontSize = 10.sp,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 8.dp)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .background(backgroundColor, bubbleShape)
-                    .widthIn(max = maxBubbleWidth)
-                    .padding(12.dp)
-            ) {
-                Column {
-                    if (!isUser) {
-                        Text(
-                            text = chat.senderName,
-                            style = CC.descriptionTextStyle(context),
-                            fontWeight = FontWeight.Bold,
-                            color = CC.primary()
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    SelectionContainer {
-                        Text(
-                            text = chat.message,
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                        )
-                    }
-                }
-            }
-            if (!isUser) {
-                Text(
-                    text = CC.getFormattedTime(chat.time),
-                    style = CC.descriptionTextStyle(context),
-                    fontSize = 10.sp,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 8.dp)
-                )
-            }
-        }
-    }
-}
 
 
 @Composable
