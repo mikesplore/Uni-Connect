@@ -1,4 +1,4 @@
-package com.mike.uniadmin.home
+package com.mike.uniadmin.dashboard
 
 
 import android.annotation.SuppressLint
@@ -37,10 +37,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -79,7 +77,6 @@ import com.mike.uniadmin.courseResources.CourseName
 import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
 import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModel
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModelFactory
 import com.mike.uniadmin.dataModel.courses.CourseEntity
@@ -93,7 +90,6 @@ import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
