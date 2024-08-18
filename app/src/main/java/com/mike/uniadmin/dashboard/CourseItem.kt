@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,17 +38,15 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
     Column(
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier
-            .shadow(
-                elevation = 4.dp,
-                shape = CircleShape
-            )
+        Card(modifier = Modifier
             .background(CC.tertiary(), CircleShape)
             .clip(CircleShape)
             .clickable {
                 navController.navigate("courseContent/${course.courseCode}")
             }
-            .size(70.dp), contentAlignment = Alignment.Center) {
+            .size(70.dp),
+            elevation = CardDefaults.elevatedCardElevation(5.dp)) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             if (course.courseImageLink.isNotEmpty()) {
                 AsyncImage(
                     model = course.courseImageLink,
@@ -60,7 +60,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
                 Icon(
                     Icons.Default.School, "Icon", tint = CC.textColor()
                 )
-            }
+            }}
         }
         Spacer(modifier = Modifier.height(5.dp))
         (if (course.courseName.length > 10) {
