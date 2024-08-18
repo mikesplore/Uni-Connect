@@ -13,25 +13,18 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.work.Configuration
-import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
-import com.mike.uniadmin.dataModel.users.UserDao
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserStateEntity
 import com.mike.uniadmin.model.Global
@@ -40,11 +33,7 @@ import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
-import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.coroutines.coroutineContext
-import kotlin.text.endsWith
-import kotlin.text.substringBeforeLast
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -91,12 +80,6 @@ class MainActivity : AppCompatActivity() {
                     Log.d("UniAdminMainActivity", "User found: ${fetchedUser.id}")
                     currentUser = fetchedUser
                     setupLifecycleObservers(currentUser.id)
-
-                    lifecycleScope.launch {
-                        val userDao = (application as UniAdmin).database.userDao()
-                        Log.d("UniAdminMainActivity", "Scheduling fetch messages work for user: ${currentUser.id}")
-                        scheduleFetchMessagesWork(userDao, currentUser.id, applicationContext)
-                    }
                 }
             }
         } else {

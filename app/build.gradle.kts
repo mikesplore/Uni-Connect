@@ -59,7 +59,6 @@ dependencies {
     //I've added these dependencies
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation("androidx.work:work-runtime:2.9.1")
     ksp(libs.androidx.room.compiler.v250) {
         exclude(group = "com.intellij", module = "annotations")
     }

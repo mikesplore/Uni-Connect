@@ -284,7 +284,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
             Row {
                 Text("We care about your feedback", style = CC.titleTextStyle(context))
             }
-            RatingAndFeedbackScreen(context)
+            currentUser?.let { it1 -> RatingAndFeedbackScreen(it1, context) }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth(0.9f)) {
                 Text("About", style = CC.titleTextStyle(context))
@@ -778,7 +778,7 @@ fun MyAbout(context: Context) {
                     .size(35.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = com.google.android.gms.base.R.drawable.googleg_standard_color_18),
+                    painter = painterResource(com.google.android.gms.base.R.drawable.googleg_standard_color_18),
                     tint = CC.textColor(),
                     contentDescription = "Open Gmail",
                     modifier = Modifier.size(20.dp)
@@ -857,11 +857,10 @@ fun Star(
 }
 
 @Composable
-fun RatingAndFeedbackScreen(context: Context) {
+fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
     var currentRating by remember { mutableIntStateOf(0) }
     var feedbackText by remember { mutableStateOf("") }
     var averageRatings by remember { mutableStateOf("") }
-    val user by remember { mutableStateOf(UserEntity("")) }
     var showFeedbackForm by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
 

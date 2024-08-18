@@ -24,6 +24,7 @@ firebaseMessaging = "24.0.0"
 roomCompiler = "2.5.0"
 roomTesting = "2.6.1"
 runtimeLivedata = "1.6.8"
+workRuntime = "2.9.1"
 workRuntimeKtx = "2.9.1"
 
 [libraries]
@@ -37,6 +38,7 @@ androidx-room-compiler-v250 = { module = "androidx.room:room-compiler", version.
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomTesting" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomTesting" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomTesting" }
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
