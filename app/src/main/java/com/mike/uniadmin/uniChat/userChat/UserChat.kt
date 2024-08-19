@@ -54,7 +54,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.R
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.groupchat.generateConversationId
 import com.mike.uniadmin.dataModel.userchat.DeliveryStatus
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
