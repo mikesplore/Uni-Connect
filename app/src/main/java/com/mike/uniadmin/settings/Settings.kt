@@ -86,7 +86,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.UserEntity
