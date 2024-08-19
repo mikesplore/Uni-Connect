@@ -37,7 +37,7 @@ import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignm
 import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModelFactory
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
