@@ -35,10 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
-
+import com.mike.uniadmin.localDatabase.UniAdmin
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -48,19 +47,16 @@ fun SplashScreen(navController: NavController, context: Context) {
     var userLoaded by remember { mutableStateOf(false) }
     var isDatabaseChecked by remember { mutableStateOf(false) }
 
-    val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.8f,
-        animationSpec = tween(
-            durationMillis = 800,
-            easing = { OvershootInterpolator(2f).getInterpolation(it) }
-        ), label = ""
+
+    val scale by animateFloatAsState(targetValue = if (startAnimation) 1f else 0.8f,
+        animationSpec = tween(durationMillis = 800,
+            easing = { OvershootInterpolator(2f).getInterpolation(it) }),
+        label = ""
     )
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
+    val application = context.applicationContext as UniAdmin
+    val userRepository = remember { application.userRepository }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository
         )
     )
 
@@ -73,7 +69,7 @@ fun SplashScreen(navController: NavController, context: Context) {
             isDatabaseChecked = true
         }
 
-        
+
         startAnimation = true // Start the animation
         delay(3000)
 
@@ -100,8 +96,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     }
 
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
+        contentAlignment = Alignment.Center, modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
@@ -125,8 +120,7 @@ fun SplashScreen(navController: NavController, context: Context) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Uni Admin",
-                style = CC.titleTextStyle(context)
+                text = "Uni Admin", style = CC.titleTextStyle(context)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
