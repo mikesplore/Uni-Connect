@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.groupchat
+package com.mike.uniadmin.localDatabase
 
 
 import androidx.room.TypeConverter
