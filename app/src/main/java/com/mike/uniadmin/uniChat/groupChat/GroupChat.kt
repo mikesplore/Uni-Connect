@@ -77,7 +77,7 @@ import com.mike.uniadmin.R
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
@@ -85,6 +85,7 @@ import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatBubble
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatTopAppBar
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupDetails
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -239,88 +240,7 @@ fun DiscussionScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChatTopAppBar(
-    navController: NavController,
-    name: String,
-    link: String,
-    context: Context,
-    onSearchClick: () -> Unit,
-    onShowUsersClick: () -> Unit
-) {
-    TopAppBar(title = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
-        ) {
-            // Group Icon on the left
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(CC.secondary(), CircleShape)
-                    .size(50.dp), contentAlignment = Alignment.Center
-            ) {
-                if (link.isNotBlank()) {
-                    AsyncImage(
-                        model = link,
-                        contentDescription = "Group Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.logo),
-                        error = painterResource(id = R.drawable.logo)
-                    )
-                } else {
-                    Text(
-                        text = name[0].toString(),
-                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
-                    )
-                }
 
-            }
-
-            Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
-
-            // Group Name and User Info in the center
-            Column(
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    text = name,
-                    style = CC.titleTextStyle(context).copy(fontSize = 18.sp),
-                    maxLines = 1
-                )
-            }
-        }
-    },
-        actions = {
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    Icons.Filled.Search, contentDescription = "Search", tint = CC.textColor()
-                )
-            }
-            IconButton(onClick = { onShowUsersClick() }) {
-                Icon(Icons.Filled.Person, "Participants", tint = CC.textColor())
-            }
-        },
-        navigationIcon = {
-            IconButton(onClick = {
-                navController.navigate("uniChat") {
-                    popUpTo("GroupChat/${GroupDetails.groupName.value}") {
-                        inclusive = true
-                    }
-                }
-            }) {
-                Icon(
-                    Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Back",
-                    tint = CC.textColor()
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary()),
-        modifier = Modifier.statusBarsPadding() // Adjust for status bar
-    )
-}
 
 @Composable
 fun GroupUsersList(
@@ -470,7 +390,7 @@ fun sendMessage(
 
 
 @Composable
-fun RowText(context: Context) {
+private fun RowText(context: Context) {
     Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
     ) {
