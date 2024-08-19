@@ -65,7 +65,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
