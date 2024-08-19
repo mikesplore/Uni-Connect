@@ -17,7 +17,7 @@
 
 
     <application
-        android:name=".dataModel.groupchat.UniAdmin"
+        android:name=".localDatabase.UniAdmin"
         android:allowBackup="true"
         android:appCategory="productivity"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,18 +29,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UniAdmin"
         tools:targetApi="tiramisu">
-
-
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="androidx.work.impl.WorkManagerInitializer"
-                android:value="androidx.startup"
-                tools:node="remove" />
-        </provider>
 
         <activity
             android:name=".MainActivity"
