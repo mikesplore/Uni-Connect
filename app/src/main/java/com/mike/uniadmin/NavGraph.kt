@@ -16,14 +16,14 @@ import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
 import com.mike.uniadmin.uniChat.groupChat.DiscussionScreen
-import com.mike.uniadmin.uniChat.UniChat
+import com.mike.uniadmin.uniChat.mainChatScreen.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 import com.mike.uniadmin.courseContent.CourseContent
 import com.mike.uniadmin.courseResources.CourseResources
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.homeScreen.HomeScreen
-import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.notification.PhoneNotifications
+import com.mike.uniadmin.programs.ProgramScreen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
@@ -31,13 +31,8 @@ import com.mike.uniadmin.ui.theme.Appearance
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    val coroutineScope = rememberCoroutineScope()
 
-    val screens = listOf(
-        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
-    )
-
-    NavHost(navController = navController, startDestination = "splashScreen") {
+    NavHost(navController = navController, startDestination = "programs") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
@@ -127,10 +122,20 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             Appearance(navController = navController)
         }
 
-        composable("homeScreen",  exitTransition = {
-            fadeOut(animationSpec = tween(300)) 
-        }) {
-            HomeScreen(navController, context, mainActivity, screens, coroutineScope)
+        composable("programs"){
+            ProgramScreen(context, navController)
+        }
+
+        composable("Program/{programCode}",  exitTransition = {
+            fadeOut(animationSpec = tween(300))
+        }, arguments = listOf(navArgument("programCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            HomeScreen(
+                programCode = backStackEntry.arguments?.getString("programCode") ?: "",
+                navController = navController,
+                context = context,
+                activity = mainActivity
+            )
         }
 
         composable("courseResource/{courseCode}",  exitTransition = {
