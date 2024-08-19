@@ -62,6 +62,7 @@ dependencies {
     ksp(libs.androidx.room.compiler.v250) {
         exclude(group = "com.intellij", module = "annotations")
     }
+
     implementation(libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
