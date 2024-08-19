@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.clearAllPreferences
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
 import com.mike.uniadmin.dataModel.users.SignedInUser
 import com.mike.uniadmin.dataModel.users.UserEntity
@@ -278,7 +277,6 @@ fun SignOut(
                             if (success) {
                                 userViewModel.deleteAllTables()
                                 userViewModel.deleteSignedInUser()
-                                clearAllPreferences(context)
                                 FirebaseAuth.getInstance().signOut()
                                 navController.navigate("login") {
                                     popUpTo("homeScreen") { inclusive = true }
