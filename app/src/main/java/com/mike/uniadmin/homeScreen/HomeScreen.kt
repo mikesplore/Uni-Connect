@@ -35,7 +35,7 @@ import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
 import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase.getUpdate
@@ -54,9 +54,13 @@ fun HomeScreen(
     navController: NavController,
     context: Context,
     activity: MainActivity,
-    screens: List<Screen>,
-    coroutineScope: CoroutineScope,
+    programCode: String
 ) {
+
+    val screens = listOf(
+        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
+    )
+    val coroutineScope = rememberCoroutineScope()
 
     // ViewModel instantiation
     val uniAdmin = context.applicationContext as? UniAdmin
