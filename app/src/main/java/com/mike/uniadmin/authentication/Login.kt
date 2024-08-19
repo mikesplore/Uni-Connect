@@ -59,7 +59,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
 import com.mike.uniadmin.dataModel.users.SignedInUser
