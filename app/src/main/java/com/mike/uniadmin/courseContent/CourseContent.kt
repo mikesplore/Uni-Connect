@@ -92,7 +92,7 @@ import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
 import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModelFactory
 import com.mike.uniadmin.dataModel.courses.CourseViewModel
 import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.users.UserViewModel
 import com.mike.uniadmin.dataModel.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
