@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.firebase.auth.FirebaseAuth
@@ -54,7 +55,7 @@ object DeviceTheme {
     }
 
     private fun loadDarkModePreference(): Boolean {
-        return sharedPreferences.getBoolean("DARK_MODE", true) // Default to false if not found
+        return sharedPreferences.getBoolean("DARK_MODE", true) // Default to true if not found
     }
 }
 
@@ -105,6 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setTheme(R.style.Theme_UniAdmin)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -115,14 +117,12 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize DeviceTheme with sharedPreferences
         DeviceTheme.init(sharedPreferences)
-
         auth.addAuthStateListener(authStateListener)
 
         setContent {
             UniAdminTheme(dynamicColor = false, darkTheme = DeviceTheme.darkMode.value) {
                 NavigationGraph(this, this)
             }
-
         }
     }
 
@@ -236,19 +236,21 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-fun clearAllPreferences(context: Context) {
-    val prefsDir = File(context.filesDir.parentFile, "shared_prefs")
-    if (prefsDir.exists() && prefsDir.isDirectory) {
-        for (file in prefsDir.listFiles() ?: emptyArray()) {
-            if (file.isFile && file.name.endsWith(".xml")) {
-                val prefsName = file.name.substringBeforeLast(".xml")
-                val sharedPreferences =
-                    context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-                val editor = sharedPreferences.edit()
-                editor.clear()
-                editor.apply()
-            }
-        }
-    }
-}
+//clear shared preferences
+
+//fun clearAllPreferences(context: Context) {
+//    val prefsDir = File(context.filesDir.parentFile, "shared_prefs")
+//    if (prefsDir.exists() && prefsDir.isDirectory) {
+//        for (file in prefsDir.listFiles() ?: emptyArray()) {
+//            if (file.isFile && file.name.endsWith(".xml")) {
+//                val prefsName = file.name.substringBeforeLast(".xml")
+//                val sharedPreferences =
+//                    context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+//                val editor = sharedPreferences.edit()
+//                editor.clear()
+//                editor.apply()
+//            }
+//        }
+//    }
+//}
 
