@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.dataModel.groupchat.UniAdmin
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
 import com.mike.uniadmin.dataModel.users.UserEntity
 import com.mike.uniadmin.dataModel.users.UserViewModel
@@ -74,14 +74,9 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController, context: Context) {
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
-
+    val userAdmin = context.applicationContext as UniAdmin
+    val userRepository = remember { userAdmin.userRepository }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
     val signedInUser by userViewModel.signedInUser.observeAsState()
     var currentUser by remember { mutableStateOf<UserEntity?>(null) }
     var updated by remember { mutableStateOf(false) }
@@ -106,6 +101,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
     }
 
     if (isLoading || signedInUser == null || currentUser == null) {
+
         // Display a loading indicator while data is being fetched
         Box(
             contentAlignment = Alignment.Center,
