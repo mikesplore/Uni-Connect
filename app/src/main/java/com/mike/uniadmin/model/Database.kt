@@ -21,16 +21,22 @@ object MyDatabase {
     private var calendar: Calendar = Calendar.getInstance()
     private var year = calendar.get(Calendar.YEAR)
 
-
     fun generateIndexNumber(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("IndexNumber") { newCode ->
             val indexNumber = "CP$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
+    fun generateProgramID(onIndexNumberGenerated: (String) -> Unit) {
+        updateAndGetCode("Program") { newCode ->
+            val indexNumber = "PR$newCode$year"
+            onIndexNumberGenerated(indexNumber)
+        }
+    }
+
     fun generateGroupId(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Group") { newCode ->
             val indexNumber = "GD$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
@@ -38,7 +44,7 @@ object MyDatabase {
 
 
     fun generateChatID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Chat") { newCode ->
             val indexNumber = "CH$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
@@ -46,56 +52,56 @@ object MyDatabase {
 
 
     fun generateFCMID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("FCM") { newCode ->
             val indexNumber = "FC$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
     fun generateAccountDeletionID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Account Deletion") { newCode ->
             val indexNumber = "AD$newCode$year"
             onIndexNumberGenerated(indexNumber) // Pass the generated index number to the callback
         }
     }
 
     fun generateSharedPreferencesID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("SharedPreferences") { newCode ->
             val indexNumber = "SP$newCode$year"
             onIndexNumberGenerated(indexNumber) // Pass the generated index number to the callback
         }
     }
 
     fun generateFeedbackID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Feedback") { newCode ->
             val indexNumber = "FB$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
     private fun generateAttendanceID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Attendance") { newCode ->
             val indexNumber = "AT$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
     fun generateAnnouncementID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Announcement") { newCode ->
             val indexNumber = "AN$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
     fun generateTimetableID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Timetable") { newCode ->
             val indexNumber = "TT$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
     fun generateNotificationID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Notification") { newCode ->
             val indexNumber = "NT$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
@@ -103,7 +109,7 @@ object MyDatabase {
 
 
     fun generateAssignmentID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode { newCode ->
+        updateAndGetCode("Assignment") { newCode ->
             val indexNumber = "AS$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
@@ -126,8 +132,8 @@ object MyDatabase {
     }
 
 
-    private fun updateAndGetCode(onCodeUpdated: (Int) -> Unit) {
-        val database = FirebaseDatabase.getInstance().getReference("Code")
+    private fun updateAndGetCode(path: String, onCodeUpdated: (Int) -> Unit) {
+        val database = FirebaseDatabase.getInstance().getReference("Codes").child(path)
 
         database.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -255,7 +261,42 @@ object MyDatabase {
                 }
         }
     }
-
 }
+
+val database = FirebaseDatabase.getInstance().reference
+
+fun moveNodesToNewParent() {
+    val sourceRef = database.child("Programs") // Reference to the "Programs" node
+    val destinationRef = sourceRef.child("PR12024") // Reference to the "PR12024" node inside "Programs"
+
+    sourceRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            if (snapshot.hasChildren()) { // Check if "Programs" has any children
+                val existingData = snapshot.value as Map<*, *>?
+
+                existingData?.let { data ->
+                    destinationRef.setValue(data)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Remove the original data from "Programs" (excluding "PR12024")
+                                for (child in snapshot.children) {
+                                    if (child.key != "PR12024") {
+                                        child.ref.removeValue()
+                                    }
+                                }
+                            } else {
+                                println("Failed to move data: ${task.exception?.message}")
+                            }
+                        }
+                }
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            println("Error reading data: ${error.message}")
+        }
+    })
+}
+
 
 
