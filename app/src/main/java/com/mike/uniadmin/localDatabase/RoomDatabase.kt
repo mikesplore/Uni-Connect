@@ -21,11 +21,15 @@ import com.mike.uniadmin.dataModel.courses.CourseDao
 import com.mike.uniadmin.dataModel.courses.CourseEntity
 import com.mike.uniadmin.dataModel.groupchat.ChatDao
 import com.mike.uniadmin.dataModel.groupchat.ChatEntity
-import com.mike.uniadmin.dataModel.groupchat.Converters
 import com.mike.uniadmin.dataModel.groupchat.GroupDao
 import com.mike.uniadmin.dataModel.groupchat.GroupEntity
 import com.mike.uniadmin.dataModel.notifications.NotificationDao
 import com.mike.uniadmin.dataModel.notifications.NotificationEntity
+import com.mike.uniadmin.dataModel.programs.Program
+import com.mike.uniadmin.dataModel.programs.ProgramDao
+import com.mike.uniadmin.dataModel.programs.ProgramEntity
+import com.mike.uniadmin.dataModel.programs.ProgramState
+import com.mike.uniadmin.dataModel.programs.ProgramStateDao
 import com.mike.uniadmin.dataModel.userchat.MessageDao
 import com.mike.uniadmin.dataModel.userchat.MessageEntity
 import com.mike.uniadmin.dataModel.users.AccountDeletionDao
@@ -56,9 +60,12 @@ import com.mike.uniadmin.dataModel.users.UserStateEntity
         CourseDetail::class,
         CourseTimetable::class,
         AttendanceState::class,
-        SignedInUser::class
+        SignedInUser::class,
+        ProgramEntity::class,
+        ProgramState::class,
+        Program::class,
                ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -79,6 +86,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun courseTimetableDao(): CourseTimetableDao
     abstract fun attendanceStateDao(): AttendanceStateDao
     abstract fun databaseDao(): DatabaseDao
+    abstract fun programDao(): ProgramDao
+    abstract fun programStateDao(): ProgramStateDao
 
     companion object {
         @Volatile
