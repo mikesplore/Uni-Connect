@@ -63,12 +63,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.groupchat.GroupEntity
+import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
