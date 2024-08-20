@@ -38,12 +38,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -55,7 +57,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.mike.uniadmin.backEnd.courses.CourseViewModel
+import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.GridItem
 import com.mike.uniadmin.model.MyDatabase.deleteItem
 import com.mike.uniadmin.model.MyDatabase.readItems
@@ -77,7 +84,15 @@ fun CourseResources(courseCode: String, context: Context) {
     var isLoading by remember { mutableStateOf(false) }
     var showAddSection by remember { mutableStateOf<Section?>(null) }
 
+    val application = context.applicationContext as UniAdmin
+    val courseRepository = remember { application.courseRepository }
+    val courseViewModel : CourseViewModel = viewModel(factory = CourseViewModelFactory(courseRepository))
+    val course by courseViewModel.fetchedCourse.observeAsState()
+
+
     LaunchedEffect(courseCode) {
+
+        courseViewModel.getCourseDetailsByCourseID(courseCode)
         
         isLoading = true
         readItems(courseCode, Section.NOTES) { fetchedNotes ->
@@ -92,6 +107,7 @@ fun CourseResources(courseCode: String, context: Context) {
             resources.addAll(fetchedResources)
             isLoading = false
         }
+
     }
 
     Scaffold(
@@ -121,18 +137,28 @@ fun CourseResources(courseCode: String, context: Context) {
                     .padding(it)
 
             ) {
-                Row(modifier = Modifier
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
                     .height(100.dp)
                     .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center) {
+                    contentAlignment = Alignment.Center
+                    ) {
+                    AsyncImage(
+                        model = course?.courseImageLink,
+                        contentDescription = "Course Image",
+                        modifier = Modifier
+                            .blur(0.3.dp)
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                     Text(
                         CourseName.name.value,
                         style = CC.titleTextStyle(context)
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 30.sp),
-                        modifier = Modifier.weight(1f),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 30.sp, color = Color.Black),
+                        modifier = Modifier.fillMaxSize(),
                         textAlign = TextAlign.Center
                     )
+
                 }
 
                 Section(title = "Notes",

@@ -154,7 +154,7 @@ fun ModalNavigationDrawerItem(
                     action = Intent.ACTION_SEND
                     putExtra(
                         Intent.EXTRA_TEXT,
-                        "${fetchedUserDetails?.firstName} invites you to join Uni Konnect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                        "${fetchedUserDetails?.firstName} invites you to join Uni Admin! Get organized and ace your studies.\n Download now: ${update.updateLink}"
                     ) // Customize the text
                     type = "text/plain"
                 }
