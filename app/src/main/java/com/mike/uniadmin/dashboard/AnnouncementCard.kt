@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
+import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
