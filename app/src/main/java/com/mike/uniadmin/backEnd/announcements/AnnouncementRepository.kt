@@ -1,11 +1,11 @@
-package com.mike.uniadmin.dataModel.announcements
+package com.mike.uniadmin.backEnd.announcements
 
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.users.viewModelScope
+import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 val announcementViewModelScope = CoroutineScope(Dispatchers.Main)
 
 class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
-    private val database = FirebaseDatabase.getInstance().reference.child("Announcements")
+    private val programCode = ProgramCode.programCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("Announcements")
 
     init {
         startAnnouncementsListener()
