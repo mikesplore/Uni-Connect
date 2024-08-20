@@ -51,10 +51,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.dataModel.notifications.NotificationEntity
-import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.backEnd.notifications.NotificationEntity
+import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object Sidebar {
@@ -79,12 +79,15 @@ fun TopAppBarContent(
 
     TopAppBar(title = {
         Row(
-            modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxHeight(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Menu Button
             IconButton(onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value }) {
                 Icon(
-                    Icons.Default.Menu, contentDescription = null, tint = CC.textColor()
+                    Icons.Default.Menu,
+                    contentDescription = null,
+                    tint = CC.textColor()
                 )
             }
 
@@ -107,15 +110,17 @@ fun TopAppBarContent(
             }
         }
     }, actions = {
-        // Notifications
         BoxWithConstraints(modifier = Modifier.padding(end = 10.dp)) {
-            Box(modifier = Modifier
-                .clickable { expanded = !expanded }
+            // Calculate dynamic sizes based on available width or height
+            val iconSize = maxWidth * 0.08f // For example, 8% of the available width
+            val badgeSize = maxWidth * 0.045f // Adjust the badge size similarly
 
-            ) {
+            Box(modifier = Modifier.clickable { expanded = !expanded }) {
                 BadgedBox(badge = {
                     if (unreadCount > 0) {
-                        Badge {
+                        Badge(
+                            modifier = Modifier.size(badgeSize) // Dynamic badge size
+                        ) {
                             Text(text = unreadCount.toString())
                         }
                     }
@@ -124,7 +129,7 @@ fun TopAppBarContent(
                         Icons.Default.Notifications,
                         contentDescription = null,
                         tint = CC.secondary(),
-                        modifier = Modifier.size(35.dp)
+                        modifier = Modifier.size(iconSize) // Dynamic icon size
                     )
                 }
             }
@@ -133,8 +138,8 @@ fun TopAppBarContent(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .heightIn(max = 200.dp)
-                    .width(160.dp)
+                    .heightIn(max = maxHeight * 0.4f) // Max height is 40% of available height
+                    .width(maxWidth * 0.4f) // Width is 40% of available width
                     .background(CC.extraColor1())
             ) {
                 Column(
@@ -162,14 +167,15 @@ fun TopAppBarContent(
 
         // Profile Image
         BoxWithConstraints(modifier = Modifier.padding(end = 10.dp)) {
-            val size = 50.dp
+            val profileImageSize = maxWidth * 0.12f // Dynamic size for profile image (e.g., 12% of available width)
+
             Box(
                 modifier = Modifier
                     .padding(start = 10.dp)
                     .border(1.dp, CC.textColor(), CircleShape)
                     .background(CC.secondary(), CircleShape)
                     .clip(CircleShape)
-                    .size(size),
+                    .size(profileImageSize),
                 contentAlignment = Alignment.Center
             ) {
                 if (loading == true) {
@@ -201,9 +207,9 @@ fun TopAppBarContent(
         }
     }, colors = TopAppBarDefaults.topAppBarColors(
         containerColor = CC.primary()
-    )
-    )
+    ))
 }
+
 
 @Composable
 fun NotificationTitleContent(
