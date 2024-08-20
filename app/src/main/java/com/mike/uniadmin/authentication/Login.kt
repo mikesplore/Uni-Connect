@@ -40,7 +40,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,12 +59,12 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.dataModel.notifications.NotificationEntity
-import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
-import com.mike.uniadmin.dataModel.users.SignedInUser
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.notifications.NotificationEntity
+import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
+import com.mike.uniadmin.backEnd.users.SignedInUser
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.model.Details
 import com.mike.uniadmin.model.Fcm
 import com.mike.uniadmin.model.MyDatabase
@@ -337,7 +336,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                     id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
                 )
             )
-            navController.navigate("homeScreen") {
+            navController.navigate("programs") {
                 popUpTo("login") { inclusive = true }
             }
         } else {
@@ -426,7 +425,7 @@ fun handleSignIn(
                 firebaseAuth.currentUser?.email?.let { current ->
                     userViewModel.findUserByEmail(current) { user ->
                         if (user != null) {
-                            navController.navigate("homeScreen")
+                            navController.navigate("programs")
                             Toast.makeText(
                                 context,
                                 "Welcome back to UniAdmin, ${user.firstName}!",
