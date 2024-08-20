@@ -51,10 +51,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.dataModel.userchat.MessageEntity
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserStateEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.backEnd.userchat.MessageEntity
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserStateEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
