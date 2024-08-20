@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.coursecontent.coursetimetable
+package com.mike.uniadmin.backEnd.coursecontent.coursetimetable
 
 
 
