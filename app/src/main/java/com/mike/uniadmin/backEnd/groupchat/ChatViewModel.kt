@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.groupchat
+package com.mike.uniadmin.backEnd.groupchat
 
 import android.util.Log
 import androidx.lifecycle.LiveData
