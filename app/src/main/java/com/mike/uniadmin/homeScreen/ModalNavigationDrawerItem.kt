@@ -50,11 +50,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.users.SignedInUser
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserStateEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.users.SignedInUser
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserStateEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.Update
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -83,7 +83,7 @@ fun ModalNavigationDrawerItem(
             .background(
                 CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
             )
-            .fillMaxHeight(0.8f)
+            .fillMaxHeight()
             .fillMaxWidth(0.5f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
