@@ -39,21 +39,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModel
-import com.mike.uniadmin.dataModel.announcements.AnnouncementViewModelFactory
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModel
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableViewModelFactory
-import com.mike.uniadmin.dataModel.courses.CourseViewModel
-import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
+import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModelFactory
+import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModel
+import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModelFactory
+import com.mike.uniadmin.backEnd.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseViewModel
+import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
+import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
-
 
 @Composable
 fun Dashboard(navController: NavController, context: Context) {
@@ -114,7 +115,6 @@ fun Dashboard(navController: NavController, context: Context) {
 
 
     LaunchedEffect(user) {
-
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
         userViewModel.getSignedInUser()
