@@ -5,43 +5,42 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.mike.uniadmin.dataModel.announcements.AnnouncementEntity
-import com.mike.uniadmin.dataModel.announcements.AnnouncementsDao
-import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncement
-import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementDao
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentDao
-import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetail
-import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailDao
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetable
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableDao
-import com.mike.uniadmin.dataModel.courses.AttendanceState
-import com.mike.uniadmin.dataModel.courses.AttendanceStateDao
-import com.mike.uniadmin.dataModel.courses.CourseDao
-import com.mike.uniadmin.dataModel.courses.CourseEntity
-import com.mike.uniadmin.dataModel.groupchat.ChatDao
-import com.mike.uniadmin.dataModel.groupchat.ChatEntity
-import com.mike.uniadmin.dataModel.groupchat.GroupDao
-import com.mike.uniadmin.dataModel.groupchat.GroupEntity
-import com.mike.uniadmin.dataModel.notifications.NotificationDao
-import com.mike.uniadmin.dataModel.notifications.NotificationEntity
-import com.mike.uniadmin.dataModel.programs.Program
-import com.mike.uniadmin.dataModel.programs.ProgramDao
-import com.mike.uniadmin.dataModel.programs.ProgramEntity
-import com.mike.uniadmin.dataModel.programs.ProgramState
-import com.mike.uniadmin.dataModel.programs.ProgramStateDao
-import com.mike.uniadmin.dataModel.userchat.MessageDao
-import com.mike.uniadmin.dataModel.userchat.MessageEntity
-import com.mike.uniadmin.dataModel.users.AccountDeletionDao
-import com.mike.uniadmin.dataModel.users.AccountDeletionEntity
-import com.mike.uniadmin.dataModel.users.DatabaseDao
-import com.mike.uniadmin.dataModel.users.SignedInUser
-import com.mike.uniadmin.dataModel.users.UserDao
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserPreferencesDao
-import com.mike.uniadmin.dataModel.users.UserPreferencesEntity
-import com.mike.uniadmin.dataModel.users.UserStateDao
-import com.mike.uniadmin.dataModel.users.UserStateEntity
+import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
+import com.mike.uniadmin.backEnd.announcements.AnnouncementsDao
+import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncement
+import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncementDao
+import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignment
+import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentDao
+import com.mike.uniadmin.backEnd.coursecontent.coursedetails.CourseDetail
+import com.mike.uniadmin.backEnd.coursecontent.coursedetails.CourseDetailDao
+import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetable
+import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableDao
+import com.mike.uniadmin.backEnd.courses.AttendanceState
+import com.mike.uniadmin.backEnd.courses.AttendanceStateDao
+import com.mike.uniadmin.backEnd.courses.CourseDao
+import com.mike.uniadmin.backEnd.courses.CourseEntity
+import com.mike.uniadmin.backEnd.groupchat.ChatDao
+import com.mike.uniadmin.backEnd.groupchat.ChatEntity
+import com.mike.uniadmin.backEnd.groupchat.GroupDao
+import com.mike.uniadmin.backEnd.groupchat.GroupEntity
+import com.mike.uniadmin.backEnd.notifications.NotificationDao
+import com.mike.uniadmin.backEnd.notifications.NotificationEntity
+import com.mike.uniadmin.backEnd.programs.ProgramDao
+import com.mike.uniadmin.backEnd.programs.ProgramEntity
+import com.mike.uniadmin.backEnd.programs.ProgramState
+import com.mike.uniadmin.backEnd.programs.ProgramStateDao
+import com.mike.uniadmin.backEnd.userchat.MessageDao
+import com.mike.uniadmin.backEnd.userchat.MessageEntity
+import com.mike.uniadmin.backEnd.users.AccountDeletionDao
+import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
+import com.mike.uniadmin.backEnd.users.DatabaseDao
+import com.mike.uniadmin.backEnd.users.SignedInUser
+import com.mike.uniadmin.backEnd.users.UserDao
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserPreferencesDao
+import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
+import com.mike.uniadmin.backEnd.users.UserStateDao
+import com.mike.uniadmin.backEnd.users.UserStateEntity
 
 @Database(
     entities = [
@@ -63,7 +62,6 @@ import com.mike.uniadmin.dataModel.users.UserStateEntity
         SignedInUser::class,
         ProgramEntity::class,
         ProgramState::class,
-        Program::class,
                ],
     version = 2,
     exportSchema = false
