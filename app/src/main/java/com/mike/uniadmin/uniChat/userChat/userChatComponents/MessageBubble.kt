@@ -34,9 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.dataModel.userchat.DeliveryStatus
-import com.mike.uniadmin.dataModel.userchat.MessageEntity
-import com.mike.uniadmin.dataModel.userchat.MessageViewModel
+import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
+import com.mike.uniadmin.backEnd.userchat.MessageEntity
+import com.mike.uniadmin.backEnd.userchat.MessageViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @OptIn(ExperimentalFoundationApi::class)
