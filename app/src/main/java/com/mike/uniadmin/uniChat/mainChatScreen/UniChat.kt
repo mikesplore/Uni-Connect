@@ -41,14 +41,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.dataModel.groupchat.generateConversationId
-import com.mike.uniadmin.dataModel.userchat.DeliveryStatus
-import com.mike.uniadmin.dataModel.userchat.MessageViewModel
-import com.mike.uniadmin.dataModel.userchat.MessageViewModel.MessageViewModelFactory
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserStateEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.groupchat.generateConversationId
+import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
+import com.mike.uniadmin.backEnd.userchat.MessageViewModel
+import com.mike.uniadmin.backEnd.userchat.MessageViewModel.MessageViewModelFactory
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserStateEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -85,7 +85,7 @@ fun UniChat(navController: NavController, context: Context) {
     } ?: emptyList()
 
 
-    val tabs = listOf("Chats", "Groups", "Status", "Contacts")
+    val tabs = listOf("Chats", "Groups", "Status", "Profile")
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email!!) {}
