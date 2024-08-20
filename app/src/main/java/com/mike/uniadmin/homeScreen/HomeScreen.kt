@@ -34,14 +34,13 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase.getUpdate
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.model.Update
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -54,7 +53,6 @@ fun HomeScreen(
     navController: NavController,
     context: Context,
     activity: MainActivity,
-    programCode: String
 ) {
 
     val screens = listOf(
