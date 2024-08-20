@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.CoroutineScope
