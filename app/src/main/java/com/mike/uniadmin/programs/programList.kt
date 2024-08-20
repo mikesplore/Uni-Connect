@@ -1,6 +1,8 @@
 package com.mike.uniadmin.programs
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -29,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -46,16 +49,42 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.mike.uniadmin.R
-import com.mike.uniadmin.dataModel.programs.ProgramEntity
-import com.mike.uniadmin.dataModel.programs.ProgramViewModel
-import com.mike.uniadmin.dataModel.programs.ProgramViewModelFactory
+import com.mike.uniadmin.backEnd.programs.ProgramEntity
+import com.mike.uniadmin.backEnd.programs.ProgramViewModel
+import com.mike.uniadmin.backEnd.programs.ProgramViewModelFactory
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.moveNodesToNewParent
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
+object ProgramCode {
+    // Define the shared preferences key for storing the value
+    private const val PREF_KEY_PROGRAM_CODE = "program_code_key"
+    private lateinit var preferences: SharedPreferences
 
+    // MutableState to hold the program code value
+    val programCode: MutableState<String> = mutableStateOf("")
+
+    // Function to initialize shared preferences and load the initial value
+    fun initialize(context: Context) {
+        preferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        // Load the value from SharedPreferences when initializing
+        programCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
+        Log.d("ProgramCode", "Program code initialized: ${programCode.value}")
+    }
+
+    // Save the value to SharedPreferences whenever it changes
+    fun saveProgramCode(newProgramCode: String) {
+        programCode.value = newProgramCode
+        preferences.edit().putString(PREF_KEY_PROGRAM_CODE, newProgramCode).apply()
+        Log.d("ProgramCode", "Program code saved: $newProgramCode")
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,14 +94,17 @@ fun ProgramScreen(context: Context, navController: NavController) {
     val programViewModel: ProgramViewModel = viewModel(
         factory = ProgramViewModelFactory(programRepository)
     )
+    val userRepository = remember { application.userRepository }
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
 
+    val currentUser by userViewModel.user.observeAsState()
     val programs by programViewModel.programs.observeAsState(emptyList())
     val isLoading by programViewModel.isLoading.observeAsState(false)
     var showAddProgram by remember { mutableStateOf(false) }
 
-//    LaunchedEffect(Unit) {
-//        moveNodesToNewParent()
-//    }
+    LaunchedEffect(Unit) {
+        userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
+    }
 
     Scaffold(
         topBar = {
@@ -105,17 +137,13 @@ fun ProgramScreen(context: Context, navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedVisibility(visible = showAddProgram) {
-                AddProgram(
-                    context = context,
-                    programViewModel = programViewModel,
+                AddProgram(context = context,
                     onProgramAdded = { newProgram ->
                         programViewModel.saveProgram(newProgram) { success ->
                             showAddProgram = false
                             if (success) {
                                 Toast.makeText(
-                                    context,
-                                    "Program added successfully",
-                                    Toast.LENGTH_SHORT
+                                    context, "Program added successfully", Toast.LENGTH_SHORT
                                 ).show()
                             } else {
                                 Toast.makeText(context, "Failed to add program", Toast.LENGTH_SHORT)
@@ -124,7 +152,7 @@ fun ProgramScreen(context: Context, navController: NavController) {
                         }
                     })
             }
-            if (programs.isEmpty()) {
+            if (programs?.isEmpty() == true) {
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
@@ -138,11 +166,56 @@ fun ProgramScreen(context: Context, navController: NavController) {
                 LazyColumn(
                     modifier = Modifier.padding(it)
                 ) {
-                    items(programs) { program ->
-                        ProgramItem(program, context, navController, onProgramClicked = {
-                            navController.navigate("program/${program.programCode}")
+                    items(programs ?: emptyList()) { program ->
+                        ProgramItem(
+                            currentUser, program, context
+                        ) {
+                            if (!program.participants.contains(currentUser?.id)) {
+                                currentUser?.id?.let { userId ->
+                                    programViewModel.saveProgram(
+                                        program.copy(participants = program.participants + userId)
+                                    ) { onSuccess ->
+                                        if (onSuccess) {
+                                            Toast.makeText(
+                                                context,
+                                                "Program joined successfully",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
 
-                        })
+                                            //get the program code
+                                            ProgramCode.saveProgramCode(program.programCode)
+                                            if (ProgramCode.programCode.value.isNotEmpty()) {
+                                                navController.navigate("homeScreen")
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "program code is empty",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to join program",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            } else {
+                                //get the program code
+                                ProgramCode.saveProgramCode(program.programCode)
+                                if (ProgramCode.programCode.value.isNotEmpty()) {
+                                    navController.navigate("homeScreen")
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "program code is empty",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -152,7 +225,12 @@ fun ProgramScreen(context: Context, navController: NavController) {
 }
 
 @Composable
-fun ProgramItem(programEntity: ProgramEntity?, context: Context, navController: NavController, onProgramClicked:() -> Unit = {}) {
+fun ProgramItem(
+    currentUser: UserEntity?,
+    programEntity: ProgramEntity?,
+    context: Context,
+    onProgramClicked: () -> Unit = {}
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -207,7 +285,7 @@ fun ProgramItem(programEntity: ProgramEntity?, context: Context, navController: 
                 Spacer(modifier = Modifier.height(8.dp)) // Space between title and details
 
                 Text(
-                    "Participants: ${programEntity?.participants}",
+                    "Participants: ${programEntity?.participants?.size}",
                     style = CC.descriptionTextStyle(context).copy(
                         fontWeight = FontWeight.Medium,
                         fontSize = 16.sp,
@@ -224,20 +302,29 @@ fun ProgramItem(programEntity: ProgramEntity?, context: Context, navController: 
                 onClick = {
                     onProgramClicked()
 
-                    },
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp)), // Rounded button corners
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CC.secondary(), contentColor = CC.textColor()
-                )
+                ),
+                // enabled = programEntity?.participants?.contains(currentUser?.id) == false
             ) {
-                Text(
-                    "Open Course", style = CC.titleTextStyle(context).copy(
-                        fontWeight = FontWeight.Bold, fontSize = 16.sp
+                if (programEntity?.participants?.contains(currentUser?.id) == true) {
+                    Text(
+                        "Open Program", style = CC.titleTextStyle(context).copy(
+                            fontWeight = FontWeight.Bold, fontSize = 16.sp
+                        )
                     )
-                )
+                } else {
+                    Text(
+                        "Join Program", style = CC.titleTextStyle(context).copy(
+                            fontWeight = FontWeight.Bold, fontSize = 16.sp
+                        )
+                    )
+                }
             }
         }
     }
@@ -246,13 +333,11 @@ fun ProgramItem(programEntity: ProgramEntity?, context: Context, navController: 
 
 @Composable
 fun AddProgram(
-    context: Context,
-    onProgramAdded: (ProgramEntity) -> Unit,
-    programViewModel: ProgramViewModel
+    context: Context, onProgramAdded: (ProgramEntity) -> Unit
 ) {
     var programName by remember { mutableStateOf("") }
     var programImageLink by remember { mutableStateOf("") }
-    val loading by programViewModel.isLoading.observeAsState(false)
+    var loading by remember { mutableStateOf(false) }
 
 
 
@@ -304,17 +389,21 @@ fun AddProgram(
 
         Button(
             onClick = {
+                loading = true
                 if (programName.isEmpty() || programImageLink.isEmpty()) {
                     Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    loading = false
                     return@Button
                 }
                 MyDatabase.generateProgramID { newID ->
                     val newProgram = ProgramEntity(
+                        participants = emptyList(),
                         programCode = newID,
                         programName = programName,
                         programImageLink = programImageLink
                     )
                     onProgramAdded(newProgram)
+                    loading = false
                 }
             },
             modifier = Modifier
@@ -326,7 +415,7 @@ fun AddProgram(
             )
         ) {
             if (loading) {
-                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxWidth())
             } else {
                 Text(
                     text = "Add Program", style = CC.titleTextStyle(context).copy(
