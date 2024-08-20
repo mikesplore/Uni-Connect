@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.coursecontent.courseannouncements
+package com.mike.uniadmin.backEnd.coursecontent.courseannouncements
 
 import androidx.room.Dao
 import androidx.room.Insert
