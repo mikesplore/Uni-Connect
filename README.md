@@ -140,8 +140,8 @@ The `GitAuth` composable function handles GitHub authentication using [Firebase]
     - `visible`: Controls visibility, initially set to true.
     - `loading`: Manages the loading state during form submission.
 - **Repositories and ViewModels:**
-    - Retrieves [notificationRepository](app/src/main/java/com/mike/uniadmin/dataModel/notifications/NotificationRepository.kt) and [userRepository](app/src/main/java/com/mike/uniadmin/dataModel/users/UserRepository.kt) from the application context.
-    - Initializes [NotificationViewModel](app/src/main/java/com/mike/uniadmin/dataModel/notifications/NotificationsViewModel.kt) and [UserViewModel](app/src/main/java/com/mike/uniadmin/dataModel/users/UserViewModel.kt) using the respective repositories.
+    - Retrieves [notificationRepository](app/src/main/java/com/mike/uniadmin/backEnd/notifications/NotificationRepository.kt) and [userRepository](app/src/main/java/com/mike/uniadmin/backEnd/users/UserRepository.kt) from the application context.
+    - Initializes [NotificationViewModel](app/src/main/java/com/mike/uniadmin/backEnd/notifications/NotificationsViewModel.kt) and [UserViewModel](app/src/main/java/com/mike/uniadmin/backEnd/users/UserViewModel.kt) using the respective repositories.
 
 ### UI Components
 
@@ -171,7 +171,7 @@ The `GitAuth` composable function handles GitHub authentication using [Firebase]
 - **`handleSignUp`:**
     - Validates email and password fields.
     - Registers the user with Firebase Authentication.
-    - Creates a new [UserEntity](app/src/main/java/com/mike/uniadmin/dataModel/users/UserEntity.kt) and writes it to the `UserViewModel`.
+    - Creates a new [UserEntity](app/src/main/java/com/mike/uniadmin/backEnd/users/UserEntity.kt) and writes it to the `UserViewModel`.
     - Generates a notification indicating the new user has joined.
     - Displays appropriate Toast messages based on success or failure.
 - **`handleSignIn`:**
