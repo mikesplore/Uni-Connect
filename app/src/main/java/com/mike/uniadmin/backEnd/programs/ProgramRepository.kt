@@ -1,10 +1,11 @@
-package com.mike.uniadmin.dataModel.programs
+package com.mike.uniadmin.backEnd.programs
 
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -12,15 +13,14 @@ import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-
 class ProgramRepository(
-    private val programDao: ProgramDao,
-    private val programStateDao: ProgramStateDao
+    private val programDao: ProgramDao, private val programStateDao: ProgramStateDao
 ) {
-
-    private val database = FirebaseDatabase.getInstance().reference.child("Programs")
+    private val programCode = ProgramCode.programCode.value
+    private val database =
+        FirebaseDatabase.getInstance().reference.child(programCode).child("Programs")
     private val programStateDatabase =
-        FirebaseDatabase.getInstance().reference.child("ProgramStates")
+        FirebaseDatabase.getInstance().reference.child(programCode).child("ProgramStates")
 
     init {
         startProgramListener()
@@ -209,16 +209,5 @@ class ProgramRepository(
         }
     }
 
-    fun insertProgramCode(program: Program) {
-        viewModelScope.launch {
-            programDao.insertProgramCode(program)
-        }
-    }
-
-    fun getProgramCode(onResult: (String) -> Unit) {
-        viewModelScope.launch {
-            val programCode = programDao.getProgramCode()
-            onResult(programCode)
-        }
-    }
 }
+
