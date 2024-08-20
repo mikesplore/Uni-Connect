@@ -42,9 +42,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mike.uniadmin.dataModel.courses.AttendanceState
-import com.mike.uniadmin.dataModel.courses.CourseViewModel
-import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
+import com.mike.uniadmin.backEnd.courses.AttendanceState
+import com.mike.uniadmin.backEnd.courses.CourseViewModel
+import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
 import com.mike.uniadmin.localDatabase.UniAdmin
 
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
