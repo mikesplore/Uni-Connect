@@ -32,11 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModel
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentViewModelFactory
-import com.mike.uniadmin.dataModel.courses.CourseViewModel
-import com.mike.uniadmin.dataModel.courses.CourseViewModelFactory
+import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignment
+import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModel
+import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModelFactory
+import com.mike.uniadmin.backEnd.courses.CourseViewModel
+import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
