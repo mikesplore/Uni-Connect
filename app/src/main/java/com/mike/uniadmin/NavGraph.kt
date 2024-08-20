@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +31,7 @@ import com.mike.uniadmin.ui.theme.Appearance
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "programs") {
+    NavHost(navController = navController, startDestination = "splashScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
@@ -122,21 +121,17 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             Appearance(navController = navController)
         }
 
+        composable("homeScreen",  exitTransition = {
+            fadeOut(animationSpec = tween(300))
+        }) {
+            HomeScreen(navController = navController, context, mainActivity)
+        }
+
         composable("programs"){
             ProgramScreen(context, navController)
         }
 
-        composable("Program/{programCode}",  exitTransition = {
-            fadeOut(animationSpec = tween(300))
-        }, arguments = listOf(navArgument("programCode") { type = NavType.StringType })
-        ) { backStackEntry ->
-            HomeScreen(
-                programCode = backStackEntry.arguments?.getString("programCode") ?: "",
-                navController = navController,
-                context = context,
-                activity = mainActivity
-            )
-        }
+
 
         composable("courseResource/{courseCode}",  exitTransition = {
             fadeOut(animationSpec = tween(300)) 
