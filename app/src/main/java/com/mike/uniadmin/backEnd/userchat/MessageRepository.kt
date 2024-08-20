@@ -1,18 +1,19 @@
-package com.mike.uniadmin.dataModel.userchat
+package com.mike.uniadmin.backEnd.userchat
 
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.users.UserDao
+import com.mike.uniadmin.backEnd.users.UserDao
+import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class MessageRepository(private val messageDao: MessageDao, private val usersDao: UserDao) {
+class MessageRepository(private val messageDao: MessageDao) {
     private val database = FirebaseDatabase.getInstance().reference
 
     fun fetchMessages(path: String, onResult: (List<MessageEntity>) -> Unit) {
