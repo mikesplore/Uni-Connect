@@ -7,7 +7,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.users.UserStateEntity
+import com.mike.uniadmin.backEnd.users.UserStateEntity
 import java.util.Calendar
 import java.util.Locale
 
@@ -31,6 +31,13 @@ object MyDatabase {
     fun generateProgramID(onIndexNumberGenerated: (String) -> Unit) {
         updateAndGetCode("Program") { newCode ->
             val indexNumber = "PR$newCode$year"
+            onIndexNumberGenerated(indexNumber)
+        }
+    }
+
+    fun generateCourseID(onIndexNumberGenerated: (String) -> Unit) {
+        updateAndGetCode("Courses") { newCode ->
+            val indexNumber = "CS$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
