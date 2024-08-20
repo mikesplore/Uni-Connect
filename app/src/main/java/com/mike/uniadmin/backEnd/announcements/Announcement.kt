@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.announcements
+package com.mike.uniadmin.backEnd.announcements
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
