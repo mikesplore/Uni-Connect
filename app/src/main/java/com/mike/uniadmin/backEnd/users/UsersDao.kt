@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.users
+package com.mike.uniadmin.backEnd.users
 
 import androidx.room.Dao
 import androidx.room.Insert
