@@ -1,9 +1,10 @@
-package com.mike.uniadmin.dataModel.coursecontent.courseannouncements
+package com.mike.uniadmin.backEnd.coursecontent.courseannouncements
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,7 +12,8 @@ import kotlinx.coroutines.launch
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnnouncementDao) {
-    private val database = FirebaseDatabase.getInstance().reference.child("CourseContent")
+    private val programCode = ProgramCode.programCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("CourseContent")
 
     //Course Content database
     fun writeCourseAnnouncement(
