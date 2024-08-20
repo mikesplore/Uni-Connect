@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.coursecontent.courseassignments
+package com.mike.uniadmin.backEnd.coursecontent.courseassignments
 
 
 import androidx.lifecycle.LiveData
