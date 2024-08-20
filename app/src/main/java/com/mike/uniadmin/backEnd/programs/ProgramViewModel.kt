@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.programs
+package com.mike.uniadmin.backEnd.programs
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,9 +8,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() {
-    private val _programs = MutableLiveData<List<ProgramEntity>>()
+    private val _programs = MutableLiveData<List<ProgramEntity>?>()
     private val _fetchedProgram = MutableLiveData<ProgramEntity?>()
-    val programs: LiveData<List<ProgramEntity>> = _programs
+
+    val programs: MutableLiveData<List<ProgramEntity>?> = _programs
     val fetchedProgram: LiveData<ProgramEntity?> = _fetchedProgram
 
     private val _programStates = MutableLiveData<Map<String, ProgramState>>()
@@ -19,8 +20,7 @@ class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() 
     private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
     
-    private val _programCode = MutableLiveData<String>()
-    val programCode: LiveData<String> = _programCode
+
 
 
     init {
@@ -28,13 +28,7 @@ class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() 
         fetchProgramStates()
     }
     
-    fun getProgramCode(onResult: (String) -> Unit) {
-        repository.getProgramCode(onResult)
-    }
-    
-    fun insertProgramCode(program: Program) {
-        repository.insertProgramCode(program)
-    }
+
 
     private fun fetchProgramStates() {
         repository.fetchProgramStates { fetchedStates ->
