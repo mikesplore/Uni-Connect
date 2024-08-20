@@ -1,24 +1,24 @@
-package com.mike.uniadmin.dataModel.courses
+package com.mike.uniadmin.backEnd.courses
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.programs.ProgramDao
+import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class CourseRepository(
     private val courseDao: CourseDao,
     private val attendanceStateDao: AttendanceStateDao,
-    private val programDao: ProgramDao
 ) {
-    private val database = FirebaseDatabase.getInstance().reference.child("Courses")
-    private val attendanceStateDatabase = FirebaseDatabase.getInstance().reference.child("AttendanceStates")
+
+    private val programCode = ProgramCode.programCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("Courses")
+    private val attendanceStateDatabase = FirebaseDatabase.getInstance().reference.child(programCode).child("AttendanceStates")
 
     init {
         startCourseListener()
