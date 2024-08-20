@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.courseResources.CourseName
-import com.mike.uniadmin.dataModel.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
