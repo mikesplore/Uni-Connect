@@ -1,13 +1,15 @@
-package com.mike.uniadmin.dataModel.coursecontent.coursedetails
+package com.mike.uniadmin.backEnd.coursecontent.coursedetails
 
 import com.google.firebase.database.*
-import com.mike.uniadmin.dataModel.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseEntity
+import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
-    private val database = FirebaseDatabase.getInstance().reference.child("CourseContent")
+    private val programCode = ProgramCode.programCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("CourseContent")
 
     // Scope for running coroutines
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
