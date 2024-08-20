@@ -54,8 +54,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.dataModel.groupchat.ChatViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModel
+import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupItem
 
