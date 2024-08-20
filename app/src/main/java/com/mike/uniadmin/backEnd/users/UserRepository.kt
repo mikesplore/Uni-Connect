@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.users
+package com.mike.uniadmin.backEnd.users
 
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
@@ -79,7 +79,7 @@ class UserRepository(
     }
 
     private fun startUserListener() {
-        startDatabaseListener("Users",
+        startDatabaseListener("Admins",
             convert = { it.getValue(UserEntity::class.java) },
             onResult = { users ->
                 userDao.insertUsers(users)
@@ -130,7 +130,7 @@ class UserRepository(
                     }
 
                     // Fetch users from "Users" node after fetching from "Admins"
-                    database.child("Users")
+                    database.child("Admins")
                         .addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 for (childSnapshot in snapshot.children) {
@@ -198,7 +198,7 @@ class UserRepository(
                 callback(databaseUser)
             } else {
                 // Check Users node
-                val usersQuery = database.child("Users").orderByChild("id").equalTo(admissionNumber)
+                val usersQuery = database.child("Admins").orderByChild("id").equalTo(admissionNumber)
                 usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val userSnapshot = snapshot.children.firstOrNull()
@@ -235,7 +235,7 @@ class UserRepository(
     fun deleteUser(userId: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             userDao.deleteUser(userId)
-            database.child("Users").child(userId).removeValue().addOnSuccessListener {
+            database.child("Admins").child(userId).removeValue().addOnSuccessListener {
                 onSuccess(true)
             }.addOnFailureListener { exception ->
                 onSuccess(false)
