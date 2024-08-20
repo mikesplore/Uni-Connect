@@ -1,10 +1,10 @@
-package com.mike.uniadmin.dataModel.coursecontent.coursedetails
+package com.mike.uniadmin.backEnd.coursecontent.coursedetails
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mike.uniadmin.dataModel.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseEntity
 
 @Dao
 interface CourseDetailDao {
