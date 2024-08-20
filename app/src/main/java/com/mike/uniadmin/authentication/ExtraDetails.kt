@@ -47,12 +47,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.dataModel.notifications.NotificationEntity
-import com.mike.uniadmin.dataModel.notifications.NotificationViewModel
-import com.mike.uniadmin.dataModel.users.SignedInUser
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserViewModel
-import com.mike.uniadmin.dataModel.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.notifications.NotificationEntity
+import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
+import com.mike.uniadmin.backEnd.users.SignedInUser
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.notification.showNotification
 
@@ -196,7 +196,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                                     notificationViewModel.fetchNotifications()
                                     showNotification(context, "Welcome", "Welcome to Uni Admin, $firstName!")
                                 }
-                                navController.navigate("homeScreen") {
+                                navController.navigate("programs") {
                                     popUpTo("moreDetails") {
                                         inclusive = true
                                     }
