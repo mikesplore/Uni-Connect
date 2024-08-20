@@ -147,7 +147,7 @@ fun CourseResources(courseCode: String, context: Context) {
                         model = course?.courseImageLink,
                         contentDescription = "Course Image",
                         modifier = Modifier
-                            .blur(0.3.dp)
+                            .blur(0.2.dp)
                             .fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
