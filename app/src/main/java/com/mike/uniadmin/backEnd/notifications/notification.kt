@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.notifications
+package com.mike.uniadmin.backEnd.notifications
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
