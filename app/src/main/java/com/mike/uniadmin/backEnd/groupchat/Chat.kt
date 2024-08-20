@@ -1,17 +1,6 @@
-package com.mike.uniadmin.dataModel.groupchat
+package com.mike.uniadmin.backEnd.groupchat
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import android.app.Application
-import com.mike.uniadmin.dataModel.announcements.AnnouncementRepository
-import com.mike.uniadmin.dataModel.coursecontent.courseannouncements.CourseAnnouncementRepository
-import com.mike.uniadmin.dataModel.coursecontent.courseassignments.CourseAssignmentRepository
-import com.mike.uniadmin.dataModel.coursecontent.coursedetails.CourseDetailRepository
-import com.mike.uniadmin.dataModel.coursecontent.coursetimetable.CourseTimetableRepository
-import com.mike.uniadmin.dataModel.courses.CourseRepository
-import com.mike.uniadmin.dataModel.notifications.NotificationRepository
-import com.mike.uniadmin.dataModel.userchat.MessageRepository
-import com.mike.uniadmin.dataModel.users.UserRepository
-import com.mike.uniadmin.localDatabase.AppDatabase
 
 fun generateConversationId(userId1: String, userId2: String): String {
     return if (userId1 < userId2) {
