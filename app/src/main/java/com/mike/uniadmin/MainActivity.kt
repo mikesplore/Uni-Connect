@@ -26,15 +26,15 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.dataModel.users.UserEntity
-import com.mike.uniadmin.dataModel.users.UserStateEntity
+import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.model.Global
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
+import com.mike.uniadmin.programs.ProgramCode
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
-import java.io.File
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
+        ProgramCode.initialize(this)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTheme(R.style.Theme_UniAdmin)
         super.onCreate(savedInstanceState)
