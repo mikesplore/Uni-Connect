@@ -1,11 +1,11 @@
-package com.mike.uniadmin.dataModel.coursecontent.coursedetails
+package com.mike.uniadmin.backEnd.coursecontent.coursedetails
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.mike.uniadmin.dataModel.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseEntity
 import kotlinx.coroutines.launch
 
 class CourseDetailViewModel(private val repository: CourseDetailRepository) : ViewModel() {
