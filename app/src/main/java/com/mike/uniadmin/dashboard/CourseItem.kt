@@ -25,12 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.dataModel.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
