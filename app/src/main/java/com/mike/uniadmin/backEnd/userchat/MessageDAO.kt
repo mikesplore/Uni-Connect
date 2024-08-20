@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.userchat
+package com.mike.uniadmin.backEnd.userchat
 
 import androidx.room.Dao
 import androidx.room.Insert
