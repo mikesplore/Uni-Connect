@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.users
+package com.mike.uniadmin.backEnd.users
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
