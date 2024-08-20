@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.programs
+package com.mike.uniadmin.backEnd.programs
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -22,13 +22,6 @@ interface ProgramDao {
 
     @Query("SELECT * FROM programs WHERE programCode = :programCode")
     suspend fun getProgram(programCode: String): ProgramEntity?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProgramCode(program: Program)
-
-    @Query("SELECT programCode FROM programCode")
-    suspend fun getProgramCode(): String
-
 
 }
 
