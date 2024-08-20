@@ -1,4 +1,4 @@
-package com.mike.uniadmin.dataModel.programs
+package com.mike.uniadmin.backEnd.programs
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -8,18 +8,12 @@ import androidx.room.PrimaryKey
 data class ProgramEntity(
     @PrimaryKey val programCode: String,
     val programName: String = "",
-    var participants: Int = 0,
+    var participants: List<String> = emptyList(),
     var programImageLink: String = ""
 
 ){
-    constructor(): this("", "", 0, "")
+    constructor(): this("", "", emptyList(), "")
 }
-
-@Entity(tableName = "programCode")
-data class Program(
-    @PrimaryKey val id: String = "ProgramCode",
-    val programCode: String = ""
-)
 
 
 @Entity(tableName = "programStates")
