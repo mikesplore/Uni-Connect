@@ -6,13 +6,18 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,41 +39,52 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun CourseItem(course: CourseEntity, context: Context, navController: NavController) {
-    Column(
-        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+    BoxWithConstraints(
+        contentAlignment = Alignment.Center, modifier = Modifier.padding( start = 10.dp)
     ) {
-        Card(modifier = Modifier
-            .background(CC.tertiary(), CircleShape)
-            .clip(CircleShape)
-            .clickable {
-                navController.navigate("courseContent/${course.courseCode}")
+        val cardSize = minOf(maxWidth, maxHeight) * 0.6f // Adaptive size based on available space
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(cardSize)
+                    .clip(CircleShape)
+                    .clickable {
+                        navController.navigate("courseContent/${course.courseCode}")
+                    }
+                    .background(CC.tertiary(), CircleShape),
+                elevation = CardDefaults.elevatedCardElevation(5.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (course.courseImageLink.isNotEmpty()) {
+                        AsyncImage(
+                            model = course.courseImageLink,
+                            contentDescription = course.courseName,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.School, contentDescription = null, tint = CC.textColor()
+                        )
+                    }
+                }
             }
-            .size(70.dp),
-            elevation = CardDefaults.elevatedCardElevation(5.dp)) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-            if (course.courseImageLink.isNotEmpty()) {
-                AsyncImage(
-                    model = course.courseImageLink,
-                    contentDescription = course.courseName,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    Icons.Default.School, "Icon", tint = CC.textColor()
-                )
-            }}
-        }
-        Spacer(modifier = Modifier.height(5.dp))
-        (if (course.courseName.length > 10) {
-            course.courseName.substring(0, 10) + "..."
-        } else {
-            course.courseName
-        }).let {
+
+            Spacer(modifier = Modifier.height(cardSize * 0.1f)) // Adaptive spacer size
+
             Text(
-                text = it, style = CC.descriptionTextStyle(context), maxLines = 1
+                text = course.courseName.take(10) + if (course.courseName.length > 10) "..." else "",
+                style = CC.descriptionTextStyle(context),
+                maxLines = 1
             )
         }
     }
@@ -76,31 +92,62 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
 
 @Composable
 fun LoadingCourseItem() {
-    Column(
-        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+    BoxWithConstraints(
+        contentAlignment = Alignment.Center, modifier = Modifier.padding(8.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .border(
-                    1.dp, CC.textColor(), CircleShape
-                )
-                .background(CC.primary(), CircleShape)
-                .clip(CircleShape)
-                .size(70.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+        val cardSize = minOf(maxWidth, maxHeight) * 0.2f // Adaptive size based on available space
 
-        }
-        Spacer(modifier = Modifier.height(5.dp))
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .width(90.dp)
-                .height(15.dp)
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
-        }
+            Box(
+                modifier = Modifier
+                    .size(cardSize)
+                    .clip(CircleShape)
+                    .background(CC.primary(), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
 
+            Spacer(modifier = Modifier.height(cardSize * 0.1f)) // Adaptive spacer size
+
+            Box(
+                modifier = Modifier
+                    .width(cardSize * 1.3f) // Adaptive width based on card size
+                    .height(cardSize * 0.2f) // Adaptive height based on card size
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(CC.primary())
+            ) {
+                CC.ColorProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
+        }
     }
 }
+
+
+@Composable
+fun CourseItemList(courses: List<CourseEntity>, context: Context, navController: NavController) {
+    BoxWithConstraints {
+        // Calculate the adaptive item width
+        val screenWidth = maxWidth
+        val itemWidth = screenWidth * 0.28f // Each item takes 30% of the screen width
+
+        // Set a minimum and maximum width for the items
+        val adaptiveItemWidth = itemWidth.coerceIn(minimumValue = 100.dp, maximumValue = 150.dp)
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            items(courses) { course ->
+                Box(
+                    modifier = Modifier.width(adaptiveItemWidth) // Apply the adaptive width
+                ) {
+                    CourseItem(course, context, navController)
+                }
+            }
+        }
+    }
+}
+
