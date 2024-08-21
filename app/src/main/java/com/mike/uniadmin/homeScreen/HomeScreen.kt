@@ -38,6 +38,12 @@ import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getCourseTimetableViewModel
+import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase.getUpdate
 import com.mike.uniadmin.model.Screen
 import com.mike.uniadmin.model.Update
@@ -60,16 +66,9 @@ fun HomeScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    // ViewModel instantiation
-    val uniAdmin = context.applicationContext as? UniAdmin
+    val userViewModel = getUserViewModel(context)
+    val chatViewModel = getChatViewModel(context)
 
-    val chatRepository =
-        uniAdmin?.chatRepository ?: throw IllegalStateException("ChatRepository not initialized")
-    val chatViewModel: ChatViewModel =
-        viewModel(factory = ChatViewModel.ChatViewModelFactory(chatRepository))
-
-    val userRepository = remember { uniAdmin.userRepository }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
 
     // State observation
     val signedInUser by userViewModel.signedInUser.observeAsState()
