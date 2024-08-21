@@ -65,6 +65,8 @@ import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.Details
 import com.mike.uniadmin.model.Fcm
 import com.mike.uniadmin.model.MyDatabase
@@ -90,15 +92,9 @@ fun LoginScreen(navController: NavController, context: Context) {
     var loading by remember { mutableStateOf(false) }
 
     val firebaseAuth = FirebaseAuth.getInstance()
-    val loginContext = context.applicationContext as UniAdmin
-    val notificationRepository = remember { loginContext.notificationRepository }
-    val userRepository = remember { loginContext.userRepository }
 
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
-    )
-
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val userViewModel = getUserViewModel(context)
+    val notificationViewModel = getNotificationViewModel(context)
 
     val brush = Brush.verticalGradient(
         colors = listOf(
