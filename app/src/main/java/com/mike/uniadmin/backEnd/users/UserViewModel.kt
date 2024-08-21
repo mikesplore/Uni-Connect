@@ -101,8 +101,9 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
 
-    fun findUserByAdmissionNumber(admissionNumber: String){
+    fun findUserByAdmissionNumber(admissionNumber: String, onUserFetched: (UserEntity?) -> Unit){
         repository.fetchUserDataByAdmissionNumber(admissionNumber){ fetchedUser ->
+            onUserFetched(fetchedUser)
             _user2.value = fetchedUser
         }
     }
