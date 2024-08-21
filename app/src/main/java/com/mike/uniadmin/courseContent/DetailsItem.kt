@@ -1,7 +1,6 @@
 package com.mike.uniadmin.courseContent
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -18,16 +17,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocalPostOffice
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
@@ -87,7 +83,7 @@ fun DetailsItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = { detailsViewModel.getCourseDetailsByCourseID(courseID){} },
+                onClick = { detailsViewModel.getCourseDetailsByCourseID(courseID) {} },
 
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = background,
@@ -148,7 +144,9 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
             .padding(10.dp)
             .border(
                 width = 1.dp,
-                color = CC.secondary().copy(alpha = 0.2f),
+                color = CC
+                    .secondary()
+                    .copy(alpha = 0.2f),
                 shape = RoundedCornerShape(12.dp)
             )
     ) {
@@ -173,7 +171,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
 
-            )
+                )
 
             // Course Information
             CourseInfoRow(
@@ -202,46 +200,39 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
             )
 
             HorizontalDivider(
-                color = Color.Gray.copy(alpha = 0.3f),
-                modifier = Modifier.padding(vertical = 12.dp)
+                color = Color.Gray.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 12.dp)
             )
 
             // Overview Section
             SectionTitle("Overview", context)
             Text(
-                text = courseDetails.overview,
-                style = CC.descriptionTextStyle(context).copy(
+                text = courseDetails.overview, style = CC.descriptionTextStyle(context).copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
-                ),
-                modifier = Modifier.padding(bottom = 8.dp)
+                ), modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Learning Outcomes Section
             SectionTitle("Learning Outcomes", context)
             courseDetails.learningOutcomes.forEach { outcome ->
                 Text(
-                    text = "- $outcome",
-                    style = CC.descriptionTextStyle(context).copy(
+                    text = "- $outcome", style = CC.descriptionTextStyle(context).copy(
                         fontSize = 16.sp,
                         color = CC.textColor().copy(alpha = 0.8f),
                         fontWeight = FontWeight.Medium
-                    ),
-                    modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                    ), modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
                 )
             }
 
             // Schedule Section
             SectionTitle("Schedule", context)
             Text(
-                text = courseDetails.schedule,
-                style = CC.descriptionTextStyle(context).copy(
+                text = courseDetails.schedule, style = CC.descriptionTextStyle(context).copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
-                ),
-                modifier = Modifier.padding(bottom = 8.dp)
+                ), modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Required Materials Section
@@ -266,10 +257,7 @@ fun CourseInfoRow(icon: ImageVector, label: String, value: String, context: Cont
         modifier = Modifier.padding(vertical = 4.dp)
     ) {
         Icon(
-            icon,
-            contentDescription = label,
-            tint = CC.textColor(),
-            modifier = Modifier.size(20.dp)
+            icon, contentDescription = label, tint = CC.textColor(), modifier = Modifier.size(20.dp)
         )
         Text(
             text = "$label $value",
@@ -281,13 +269,9 @@ fun CourseInfoRow(icon: ImageVector, label: String, value: String, context: Cont
 @Composable
 fun SectionTitle(title: String, context: Context) {
     Text(
-        text = title,
-        style = CC.descriptionTextStyle(context).copy(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = CC.extraColor2()
-        ),
-        modifier = Modifier.padding(vertical = 4.dp)
+        text = title, style = CC.descriptionTextStyle(context).copy(
+            fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.extraColor2()
+        ), modifier = Modifier.padding(vertical = 4.dp)
     )
 }
 
@@ -343,17 +327,12 @@ fun AddDetailsItem(
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Course Details",
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CC.textColor()
-                ),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                text = "Course Details", style = TextStyle(
+                    fontSize = 18.sp, fontWeight = FontWeight.Bold, color = CC.textColor()
+                ), modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             AddTextField(
@@ -362,7 +341,7 @@ fun AddDetailsItem(
                 onValueChange = { lecturer = it },
                 context = context,
 
-            )
+                )
 
             AddTextField(
                 label = "Course Department",
@@ -370,7 +349,7 @@ fun AddDetailsItem(
                 onValueChange = { courseDepartment = it },
                 context = context,
 
-            )
+                )
 
             AddTextField(
                 label = "Course Outcome",
@@ -380,7 +359,7 @@ fun AddDetailsItem(
                 singleLine = false,
                 maxLines = 10,
 
-            )
+                )
 
             AddTextField(
                 label = "Overview",
@@ -390,7 +369,7 @@ fun AddDetailsItem(
                 singleLine = false,
                 maxLines = 10,
 
-            )
+                )
 
             AddTextField(
                 label = "Learning Outcomes",
@@ -400,7 +379,7 @@ fun AddDetailsItem(
                 singleLine = false,
                 maxLines = 10,
 
-            )
+                )
 
             AddTextField(
                 label = "Schedule",
@@ -410,7 +389,7 @@ fun AddDetailsItem(
                 singleLine = false,
                 maxLines = 10,
 
-            )
+                )
 
             AddTextField(
                 label = "Required Materials",
@@ -420,18 +399,18 @@ fun AddDetailsItem(
                 singleLine = false,
                 maxLines = 10,
 
-            )
+                )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
             ) {
                 Button(
                     onClick = {
                         if (courseName.isEmpty() || courseCode.isEmpty() || lecturer.isEmpty() || numberOfVisits.isEmpty() || courseDepartment.isEmpty() || overview.isEmpty()) {
-                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT)
+                                .show()
                             return@Button
                         }
                         loading = true
@@ -447,8 +426,7 @@ fun AddDetailsItem(
                             schedule = schedule,
                             requiredMaterials = requiredMaterials
                         )
-                        detailsViewModel.saveCourseDetail(
-                            courseID = courseID,
+                        detailsViewModel.saveCourseDetail(courseID = courseID,
                             detail = newDetails,
                             onResult = { success ->
                                 loading = false
@@ -463,7 +441,10 @@ fun AddDetailsItem(
                     colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
                 ) {
                     if (loading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
                     } else {
                         Text(text = if (expanded) "Save" else "Edit", color = Color.White)
                     }
