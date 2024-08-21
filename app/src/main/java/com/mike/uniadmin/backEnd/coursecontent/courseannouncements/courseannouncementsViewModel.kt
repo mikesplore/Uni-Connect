@@ -21,7 +21,7 @@ class CourseAnnouncementViewModel(private val repository: CourseAnnouncementRepo
     fun getCourseAnnouncements(courseID: String) {
         _isLoading.value = true // Set loading to true before fetching
         repository.getCourseAnnouncements(courseID) { announcements ->
-            _announcements.value = announcements
+            _announcements.postValue(announcements)
             _isLoading.value = false // Set loading to false after fetching
         }
     }
