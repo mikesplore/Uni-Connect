@@ -15,4 +15,8 @@ interface CourseAnnouncementDao {
 
     @Query("SELECT * FROM courseAnnouncements WHERE courseID = :courseID")
     suspend fun getCourseAnnouncements(courseID: String): List<CourseAnnouncement>
+
+    @Query("DELETE FROM courseAnnouncements WHERE courseID = :courseID")
+    suspend fun clearAnnouncements(courseID: String)
+
 }
