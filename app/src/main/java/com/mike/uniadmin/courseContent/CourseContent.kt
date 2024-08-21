@@ -63,6 +63,12 @@ import com.mike.uniadmin.backEnd.courses.CourseViewModel
 import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getCourseAnnouncementViewModel
+import com.mike.uniadmin.getCourseAssignmentViewModel
+import com.mike.uniadmin.getCourseDetailViewModel
+import com.mike.uniadmin.getCourseTimetableViewModel
+import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.randomColor
 import kotlinx.coroutines.launch
@@ -74,52 +80,12 @@ var background = randomColor.random()
 @Composable
 fun CourseContent(context: Context, targetCourseID: String) {
 
-    val courseResource = context.applicationContext as? UniAdmin
-    val courseRepository = remember { courseResource?.courseRepository }
-    val courseViewModel: CourseViewModel = viewModel(
-        factory = CourseViewModelFactory(
-            courseRepository ?: throw IllegalStateException("CourseRepository is null")
-        )
-    )
-
-
-    val courseAnnouncementRepository = remember { courseResource?.courseAnnouncementRepository }
-    val courseAnnouncementViewModel: CourseAnnouncementViewModel = viewModel(
-        factory = CourseAnnouncementViewModelFactory(
-            courseAnnouncementRepository
-                ?: throw IllegalStateException("CourseAnnouncementRepository is null")
-        )
-    )
-
-    val courseAssignmentRepository = remember { courseResource?.courseAssignmentRepository }
-    val courseAssignmentViewModel: CourseAssignmentViewModel = viewModel(
-        factory = CourseAssignmentViewModelFactory(
-            courseAssignmentRepository
-                ?: throw IllegalStateException("CourseAssignmentRepository is null")
-        )
-    )
-
-    val courseDetailRepository = remember { courseResource?.courseDetailRepository }
-    val courseDetailViewModel: CourseDetailViewModel = viewModel(
-        factory = CourseDetailViewModelFactory(
-            courseDetailRepository ?: throw IllegalStateException("CourseDetailsRepository is null")
-        )
-    )
-
-    val courseTimetableRepository = remember { courseResource?.courseTimetableRepository }
-    val courseTimetableViewModel: CourseTimetableViewModel = viewModel(
-        factory = CourseTimetableViewModelFactory(
-            courseTimetableRepository
-                ?: throw IllegalStateException("CourseTimetableRepository is null")
-        )
-    )
-
-    val userRepository = remember { courseResource?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("CourseTimetableRepository is null")
-        )
-    )
+    val courseViewModel = getCourseViewModel(context)
+    val courseAnnouncementViewModel = getCourseAnnouncementViewModel(context)
+    val courseAssignmentViewModel = getCourseAssignmentViewModel(context)
+    val courseTimetableViewModel = getCourseTimetableViewModel(context)
+    val courseDetailViewModel = getCourseDetailViewModel(context)
+    val userViewModel = getUserViewModel(context)
 
     val announcementsLoading by courseAnnouncementViewModel.isLoading.observeAsState(initial = false)
     val assignmentsLoading by courseAssignmentViewModel.isLoading.observeAsState(initial = false)
