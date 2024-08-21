@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
 import com.mike.uniadmin.backEnd.groupchat.ChatEntity
+import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -82,7 +83,7 @@ fun ChatBubble(
                     }
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(CommonComponents.primary(), CircleShape)
+                    .background(randomColor.random(), CircleShape)
                     .padding(4.dp), contentAlignment = Alignment.Center) {
                     if (chat.profileImageLink.isNotBlank()) {
                         AsyncImage(
