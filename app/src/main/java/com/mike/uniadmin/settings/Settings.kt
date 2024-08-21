@@ -92,6 +92,7 @@ import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.Feedback
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.generateSharedPreferencesID
@@ -107,20 +108,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
     val fontPrefs = remember { FontPreferences(context) }
     var savedFont by remember { mutableStateOf("system") }
 
-    val userAdmin = context.applicationContext as UniAdmin
-    val userRepository = remember { userAdmin.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository
-        )
-    )
-
-    val notificationRepository = remember { userAdmin.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(
-            notificationRepository
-        )
-    )
+    val userViewModel = getUserViewModel(context)
 
     val currentUser by userViewModel.user.observeAsState()
 
@@ -252,7 +240,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
             Spacer(modifier = Modifier.height(20.dp))
             Biometrics(context, mainActivity, userViewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            PasswordUpdateSection(context, notificationViewModel)
+            PasswordUpdateSection(context)
             Spacer(modifier = Modifier.height(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(0.9f),
@@ -508,7 +496,7 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
 
 
 @Composable
-fun PasswordUpdateSection(context: Context, notificationViewModel: NotificationViewModel) {
+fun PasswordUpdateSection(context: Context) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -603,18 +591,6 @@ fun PasswordUpdateSection(context: Context, notificationViewModel: NotificationV
                                     updatePassword(newPassword, onSuccess = {
                                         // Handle success (e.g., show a success message)
                                         loading = false
-                                        MyDatabase.generateNotificationID { id ->
-                                            notificationViewModel.writeNotification(
-                                                notificationEntity = NotificationEntity(
-                                                    id = id,
-                                                    title = "Account Updated",
-                                                    description = "You have successfully updated your password",
-                                                    date = CC.getTimeStamp(),
-                                                    time = CC.getTimeStamp(),
-                                                    category = "Announcements",
-                                                )
-                                            )
-                                        }
                                         Toast.makeText(
                                             context,
                                             "Password updated successfully",
