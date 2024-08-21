@@ -53,6 +53,8 @@ import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.notification.showNotification
 
@@ -63,13 +65,8 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun MoreDetails(context: Context, navController: NavController) {
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
+    val userViewModel = getUserViewModel(context)
+    val notificationViewModel = getNotificationViewModel(context)
 
     var addLoading by remember { mutableStateOf(false) }
     val loggedInUser = FirebaseAuth.getInstance().currentUser
@@ -83,12 +80,6 @@ fun MoreDetails(context: Context, navController: NavController) {
         colors = listOf(
             CC.primary(), CC.secondary()
         )
-    )
-
-    val notificationAdmin = context.applicationContext as UniAdmin
-    val notificationRepository = remember { notificationAdmin.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
     )
 
     LaunchedEffect(Unit) {
