@@ -49,6 +49,13 @@ import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getCourseTimetableViewModel
+import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getMessageViewModel
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.UsersProfile
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
@@ -58,16 +65,8 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UniChat(navController: NavController, context: Context) {
-    val messageAdmin = context.applicationContext as UniAdmin
-    val messageRepository = remember { messageAdmin.messageRepository }
-    val messageViewModel: MessageViewModel = viewModel(
-        factory = MessageViewModelFactory(messageRepository)
-    )
-
-    val userRepository = remember { messageAdmin.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(userRepository)
-    )
+    val userViewModel = getUserViewModel(context)
+    val messageViewModel = getMessageViewModel(context)
 
     var usersLoading by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
