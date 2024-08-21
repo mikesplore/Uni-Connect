@@ -4,38 +4,23 @@ import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,28 +30,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.ChatEntity
 import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.homeScreen.UserItem
+import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatBubble
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatTopAppBar
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.DateHeader
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupDetails
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.MessageInputRow
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.RowText
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.SearchBar
+import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.sendMessage
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -74,18 +60,18 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun DiscussionScreen(
     navController: NavController, context: Context, targetGroupID: String
 ) {
-    val uniAdmin = context.applicationContext as? UniAdmin
-    val chatRepository = remember { uniAdmin?.chatRepository }
+    val uniAdmin = context.applicationContext as UniAdmin
+    val chatRepository = remember { uniAdmin.chatRepository }
     val chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.ChatViewModelFactory(
-            chatRepository ?: throw IllegalStateException("ChatRepository is null")
+            chatRepository
         )
     )
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
+    val userAdmin = context.applicationContext as UniAdmin
+    val userRepository = remember { userAdmin.userRepository }
     val userViewModel: UserViewModel = viewModel(
         factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
+            userRepository
         )
     )
 
@@ -220,8 +206,6 @@ fun DiscussionScreen(
 }
 
 
-
-
 @Composable
 fun GroupUsersList(
     isVisible: Boolean,
@@ -249,148 +233,10 @@ fun GroupUsersList(
     }
 }
 
-@Composable
-fun SearchBar(
-    isSearchVisible: Boolean,
-    searchQuery: TextFieldValue,
-    onSearchQueryChange: (TextFieldValue) -> Unit
-) {
-    AnimatedVisibility(visible = isSearchVisible,
-        enter = slideInVertically(initialOffsetY = { it }),
-        exit = slideOutVertically(targetOffsetY = { -it })
-    ) {
-        TextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            label = { Text("Search Chats") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = CC.primary(),
-                unfocusedIndicatorColor = CC.textColor(),
-                focusedIndicatorColor = CC.secondary(),
-                unfocusedContainerColor = CC.primary(),
-                focusedTextColor = CC.textColor(),
-                unfocusedTextColor = CC.textColor(),
-                focusedLabelColor = CC.secondary(),
-                unfocusedLabelColor = CC.textColor()
-            ),
-            shape = RoundedCornerShape(10.dp)
-        )
-    }
-}
-
-@Composable
-fun DateHeader(context: Context) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .background(CC.secondary(), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = CC.getRelativeDate(CC.getCurrentDate(CC.getTimeStamp())),
-                style = CC.descriptionTextStyle(context),
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-
-@Composable
-fun MessageInputRow(
-    message: String, onMessageChange: (String) -> Unit, onSendClick: () -> Unit, context: Context
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .imePadding(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BasicTextField(
-            value = message,
-            onValueChange = onMessageChange,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp) // Add padding to the right
-                .background(CC.secondary(), RoundedCornerShape(24.dp)) // Use surface color
-                .heightIn(min = 40.dp), // Minimum height
-            textStyle = CC.descriptionTextStyle(context),
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier.padding(16.dp), // Increased padding
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (message.isEmpty()) {
-                        Text(
-                            text = "Message",
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
-                        )
-                    }
-                    innerTextField()
-                }
-            },
-            cursorBrush = SolidColor(CC.textColor())
-        )
-        IconButton(
-            onClick = {
-                if (message.isNotBlank()) { // Check for non-blank messages
-                    onMessageChange(message)
-                    onSendClick()
-                }
-            }, modifier = Modifier
-                .clip(CircleShape) // Circular button
-                .background(CC.secondary()) // Button background color
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Send,
-                contentDescription = "Send",
-                tint = CC.extraColor2() // Icon color on secondary background
-            )
-        }
-    }
-}
-
-fun sendMessage(
-    chat: ChatEntity, viewModel: ChatViewModel, path: String
-) {
-    viewModel.saveChat(chat, path) {}
-}
 
 
 
 
-@Composable
-private fun RowText(context: Context) {
-    Row(
-        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .background(
-                    CC.secondary(), RoundedCornerShape(10.dp)
-                )
-                .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Group chats are moderated by admin.",
-                modifier = Modifier.padding(5.dp),
-                style = CC.descriptionTextStyle(context),
-                textAlign = TextAlign.Center,
-                color = CC.textColor()
-            )
-        }
-    }
-}
 
 
 
