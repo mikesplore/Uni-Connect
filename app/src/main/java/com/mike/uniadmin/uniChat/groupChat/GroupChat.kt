@@ -41,6 +41,8 @@ import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.MyDatabase
@@ -60,20 +62,8 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun DiscussionScreen(
     navController: NavController, context: Context, targetGroupID: String
 ) {
-    val uniAdmin = context.applicationContext as UniAdmin
-    val chatRepository = remember { uniAdmin.chatRepository }
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(
-            chatRepository
-        )
-    )
-    val userAdmin = context.applicationContext as UniAdmin
-    val userRepository = remember { userAdmin.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository
-        )
-    )
+    val chatViewModel = getChatViewModel(context)
+    val userViewModel = getUserViewModel(context)
 
 
     val chats by chatViewModel.chats.observeAsState(listOf())
