@@ -32,19 +32,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.ChatEntity
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.getChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatBubble
@@ -65,11 +61,11 @@ fun DiscussionScreen(
     val chatViewModel = getChatViewModel(context)
     val userViewModel = getUserViewModel(context)
 
-
     val chats by chatViewModel.chats.observeAsState(listOf())
     val user by userViewModel.user.observeAsState(initial = null)
     val group by chatViewModel.group.observeAsState(initial = null)
     val users by userViewModel.users.observeAsState(emptyList())
+
 
     var messageText by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
