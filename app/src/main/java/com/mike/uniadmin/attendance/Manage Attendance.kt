@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mike.uniadmin.backEnd.courses.AttendanceState
 import com.mike.uniadmin.backEnd.courses.CourseViewModel
 import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
+import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -53,13 +54,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageAttendanceScreen(context: Context) {
-    val announcementAdmin = context.applicationContext as? UniAdmin
-    val courseRepository = remember { announcementAdmin?.courseRepository }
-    val courseViewModel: CourseViewModel = viewModel(
-        factory = CourseViewModelFactory(
-            courseRepository ?: throw IllegalStateException("CourseRepository is null")
-        )
-    )
+    val courseViewModel = getCourseViewModel(context)
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val attendanceStates by courseViewModel.attendanceStates.observeAsState(emptyMap())
     var refresh by remember { mutableStateOf(false) }
