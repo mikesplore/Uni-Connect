@@ -37,25 +37,17 @@ import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmen
 import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModelFactory
 import com.mike.uniadmin.backEnd.courses.CourseViewModel
 import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
+import com.mike.uniadmin.getCourseAssignmentViewModel
+import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssignmentScreen(context: Context) {
-    val announcementAdmin = context.applicationContext as? UniAdmin
-    val courseRepository = remember { announcementAdmin?.courseRepository }
-    val courseViewModel: CourseViewModel = viewModel(
-        factory = CourseViewModelFactory(
-            courseRepository ?: throw IllegalStateException("CourseRepository is null")
-        )
-    )
-    val assignmentRepository = remember { announcementAdmin?.courseAssignmentRepository }
-    val assignmentViewModel: CourseAssignmentViewModel = viewModel(
-        factory = CourseAssignmentViewModelFactory(
-            assignmentRepository ?: throw IllegalStateException("AssignmentRepository is null")
-        )
-    )
+
+    val courseViewModel = getCourseViewModel(context)
+    val assignmentViewModel = getCourseAssignmentViewModel(context)
 
     val assignments by assignmentViewModel.assignments.observeAsState()
     val courses by courseViewModel.courses.observeAsState()
