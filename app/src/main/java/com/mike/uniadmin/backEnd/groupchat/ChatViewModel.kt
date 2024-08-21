@@ -20,7 +20,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
     fun fetchChats(path: String) {
         repository.fetchChats(path) { chats ->
-            _chats.value = chats
+            _chats.postValue(chats)
         }
     }
 
@@ -75,6 +75,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
                 },
                 onFailure = {
                     // Handle delete failure if needed
+                    Log.e("Chats", "Could not delete chat", it)
                 }
             )
         }
