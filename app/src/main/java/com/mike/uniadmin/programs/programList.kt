@@ -58,6 +58,13 @@ import com.mike.uniadmin.backEnd.programs.ProgramViewModelFactory
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getCourseTimetableViewModel
+import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getProgramViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -89,13 +96,9 @@ object ProgramCode {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProgramScreen(context: Context, navController: NavController) {
-    val application = context.applicationContext as UniAdmin
-    val programRepository = remember { application.programRepository }
-    val programViewModel: ProgramViewModel = viewModel(
-        factory = ProgramViewModelFactory(programRepository)
-    )
-    val userRepository = remember { application.userRepository }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val programViewModel = getProgramViewModel(context)
+    val userViewModel = getUserViewModel(context)
+
 
     val currentUser by userViewModel.user.observeAsState()
     val programs by programViewModel.programs.observeAsState(emptyList())
