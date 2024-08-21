@@ -120,7 +120,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
             userViewModel.findUserByEmail(email) {}
         }
 
-        userViewModel.findUserByAdmissionNumber(targetUserId)
+        userViewModel.findUserByAdmissionNumber(targetUserId){}
         userViewModel.checkUserStateByID(targetUserId)
     }
 
