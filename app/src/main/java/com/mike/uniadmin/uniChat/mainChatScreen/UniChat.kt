@@ -50,6 +50,7 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.homeScreen.UserItem
+import com.mike.uniadmin.uniChat.UsersProfile
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -85,7 +86,7 @@ fun UniChat(navController: NavController, context: Context) {
     } ?: emptyList()
 
 
-    val tabs = listOf("Chats", "Groups", "Status", "Profile")
+    val tabs = listOf("Chats", "Groups", "Status", "Users")
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email!!) {}
@@ -166,7 +167,7 @@ fun UniChat(navController: NavController, context: Context) {
 
                 1 -> UniGroups(context, navController)
                 2 -> ContactsScreen()
-                3 -> SettingsScreen()
+                3 -> UsersProfile(context, navController)
                 4 -> StatusScreen()
             }
         }
@@ -263,17 +264,6 @@ fun StatusScreen() {
 }
 
 
-@Composable
-fun SettingsScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Magenta),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Settings Screen", style = TextStyle(fontSize = 24.sp))
-    }
-}
 
 
 //AnimatedVisibility(pagerState.currentPage == 0, enter = fadeIn(), exit = fadeOut()) {
