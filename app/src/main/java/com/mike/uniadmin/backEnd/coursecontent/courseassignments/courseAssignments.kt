@@ -11,8 +11,9 @@ data class CourseAssignment(
     val dueDate: String = "",
     val title: String = "",
     val description: String = "",
-    val publishedDate: String = ""
+    val publishedDate: String = "",
+    val authorID: String = ""
 ){
-    constructor(): this("", "", "", "", "", "")
+    constructor(): this("", "", "", "", "","", "")
 
 }
