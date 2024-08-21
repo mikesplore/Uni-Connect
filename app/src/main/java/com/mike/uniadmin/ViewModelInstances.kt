@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
+import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModelFactory
 import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncementViewModel
 import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncementViewModelFactory
 import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModel
@@ -15,6 +17,9 @@ import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableVi
 import com.mike.uniadmin.backEnd.courses.CourseViewModel
 import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
 import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
+import com.mike.uniadmin.backEnd.programs.ProgramViewModel
+import com.mike.uniadmin.backEnd.programs.ProgramViewModelFactory
 import com.mike.uniadmin.backEnd.userchat.MessageViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
@@ -84,5 +89,29 @@ fun getCourseTimetableViewModel(context: Context): CourseTimetableViewModel {
     val courseResource = context.applicationContext as UniAdmin
     val courseTimetableRepository = remember { courseResource.courseTimetableRepository }
     return viewModel(factory = CourseTimetableViewModelFactory(courseTimetableRepository))
+}
+
+//AnnouncementViewModel
+@Composable
+fun getAnnouncementViewModel(context: Context): AnnouncementViewModel {
+    val announcementResource = context.applicationContext as UniAdmin
+    val announcementRepository = remember { announcementResource.announcementRepository }
+    return viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
+}
+
+//Notification ViewModel
+@Composable
+fun getNotificationViewModel(context: Context): NotificationViewModel {
+    val announcementResource = context.applicationContext as UniAdmin
+    val announcementRepository = remember { announcementResource.announcementRepository }
+    return viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
+}
+
+//ProgramViewModel
+@Composable
+fun getProgramViewModel(context: Context): ProgramViewModel {
+    val programResource = context.applicationContext as UniAdmin
+    val programRepository = remember { programResource.programRepository }
+    return viewModel(factory = ProgramViewModelFactory(programRepository))
 }
 
