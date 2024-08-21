@@ -55,6 +55,7 @@ import com.mike.uniadmin.backEnd.userchat.MessageEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
@@ -215,7 +216,7 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
         } else {
             Box(modifier = Modifier
                 .clickable { showDialog = true }
-                .background(CommonComponents.extraColor1())
+                .background(randomColor.random(), CircleShape)
                 .fillMaxSize(),
                 contentAlignment = Alignment.Center) {
                 if (currentUser != null) {
