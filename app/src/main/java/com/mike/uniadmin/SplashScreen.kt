@@ -49,8 +49,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     var startAnimation by remember { mutableStateOf(false) }
     var userLoaded by remember { mutableStateOf(false) }
     var isDatabaseChecked by remember { mutableStateOf(false) }
-
-
+    
     val scale by animateFloatAsState(targetValue = if (startAnimation) 1f else 0.8f,
         animationSpec = tween(durationMillis = 800,
             easing = { OvershootInterpolator(2f).getInterpolation(it) }),
@@ -58,7 +57,6 @@ fun SplashScreen(navController: NavController, context: Context) {
     )
 
     val userViewModel = getUserViewModel(context)
-
 
     val currentUser by userViewModel.signedInUser.observeAsState()
     val destination = when {
