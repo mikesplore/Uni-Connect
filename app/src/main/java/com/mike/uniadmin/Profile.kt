@@ -75,9 +75,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController, context: Context) {
-    val userAdmin = context.applicationContext as UniAdmin
-    val userRepository = remember { userAdmin.userRepository }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository))
+    val userViewModel = getUserViewModel(context)
     val signedInUser by userViewModel.signedInUser.observeAsState()
     var currentUser by remember { mutableStateOf<UserEntity?>(null) }
     var updated by remember { mutableStateOf(false) }
