@@ -69,6 +69,8 @@ import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -80,18 +82,9 @@ object GroupDetails {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UniGroups(context: Context, navController: NavController) {
-    val application = context.applicationContext as UniAdmin
-    val chatRepository = remember { application.chatRepository }
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
-    )
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
+
+    val chatViewModel = getChatViewModel(context)
+    val userViewModel = getUserViewModel(context)
 
     val groups by chatViewModel.groups.observeAsState(emptyList())
     val users by userViewModel.users.observeAsState(emptyList())
