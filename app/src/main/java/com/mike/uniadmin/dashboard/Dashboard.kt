@@ -52,53 +52,27 @@ import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getCourseAnnouncementViewModel
+import com.mike.uniadmin.getCourseAssignmentViewModel
+import com.mike.uniadmin.getCourseDetailViewModel
+import com.mike.uniadmin.getCourseTimetableViewModel
+import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun Dashboard(navController: NavController, context: Context) {
-    val application = context.applicationContext as UniAdmin
-    val chatRepository = remember { application.chatRepository }
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModel.ChatViewModelFactory(chatRepository)
-    )
-
-    val dashboardAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { dashboardAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
-
-
-    val courseRepository = remember { dashboardAdmin?.courseRepository }
-    val courseViewModel: CourseViewModel = viewModel(
-        factory = CourseViewModelFactory(
-            courseRepository ?: throw IllegalStateException("CourseRepository is null")
-        )
-    )
-
-    val announcementRepository = remember { dashboardAdmin?.announcementRepository }
-    val announcementViewModel: AnnouncementViewModel = viewModel(
-        factory = AnnouncementViewModelFactory(
-            announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
-        )
-    )
-
-    val timetableRepository = remember { dashboardAdmin?.courseTimetableRepository }
-    val timetableViewModel: CourseTimetableViewModel = viewModel(
-        factory = CourseTimetableViewModelFactory(
-            timetableRepository ?: throw IllegalStateException("TimetableRepository is null")
-        )
-    )
-
-    val notificationAdmin = context.applicationContext as UniAdmin
-    val notificationRepository = remember { notificationAdmin.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
-    )
+    val courseViewModel = getCourseViewModel(context)
+    val userViewModel = getUserViewModel(context)
+    val announcementViewModel = getAnnouncementViewModel(context)
+    val chatViewModel = getChatViewModel(context)
+    val notificationViewModel = getNotificationViewModel(context)
+    val timetableViewModel = getCourseTimetableViewModel(context)
 
     val fetchedCourse by courseViewModel.fetchedCourse.observeAsState()
     val timetable by timetableViewModel.timetablesToday.observeAsState()
