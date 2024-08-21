@@ -68,6 +68,7 @@ import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.model.randomColor
 import kotlin.random.Random
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -203,7 +204,7 @@ fun DisplayImage(
     ) {
         Box(
             modifier = Modifier
-                .background(CC.secondary(), RoundedCornerShape(10.dp))
+                .background(randomColor.random(), RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
                 .height(boxSize)
                 .fillMaxWidth(),
