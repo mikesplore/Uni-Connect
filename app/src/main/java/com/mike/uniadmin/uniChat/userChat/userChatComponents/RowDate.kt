@@ -34,7 +34,7 @@ fun RowDate(date: String, context: Context) {
                 text = CommonComponents.getRelativeDate(CommonComponents.getCurrentDate(date)),
                 modifier = Modifier.padding(5.dp),
                 style = CommonComponents.descriptionTextStyle(context),
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )
         }
