@@ -69,6 +69,7 @@ import com.mike.uniadmin.uniChat.userChat.userChatComponents.ChatInput
 import com.mike.uniadmin.uniChat.userChat.userChatComponents.MessageBubble
 import com.mike.uniadmin.uniChat.userChat.userChatComponents.RowDate
 import com.mike.uniadmin.uniChat.userChat.userChatComponents.SearchTextField
+import com.mike.uniadmin.uniChat.userChat.userChatComponents.TopAppBarComponent
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -279,104 +280,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
 
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopAppBarComponent(
-    navController: NavController,
-    name: String,
-    context: Context,
-    user: UserEntity,
-    userState: String,
-    isSearchVisible: Boolean = false,
-    onValueChange: (Boolean) -> Unit,
-    isTyping: Boolean
-
-) {
-    TopAppBar(title = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 8.dp)
-        ) {
-            IconButton(onClick = {
-                navController.navigate("uniChat"){
-                    popUpTo("chat/${user.id}"){
-                        inclusive = true
-                    }
-                }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Back",
-                    tint = CC.textColor()
-                )
-            }
-            Box(
-                contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)
-            ) {
-                if (user.profileImageLink.isNotBlank()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(user.profileImageLink),
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.student), // Replace with your profile icon
-                        contentDescription = "Profile Icon",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight(),
-            ) {
-                Text(name, style = CC.titleTextStyle(context).copy(fontSize = 18.sp))
-                Spacer(modifier = Modifier.height(5.dp))
-                if (isTyping) {
-                    Text("Typing...", style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp))
-                } else{
-                    Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp))
-                }
-            }
-        }
-    },
-        actions = {
-            IconButton(onClick = { onValueChange(!isSearchVisible) }) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = Color.White
-                )
-            }
-            val intent = Intent(Intent.ACTION_DIAL)
-            IconButton(onClick = {
-                if (user.phoneNumber != "") {
-                    intent.data = Uri.parse("tel:${user.phoneNumber}")
-                    context.startActivity(intent)
-                }
-
-                context.startActivity(intent)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Call, // Replace with call icon
-                    contentDescription = "Call",
-                    tint = CC.textColor(),
-                )
-            }
-        },
-        modifier = Modifier.height(70.dp),
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
-    )
-}
 
 
 
