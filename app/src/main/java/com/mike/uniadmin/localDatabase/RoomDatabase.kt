@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementsDao
 import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncement
@@ -94,13 +96,19 @@ abstract class AppDatabase : RoomDatabase() {
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext, AppDatabase::class.java, "Uni_Admin"
+                    context.applicationContext, AppDatabase::class.java, "Uni_AdminV2"
                 ).build()
                 INSTANCE = instance
                 instance
             }
         }
     }
+
 }
 
+//val MIGRATION_2_3 = object : Migration(1, 2) {
+//    override fun migrate(db: SupportSQLiteDatabase) {
+//        db.execSQL("ALTER TABLE courseAssignments ADD COLUMN authorID TEXT")
+//    }
+//}
 
