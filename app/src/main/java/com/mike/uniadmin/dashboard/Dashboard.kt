@@ -206,16 +206,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 }
 
             } else {
-                LazyRow(
-                    modifier = Modifier
-                        .padding(start = 15.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between items
-                ) {
-                    items(courses) { course ->
-                        CourseItem(course, context, navController)
-                    }
-                }
+                CourseItemList(courses, context, navController)
             }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -246,24 +237,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 val sortedCourses =
                     courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
 
-                LazyRow(
-                    modifier = Modifier
-                        .padding(start = 15.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(sortedCourses) { course -> // Use the sorted list
-                        CourseBox(course, context, navController, onClicked = {
-                            courseViewModel.saveCourse(
-                                course.copy(
-                                    visits = course.visits.plus(
-                                        1
-                                    )
-                                )
-                            )
-                        })
-                    }
-                }
+                CourseBoxList(sortedCourses, context, navController, courseViewModel)
             } else {
                 Box(
                     modifier = Modifier
