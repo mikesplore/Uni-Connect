@@ -66,6 +66,7 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.mike.uniadmin.backEnd.courses.CourseViewModel
 import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
+import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.GridItem
 import com.mike.uniadmin.model.MyDatabase.deleteItem
@@ -88,9 +89,7 @@ fun CourseResources(courseCode: String, context: Context) {
     var isLoading by remember { mutableStateOf(false) }
     var showAddSection by remember { mutableStateOf<Section?>(null) }
 
-    val application = context.applicationContext as UniAdmin
-    val courseRepository = remember { application.courseRepository }
-    val courseViewModel : CourseViewModel = viewModel(factory = CourseViewModelFactory(courseRepository))
+    val courseViewModel = getCourseViewModel(context)
     val course by courseViewModel.fetchedCourse.observeAsState()
 
 
