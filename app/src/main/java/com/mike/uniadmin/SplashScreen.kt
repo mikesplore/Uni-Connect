@@ -57,11 +57,7 @@ fun SplashScreen(navController: NavController, context: Context) {
         label = ""
     )
 
-    val application = context.applicationContext as UniAdmin
-    val userRepository = remember { application.userRepository }
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepository
-        )
-    )
+    val userViewModel = getUserViewModel(context)
 
 
     val currentUser by userViewModel.signedInUser.observeAsState()
