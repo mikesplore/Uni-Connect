@@ -74,6 +74,9 @@ import com.mike.uniadmin.backEnd.notifications.NotificationEntity
 import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.notification.showNotification
 
@@ -84,32 +87,9 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun AnnouncementsScreen(context: Context) {
 
     var addAnnouncement by rememberSaveable { mutableStateOf(false) }
-    val announcementAdmin = context.applicationContext as? UniAdmin
-    val announcementRepository = remember { announcementAdmin?.announcementRepository }
-
-    // ViewModel for announcements
-    val announcementViewModel: AnnouncementViewModel = viewModel(
-        factory = AnnouncementViewModelFactory(
-            announcementRepository ?: throw IllegalStateException("AnnouncementRepository is null")
-        )
-    )
-
-    val userRepository = remember { announcementAdmin?.userRepository }
-
-    // ViewModel for users (if needed for AddAnnouncement)
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
-
-    //viewModel for notifications
-    val notificationRepository = remember { announcementAdmin?.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(
-            notificationRepository ?: throw IllegalStateException("AnnouncementRepository is null")
-        )
-    )
+    val announcementViewModel = getAnnouncementViewModel(context)
+    val userViewModel = getUserViewModel(context)
+    val notificationViewModel = getNotificationViewModel(context)
 
     val announcements by announcementViewModel.announcements.observeAsState()
     var refresh by remember { mutableStateOf(true) }
