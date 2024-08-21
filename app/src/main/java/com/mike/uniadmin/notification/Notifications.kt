@@ -55,27 +55,23 @@ import com.mike.uniadmin.backEnd.userchat.MessageEntity
 import com.mike.uniadmin.backEnd.userchat.MessageViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getCourseTimetableViewModel
+import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getMessageViewModel
+import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhoneNotifications(navController: NavController, context: Context) {
-    val notificationAdmin = context.applicationContext as UniAdmin
 
-    val notificationRepository = remember { notificationAdmin.notificationRepository }
-    val notificationViewModel: NotificationViewModel = viewModel(
-        factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository)
-    )
-    val messageRepository = remember { notificationAdmin.messageRepository }
-    val messageViewModel: MessageViewModel = viewModel(
-        factory = MessageViewModel.MessageViewModelFactory(messageRepository)
-    )
-
-    val userRepository = remember { notificationAdmin.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(userRepository)
-    )
+    val userViewModel = getUserViewModel(context)
+    val notificationViewModel = getNotificationViewModel(context)
+    val messageViewModel = getMessageViewModel(context)
 
     // Keep track of previous notifications
     var previousNotifications by remember { mutableStateOf<List<NotificationEntity>>(emptyList()) }
