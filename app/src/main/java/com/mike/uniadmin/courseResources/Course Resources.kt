@@ -1,9 +1,11 @@
 package com.mike.uniadmin.courseResources
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -47,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -135,11 +139,13 @@ fun CourseResources(courseCode: String, context: Context) {
                     .fillMaxSize()
                     .background(CC.primary())
                     .padding(it)
+                    .imePadding(),
+                horizontalAlignment = Alignment.CenterHorizontally
 
             ) {
                 Box(modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .height(100.dp)
+                    .height(200.dp)
                     .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                     ) {
@@ -147,20 +153,29 @@ fun CourseResources(courseCode: String, context: Context) {
                         model = course?.courseImageLink,
                         contentDescription = "Course Image",
                         modifier = Modifier
-                            .blur(0.2.dp)
+                            .blur(2.2.dp)
                             .fillMaxSize(),
                         contentScale = ContentScale.Crop
+                    )
+                    val textBrush = Brush.horizontalGradient(
+                        listOf(
+                            CC.extraColor2(),
+                            CC.textColor(),
+                            CC.extraColor1()
+
+                        )
                     )
                     Text(
                         CourseName.name.value,
                         style = CC.titleTextStyle(context)
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 30.sp, color = Color.Black),
+                            .copy(fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, brush = textBrush),
                         modifier = Modifier.fillMaxSize(),
                         textAlign = TextAlign.Center
                     )
 
                 }
 
+                Spacer(modifier = Modifier.height(20.dp))
                 Section(title = "Notes",
                     items = notes,
                     onAddClick = { showAddSection = Section.NOTES },
@@ -270,7 +285,7 @@ fun Section(
 
     Button(
         onClick = onAddClick, colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF007BFF), contentColor = Color.White
+            containerColor = CC.extraColor2(), contentColor = Color.White
         ), shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(start = 15.dp)
     ) {
         Text("Add Item", style = CC.descriptionTextStyle(context = context))
@@ -345,10 +360,15 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
 
     Column(
         modifier = Modifier
+            .border(
+                width = 1.dp,
+                color = CC.extraColor2().copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .fillMaxWidth(0.9f)
+            .background(CC.extraColor1(), RoundedCornerShape(8.dp))
             .padding(16.dp)
-            .fillMaxWidth()
-            .background(CC.extraColor2(), RoundedCornerShape(8.dp))
-            .padding(16.dp)
+            .imePadding()
     ) {
         Text("Add New Item", style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 20.sp))
 
@@ -386,6 +406,10 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
             horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
         ) {
             Button(onClick = {
+                if (title.isEmpty() || description.isEmpty() || imageUrl.isEmpty() || fileUrl.isEmpty()) {
+                    Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 onAddItem(
                     title, description, imageUrl, fileUrl)
                      title = ""
@@ -395,7 +419,7 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
 
                              },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.extraColor1()
+                    containerColor = CC.secondary()
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {
@@ -422,14 +446,15 @@ fun InputDialogTextField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, style = CC.descriptionTextStyle(context)) },
+        placeholder = { Text(label, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f))) },
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = CC.tertiary(),
             unfocusedIndicatorColor = CC.secondary(),
             focusedTextColor = CC.textColor(),
             unfocusedTextColor = CC.textColor(),
             focusedContainerColor = CC.secondary(),
-            unfocusedContainerColor = CC.secondary()
+            unfocusedContainerColor = CC.secondary(),
+            cursorColor = CC.textColor()
         ),
         modifier = Modifier.fillMaxWidth()
     )
