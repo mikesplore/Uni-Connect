@@ -4,14 +4,13 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 val chatViewModelScope = CoroutineScope(Dispatchers.Main)
 
-class ChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDao) {
+class GroupChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDao) {
     private val database = FirebaseDatabase.getInstance().getReference()
 
     fun fetchChats(path: String, onResult: (List<ChatEntity>) -> Unit) {
