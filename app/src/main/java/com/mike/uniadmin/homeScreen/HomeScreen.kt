@@ -35,6 +35,7 @@ import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
 import com.mike.uniadmin.helperFunctions.Screen
 import com.mike.uniadmin.helperFunctions.Update
@@ -60,7 +61,6 @@ fun HomeScreen(
     val userViewModel = getUserViewModel(context)
     val chatViewModel = getGroupChatViewModel(context)
 
-
     // State observation
     val signedInUser by userViewModel.signedInUser.observeAsState()
     val fetchedUserDetails by userViewModel.user.observeAsState()
@@ -79,13 +79,12 @@ fun HomeScreen(
 
     // Side effects
     LaunchedEffect(signedInUser, fetchedUserDetails) {
-        // 1. Get signed-in user and fetch details (if needed)
+        //MyDatabase.setUpdate(update = Update(version = "1.0.0", updateLink = ""))
         userViewModel.getSignedInUser()
         signedInUser?.email?.let { email ->
             userViewModel.findUserByEmail(email) { user -> Log.d("Fetched User details", "$user") }
         }
 
-        // 2. Fetch app version (can run concurrently)
         launch {
             getUpdate { fetched ->
                 if (fetched != null) {
