@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
-import com.mike.uniadmin.backEnd.userchat.UserGroupChatViewModel
+import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -47,7 +47,7 @@ fun MessageBubble(
     message: UserChatEntity,
     isUser: Boolean,
     context: Context,
-    userGroupChatViewModel: UserGroupChatViewModel,
+    userGroupChatViewModel: UserChatViewModel,
     path: String,
     senderID: String
 ) {
