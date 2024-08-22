@@ -57,8 +57,8 @@ import com.mike.uniadmin.backEnd.modules.CourseEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.randomColor
+import com.mike.uniadmin.helperFunctions.MyDatabase
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object CourseCode {
