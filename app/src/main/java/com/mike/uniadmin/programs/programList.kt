@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,50 +51,52 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.mike.uniadmin.R
-import com.mike.uniadmin.backEnd.programs.ProgramEntity
+import com.mike.uniadmin.backEnd.modules.CourseEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.getProgramViewModel
+import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-object ProgramCode {
+object CourseCode {
     // Define the shared preferences key for storing the value
-    private const val PREF_KEY_PROGRAM_CODE = "program_code_key"
+    private const val PREF_KEY_PROGRAM_CODE = "course_code_key"
     private lateinit var preferences: SharedPreferences
 
-    // MutableState to hold the program code value
-    val programCode: MutableState<String> = mutableStateOf("")
+    // MutableState to hold the course code value
+    val courseCode: MutableState<String> = mutableStateOf("")
 
     // Function to initialize shared preferences and load the initial value
     fun initialize(context: Context) {
         preferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         // Load the value from SharedPreferences when initializing
-        programCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
-        Log.d("ProgramCode", "Program code initialized: ${programCode.value}")
+        courseCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
+        Log.d("CourseCode", "Course code initialized: ${courseCode.value}")
     }
 
     // Save the value to SharedPreferences whenever it changes
-    fun saveProgramCode(newProgramCode: String) {
-        programCode.value = newProgramCode
-        preferences.edit().putString(PREF_KEY_PROGRAM_CODE, newProgramCode).apply()
-        Log.d("ProgramCode", "Program code saved: $newProgramCode")
+    fun saveCourseCode(newCourseCode: String) {
+        courseCode.value = newCourseCode
+        preferences.edit().putString(PREF_KEY_PROGRAM_CODE, newCourseCode).apply()
+        Log.d("CourseCode", "Course code saved: $newCourseCode")
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProgramScreen(context: Context, navController: NavController) {
-    val programViewModel = getProgramViewModel(context)
+fun CourseScreen(context: Context, navController: NavController) {
+    val courseViewModel = getCourseViewModel(context)
     val userViewModel = getUserViewModel(context)
 
 
     val currentUser by userViewModel.user.observeAsState()
-    val programs by programViewModel.programs.observeAsState(emptyList())
-    val isLoading by programViewModel.isLoading.observeAsState(false)
-    var showAddProgram by remember { mutableStateOf(false) }
+    val courses by courseViewModel.courses.observeAsState(emptyList())
+    val isLoading by courseViewModel.isLoading.observeAsState(false)
+    var showAddCourse by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
@@ -102,15 +106,22 @@ fun ProgramScreen(context: Context, navController: NavController) {
         topBar = {
             TopAppBar(title = {
                 Text(
-                    "Programs", style = CC.titleTextStyle(context).copy(
+                    "Courses", style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.Bold, fontSize = 24.sp
                     )
                 )
             }, actions = {
-                IconButton(onClick = { showAddProgram = !showAddProgram }) {
+                IconButton(onClick = { showAddCourse = !showAddCourse }) {
                     Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Add Program",
+                        if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
+                        contentDescription = "Add Course",
+                        tint = CC.textColor()
+                    )
+                }
+                IconButton(onClick = {courseViewModel.fetchCourses()}) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Add Course",
                         tint = CC.textColor()
                     )
                 }
@@ -124,86 +135,82 @@ fun ProgramScreen(context: Context, navController: NavController) {
     ) {
         Column(
             modifier = Modifier
-                .border(
-                    1.dp, CC.secondary(), RoundedCornerShape(16.dp)
-
-                )
+                .border(1.dp, CC.secondary(), RoundedCornerShape(16.dp))
                 .padding(it)
-                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AnimatedVisibility(visible = showAddProgram) {
-                AddProgram(context = context, onProgramAdded = { newProgram ->
-                    programViewModel.saveProgram(newProgram) { success ->
-                        showAddProgram = false
+            AnimatedVisibility(visible = showAddCourse) {
+                AddCourse(context = context, onCourseAdded = { newCourse ->
+                    courseViewModel.saveCourse(newCourse) { success ->
+                        showAddCourse = false
                         if (success) {
                             Toast.makeText(
-                                context, "Program added successfully", Toast.LENGTH_SHORT
+                                context, "Course added successfully", Toast.LENGTH_SHORT
                             ).show()
                         } else {
-                            Toast.makeText(context, "Failed to add program", Toast.LENGTH_SHORT)
+                            Toast.makeText(context, "Failed to add course", Toast.LENGTH_SHORT)
                                 .show()
                         }
                     }
                 })
             }
-            if (programs?.isEmpty() == true) {
+            if (courses?.isEmpty() == true) {
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "No programs available", style = CC.titleTextStyle(context).copy(
+                        "No courses available", style = CC.titleTextStyle(context).copy(
                             fontWeight = FontWeight.Bold, fontSize = 24.sp
                         )
                     )
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier.padding(it)
-                ) {
-                    items(programs ?: emptyList()) { program ->
-                        ProgramItem(
-                            currentUser, program, context
+                LazyColumn {
+                    items(courses ?: emptyList()) { course ->
+                        CourseItem(
+                            currentUser, course, context
                         ) {
-                            if (!program.participants.contains(currentUser?.id)) {
+                            if (!course.participants.contains(currentUser?.id)) {
                                 currentUser?.id?.let { userId ->
-                                    programViewModel.saveProgram(
-                                        program.copy(participants = program.participants + userId)
+                                    courseViewModel.saveCourse(
+                                        course.copy(participants = course.participants + userId)
                                     ) { onSuccess ->
                                         if (onSuccess) {
                                             Toast.makeText(
                                                 context,
-                                                "Program joined successfully",
+                                                "Course joined successfully",
                                                 Toast.LENGTH_SHORT
                                             ).show()
 
-                                            //get the program code
-                                            ProgramCode.saveProgramCode(program.programCode)
-                                            if (ProgramCode.programCode.value.isNotEmpty()) {
+                                            //get the course code
+                                            CourseCode.saveCourseCode(course.courseCode)
+                                            if (CourseCode.courseCode.value.isNotEmpty()) {
                                                 navController.navigate("homeScreen")
                                             } else {
                                                 Toast.makeText(
                                                     context,
-                                                    "program code is empty",
+                                                    "course code is empty",
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             }
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                "Failed to join program",
+                                                "Failed to join course",
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
                                     }
                                 }
                             } else {
-                                //get the program code
-                                ProgramCode.saveProgramCode(program.programCode)
-                                if (ProgramCode.programCode.value.isNotEmpty()) {
+                                //get the course code
+                                CourseCode.saveCourseCode(course.courseCode)
+                                if (CourseCode.courseCode.value.isNotEmpty()) {
                                     navController.navigate("homeScreen")
                                 } else {
                                     Toast.makeText(
-                                        context, "program code is empty", Toast.LENGTH_SHORT
+                                        context, "course code is empty", Toast.LENGTH_SHORT
                                     ).show()
                                 }
                             }
@@ -217,11 +224,11 @@ fun ProgramScreen(context: Context, navController: NavController) {
 }
 
 @Composable
-fun ProgramItem(
+fun CourseItem(
     currentUser: UserEntity?,
-    programEntity: ProgramEntity?,
+    courseEntity: CourseEntity?,
     context: Context,
-    onProgramClicked: () -> Unit = {}
+    onCourseClicked: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -234,7 +241,7 @@ fun ProgramItem(
             .fillMaxWidth(0.85f)
             .wrapContentHeight()
     ) {
-        // Course Image
+        // Module Image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -242,9 +249,9 @@ fun ProgramItem(
                 .clip(RoundedCornerShape(16.dp)) // Clip the image with rounded corners
         ) {
             AsyncImage(
-                model = programEntity?.programImageLink,
+                model = courseEntity?.courseImageLink,
                 contentScale = ContentScale.Crop,
-                contentDescription = "Course Image",
+                contentDescription = "Module Image",
                 placeholder = painterResource(R.drawable.logo),
                 modifier = Modifier.fillMaxSize()
             )
@@ -252,13 +259,13 @@ fun ProgramItem(
 
         Spacer(modifier = Modifier.height(12.dp)) // Add spacing between image and text
 
-        // Course Title and Details
+        // Module Title and Details
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            programEntity?.programName?.let {
+            courseEntity?.courseName?.let {
                 Text(
                     it, style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.Bold, fontSize = 20.sp, textAlign = TextAlign.Center
@@ -269,7 +276,7 @@ fun ProgramItem(
             Spacer(modifier = Modifier.height(8.dp)) // Space between title and details
 
             Text(
-                "Participants: ${programEntity?.participants?.size}",
+                "Participants: ${courseEntity?.participants?.size}",
                 style = CC.descriptionTextStyle(context).copy(
                     fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center
                 ),
@@ -279,10 +286,10 @@ fun ProgramItem(
 
         Spacer(modifier = Modifier.height(16.dp)) // Space before button
 
-        // Open Program Button
+        // Open Course Button
         Button(
             onClick = {
-                onProgramClicked()
+                onCourseClicked()
 
             },
             modifier = Modifier
@@ -292,17 +299,17 @@ fun ProgramItem(
             colors = ButtonDefaults.buttonColors(
                 containerColor = randomColor.random(), contentColor = CC.textColor()
             ),
-            // enabled = programEntity?.participants?.contains(currentUser?.id) == false
+            // enabled = courseEntity?.participants?.contains(currentUser?.id) == false
         ) {
-            if (programEntity?.participants?.contains(currentUser?.id) == true) {
+            if (courseEntity?.participants?.contains(currentUser?.id) == true) {
                 Text(
-                    "Open Program", style = CC.titleTextStyle(context).copy(
+                    "Open Course", style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.Bold, fontSize = 16.sp
                     )
                 )
             } else {
                 Text(
-                    "Join Program", style = CC.titleTextStyle(context).copy(
+                    "Join Course", style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.Bold, fontSize = 16.sp
                     )
                 )
@@ -314,11 +321,11 @@ fun ProgramItem(
 
 
 @Composable
-fun AddProgram(
-    context: Context, onProgramAdded: (ProgramEntity) -> Unit
+fun AddCourse(
+    context: Context, onCourseAdded: (CourseEntity) -> Unit
 ) {
-    var programName by remember { mutableStateOf("") }
-    var programImageLink by remember { mutableStateOf("") }
+    var courseName by remember { mutableStateOf("") }
+    var courseImageLink by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
 
 
@@ -334,7 +341,7 @@ fun AddProgram(
             .wrapContentHeight()
     ) {
         Text(
-            text = "Add Program", style = CC.titleTextStyle(context).copy(
+            text = "Add Course", style = CC.titleTextStyle(context).copy(
                 fontWeight = FontWeight.Bold, fontSize = 24.sp, textAlign = TextAlign.Center
             ), modifier = Modifier
                 .fillMaxWidth()
@@ -342,9 +349,9 @@ fun AddProgram(
         )
 
         CC.SingleLinedTextField(
-            value = programName,
-            onValueChange = { newText -> programName = newText },
-            label = "Program Name",
+            value = courseName,
+            onValueChange = { newText -> courseName = newText },
+            label = "Course Name",
             context = context,
             singleLine = true,
             modifier = Modifier
@@ -356,9 +363,9 @@ fun AddProgram(
         )
 
         CC.SingleLinedTextField(
-            value = programImageLink,
-            onValueChange = { newText -> programImageLink = newText },
-            label = "Program Image Link",
+            value = courseImageLink,
+            onValueChange = { newText -> courseImageLink = newText },
+            label = "Course Image Link",
             context = context,
             singleLine = true,
             modifier = Modifier
@@ -372,19 +379,19 @@ fun AddProgram(
         Button(
             onClick = {
                 loading = true
-                if (programName.isEmpty() || programImageLink.isEmpty()) {
+                if (courseName.isEmpty() || courseImageLink.isEmpty()) {
                     Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                     loading = false
                     return@Button
                 }
-                MyDatabase.generateProgramID { newID ->
-                    val newProgram = ProgramEntity(
+                MyDatabase.generateCourseID { newID ->
+                    val newCourse = CourseEntity(
                         participants = emptyList(),
-                        programCode = newID,
-                        programName = programName,
-                        programImageLink = programImageLink
+                        courseCode = newID,
+                        courseName = courseName,
+                        courseImageLink = courseImageLink
                     )
-                    onProgramAdded(newProgram)
+                    onCourseAdded(newCourse)
                     loading = false
                 }
             },
@@ -400,7 +407,7 @@ fun AddProgram(
                 CC.ColorProgressIndicator(modifier = Modifier.fillMaxWidth())
             } else {
                 Text(
-                    text = "Add Program", style = CC.titleTextStyle(context).copy(
+                    text = "Add Course", style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.Bold, fontSize = 16.sp
                     )
                 )
@@ -409,6 +416,28 @@ fun AddProgram(
     }
 }
 
+fun renameNode(){
+    val database = FirebaseDatabase.getInstance().reference
+    val oldNodeRef = database.child("PR22024")
+    val newNodeRef = database.child("CR12024")
+
+    oldNodeRef.get().addOnSuccessListener { dataSnapshot ->
+        if (dataSnapshot.exists()) {
+            newNodeRef.setValue(dataSnapshot.value)
+                .addOnSuccessListener {
+                    oldNodeRef.removeValue()
+                }
+                .addOnFailureListener { e ->
+                    // Handle failure to write to the new node
+                }
+        } else {
+            // Handle case where old node doesn't exist
+        }
+    }
+        .addOnFailureListener { e ->
+            // Handle failure to read from the old node
+        }
+}
 
 
 
