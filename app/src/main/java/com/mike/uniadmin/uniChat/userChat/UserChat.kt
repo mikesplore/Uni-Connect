@@ -1,38 +1,20 @@
 package com.mike.uniadmin.uniChat.userChat
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,28 +23,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.R
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
-import com.mike.uniadmin.backEnd.userchat.MessageEntity
-import com.mike.uniadmin.backEnd.userchat.MessageViewModel
-import com.mike.uniadmin.backEnd.userchat.MessageViewModel.MessageViewModelFactory
-import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
+import com.mike.uniadmin.backEnd.userchat.UserChatEntity
+import com.mike.uniadmin.getUserGroupChatViewModel
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.userChat.userChatComponents.ChatInput
@@ -76,23 +45,11 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun UserChatScreen(navController: NavController, context: Context, targetUserId: String) {
-    val messageAdmin = context.applicationContext as? UniAdmin
-    val messageRepository = remember { messageAdmin?.messageRepository }
-    val messageViewModel: MessageViewModel = viewModel(
-        factory = MessageViewModelFactory(
-            messageRepository ?: throw IllegalStateException("ChatRepository is null")
-        )
-    )
 
-    val userAdmin = context.applicationContext as? UniAdmin
-    val userRepository = remember { userAdmin?.userRepository }
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(
-            userRepository ?: throw IllegalStateException("UserRepository is null")
-        )
-    )
+    val userGroupChatViewModel = getUserGroupChatViewModel(context)
+    val userViewModel = getUserViewModel(context)
 
-    val messages by messageViewModel.messages.observeAsState(emptyList())
+    val messages by userGroupChatViewModel.messages.observeAsState(emptyList())
     val user by userViewModel.user.observeAsState()
     val user2 by userViewModel.user2.observeAsState()
     val userState by userViewModel.userState.observeAsState()
@@ -108,12 +65,16 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     val scrollState = rememberLazyListState()
 
     var myUserState by remember { mutableStateOf("") }
-    val typing by messageViewModel.isTyping.observeAsState(false)
+    val typing by userGroupChatViewModel.isTyping.observeAsState(false)
 
     myUserState = when {
         userState == null -> "Never online"
         userState!!.online == "online" -> "Online"
-        else -> "Last seen ${CC.getRelativeDate(CC.getCurrentDate(userState!!.lastDate))} at ${CC.getFormattedTime(userState!!.lastTime)}"
+        else -> "Last seen ${CC.getRelativeDate(CC.getCurrentDate(userState!!.lastDate))} at ${
+            CC.getFormattedTime(
+                userState!!.lastTime
+            )
+        }"
     }
 
     LaunchedEffect(targetUserId) {
@@ -121,7 +82,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
             userViewModel.findUserByEmail(email) {}
         }
 
-        userViewModel.findUserByAdmissionNumber(targetUserId){}
+        userViewModel.findUserByAdmissionNumber(targetUserId) {}
         userViewModel.checkUserStateByID(targetUserId)
     }
 
@@ -144,8 +105,8 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
     LaunchedEffect(conversationId) {
         if (conversationId.isNotEmpty()) {
-            messageViewModel.fetchMessages(conversationId)
-            messageViewModel.listenForTypingStatus(typingStatusID, targetUserId)
+            userGroupChatViewModel.fetchMessages(conversationId)
+            userGroupChatViewModel.listenForTypingStatus(typingStatusID, targetUserId)
         }
     }
 
@@ -158,7 +119,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     fun sendMessage(messageContent: String) {
         try {
             MyDatabase.generateChatID { chatId ->
-                val newMessage = MessageEntity(
+                val newMessage = UserChatEntity(
                     path = conversationId,
                     id = chatId,
                     message = messageContent,
@@ -168,9 +129,9 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     date = CC.getTimeStamp(),
                     deliveryStatus = DeliveryStatus.SENT
                 )
-                messageViewModel.saveMessage(newMessage, conversationId) { success ->
+                userGroupChatViewModel.saveMessage(newMessage, conversationId) { success ->
                     if (success) {
-                        Log.d("MessageViewModel", "Message sent successfully")
+                        Log.d("userGroupChatViewModel", "Message sent successfully")
                         // Once the message is sent, update it to delivered when the receiver gets it
                     } else {
                         scope.launch {
@@ -231,7 +192,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                         messages.forEach { message ->
                             // If the current user is not the sender (and thus the receiver), or if it's a self-chat
                             if (message.senderID != user?.id || message.senderID == message.recipientID) {
-                                messageViewModel.markMessageAsRead(message, conversationId)
+                                userGroupChatViewModel.markMessageAsRead(message, conversationId)
                             }
                         }
                     }
@@ -242,7 +203,10 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                         val originalTimestamp = chatsForDate.first().date
 
                         item {
-                            RowDate(originalTimestamp, context) // Pass the original timestamp to RowDate
+                            RowDate(
+                                originalTimestamp,
+                                context
+                            ) // Pass the original timestamp to RowDate
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
@@ -253,7 +217,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                                 message = chat,
                                 isUser = chat.senderID == user?.id,
                                 context = context,
-                                messageViewModel = messageViewModel,
+                                userGroupChatViewModel = userGroupChatViewModel,
                                 path = conversationId,
                                 senderID = user?.id.orEmpty()
                             )
@@ -263,15 +227,15 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     }
                 }
 
-                ChatInput(
-                    modifier = Modifier.fillMaxWidth(),
+                ChatInput(modifier = Modifier.fillMaxWidth(),
                     onMessageChange = { message = it },
                     sendMessage = { sendMessage(message) },
                     context = context,
-                    isTypingChange = { isTyping -> user?.id?.let {
-                        messageViewModel.updateTypingStatus(typingStatusID, it, isTyping)
-                    } }
-                )
+                    isTypingChange = { isTyping ->
+                        user?.id?.let {
+                            userGroupChatViewModel.updateTypingStatus(typingStatusID, it, isTyping)
+                        }
+                    })
             }
         }
     }
