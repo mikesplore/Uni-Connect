@@ -48,13 +48,15 @@ class ModuleViewModel(private val repository: ModuleRepository) : ViewModel() {
         }
     }
 
-    fun saveModule(module: ModuleEntity) {
+    fun saveModule(module: ModuleEntity, onSuccess: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
             repository.saveModule(module) { success ->
                 if (success) {
+                    onSuccess(true)
                     fetchModules() // Refresh the module list after saving
                     getModuleDetailsByModuleID(module.moduleCode)
                 } else {
+                    onSuccess(false)
                     // Handle save failure if needed
                 }
             }
