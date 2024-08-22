@@ -129,7 +129,7 @@ fun AnnouncementTitleRow(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Start
     ) {
         ProfileImageBox(imageLink, authorName, isLoading, context)
 
@@ -143,7 +143,7 @@ fun AnnouncementTitleRow(
                 style = CC.titleTextStyle(context),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.fillMaxWidth(1f)
             )
         }
