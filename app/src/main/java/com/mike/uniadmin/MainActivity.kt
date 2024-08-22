@@ -28,9 +28,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
-import com.mike.uniadmin.model.Global
-import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.MyDatabase.writeUserActivity
+import com.mike.uniadmin.helperFunctions.Global
+import com.mike.uniadmin.helperFunctions.MyDatabase
+import com.mike.uniadmin.helperFunctions.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.courses.CourseCode
 import com.mike.uniadmin.settings.BiometricPromptManager
