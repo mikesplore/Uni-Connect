@@ -57,7 +57,7 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
