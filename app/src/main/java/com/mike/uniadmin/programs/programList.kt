@@ -46,27 +46,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.mike.uniadmin.R
 import com.mike.uniadmin.backEnd.programs.ProgramEntity
-import com.mike.uniadmin.backEnd.programs.ProgramViewModel
-import com.mike.uniadmin.backEnd.programs.ProgramViewModelFactory
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.getAnnouncementViewModel
-import com.mike.uniadmin.getChatViewModel
-import com.mike.uniadmin.getCourseTimetableViewModel
-import com.mike.uniadmin.getCourseViewModel
-import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getProgramViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object ProgramCode {
@@ -135,25 +124,27 @@ fun ProgramScreen(context: Context, navController: NavController) {
     ) {
         Column(
             modifier = Modifier
+                .border(
+                    1.dp, CC.secondary(), RoundedCornerShape(16.dp)
+
+                )
                 .padding(it)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedVisibility(visible = showAddProgram) {
-                AddProgram(context = context,
-                    onProgramAdded = { newProgram ->
-                        programViewModel.saveProgram(newProgram) { success ->
-                            showAddProgram = false
-                            if (success) {
-                                Toast.makeText(
-                                    context, "Program added successfully", Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                Toast.makeText(context, "Failed to add program", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+                AddProgram(context = context, onProgramAdded = { newProgram ->
+                    programViewModel.saveProgram(newProgram) { success ->
+                        showAddProgram = false
+                        if (success) {
+                            Toast.makeText(
+                                context, "Program added successfully", Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(context, "Failed to add program", Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    })
+                    }
+                })
             }
             if (programs?.isEmpty() == true) {
                 Box(
@@ -212,14 +203,12 @@ fun ProgramScreen(context: Context, navController: NavController) {
                                     navController.navigate("homeScreen")
                                 } else {
                                     Toast.makeText(
-                                        context,
-                                        "program code is empty",
-                                        Toast.LENGTH_SHORT
+                                        context, "program code is empty", Toast.LENGTH_SHORT
                                     ).show()
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
                     }
                 }
             }
@@ -234,103 +223,93 @@ fun ProgramItem(
     context: Context,
     onProgramClicked: () -> Unit = {}
 ) {
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp), // Add padding around the box
-        contentAlignment = Alignment.Center
+            .clip(RoundedCornerShape(16.dp)) // Smoothen corners for the entire card
+            .border(
+                1.dp, CC.secondary(), RoundedCornerShape(16.dp)
+            ) // Add a border with rounded corners
+            .background(CC.primary()) // Set a background color
+            .padding(10.dp) // Inner padding for content
+            .fillMaxWidth(0.85f)
+            .wrapContentHeight()
     ) {
+        // Course Image
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .clip(RoundedCornerShape(16.dp)) // Clip the image with rounded corners
+        ) {
+            AsyncImage(
+                model = programEntity?.programImageLink,
+                contentScale = ContentScale.Crop,
+                contentDescription = "Course Image",
+                placeholder = painterResource(R.drawable.logo),
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp)) // Add spacing between image and text
+
+        // Course Title and Details
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp)) // Smoothen corners for the entire card
-                .border(
-                    1.dp, CC.secondary(), RoundedCornerShape(16.dp)
-                ) // Add a border with rounded corners
-                .background(CC.primary()) // Set a background color
-                .padding(16.dp) // Inner padding for content
-                .fillMaxWidth(0.85f)
-                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
         ) {
-            // Course Image
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(16.dp)) // Clip the image with rounded corners
-            ) {
-                AsyncImage(
-                    model = programEntity?.programImageLink,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = "Course Image",
-                    placeholder = painterResource(R.drawable.logo),
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp)) // Add spacing between image and text
-
-            // Course Title and Details
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-            ) {
-                programEntity?.programName?.let {
-                    Text(
-                        it, style = CC.titleTextStyle(context).copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center
-                        ), modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp)) // Space between title and details
-
+            programEntity?.programName?.let {
                 Text(
-                    "Participants: ${programEntity?.participants?.size}",
-                    style = CC.descriptionTextStyle(context).copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    it, style = CC.titleTextStyle(context).copy(
+                        fontWeight = FontWeight.Bold, fontSize = 20.sp, textAlign = TextAlign.Center
+                    ), modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp)) // Space before button
+            Spacer(modifier = Modifier.height(8.dp)) // Space between title and details
 
-            // Open Program Button
-            Button(
-                onClick = {
-                    onProgramClicked()
-
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp)), // Rounded button corners
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.secondary(), contentColor = CC.textColor()
+            Text(
+                "Participants: ${programEntity?.participants?.size}",
+                style = CC.descriptionTextStyle(context).copy(
+                    fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center
                 ),
-                // enabled = programEntity?.participants?.contains(currentUser?.id) == false
-            ) {
-                if (programEntity?.participants?.contains(currentUser?.id) == true) {
-                    Text(
-                        "Open Program", style = CC.titleTextStyle(context).copy(
-                            fontWeight = FontWeight.Bold, fontSize = 16.sp
-                        )
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp)) // Space before button
+
+        // Open Program Button
+        Button(
+            onClick = {
+                onProgramClicked()
+
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp)), // Rounded button corners
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = randomColor.random(), contentColor = CC.textColor()
+            ),
+            // enabled = programEntity?.participants?.contains(currentUser?.id) == false
+        ) {
+            if (programEntity?.participants?.contains(currentUser?.id) == true) {
+                Text(
+                    "Open Program", style = CC.titleTextStyle(context).copy(
+                        fontWeight = FontWeight.Bold, fontSize = 16.sp
                     )
-                } else {
-                    Text(
-                        "Join Program", style = CC.titleTextStyle(context).copy(
-                            fontWeight = FontWeight.Bold, fontSize = 16.sp
-                        )
+                )
+            } else {
+                Text(
+                    "Join Program", style = CC.titleTextStyle(context).copy(
+                        fontWeight = FontWeight.Bold, fontSize = 16.sp
                     )
-                }
+                )
             }
         }
     }
+
 }
 
 
