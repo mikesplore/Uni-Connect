@@ -34,14 +34,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
-import com.mike.uniadmin.backEnd.groupchat.ChatEntity
+import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
 import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ChatBubble(
-    chat: ChatEntity, isUser: Boolean, context: Context, navController: NavController
+    chat: GroupChatEntity, isUser: Boolean, context: Context, navController: NavController
 ) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
     val bubbleShape = RoundedCornerShape(
