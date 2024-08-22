@@ -2,7 +2,7 @@ package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
 
 import com.google.firebase.database.*
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import com.mike.uniadmin.programs.CourseCode
+import com.mike.uniadmin.courses.CourseCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
