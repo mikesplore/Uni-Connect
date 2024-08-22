@@ -332,7 +332,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                     id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
                 )
             )
-            navController.navigate("programs") {
+            navController.navigate("courses") {
                 popUpTo("login") { inclusive = true }
             }
         } else {
@@ -421,7 +421,7 @@ fun handleSignIn(
                 firebaseAuth.currentUser?.email?.let { current ->
                     userViewModel.findUserByEmail(current) { user ->
                         if (user != null) {
-                            navController.navigate("programs")
+                            navController.navigate("courses")
                             Toast.makeText(
                                 context,
                                 "Welcome back to UniAdmin, ${user.firstName}!",
