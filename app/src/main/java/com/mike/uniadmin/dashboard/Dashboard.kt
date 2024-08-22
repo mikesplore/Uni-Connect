@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -37,54 +36,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
-import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModelFactory
-import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModel
-import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModelFactory
-import com.mike.uniadmin.backEnd.courses.CourseEntity
-import com.mike.uniadmin.backEnd.courses.CourseViewModel
-import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.getAnnouncementViewModel
-import com.mike.uniadmin.getChatViewModel
-import com.mike.uniadmin.getCourseAnnouncementViewModel
-import com.mike.uniadmin.getCourseAssignmentViewModel
-import com.mike.uniadmin.getCourseDetailViewModel
-import com.mike.uniadmin.getCourseTimetableViewModel
-import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getGroupChatViewModel
+import com.mike.uniadmin.getModuleTimetableViewModel
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun Dashboard(navController: NavController, context: Context) {
-    val courseViewModel = getCourseViewModel(context)
+    val moduleViewModel = getModuleViewModel(context)
     val userViewModel = getUserViewModel(context)
     val announcementViewModel = getAnnouncementViewModel(context)
-    val chatViewModel = getChatViewModel(context)
+    val chatViewModel = getGroupChatViewModel(context)
     val notificationViewModel = getNotificationViewModel(context)
-    val timetableViewModel = getCourseTimetableViewModel(context)
+    val timetableViewModel = getModuleTimetableViewModel(context)
 
-    val fetchedCourse by courseViewModel.fetchedCourse.observeAsState()
+    val fetchedModule by moduleViewModel.fetchedModule.observeAsState()
     val timetable by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
     val user by userViewModel.user.observeAsState()
-    val courses by courseViewModel.courses.observeAsState(emptyList())
+    val modules by moduleViewModel.modules.observeAsState(emptyList())
     val signedInUser by userViewModel.signedInUser.observeAsState()
     var currentUser by remember { mutableStateOf(UserEntity()) }
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
-    val coursesLoading by courseViewModel.isLoading.observeAsState()
+    val modulesLoading by moduleViewModel.isLoading.observeAsState()
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
-    val courseName by remember { mutableStateOf(fetchedCourse?.courseName) }
+    val moduleName by remember { mutableStateOf(fetchedModule?.moduleName) }
 
 
 
@@ -96,8 +78,8 @@ fun Dashboard(navController: NavController, context: Context) {
 
         timetable?.let {
             Log.d("TIMETABLE", it.toString())
-            courseViewModel.getCourseDetailsByCourseID(it.courseID)
-            Log.d("TIMETABLE", courseName.toString())
+            moduleViewModel.getModuleDetailsByModuleID(it.moduleID)
+            Log.d("TIMETABLE", moduleName.toString())
         }
 
         signedInUser?.email?.let {
@@ -148,14 +130,14 @@ fun Dashboard(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    "Courses",
+                    "Modules",
                     style = CC.titleTextStyle(context)
                         .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                     modifier = Modifier.padding(start = 15.dp)
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            if (coursesLoading == true) {
+            if (modulesLoading == true) {
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -165,35 +147,35 @@ fun Dashboard(navController: NavController, context: Context) {
                                 .padding(start = 15.dp)
                                 .height(100.dp)
                         ) {
-                            LoadingCourseItem()
+                            LoadingModuleItem()
                         }
                     }
                 }
-            } else if (courses.isEmpty()) {
+            } else if (modules.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .height(100.dp)
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No courses found", style = CC.descriptionTextStyle(context))
+                    Text("No modules found", style = CC.descriptionTextStyle(context))
                 }
 
             } else {
-                CourseItemList(courses, context, navController)
+                ModuleItemList(modules, context, navController)
             }
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
 
                 Text(
-                    "Course Resources",
+                    "Module Resources",
                     style = CC.titleTextStyle(context)
                         .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                     modifier = Modifier.padding(start = 15.dp)
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            if (coursesLoading == true) {
+            if (modulesLoading == true) {
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -203,15 +185,15 @@ fun Dashboard(navController: NavController, context: Context) {
                                 .padding(start = 15.dp)
                                 .height(200.dp)
                         ) {
-                            LoadingCourseBox()
+                            LoadingModuleBox()
                         }
                     }
                 }
-            } else if (courses.isNotEmpty()) {
-                val sortedCourses =
-                    courses.sortedByDescending { it.visits } // Sort by courseVisits in descending order
+            } else if (modules.isNotEmpty()) {
+                val sortedModules =
+                    modules.sortedByDescending { it.visits } // Sort by moduleVisits in descending order
 
-                CourseBoxList(sortedCourses, context, navController, courseViewModel)
+                ModuleBoxList(sortedModules, context, navController, moduleViewModel)
             } else {
                 Box(
                     modifier = Modifier
@@ -219,7 +201,7 @@ fun Dashboard(navController: NavController, context: Context) {
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No courses found", style = CC.descriptionTextStyle(context))
+                    Text("No modules found", style = CC.descriptionTextStyle(context))
                 }
             }
 
