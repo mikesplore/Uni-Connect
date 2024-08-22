@@ -1,4 +1,4 @@
-package com.mike.uniadmin.model
+package com.mike.uniadmin.helperFunctions
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
