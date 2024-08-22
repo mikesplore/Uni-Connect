@@ -6,12 +6,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface MessageDao {
+interface UserChatDAO {
     @Query("SELECT * FROM messages WHERE path = :path")
-    suspend fun getMessages(path: String): List<MessageEntity>
+    suspend fun getMessages(path: String): List<UserChatEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMessages(messages: List<MessageEntity>)
+    suspend fun insertMessages(messages: List<UserChatEntity>)
 
     @Query("DELETE FROM messages WHERE id = :messageId")
     suspend fun deleteMessage(messageId: String)
