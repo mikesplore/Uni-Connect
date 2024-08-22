@@ -1,4 +1,4 @@
-package com.mike.uniadmin.model
+package com.mike.uniadmin.helperFunctions
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
