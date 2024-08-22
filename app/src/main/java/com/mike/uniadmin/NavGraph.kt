@@ -23,6 +23,7 @@ import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.homeScreen.HomeScreen
 import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.courses.CourseScreen
+import com.mike.uniadmin.profile.ProfileScreen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
