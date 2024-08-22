@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
@@ -68,7 +68,7 @@ fun ModalNavigationDrawerItem(
     context: Context,
     navController: NavController,
     userViewModel: UserViewModel,
-    chatViewModel: ChatViewModel,
+    chatViewModel: GroupChatViewModel,
     signedInUserLoading: Boolean?,
     signedInUser: SignedInUser?,
     fetchedUserDetails: UserEntity?,
