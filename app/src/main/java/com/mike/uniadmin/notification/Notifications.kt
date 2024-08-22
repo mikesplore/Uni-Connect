@@ -54,7 +54,7 @@ import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
