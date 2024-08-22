@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,147 +82,162 @@ fun ModalDrawerItem(
         userViewModel.fetchUsers()
         chatViewModel.fetchGroups()
     }
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(10.dp)
-            .background(CC.primary())
-            .fillMaxSize()
-    ) {
-        Card(
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val rowHeight = columnWidth * 0.25f
+        val iconSize = columnWidth * 0.15f
+
+        val density = LocalDensity.current
+        val textSize = with(density) { (columnWidth * 0.07f).toSp() }
+
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            elevation = CardDefaults.cardElevation(4.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = CC.extraColor1())
+                .verticalScroll(rememberScrollState())
+                .padding(10.dp)
+                .background(CC.primary())
+                .fillMaxSize()
         ) {
-            Row(
+            Card(
                 modifier = Modifier
-                    .height(100.dp)
+                    .fillMaxWidth()
                     .padding(10.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                elevation = CardDefaults.cardElevation(4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = CC.extraColor1())
             ) {
-                Box(
+                Row(
                     modifier = Modifier
-                        .border(1.dp, CC.textColor(), CircleShape)
-                        .clip(CircleShape)
-                        .background(CC.secondary(), CircleShape)
-                        .size(70.dp),
-                    contentAlignment = Alignment.Center
+                        .height(rowHeight)
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (signedInUser?.profileImageLink?.isNotEmpty() == true) {
-                        AsyncImage(
-                            model = signedInUser?.profileImageLink,
-                            contentDescription = "Profile Image",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Text(
-                            text = "${signedInUser?.firstName?.get(0)}${signedInUser?.lastName?.get(0)}",
-                            style = CC.titleTextStyle(context)
-                                .copy(fontWeight = FontWeight.Bold, fontSize = 27.sp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Column(
-                    modifier = Modifier.fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "${signedInUser?.firstName} ${signedInUser?.lastName}",
-                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    signedInUser?.email?.let {
-                        Text(it, style = CC.descriptionTextStyle(context))
-                    }
-                    signedInUser?.id?.let {
-                        Text(it, style = CC.descriptionTextStyle(context))
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Text("Chat", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold))
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            "Select a user to open chat",
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        LazyRow(
-            modifier = Modifier.animateContentSize()
-        ) {
-            items(users, key = { it.id }) { user ->
-                UserItem(user, context, navController, userViewModel)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            "Group Discussions",
-            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            "Select a group to open",
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-
-        if (groups.isEmpty()) {
-            Text(
-                text = "No groups available",
-                style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        } else {
-            LazyRow(
-                modifier = Modifier.animateContentSize()
-            ) {
-                items(groups, key = { it.id }) { group ->
-                    if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
-                        signedInUser?.let {
-                            GroupItem(
-                                group,
-                                context,
-                                navController,
-                                chatViewModel,
-                                userViewModel,
-                                it
+                    Box(
+                        modifier = Modifier
+                            .border(1.dp, CC.textColor(), CircleShape)
+                            .clip(CircleShape)
+                            .background(CC.secondary(), CircleShape)
+                            .size(iconSize),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (signedInUser?.profileImageLink?.isNotEmpty() == true) {
+                            AsyncImage(
+                                model = signedInUser?.profileImageLink,
+                                contentDescription = "Profile Image",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
                             )
-                            Spacer(modifier = Modifier.width(10.dp))
+                        } else {
+                            Text(
+                                text = "${signedInUser?.firstName?.get(0)}${
+                                    signedInUser?.lastName?.get(
+                                        0
+                                    )
+                                }",
+                                style = CC.titleTextStyle(context)
+                                    .copy(fontWeight = FontWeight.Bold, fontSize = textSize)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "${signedInUser?.firstName} ${signedInUser?.lastName}",
+                            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        signedInUser?.email?.let {
+                            Text(it, style = CC.descriptionTextStyle(context))
+                        }
+                        signedInUser?.id?.let {
+                            Text(it, style = CC.descriptionTextStyle(context))
                         }
                     }
                 }
             }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            "Quick Settings", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        QuickSettings(context, activity)
 
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("Chat", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize*0.8f))
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                "Select a user to open chat",
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyRow(
+                modifier = Modifier.animateContentSize()
+            ) {
+                items(users, key = { it.id }) { user ->
+                    UserItem(user, context, navController, userViewModel)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                "Group Discussions",
+                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize*0.8f)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                "Select a group to open",
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (groups.isEmpty()) {
+                Text(
+                    text = "No groups available",
+                    style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                LazyRow(
+                    modifier = Modifier.animateContentSize()
+                ) {
+                    items(groups, key = { it.id }) { group ->
+                        if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
+                            signedInUser?.let {
+                                GroupItem(
+                                    group,
+                                    context,
+                                    navController,
+                                    chatViewModel,
+                                    userViewModel,
+                                    it
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                "Quick Settings",
+                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize*0.8f)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            QuickSettings(context, activity)
+
+        }
     }
 }
-
 @Composable
 fun QuickSettings(context: Context, activity: MainActivity) {
     var isBiometricsEnabled by remember { mutableStateOf(false) }
-
+    BoxWithConstraints {
+     val columnWidth = maxWidth
+     val iconSize = columnWidth * 0.11f
     Column(
         modifier = Modifier
             .background(CC.primary())
@@ -238,7 +255,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(CC.secondary())
-                    .size(50.dp)
+                    .size(iconSize)
             ) {
                 Icon(
                     if (DeviceTheme.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
@@ -252,14 +269,16 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                 onCheckedChange = {
                     DeviceTheme.darkMode.value = it
                     DeviceTheme.saveDarkModePreference(it)
-                }, checked = DeviceTheme.darkMode.value, colors = SwitchDefaults.colors(
+                }, checked = DeviceTheme.darkMode.value,
+                colors = SwitchDefaults.colors(
                     checkedThumbColor = CC.extraColor1(),
                     uncheckedThumbColor = CC.extraColor2(),
                     checkedTrackColor = CC.extraColor2(),
                     uncheckedTrackColor = CC.extraColor1(),
                     checkedIconColor = CC.textColor(),
                     uncheckedIconColor = CC.textColor()
-                )
+                ),
+                modifier = Modifier.size(iconSize)
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -273,7 +292,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(CC.secondary())
-                    .size(50.dp)
+                    .size(iconSize)
             ) {
                 Icon(
                     Icons.Default.Fingerprint, "theme", tint = CC.textColor()
@@ -305,15 +324,17 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                     } else {
                         isBiometricsEnabled = false // Update state if switch is turned off manually
                     }
-                }, checked = isBiometricsEnabled, colors = SwitchDefaults.colors(
+                }, checked = isBiometricsEnabled,
+                colors = SwitchDefaults.colors(
                     checkedThumbColor = CC.extraColor1(),
                     uncheckedThumbColor = CC.extraColor2(),
                     checkedTrackColor = CC.extraColor2(),
                     uncheckedTrackColor = CC.extraColor1(),
                     checkedIconColor = CC.textColor(),
                     uncheckedIconColor = CC.textColor()
-                )
+                ),
+                modifier = Modifier.size(iconSize)
             )
         }
-    }
+    }}
 }
