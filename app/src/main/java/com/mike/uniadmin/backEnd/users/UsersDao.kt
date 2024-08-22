@@ -105,13 +105,13 @@ interface DatabaseDao {
     @Query("DELETE FROM modules")
     suspend fun deleteModules()
 
-    @Query("DELETE FROM chats")
+    @Query("DELETE FROM groupChats")
     suspend fun deleteChats()
 
     @Query("DELETE FROM groups")
     suspend fun deleteGroups()
 
-    @Query("DELETE FROM messages")
+    @Query("DELETE FROM userChats")
     suspend fun deleteMessages()
 
     @Query("DELETE FROM admins")
@@ -152,5 +152,4 @@ interface DatabaseDao {
         deleteUserStates()
         deleteSignedInUser()
     }
-
 }
