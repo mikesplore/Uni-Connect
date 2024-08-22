@@ -54,7 +54,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupItem
@@ -64,7 +64,7 @@ fun ModalDrawerItem(
     context: Context,
     navController: NavController,
     userViewModel: UserViewModel,
-    chatViewModel: ChatViewModel,
+    chatViewModel: GroupChatViewModel,
     activity: MainActivity
 ) {
     val signedInUser by userViewModel.user.observeAsState()
