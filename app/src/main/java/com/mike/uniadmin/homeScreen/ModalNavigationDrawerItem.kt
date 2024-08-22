@@ -84,10 +84,6 @@ fun ModalNavigationDrawerItem(
     BoxWithConstraints {
         val columnWidth = maxWidth
         val columnHeight = columnWidth * 0.45f
-        val iconSize = columnWidth * 0.15f
-
-        val density = LocalDensity.current
-        val textSize = with(density) { (columnWidth * 0.07f).toSp() }
 
 
         Column(
@@ -327,7 +323,6 @@ fun SignOut(
 fun SideProfile(user: UserEntity, context: Context) {
     BoxWithConstraints {
         val columnWidth = maxWidth
-        val rowHeight = columnWidth * 0.25f
         val iconSize = columnWidth * 0.45f
 
         val density = LocalDensity.current
