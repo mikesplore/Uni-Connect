@@ -1,4 +1,4 @@
-package com.mike.uniadmin.courseContent
+package com.mike.uniadmin.moduleContent
 
 import android.content.Context
 import android.widget.Toast
@@ -54,13 +54,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.backEnd.coursecontent.coursedetails.CourseDetail
-import com.mike.uniadmin.backEnd.coursecontent.coursedetails.CourseDetailViewModel
+import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetail
+import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetailViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun DetailsItem(
-    courseID: String, detailsViewModel: CourseDetailViewModel, context: Context
+    moduleID: String, detailsViewModel: ModuleDetailViewModel, context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
     val details = detailsViewModel.details.observeAsState()
@@ -83,7 +83,7 @@ fun DetailsItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = { detailsViewModel.getCourseDetailsByCourseID(courseID) {} },
+                onClick = { detailsViewModel.getModuleDetailsByModuleID(moduleID) {} },
 
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = background,
@@ -111,7 +111,7 @@ fun DetailsItem(
         ) {
             AnimatedVisibility(visible = expanded) {
                 AddDetailsItem(
-                    courseID,
+                    moduleID,
                     context,
                     expanded,
                     onExpandedChange = { expanded = !expanded },
@@ -134,7 +134,7 @@ fun DetailsItem(
 
 
 @Composable
-fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
+fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = CC.extraColor1()),
@@ -157,9 +157,9 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Course Title
+            // Module Title
             Text(
-                text = courseDetails.courseName,
+                text = moduleDetails.moduleName,
                 style = CC.titleTextStyle(context).copy(
                     textAlign = TextAlign.Center,
                     fontSize = 22.sp,
@@ -173,29 +173,29 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
 
                 )
 
-            // Course Information
-            CourseInfoRow(
+            // Module Information
+            ModuleInfoRow(
                 icon = Icons.Default.Info,
-                label = "Course Code:",
-                value = courseDetails.courseCode,
+                label = "Module Code:",
+                value = moduleDetails.moduleCode,
                 context = context
             )
-            CourseInfoRow(
+            ModuleInfoRow(
                 icon = Icons.Default.Person,
                 label = "Lecturer:",
-                value = courseDetails.lecturer,
+                value = moduleDetails.lecturer,
                 context = context
             )
-            CourseInfoRow(
+            ModuleInfoRow(
                 icon = Icons.AutoMirrored.Filled.DirectionsWalk,
                 label = "Visits:",
-                value = courseDetails.numberOfVisits,
+                value = moduleDetails.numberOfVisits,
                 context = context
             )
-            CourseInfoRow(
+            ModuleInfoRow(
                 icon = Icons.Default.School,
                 label = "Department:",
-                value = courseDetails.courseDepartment,
+                value = moduleDetails.moduleDepartment,
                 context = context
             )
 
@@ -206,7 +206,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
             // Overview Section
             SectionTitle("Overview", context)
             Text(
-                text = courseDetails.overview, style = CC.descriptionTextStyle(context).copy(
+                text = moduleDetails.overview, style = CC.descriptionTextStyle(context).copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
@@ -215,7 +215,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
 
             // Learning Outcomes Section
             SectionTitle("Learning Outcomes", context)
-            courseDetails.learningOutcomes.forEach { outcome ->
+            moduleDetails.learningOutcomes.forEach { outcome ->
                 Text(
                     text = "- $outcome", style = CC.descriptionTextStyle(context).copy(
                         fontSize = 16.sp,
@@ -228,7 +228,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
             // Schedule Section
             SectionTitle("Schedule", context)
             Text(
-                text = courseDetails.schedule, style = CC.descriptionTextStyle(context).copy(
+                text = moduleDetails.schedule, style = CC.descriptionTextStyle(context).copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
@@ -238,7 +238,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
             // Required Materials Section
             SectionTitle("Required Materials", context)
             Text(
-                text = courseDetails.requiredMaterials,
+                text = moduleDetails.requiredMaterials,
                 style = CC.descriptionTextStyle(context).copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
@@ -250,7 +250,7 @@ fun DetailsItemCard(courseDetails: CourseDetail, context: Context) {
 }
 
 @Composable
-fun CourseInfoRow(icon: ImageVector, label: String, value: String, context: Context) {
+fun ModuleInfoRow(icon: ImageVector, label: String, value: String, context: Context) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -278,31 +278,31 @@ fun SectionTitle(title: String, context: Context) {
 
 @Composable
 fun AddDetailsItem(
-    courseID: String,
+    moduleID: String,
     context: Context,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
-    detailsViewModel: CourseDetailViewModel
+    detailsViewModel: ModuleDetailViewModel
 ) {
-    var courseName by remember { mutableStateOf("") }
-    var courseCode by remember { mutableStateOf("") }
+    var moduleName by remember { mutableStateOf("") }
+    var moduleCode by remember { mutableStateOf("") }
     var lecturer by remember { mutableStateOf("") }
     var numberOfVisits by remember { mutableStateOf("") }
-    var courseDepartment by remember { mutableStateOf("") }
-    var courseOutcome by remember { mutableStateOf("") }
+    var moduleDepartment by remember { mutableStateOf("") }
+    var moduleOutcome by remember { mutableStateOf("") }
     var overview by remember { mutableStateOf("") }
     var learningOutcomes by remember { mutableStateOf("") }
     var schedule by remember { mutableStateOf("") }
     var requiredMaterials by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
-    val courseInfo by detailsViewModel.courseDetails.observeAsState()
+    val moduleInfo by detailsViewModel.moduleDetails.observeAsState()
 
-    LaunchedEffect(courseID) {
-        detailsViewModel.getCourseDetailsByCourseID(courseID) { result ->
+    LaunchedEffect(moduleID) {
+        detailsViewModel.getModuleDetailsByModuleID(moduleID) { result ->
             if (result) {
-                courseName = courseInfo?.courseName.orEmpty()
-                courseCode = courseInfo?.courseCode.orEmpty()
-                numberOfVisits = courseInfo?.visits.toString()
+                moduleName = moduleInfo?.moduleName.orEmpty()
+                moduleCode = moduleInfo?.moduleCode.orEmpty()
+                numberOfVisits = moduleInfo?.visits.toString()
             }
         }
     }
@@ -330,7 +330,7 @@ fun AddDetailsItem(
                 .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Course Details", style = TextStyle(
+                text = "Module Details", style = TextStyle(
                     fontSize = 18.sp, fontWeight = FontWeight.Bold, color = CC.textColor()
                 ), modifier = Modifier.align(Alignment.CenterHorizontally)
             )
@@ -344,17 +344,17 @@ fun AddDetailsItem(
                 )
 
             AddTextField(
-                label = "Course Department",
-                value = courseDepartment,
-                onValueChange = { courseDepartment = it },
+                label = "Module Department",
+                value = moduleDepartment,
+                onValueChange = { moduleDepartment = it },
                 context = context,
 
                 )
 
             AddTextField(
-                label = "Course Outcome",
-                value = courseOutcome,
-                onValueChange = { courseOutcome = it },
+                label = "Module Outcome",
+                value = moduleOutcome,
+                onValueChange = { moduleOutcome = it },
                 context = context,
                 singleLine = false,
                 maxLines = 10,
@@ -408,25 +408,25 @@ fun AddDetailsItem(
             ) {
                 Button(
                     onClick = {
-                        if (courseName.isEmpty() || courseCode.isEmpty() || lecturer.isEmpty() || numberOfVisits.isEmpty() || courseDepartment.isEmpty() || overview.isEmpty()) {
+                        if (moduleName.isEmpty() || moduleCode.isEmpty() || lecturer.isEmpty() || numberOfVisits.isEmpty() || moduleDepartment.isEmpty() || overview.isEmpty()) {
                             Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT)
                                 .show()
                             return@Button
                         }
                         loading = true
-                        val newDetails = CourseDetail(
-                            courseName = courseName,
-                            courseCode = courseCode,
+                        val newDetails = ModuleDetail(
+                            moduleName = moduleName,
+                            moduleCode = moduleCode,
                             numberOfVisits = numberOfVisits,
-                            detailID = "2024$courseID",
+                            detailID = "2024$moduleID",
                             lecturer = lecturer,
-                            courseDepartment = courseDepartment,
+                            moduleDepartment = moduleDepartment,
                             overview = overview,
                             learningOutcomes = learningOutcomes.split(",").map { it.trim() },
                             schedule = schedule,
                             requiredMaterials = requiredMaterials
                         )
-                        detailsViewModel.saveCourseDetail(courseID = courseID,
+                        detailsViewModel.saveModuleDetail(moduleID = moduleID,
                             detail = newDetails,
                             onResult = { success ->
                                 loading = false
