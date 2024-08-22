@@ -1,4 +1,4 @@
-package com.mike.uniadmin.courseResources
+package com.mike.uniadmin.moduleResources
 
 import android.content.Context
 import android.widget.Toast
@@ -61,13 +61,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import com.mike.uniadmin.backEnd.courses.CourseViewModel
-import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
-import com.mike.uniadmin.getCourseViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.model.GridItem
 import com.mike.uniadmin.model.MyDatabase.deleteItem
 import com.mike.uniadmin.model.MyDatabase.readItems
@@ -75,38 +71,38 @@ import com.mike.uniadmin.model.MyDatabase.writeItem
 import com.mike.uniadmin.model.Section
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-object CourseName {
+object ModuleName {
     var name: MutableState<String> = mutableStateOf("")
-    var courseID: MutableState<String> = mutableStateOf("")
+    var moduleID: MutableState<String> = mutableStateOf("")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CourseResources(courseCode: String, context: Context) {
+fun ModuleResources(moduleCode: String, context: Context) {
     val notes = remember { mutableStateListOf<GridItem>() }
     val pastPapers = remember { mutableStateListOf<GridItem>() }
     val resources = remember { mutableStateListOf<GridItem>() }
     var isLoading by remember { mutableStateOf(false) }
     var showAddSection by remember { mutableStateOf<Section?>(null) }
 
-    val courseViewModel = getCourseViewModel(context)
-    val course by courseViewModel.fetchedCourse.observeAsState()
+    val moduleViewModel = getModuleViewModel(context)
+    val module by moduleViewModel.fetchedModule.observeAsState()
 
 
-    LaunchedEffect(courseCode) {
+    LaunchedEffect(moduleCode) {
 
-        courseViewModel.getCourseDetailsByCourseID(courseCode)
+        moduleViewModel.getModuleDetailsByModuleID(moduleCode)
         
         isLoading = true
-        readItems(courseCode, Section.NOTES) { fetchedNotes ->
+        readItems(moduleCode, Section.NOTES) { fetchedNotes ->
             notes.addAll(fetchedNotes)
             isLoading = false
         }
-        readItems(courseCode, Section.PAST_PAPERS) { fetchedPastPapers ->
+        readItems(moduleCode, Section.PAST_PAPERS) { fetchedPastPapers ->
             pastPapers.addAll(fetchedPastPapers)
             isLoading = false
         }
-        readItems(courseCode, Section.RESOURCES) { fetchedResources ->
+        readItems(moduleCode, Section.RESOURCES) { fetchedResources ->
             resources.addAll(fetchedResources)
             isLoading = false
         }
@@ -149,8 +145,8 @@ fun CourseResources(courseCode: String, context: Context) {
                     contentAlignment = Alignment.Center
                     ) {
                     AsyncImage(
-                        model = course?.courseImageLink,
-                        contentDescription = "Course Image",
+                        model = module?.moduleImageLink,
+                        contentDescription = "Module Image",
                         modifier = Modifier
                             .blur(2.2.dp)
                             .fillMaxSize(),
@@ -165,7 +161,7 @@ fun CourseResources(courseCode: String, context: Context) {
                         )
                     )
                     Text(
-                        CourseName.name.value,
+                        ModuleName.name.value,
                         style = CC.titleTextStyle(context)
                             .copy(fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, brush = textBrush),
                         modifier = Modifier.fillMaxSize(),
@@ -178,7 +174,7 @@ fun CourseResources(courseCode: String, context: Context) {
                 Section(title = "Notes",
                     items = notes,
                     onAddClick = { showAddSection = Section.NOTES },
-                    onDelete = { gridItem -> notes.remove(gridItem); deleteItem(courseCode, Section.NOTES, gridItem) },
+                    onDelete = { gridItem -> notes.remove(gridItem); deleteItem(moduleCode, Section.NOTES, gridItem) },
                     context = context
                 )
                 AnimatedVisibility(showAddSection == Section.NOTES) {
@@ -190,7 +186,7 @@ fun CourseResources(courseCode: String, context: Context) {
                             imageLink = imageUrl
                         )
                         notes.add(newItem)
-                        writeItem(courseCode, Section.NOTES, newItem)
+                        writeItem(moduleCode, Section.NOTES, newItem)
                         showAddSection = null
                     }
                 }
@@ -200,7 +196,7 @@ fun CourseResources(courseCode: String, context: Context) {
                     onAddClick = { showAddSection = Section.PAST_PAPERS },
                     onDelete = { gridItem ->
                         pastPapers.remove(gridItem); deleteItem(
-                        courseCode,
+                        moduleCode,
                         Section.PAST_PAPERS,
                         gridItem
                     )
@@ -216,7 +212,7 @@ fun CourseResources(courseCode: String, context: Context) {
                             imageLink = imageUrl
                         )
                         pastPapers.add(newItem)
-                        writeItem(courseCode, Section.PAST_PAPERS, newItem)
+                        writeItem(moduleCode, Section.PAST_PAPERS, newItem)
                         showAddSection = null
                     }
                 }
@@ -227,7 +223,7 @@ fun CourseResources(courseCode: String, context: Context) {
                     onAddClick = { showAddSection = Section.RESOURCES },
                     onDelete = { gridItem ->
                         resources.remove(gridItem); deleteItem(
-                        courseCode,
+                        moduleCode,
                         Section.RESOURCES,
                         gridItem
                     )
@@ -243,7 +239,7 @@ fun CourseResources(courseCode: String, context: Context) {
                             imageLink = imageUrl
                         )
                         resources.add(newItem)
-                        writeItem(courseCode, Section.RESOURCES, newItem)
+                        writeItem(moduleCode, Section.RESOURCES, newItem)
                         showAddSection = null
                     }
                 }
@@ -431,9 +427,9 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
 
 @Preview(showBackground = true)
 @Composable
-fun CourseScreenPreview() {
-    CourseResources(
-        courseCode = "CP123456", context = LocalContext.current
+fun ModuleScreenPreview() {
+    ModuleResources(
+        moduleCode = "CP123456", context = LocalContext.current
     )
 }
 
