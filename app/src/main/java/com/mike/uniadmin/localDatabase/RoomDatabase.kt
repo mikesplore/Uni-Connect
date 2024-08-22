@@ -19,8 +19,8 @@ import com.mike.uniadmin.backEnd.modules.AttendanceState
 import com.mike.uniadmin.backEnd.modules.AttendanceStateDao
 import com.mike.uniadmin.backEnd.modules.ModuleDao
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import com.mike.uniadmin.backEnd.groupchat.ChatDao
-import com.mike.uniadmin.backEnd.groupchat.ChatEntity
+import com.mike.uniadmin.backEnd.groupchat.GroupChatDao
+import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
 import com.mike.uniadmin.backEnd.groupchat.GroupDao
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.notifications.NotificationDao
@@ -44,7 +44,7 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
 
 @Database(
     entities = [
-        ChatEntity::class,
+        GroupChatEntity::class,
         GroupEntity::class,
         UserChatEntity::class,
         UserEntity::class,
@@ -68,9 +68,9 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun chatDao(): ChatDao
+    abstract fun groupChatDao(): GroupChatDao
     abstract fun groupDao(): GroupDao
-    abstract fun messageDao(): UserChatDAO
+    abstract fun userChatDao(): UserChatDAO
     abstract fun userDao(): UserDao
     abstract fun accountDeletionDao(): AccountDeletionDao
     abstract fun userPreferencesDao(): UserPreferencesDao
