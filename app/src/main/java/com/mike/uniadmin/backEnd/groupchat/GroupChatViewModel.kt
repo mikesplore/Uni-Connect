@@ -9,8 +9,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class GroupChatViewModel(private val repository: GroupChatRepository) : ViewModel() {
-    private val _chats = MutableLiveData<List<ChatEntity>>()
-    val chats: LiveData<List<ChatEntity>> = _chats
+    private val _chats = MutableLiveData<List<GroupChatEntity>>()
+    val chats: LiveData<List<GroupChatEntity>> = _chats
 
     private val _groups = MutableLiveData<List<GroupEntity>>()
     val groups: LiveData<List<GroupEntity>> = _groups
@@ -18,8 +18,8 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
     private val _group = MutableLiveData<GroupEntity?>()
     val group: MutableLiveData<GroupEntity?> = _group
 
-    fun fetchChats(path: String) {
-        repository.fetchChats(path) { chats ->
+    fun fetchGroupChats(path: String) {
+        repository.fetchGroupChats(path) { chats ->
             _chats.postValue(chats)
         }
     }
@@ -53,12 +53,12 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
         }
     }
 
-    fun saveChat(chat: ChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
+    fun saveGroupChat(chat: GroupChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
-            repository.saveChat(chat, path, onComplete = { success ->
+            repository.saveGroupChat(chat, path, onComplete = { success ->
                 if (success) {
                     onSuccess(true)
-                    fetchChats(path)
+                    fetchGroupChats(path)
                 } else {
                     onSuccess(false)
                     Log.e("Chats", "Could not save chat")
@@ -67,11 +67,11 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
         }
     }
 
-    fun deleteChat(chatId: String, path: String) {
+    fun deleteGroupChat(chatId: String, path: String) {
         viewModelScope.launch {
             repository.deleteChat(chatId,
                 onSuccess = {
-                    fetchChats(path) // Refresh the chat list after deleting
+                    fetchGroupChats(path) // Refresh the chat list after deleting
                 },
                 onFailure = {
                     // Handle delete failure if needed
