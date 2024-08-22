@@ -55,7 +55,7 @@ import com.mike.uniadmin.backEnd.userchat.UserChatEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.model.randomColor
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
