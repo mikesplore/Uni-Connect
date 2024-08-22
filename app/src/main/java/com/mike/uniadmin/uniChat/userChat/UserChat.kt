@@ -32,7 +32,7 @@ import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.userChat.userChatComponents.ChatInput
 import com.mike.uniadmin.uniChat.userChat.userChatComponents.MessageBubble
