@@ -2,13 +2,11 @@ package com.mike.uniadmin.dashboard
 
 import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,11 +32,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.courses.CourseEntity
+import com.mike.uniadmin.backEnd.modules.ModuleEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
-fun CourseItem(course: CourseEntity, context: Context, navController: NavController) {
+fun ModuleItem(module: ModuleEntity, context: Context, navController: NavController) {
     BoxWithConstraints(
         contentAlignment = Alignment.Center, modifier = Modifier.padding( start = 10.dp)
     ) {
@@ -53,7 +51,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
                     .size(cardSize)
                     .clip(CircleShape)
                     .clickable {
-                        navController.navigate("courseContent/${course.courseCode}")
+                        navController.navigate("moduleContent/${module.moduleCode}")
                     }
                     .background(CC.tertiary(), CircleShape),
                 elevation = CardDefaults.elevatedCardElevation(5.dp)
@@ -62,10 +60,10 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (course.courseImageLink.isNotEmpty()) {
+                    if (module.moduleImageLink.isNotEmpty()) {
                         AsyncImage(
-                            model = course.courseImageLink,
-                            contentDescription = course.courseName,
+                            model = module.moduleImageLink,
+                            contentDescription = module.moduleName,
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .fillMaxSize(),
@@ -82,7 +80,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
             Spacer(modifier = Modifier.height(cardSize * 0.1f)) // Adaptive spacer size
 
             Text(
-                text = course.courseName.take(10) + if (course.courseName.length > 10) "..." else "",
+                text = module.moduleName.take(10) + if (module.moduleName.length > 10) "..." else "",
                 style = CC.descriptionTextStyle(context),
                 maxLines = 1
             )
@@ -91,7 +89,7 @@ fun CourseItem(course: CourseEntity, context: Context, navController: NavControl
 }
 
 @Composable
-fun LoadingCourseItem() {
+fun LoadingModuleItem() {
     BoxWithConstraints(
         contentAlignment = Alignment.Center, modifier = Modifier.padding(8.dp)
     ) {
@@ -128,7 +126,7 @@ fun LoadingCourseItem() {
 
 
 @Composable
-fun CourseItemList(courses: List<CourseEntity>, context: Context, navController: NavController) {
+fun ModuleItemList(modules: List<ModuleEntity>, context: Context, navController: NavController) {
     BoxWithConstraints {
         // Calculate the adaptive item width
         val screenWidth = maxWidth
@@ -140,11 +138,11 @@ fun CourseItemList(courses: List<CourseEntity>, context: Context, navController:
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            items(courses) { course ->
+            items(modules) { module ->
                 Box(
                     modifier = Modifier.width(adaptiveItemWidth) // Apply the adaptive width
                 ) {
-                    CourseItem(course, context, navController)
+                    ModuleItem(module, context, navController)
                 }
             }
         }
