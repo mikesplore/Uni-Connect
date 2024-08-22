@@ -67,8 +67,7 @@ fun UniChat(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
     val messageViewModel = getUserChatViewModel(context)
 
-    var usersLoading by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by remember { mutableStateOf("") }
 
     val userStates by userViewModel.userStates.observeAsState(emptyMap())
     val currentUser by userViewModel.user.observeAsState()
