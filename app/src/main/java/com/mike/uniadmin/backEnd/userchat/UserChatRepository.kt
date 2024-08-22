@@ -11,14 +11,14 @@ import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class UserGroupChatRepository(private val userChatDAO: UserChatDAO) {
+class UserChatRepository(private val userChatDAO: UserChatDAO) {
     private val database = FirebaseDatabase.getInstance().reference
 
-    fun fetchMessages(path: String, onResult: (List<UserChatEntity>) -> Unit) {
+    fun fetchUserChats(path: String, onResult: (List<UserChatEntity>) -> Unit) {
         viewModelScope.launch {
-            // Fetch messages from the local database first
-            val cachedChats = userChatDAO.getMessages(path)
-            Log.d("Cached Messages","The messages are not fetched")
+            // Fetch userChats from the local database first
+            val cachedChats = userChatDAO.getUserChats(path)
+            Log.d("Cached UserChats","The userChats are not fetched")
             if (cachedChats.isNotEmpty()) {
                 onResult(cachedChats)
             }
@@ -26,24 +26,24 @@ class UserGroupChatRepository(private val userChatDAO: UserChatDAO) {
             // Set up a listener for real-time updates from Firebase
             database.child(path).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val messages = mutableListOf<UserChatEntity>()
+                    val userChats = mutableListOf<UserChatEntity>()
                     for (childSnapshot in snapshot.children) {
                         val message = childSnapshot.getValue(UserChatEntity::class.java)
-                        message?.let { messages.add(it) }
+                        message?.let { userChats.add(it) }
                     }
                     viewModelScope.launch(Dispatchers.IO) {
-                        userChatDAO.insertMessages(messages)
+                        userChatDAO.insertUserChats(userChats)
                     }
 
                     // Call onResult on the main thread
                     viewModelScope.launch(Dispatchers.Main) {
-                        onResult(messages)
+                        onResult(userChats)
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle the read error (e.g., log the error)
-                    println("Error reading messages: ${error.message}")
+                    println("Error reading userChats: ${error.message}")
                 }
             })
         }
@@ -52,7 +52,7 @@ class UserGroupChatRepository(private val userChatDAO: UserChatDAO) {
     fun saveMessage(message: UserChatEntity, path: String, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             // Save the message to the local database first
-            userChatDAO.insertMessages(listOf(message))
+            userChatDAO.insertUserChats(listOf(message))
             Log.d("Message Saved","The message is saved in path $path")
 
             // Then save the message to Firebase using the message ID
@@ -74,7 +74,7 @@ class UserGroupChatRepository(private val userChatDAO: UserChatDAO) {
             //the user may get delayed feedback
             database.child(path).child(messageId).removeValue()
                 .addOnSuccessListener {
-                    fetchMessages(path){
+                    fetchUserChats(path){
                         onSuccess()
                     }
                 }
