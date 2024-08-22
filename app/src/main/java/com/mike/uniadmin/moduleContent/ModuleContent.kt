@@ -1,4 +1,4 @@
-package com.mike.uniadmin.courseContent
+package com.mike.uniadmin.moduleContent
 
 
 import android.content.Context
@@ -49,27 +49,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncementViewModel
-import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncementViewModelFactory
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModel
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModelFactory
-import com.mike.uniadmin.backEnd.coursecontent.coursedetails.CourseDetailViewModel
-import com.mike.uniadmin.backEnd.coursecontent.coursedetails.CourseDetailViewModelFactory
-import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModel
-import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModelFactory
-import com.mike.uniadmin.backEnd.courses.CourseViewModel
-import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.getCourseAnnouncementViewModel
-import com.mike.uniadmin.getCourseAssignmentViewModel
-import com.mike.uniadmin.getCourseDetailViewModel
-import com.mike.uniadmin.getCourseTimetableViewModel
-import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getModuleAnnouncementViewModel
+import com.mike.uniadmin.getModuleAssignmentViewModel
+import com.mike.uniadmin.getModuleDetailViewModel
+import com.mike.uniadmin.getModuleTimetableViewModel
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.model.randomColor
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -78,31 +64,31 @@ var background = randomColor.random()
 
 
 @Composable
-fun CourseContent(context: Context, targetCourseID: String) {
+fun ModuleContent(context: Context, targetModuleID: String) {
 
-    val courseViewModel = getCourseViewModel(context)
-    val courseAnnouncementViewModel = getCourseAnnouncementViewModel(context)
-    val courseAssignmentViewModel = getCourseAssignmentViewModel(context)
-    val courseTimetableViewModel = getCourseTimetableViewModel(context)
-    val courseDetailViewModel = getCourseDetailViewModel(context)
+    val moduleViewModel = getModuleViewModel(context)
+    val moduleAnnouncementViewModel = getModuleAnnouncementViewModel(context)
+    val moduleAssignmentViewModel = getModuleAssignmentViewModel(context)
+    val moduleTimetableViewModel = getModuleTimetableViewModel(context)
+    val moduleDetailViewModel = getModuleDetailViewModel(context)
     val userViewModel = getUserViewModel(context)
 
-    val announcementsLoading by courseAnnouncementViewModel.isLoading.observeAsState(initial = false)
-    val assignmentsLoading by courseAssignmentViewModel.isLoading.observeAsState(initial = false)
-    val timetablesLoading by courseTimetableViewModel.isLoading.observeAsState(initial = false)
-    val detailsLoading by courseDetailViewModel.isLoading.observeAsState(initial = false)
+    val announcementsLoading by moduleAnnouncementViewModel.isLoading.observeAsState(initial = false)
+    val assignmentsLoading by moduleAssignmentViewModel.isLoading.observeAsState(initial = false)
+    val timetablesLoading by moduleTimetableViewModel.isLoading.observeAsState(initial = false)
+    val detailsLoading by moduleDetailViewModel.isLoading.observeAsState(initial = false)
 
     val coroutineScope = rememberCoroutineScope()
-    val courseInfo by courseViewModel.fetchedCourse.observeAsState(initial = null)
+    val moduleInfo by moduleViewModel.fetchedModule.observeAsState(initial = null)
 
-    LaunchedEffect(targetCourseID) {
+    LaunchedEffect(targetModuleID) {
         background = randomColor.random()
 
-        courseViewModel.getCourseDetailsByCourseID(targetCourseID)
-        courseAnnouncementViewModel.getCourseAnnouncements(targetCourseID)
-        courseAssignmentViewModel.getCourseAssignments(targetCourseID)
-        courseTimetableViewModel.getCourseTimetables(targetCourseID)
-        courseDetailViewModel.getCourseDetails(targetCourseID)
+        moduleViewModel.getModuleDetailsByModuleID(targetModuleID)
+        moduleAnnouncementViewModel.getModuleAnnouncements(targetModuleID)
+        moduleAssignmentViewModel.getModuleAssignments(targetModuleID)
+        moduleTimetableViewModel.getModuleTimetables(targetModuleID)
+        moduleDetailViewModel.getModuleDetails(targetModuleID)
     }
 
     Scaffold(
@@ -123,9 +109,9 @@ fun CourseContent(context: Context, targetCourseID: String) {
                     .background(Color.Black.copy(alpha = 0.5f)), // Semi-transparent background
                 contentAlignment = Alignment.Center
             ) {
-                courseInfo?.courseName?.let { courseName ->
+                moduleInfo?.moduleName?.let { moduleName ->
                     AsyncImage(
-                        model = courseInfo!!.courseImageLink,
+                        model = moduleInfo!!.moduleImageLink,
                         contentDescription = null,
                         modifier = Modifier
                             .blur(5.4.dp)
@@ -143,7 +129,7 @@ fun CourseContent(context: Context, targetCourseID: String) {
                             )
                     ) {
                         Text(
-                            text = courseName,
+                            text = moduleName,
                             modifier = Modifier
                                 .padding(10.dp)
                                 .padding(16.dp), // Added padding
@@ -232,7 +218,7 @@ fun CourseContent(context: Context, targetCourseID: String) {
                             LoadingIndicator()
                         } else {
                             AnnouncementsItem(
-                                targetCourseID, courseAnnouncementViewModel, context, userViewModel
+                                targetModuleID, moduleAnnouncementViewModel, context, userViewModel
                             )
                         }
                     }
@@ -242,7 +228,7 @@ fun CourseContent(context: Context, targetCourseID: String) {
                             LoadingIndicator()
                         } else {
                             AssignmentsItem(
-                                targetCourseID, courseAssignmentViewModel, context, userViewModel
+                                targetModuleID, moduleAssignmentViewModel, context, userViewModel
 
                             )
                         }
@@ -253,7 +239,7 @@ fun CourseContent(context: Context, targetCourseID: String) {
                             LoadingIndicator()
                         } else {
                             TimetableItem(
-                                targetCourseID, courseTimetableViewModel, context
+                                targetModuleID, moduleTimetableViewModel, context
                             )
                         }
                     }
@@ -262,7 +248,7 @@ fun CourseContent(context: Context, targetCourseID: String) {
                         if (detailsLoading) {
                             LoadingIndicator()
                         } else {
-                            DetailsItem(targetCourseID, courseDetailViewModel, context)
+                            DetailsItem(targetModuleID, moduleDetailViewModel, context)
                         }
                     }
 
