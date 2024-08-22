@@ -1,35 +1,35 @@
-package com.mike.uniadmin.backEnd.coursecontent.courseannouncements
+package com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.programs.ProgramCode
+import com.mike.uniadmin.programs.CourseCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnnouncementDao) {
-    private val programCode = ProgramCode.programCode.value
+class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnnouncementDao) {
+    private val courseCode = CourseCode.courseCode.value
     private val database =
-        FirebaseDatabase.getInstance().reference.child(programCode).child("CourseContent")
+        FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
 
-    // Write a new course announcement to both Firebase and the local database
-    fun writeCourseAnnouncement(
-        courseID: String,
-        courseAnnouncement: CourseAnnouncement,
+    // Write a new module announcement to both Firebase and the local database
+    fun writeModuleAnnouncement(
+        moduleID: String,
+        moduleAnnouncement: ModuleAnnouncement,
         onResult: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
             // Save to local database first
-            courseAnnouncementDao.insertCourseAnnouncement(courseAnnouncement)
+            moduleAnnouncementDao.insertModuleAnnouncement(moduleAnnouncement)
 
             // Save to Firebase
-            database.child(courseID).child("Course Announcements")
-                .child(courseAnnouncement.announcementID)
-                .setValue(courseAnnouncement)
+            database.child(moduleID).child("Module Announcements")
+                .child(moduleAnnouncement.announcementID)
+                .setValue(moduleAnnouncement)
                 .addOnSuccessListener { onResult(true) }
                 .addOnFailureListener { exception ->
                     println("Error writing announcement: ${exception.message}")
@@ -38,29 +38,29 @@ class CourseAnnouncementRepository(private val courseAnnouncementDao: CourseAnno
         }
     }
 
-    // Get course announcements and keep the local database in sync with Firebase
-    fun getCourseAnnouncements(courseID: String, onResult: (List<CourseAnnouncement>) -> Unit) {
+    // Get module announcements and keep the local database in sync with Firebase
+    fun getModuleAnnouncements(moduleID: String, onResult: (List<ModuleAnnouncement>) -> Unit) {
         viewModelScope.launch {
             // Step 1: Load Local Data
-            val localAnnouncements = courseAnnouncementDao.getCourseAnnouncements(courseID)
+            val localAnnouncements = moduleAnnouncementDao.getModuleAnnouncements(moduleID)
             if (localAnnouncements.isNotEmpty()) {
                 onResult(localAnnouncements) // Return local data immediately
             }
 
             // Step 2: Set Up Firebase Listener to Sync Data
-            val courseAnnouncementRef = database.child(courseID).child("Course Announcements")
-            courseAnnouncementRef.addValueEventListener(object : ValueEventListener {
+            val moduleAnnouncementRef = database.child(moduleID).child("Module Announcements")
+            moduleAnnouncementRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val announcements = mutableListOf<CourseAnnouncement>()
+                    val announcements = mutableListOf<ModuleAnnouncement>()
                     for (childSnapshot in snapshot.children) {
-                        val announcement = childSnapshot.getValue(CourseAnnouncement::class.java)
+                        val announcement = childSnapshot.getValue(ModuleAnnouncement::class.java)
                         announcement?.let { announcements.add(it) }
                     }
 
                     // Step 3: Update Local Database with Firebase Data
                     viewModelScope.launch {
-                        courseAnnouncementDao.clearAnnouncements(courseID) // Clear old data
-                        courseAnnouncementDao.insertCourseAnnouncements(announcements) // Insert new data
+                        moduleAnnouncementDao.clearAnnouncements(moduleID) // Clear old data
+                        moduleAnnouncementDao.insertModuleAnnouncements(announcements) // Insert new data
                     }
 
                     onResult(announcements) // Return the updated list
