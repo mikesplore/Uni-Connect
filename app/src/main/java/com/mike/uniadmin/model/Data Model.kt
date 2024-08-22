@@ -68,7 +68,7 @@ sealed class Screen(
 
 }
 
-//random color for the course contents
+//random color for the module contents
 val randomColor = listOf(
     Color(0xff00A9FF),
     Color(0xffE68369),
