@@ -13,8 +13,8 @@ fun generateConversationId(userId1: String, userId2: String): String {
 }
 
 
-@Entity(tableName = "chats")
-data class ChatEntity(
+@Entity(tableName = "groupChats")
+data class GroupChatEntity(
     @PrimaryKey val id: String,
     var message: String = "",
     var senderName: String = "",
