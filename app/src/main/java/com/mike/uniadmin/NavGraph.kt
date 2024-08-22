@@ -17,12 +17,12 @@ import com.mike.uniadmin.authentication.PasswordReset
 import com.mike.uniadmin.uniChat.groupChat.DiscussionScreen
 import com.mike.uniadmin.uniChat.mainChatScreen.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
-import com.mike.uniadmin.courseContent.CourseContent
-import com.mike.uniadmin.courseResources.CourseResources
+import com.mike.uniadmin.moduleContent.ModuleContent
+import com.mike.uniadmin.moduleResources.ModuleResources
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.homeScreen.HomeScreen
 import com.mike.uniadmin.notification.PhoneNotifications
-import com.mike.uniadmin.programs.ProgramScreen
+import com.mike.uniadmin.programs.CourseScreen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
 
@@ -30,7 +30,7 @@ import com.mike.uniadmin.ui.theme.Appearance
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "programs") {
+    NavHost(navController = navController, startDestination = "splashScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
@@ -126,27 +126,27 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             HomeScreen(navController = navController, context, mainActivity)
         }
 
-        composable("programs"){
-            ProgramScreen(context, navController)
+        composable("courses"){
+            CourseScreen(context, navController)
         }
 
 
 
-        composable("courseResource/{courseCode}",  exitTransition = {
+        composable("moduleResource/{moduleCode}",  exitTransition = {
             fadeOut(animationSpec = tween(300)) 
-        }, arguments = listOf(navArgument("courseCode") { type = NavType.StringType })
+        }, arguments = listOf(navArgument("moduleCode") { type = NavType.StringType })
         ) { backStackEntry ->
-            CourseResources(
-                backStackEntry.arguments?.getString("courseCode") ?: "", context
+            ModuleResources(
+                backStackEntry.arguments?.getString("moduleCode") ?: "", context
             )
         }
 
-        composable("courseContent/{courseId}",  exitTransition = {
+        composable("moduleContent/{moduleId}",  exitTransition = {
             fadeOut(animationSpec = tween(300)) 
-        }, arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+        }, arguments = listOf(navArgument("moduleId") { type = NavType.StringType })
         ) { backStackEntry ->
-            CourseContent(
-                context, backStackEntry.arguments?.getString("courseId") ?: ""
+            ModuleContent(
+                context, backStackEntry.arguments?.getString("moduleId") ?: ""
             )
         }
     }
