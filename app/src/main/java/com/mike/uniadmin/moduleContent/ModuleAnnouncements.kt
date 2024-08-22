@@ -1,4 +1,4 @@
-package com.mike.uniadmin.courseContent
+package com.mike.uniadmin.moduleContent
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
@@ -54,22 +54,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncement
-import com.mike.uniadmin.backEnd.coursecontent.courseannouncements.CourseAnnouncementViewModel
+import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
+import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AnnouncementsItem(
-    courseID: String,
-    courseAnnouncementViewModel: CourseAnnouncementViewModel,
+    moduleID: String,
+    moduleAnnouncementViewModel: ModuleAnnouncementViewModel,
     context: Context,
     userViewModel: UserViewModel
 ) {
     var visible by remember { mutableStateOf(false) }
     val announcements =
-        courseAnnouncementViewModel.announcements.observeAsState(initial = emptyList())
+        moduleAnnouncementViewModel.announcements.observeAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
@@ -89,7 +89,7 @@ fun AnnouncementsItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = { courseAnnouncementViewModel.getCourseAnnouncements(courseID) },
+            IconButton(onClick = { moduleAnnouncementViewModel.getModuleAnnouncements(moduleID) },
 
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = background,
@@ -119,10 +119,10 @@ fun AnnouncementsItem(
         ) {
             AnimatedVisibility(visible) {
                 AddAnnouncementItem(
-                    courseID,
+                    moduleID,
                     context,
                     onExpandedChange = { visible = !visible },
-                    courseAnnouncementViewModel,
+                    moduleAnnouncementViewModel,
                     userViewModel
                 )
             }
@@ -151,14 +151,14 @@ fun AnnouncementsItem(
 
 @Composable
 fun AnnouncementCard(
-    courseAnnouncement: CourseAnnouncement,
+    moduleAnnouncement: ModuleAnnouncement,
     context: Context,
     userViewModel: UserViewModel
 ) {
     var profileImageLink by remember { mutableStateOf("") }
     var authorName by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
-        userViewModel.findUserByAdmissionNumber(courseAnnouncement.author) { user ->
+        userViewModel.findUserByAdmissionNumber(moduleAnnouncement.author) { user ->
             user?.profileImageLink?.let {
                 profileImageLink = it
                 authorName = user.firstName
@@ -182,13 +182,13 @@ fun AnnouncementCard(
         ) {
             // Announcement Title
             Text(
-                text = courseAnnouncement.title,
+                text = moduleAnnouncement.title,
                 style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
             )
 
             // Announcement Description
             Text(
-                text = courseAnnouncement.description,
+                text = moduleAnnouncement.description,
                 style = CC.descriptionTextStyle(context).copy(
                     color = CC.textColor().copy(0.7f),
                     textAlign = TextAlign.Start
@@ -228,7 +228,7 @@ fun AnnouncementCard(
                             )
                         )
                         Text(
-                            text = courseAnnouncement.date,
+                            text = moduleAnnouncement.date,
                             style = CC.descriptionTextStyle(context).copy(
                                 fontSize = 12.sp,
                                 color = CC.textColor().copy(0.6f)
@@ -245,10 +245,10 @@ fun AnnouncementCard(
 
 @Composable
 fun AddAnnouncementItem(
-    courseID: String,
+    moduleID: String,
     context: Context,
     onExpandedChange: (Boolean) -> Unit,
-    courseViewModel: CourseAnnouncementViewModel,
+    moduleViewModel: ModuleAnnouncementViewModel,
     userViewModel: UserViewModel
 ) {
     val user by userViewModel.signedInUser.observeAsState()
@@ -375,16 +375,16 @@ fun AddAnnouncementItem(
                     }
                     loading = true
                     MyDatabase.generateAnnouncementID { iD ->
-                        val newAnnouncement = CourseAnnouncement(
-                            courseID = courseID,
+                        val newAnnouncement = ModuleAnnouncement(
+                            moduleID = moduleID,
                             announcementID = iD,
                             title = title,
                             description = description,
                             author = senderName,
                             date = CC.getCurrentDate(CC.getTimeStamp())
                         )
-                        courseViewModel.saveCourseAnnouncement(
-                            courseID = courseID, announcement = newAnnouncement
+                        moduleViewModel.saveModuleAnnouncement(
+                            moduleID = moduleID, announcement = newAnnouncement
                         )
                         loading = false
                         onExpandedChange(false)
