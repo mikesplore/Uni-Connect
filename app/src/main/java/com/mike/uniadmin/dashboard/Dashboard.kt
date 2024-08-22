@@ -219,7 +219,7 @@ fun Dashboard(navController: NavController, context: Context) {
 
                 LoadingAnnouncementCard(context)
 
-            } else if (announcements == null) {
+            } else if (announcements?.isEmpty() == true) {
                 Box(
                     modifier = Modifier
                         .height(200.dp)
