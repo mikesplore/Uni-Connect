@@ -20,24 +20,24 @@ import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.modules.CourseViewModel
 import com.mike.uniadmin.backEnd.modules.CourseViewModelFactory
-import com.mike.uniadmin.backEnd.userchat.UserGroupChatViewModel
+import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.localDatabase.UniAdmin
 
 //messageViewModel
 @Composable
-fun getUserGroupChatViewModel(context: Context): UserGroupChatViewModel {
+fun getUserChatViewModel(context: Context): UserChatViewModel {
     val application = context.applicationContext as UniAdmin
-    val messageRepository = application.messageRepository
-    return viewModel(factory = UserGroupChatViewModel.MessageViewModelFactory(messageRepository))
+    val userChatRepository = application.userChatRepository
+    return viewModel(factory = UserChatViewModel.UserChatViewModelFactory(userChatRepository))
 }
 
 //chatViewModel
 @Composable
 fun getGroupChatViewModel(context: Context): GroupChatViewModel {
     val application = context.applicationContext as UniAdmin
-    val chatRepository = application.chatRepository
+    val chatRepository = application.groupChatRepository
     return viewModel(factory = GroupChatViewModel.GroupChatViewModelFactory(chatRepository))
 }
 

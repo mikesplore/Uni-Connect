@@ -30,7 +30,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
-import com.mike.uniadmin.getUserGroupChatViewModel
+import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
@@ -46,10 +46,10 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun UserChatScreen(navController: NavController, context: Context, targetUserId: String) {
 
-    val userGroupChatViewModel = getUserGroupChatViewModel(context)
+    val userGroupChatViewModel = getUserChatViewModel(context)
     val userViewModel = getUserViewModel(context)
 
-    val messages by userGroupChatViewModel.messages.observeAsState(emptyList())
+    val messages by userGroupChatViewModel.userChats.observeAsState(emptyList())
     val user by userViewModel.user.observeAsState()
     val user2 by userViewModel.user2.observeAsState()
     val userState by userViewModel.userState.observeAsState()
@@ -105,7 +105,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
     LaunchedEffect(conversationId) {
         if (conversationId.isNotEmpty()) {
-            userGroupChatViewModel.fetchMessages(conversationId)
+            userGroupChatViewModel.fetchUserChats(conversationId)
             userGroupChatViewModel.listenForTypingStatus(typingStatusID, targetUserId)
         }
     }
