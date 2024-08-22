@@ -31,7 +31,7 @@ import com.mike.uniadmin.ui.theme.Appearance
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "homeScreen") {
+    NavHost(navController = navController, startDestination = "splashScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
