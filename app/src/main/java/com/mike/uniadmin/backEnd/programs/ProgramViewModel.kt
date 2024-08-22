@@ -1,21 +1,22 @@
-package com.mike.uniadmin.backEnd.programs
+package com.mike.uniadmin.backEnd.modules
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.mike.uniadmin.backEnd.programs.CourseRepository
 import kotlinx.coroutines.launch
 
-class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() {
-    private val _programs = MutableLiveData<List<ProgramEntity>?>()
-    private val _fetchedProgram = MutableLiveData<ProgramEntity?>()
+class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
+    private val _courses = MutableLiveData<List<CourseEntity>?>()
+    private val _fetchedCourse = MutableLiveData<CourseEntity?>()
 
-    val programs: MutableLiveData<List<ProgramEntity>?> = _programs
-    val fetchedProgram: LiveData<ProgramEntity?> = _fetchedProgram
+    val courses: MutableLiveData<List<CourseEntity>?> = _courses
+    val fetchedCourse: LiveData<CourseEntity?> = _fetchedCourse
 
-    private val _programStates = MutableLiveData<Map<String, ProgramState>>()
-    val programStates: LiveData<Map<String, ProgramState>> = _programStates
+    private val _courseStates = MutableLiveData<Map<String, CourseState>>()
+    val courseStates: LiveData<Map<String, CourseState>> = _courseStates
 
     private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
@@ -24,42 +25,42 @@ class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() 
 
 
     init {
-        fetchPrograms()
-        fetchProgramStates()
+        fetchCourses()
+        fetchCourseStates()
     }
     
 
 
-    private fun fetchProgramStates() {
-        repository.fetchProgramStates { fetchedStates ->
-            val statesMap = fetchedStates.associateBy { it.programID }
-            _programStates.value = statesMap
+    private fun fetchCourseStates() {
+        repository.fetchCourseStates { fetchedStates ->
+            val statesMap = fetchedStates.associateBy { it.courseID }
+            _courseStates.value = statesMap
 
         }
     }
 
 
-    fun fetchPrograms() {
+    fun fetchCourses() {
         _isLoading.value = true // Set loading to true before fetching
-        repository.fetchPrograms { programs ->
-            _programs.value = programs
+        repository.fetchCourses { courses ->
+            _courses.value = courses
             _isLoading.value = false // Set loading to false after fetching
         }
     }
 
-    fun getProgramDetailsByProgramID(programCode: String) {
-        repository.getProgramDetailsByProgramID(programCode) { program ->
-            _fetchedProgram.value = program
+    fun getCourseDetailsByCourseID(courseCode: String) {
+        repository.getCourseDetailsByCourseID(courseCode) { course ->
+            _fetchedCourse.value = course
         }
     }
 
-    fun saveProgram(program: ProgramEntity, onProgramSaved: (Boolean) -> Unit) {
+    fun saveCourse(course: CourseEntity, onCourseSaved: (Boolean) -> Unit) {
         viewModelScope.launch {
-            repository.saveProgram(program) { success ->
-                onProgramSaved(success)
+            repository.saveCourse(course) { success ->
+                onCourseSaved(success)
                 if (success) {
-                    fetchPrograms() // Refresh the program list after saving
-                    getProgramDetailsByProgramID(program.programCode)
+                    fetchCourses() // Refresh the course list after saving
+                    getCourseDetailsByCourseID(course.courseCode)
                 } else {
                     // Handle save failure if needed
                 }
@@ -67,11 +68,11 @@ class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() 
         }
     }
 
-    fun saveProgramState(programState: ProgramState) {
+    fun saveCourseState(courseState: CourseState) {
         viewModelScope.launch {
-            repository.saveProgramState(programState) { success ->
+            repository.saveCourseState(courseState) { success ->
                 if (success) {
-                    fetchProgramStates() // Refresh the program list after saving
+                    fetchCourseStates() // Refresh the course list after saving
                 } else {
                     // Handle save failure if needed
                 }
@@ -80,12 +81,12 @@ class ProgramViewModel(private val repository: ProgramRepository) : ViewModel() 
     }
 }
 
-class ProgramViewModelFactory(private val repository: ProgramRepository) : ViewModelProvider.Factory {
+class CourseViewModelFactory(private val repository: CourseRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ProgramViewModel::class.java)) {
-            return ProgramViewModel(repository) as T
+        if (modelClass.isAssignableFrom(CourseViewModel::class.java)) {
+            return CourseViewModel(repository) as T
         }
-        throw IllegalArgumentException("Unknown ViewModel class for the Program")
+        throw IllegalArgumentException("Unknown ViewModel class for the Course")
     }
 }
