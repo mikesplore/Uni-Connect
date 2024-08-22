@@ -35,23 +35,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.courseResources.CourseName
-import com.mike.uniadmin.backEnd.courses.CourseEntity
-import com.mike.uniadmin.backEnd.courses.CourseViewModel
+import com.mike.uniadmin.moduleResources.ModuleName
+import com.mike.uniadmin.backEnd.modules.ModuleEntity
+import com.mike.uniadmin.backEnd.modules.ModuleViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
-fun CourseBox(
-    course: CourseEntity,
+fun ModuleBox(
+    module: ModuleEntity,
     context: Context,
     navController: NavController,
-    onClicked: (CourseEntity) -> Unit
+    onClicked: (ModuleEntity) -> Unit
 ) {
-    BaseCourseBox(
+    BaseModuleBox(
         imageContent = {
             AsyncImage(
-                model = course.courseImageLink,
-                contentDescription = course.courseName,
+                model = module.moduleImageLink,
+                contentDescription = module.moduleName,
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
                     .fillMaxSize(),
@@ -61,22 +61,22 @@ fun CourseBox(
         },
         bodyContent = {
             Text(
-                course.courseCode,
+                module.moduleCode,
                 style = CC.descriptionTextStyle(context),
                 modifier = Modifier.padding(start = 10.dp)
             )
             Text(
-                course.courseName,
+                module.moduleName,
                 style = CC.titleTextStyle(context)
                     .copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
-            val visits = when (course.visits) {
+            val visits = when (module.visits) {
                 0 -> "Never visited"
                 1 -> "Visited once"
-                else -> "Visited ${course.visits} times"
+                else -> "Visited ${module.visits} times"
             }
             Row(
                 modifier = Modifier
@@ -92,9 +92,9 @@ fun CourseBox(
                 )
                 IconButton(
                     onClick = {
-                        onClicked(course)
-                        CourseName.name.value = course.courseName
-                        navController.navigate("courseResource/${course.courseCode}")
+                        onClicked(module)
+                        ModuleName.name.value = module.moduleName
+                        navController.navigate("moduleResource/${module.moduleCode}")
                     }
                 ) {
                     Icon(
@@ -109,8 +109,8 @@ fun CourseBox(
 }
 
 @Composable
-fun LoadingCourseBox() {
-    BaseCourseBox(
+fun LoadingModuleBox() {
+    BaseModuleBox(
         imageContent = {
             CC.ColorProgressIndicator(
                 modifier = Modifier
@@ -134,7 +134,7 @@ fun LoadingCourseBox() {
 }
 
 @Composable
-fun BaseCourseBox(
+fun BaseModuleBox(
     imageContent: @Composable BoxScope.() -> Unit,
     bodyContent: @Composable ColumnScope.() -> Unit
 ) {
@@ -173,7 +173,7 @@ fun BaseCourseBox(
 }
 
 @Composable
-fun CourseBoxList(courses: List<CourseEntity>, context: Context, navController: NavController, courseViewModel: CourseViewModel){
+fun ModuleBoxList(modules: List<ModuleEntity>, context: Context, navController: NavController, moduleViewModel: ModuleViewModel){
     BoxWithConstraints {
         val screenWidth = maxWidth
         val itemWidth = screenWidth * 0.4f // Each item takes 40% of the screen width
@@ -185,14 +185,14 @@ fun CourseBoxList(courses: List<CourseEntity>, context: Context, navController: 
                 .padding(horizontal = 10.dp)
                 .fillMaxWidth(),
         ) {
-            items(courses) { course -> // Use the sorted list
+            items(modules) { module -> // Use the sorted list
                 Box(
                     modifier = Modifier.width(adaptiveItemWidth) // Apply the adaptive width
                 ) {
-                CourseBox(course, context, navController, onClicked = {
-                    courseViewModel.saveCourse(
-                        course.copy(
-                            visits = course.visits.plus(
+                ModuleBox(module, context, navController, onClicked = {
+                    moduleViewModel.saveModule(
+                        module.copy(
+                            visits = module.visits.plus(
                                 1
                             )
                         )
