@@ -60,18 +60,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object GroupDetails {
