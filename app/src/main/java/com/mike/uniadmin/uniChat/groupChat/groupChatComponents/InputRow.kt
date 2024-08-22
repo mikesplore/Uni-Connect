@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.groupchat.ChatEntity
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
@@ -83,7 +83,7 @@ fun MessageInputRow(
 }
 
 fun sendMessage(
-    chat: ChatEntity, viewModel: ChatViewModel, path: String
+    chat: ChatEntity, viewModel: GroupChatViewModel, path: String
 ) {
     viewModel.saveChat(chat, path) {}
 }
