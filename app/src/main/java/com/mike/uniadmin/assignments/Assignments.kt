@@ -31,39 +31,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModel
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModelFactory
-import com.mike.uniadmin.backEnd.courses.CourseViewModel
-import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
-import com.mike.uniadmin.getCourseAssignmentViewModel
-import com.mike.uniadmin.getCourseViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
+import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
+import com.mike.uniadmin.getModuleAssignmentViewModel
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssignmentScreen(context: Context) {
 
-    val courseViewModel = getCourseViewModel(context)
-    val assignmentViewModel = getCourseAssignmentViewModel(context)
+    val moduleViewModel = getModuleViewModel(context)
+    val assignmentViewModel = getModuleAssignmentViewModel(context)
 
     val assignments by assignmentViewModel.assignments.observeAsState()
-    val courses by courseViewModel.courses.observeAsState()
+    val modules by moduleViewModel.modules.observeAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    var selectedCourseId by remember { mutableStateOf<String?>(null) }
+    var selectedModuleId by remember { mutableStateOf<String?>(null) }
 
     val isLoading by assignmentViewModel.isLoading.observeAsState()
 
     LaunchedEffect(Unit) {
-        courseViewModel.fetchCourses()
+        moduleViewModel.fetchModules()
     }
 
     LaunchedEffect(selectedTabIndex) {
-        selectedCourseId = courses?.getOrNull(selectedTabIndex)?.courseCode
-        selectedCourseId?.let { assignmentViewModel.getCourseAssignments(it) }
+        selectedModuleId = modules?.getOrNull(selectedTabIndex)?.moduleCode
+        selectedModuleId?.let { assignmentViewModel.getModuleAssignments(it) }
     }
 
     Scaffold(
@@ -86,12 +80,12 @@ fun AssignmentScreen(context: Context) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when {
-                courses.isNullOrEmpty() -> {
+                modules.isNullOrEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "No courses available", color = CC.textColor())
+                        Text(text = "No modules available", color = CC.textColor())
                     }
                 }
                 isLoading == true -> {
@@ -103,17 +97,17 @@ fun AssignmentScreen(context: Context) {
                     }
                 }
                 else -> {
-                    courses?.let { courseList ->
+                    modules?.let { moduleList ->
                         ScrollableTabRow(
                             containerColor = CC.primary(), selectedTabIndex = selectedTabIndex
                         ) {
-                            courseList.forEachIndexed { index, course ->
+                            moduleList.forEachIndexed { index, module ->
                                 Tab(
                                     selected = selectedTabIndex == index,
                                     onClick = { selectedTabIndex = index },
                                     text = {
                                         Text(
-                                            course.courseName, style = CC.descriptionTextStyle(context)
+                                            module.moduleName, style = CC.descriptionTextStyle(context)
                                         )
                                     }
                                 )
@@ -153,7 +147,7 @@ fun AssignmentScreen(context: Context) {
 
 
 @Composable
-fun AssignmentCard(assignment: CourseAssignment, context: Context) {
+fun AssignmentCard(assignment: ModuleAssignment, context: Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth(0.9f)
