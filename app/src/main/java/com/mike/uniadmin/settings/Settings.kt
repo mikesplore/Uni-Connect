@@ -14,6 +14,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -70,6 +72,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -77,7 +80,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.EmailAuthProvider
@@ -85,13 +87,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
-import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.Feedback
 import com.mike.uniadmin.model.MyDatabase
@@ -133,150 +131,168 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
             )
         }, containerColor = CC.primary()
     ) {
+        BoxWithConstraints {
+            val columnWidth = maxWidth
+            val rowHeight = columnWidth * 0.15f
+            val iconSize = columnWidth * 0.15f
 
-        Column(
-            modifier = Modifier
-                .background(CC.primary())
-                .verticalScroll(rememberScrollState())
-                .padding(it)
-                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth(0.9f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Settings",
-                    style = CC.titleTextStyle(context),
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(0.9f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Text("Account", style = CC.titleTextStyle(context))
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            //Profile Section
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(80.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
+            val density = LocalDensity.current
+            val textSize = with(density) { (columnWidth * 0.07f).toSp() }
 
+
+            Column(
+                modifier = Modifier
+                    .background(CC.primary())
+                    .verticalScroll(rememberScrollState())
+                    .padding(it)
+                    .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    modifier = Modifier
+                        .height(rowHeight)
+                        .fillMaxWidth(0.9f),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .border(
-                                1.dp, CC.textColor(), CircleShape
-                            )
-                            .clip(CircleShape)
-                            .background(CC.secondary(), CircleShape)
-                            .size(70.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (currentUser?.profileImageLink?.isNotEmpty() == true) {
-                            AsyncImage(model = currentUser?.profileImageLink,
-                                contentDescription = "Profile Image",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop,
-                                onError = { R.drawable.notification },
-                                onLoading = { R.drawable.logo }
+                    Text(
+                        "Settings",
+                        style = CC.titleTextStyle(context),
+                        fontSize = textSize * 1.2f,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Text("Account", style = CC.titleTextStyle(context).copy(fontSize = textSize * 0.8f))
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                //Profile Section
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(80.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
 
-                            )
-                        } else {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .border(
+                                    1.dp, CC.textColor(), CircleShape
+                                )
+                                .clip(CircleShape)
+                                .background(CC.secondary(), CircleShape)
+                                .size(iconSize * 1.1f), contentAlignment = Alignment.Center
+                        ) {
+                            if (currentUser?.profileImageLink?.isNotEmpty() == true) {
+                                AsyncImage(model = currentUser?.profileImageLink,
+                                    contentDescription = "Profile Image",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                    onError = { R.drawable.notification },
+                                    onLoading = { R.drawable.logo }
+
+                                )
+                            } else {
+                                Text(
+                                    "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
+                                    style = CC.titleTextStyle(context)
+                                        .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxHeight(0.9f),
+                            verticalArrangement = Arrangement.Center
+                        ) {
                             Text(
-                                "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
-                                style = CC.titleTextStyle(context)
-                                    .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
+                                currentUser?.firstName + " " + currentUser?.lastName,
+                                style = CC.descriptionTextStyle(context),
+                                fontSize = 20.sp
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                "Personal Info",
+                                style = CC.descriptionTextStyle(context),
+                                color = CC.textColor().copy(0.8f)
                             )
                         }
                     }
-                    Column(
-                        modifier = Modifier.fillMaxHeight(0.9f),
-                        verticalArrangement = Arrangement.Center
+                    MyIconButton(
+                        icon = Icons.AutoMirrored.Filled.ArrowForwardIos, navController, "profile"
+                    )
+
+                }
+                Spacer(modifier = Modifier.height(40.dp))
+                Row(modifier = Modifier.fillMaxWidth(0.9f)) {
+                    Text("System", style = CC.titleTextStyle(context).copy(fontSize = textSize * 0.8f))
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                DarkMode(context)
+                Spacer(modifier = Modifier.height(20.dp))
+                Notifications(context, userViewModel)
+                Spacer(modifier = Modifier.height(40.dp))
+                Row(modifier = Modifier.fillMaxWidth(0.9f)) {
+                    Text("Security", style = CC.titleTextStyle(context).copy(fontSize = textSize * 0.8f))
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Biometrics(context, mainActivity, userViewModel)
+                Spacer(modifier = Modifier.height(20.dp))
+                PasswordUpdateSection(context)
+                Spacer(modifier = Modifier.height(20.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Font Style", style = CC.titleTextStyle(context))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(50.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            currentUser?.firstName + " " + currentUser?.lastName,
-                            style = CC.descriptionTextStyle(context),
-                            fontSize = 20.sp
+                            "Selected Font: $savedFont",
+                            style = CC.descriptionTextStyle(context)
+                                .copy(fontSize = 20.sp)
                         )
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Text(
-                            "Personal Info",
-                            style = CC.descriptionTextStyle(context),
-                            color = CC.textColor().copy(0.8f)
-                        )
+                        IconButton(
+                            onClick = { navController.navigate("appearance") },
+                            modifier = Modifier
+                                .size(iconSize * 0.5f)
+                                .background(
+                                    CC.secondary(), RoundedCornerShape(10.dp)
+                                )
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = "Font Style",
+                                tint = CC.textColor()
+                            )
+                        }
                     }
                 }
-                MyIconButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowForwardIos, navController, "profile"
-                )
-
-            }
-            Spacer(modifier = Modifier.height(40.dp))
-            Row(modifier = Modifier.fillMaxWidth(0.9f)) {
-                Text("System", style = CC.titleTextStyle(context))
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            DarkMode(context)
-            Spacer(modifier = Modifier.height(20.dp))
-            Notifications(context, userViewModel)
-            Spacer(modifier = Modifier.height(40.dp))
-            Row(modifier = Modifier.fillMaxWidth(0.9f)) {
-                Text("Security", style = CC.titleTextStyle(context))
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Biometrics(context, mainActivity, userViewModel)
-            Spacer(modifier = Modifier.height(20.dp))
-            PasswordUpdateSection(context)
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(0.9f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Font Style", style = CC.titleTextStyle(context))
-
-                Text(
-                    savedFont,
-                    style = CC.descriptionTextStyle(context)
-                        .copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                )
-                IconButton(
-                    onClick = { navController.navigate("appearance") },
-                    modifier = Modifier.background(
-                        CC.secondary(), RoundedCornerShape(10.dp)
-                    )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = "Font Style",
-                        tint = CC.textColor()
-                    )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row {
+                    Text("We care about your feedback", style = CC.titleTextStyle(context))
                 }
+                currentUser?.let { it1 -> RatingAndFeedbackScreen(it1, context) }
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(modifier = Modifier.fillMaxWidth(0.9f)) {
+                    Text("About", style = CC.titleTextStyle(context))
+                }
+                MyAbout(context)
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row {
-                Text("We care about your feedback", style = CC.titleTextStyle(context))
-            }
-            currentUser?.let { it1 -> RatingAndFeedbackScreen(it1, context) }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth(0.9f)) {
-                Text("About", style = CC.titleTextStyle(context))
-            }
-            MyAbout(context)
         }
     }
 }
@@ -284,13 +300,17 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
 
 @Composable
 fun MyIconButton(icon: ImageVector, navController: NavController, route: String) {
-    Box(modifier = Modifier
-        .background(CC.secondary(), RoundedCornerShape(10.dp))
-        .clickable { navController.navigate(route) }
-        .size(50.dp)
-        .clip(RoundedCornerShape(10.dp)),
-        contentAlignment = Alignment.Center) {
-        Icon(icon, contentDescription = null, tint = CC.textColor())
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val iconSize = columnWidth * 0.15f
+
+        Box(modifier = Modifier
+            .background(CC.secondary(), RoundedCornerShape(10.dp))
+            .clickable { navController.navigate(route) }
+            .size(iconSize * 0.8f)
+            .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = null, tint = CC.textColor())
+        }
     }
 
 }
@@ -300,39 +320,41 @@ fun DarkMode(context: Context) {
     val icon = if (DeviceTheme.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
     val iconDescription =
         if (DeviceTheme.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val iconSize = columnWidth * 0.10f
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .height(50.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
+        Row(
             modifier = Modifier
-                .background(CC.secondary(), CircleShape)
-                .size(50.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth(0.9f)
+                .height(iconSize),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = icon, contentDescription = iconDescription, tint = CC.extraColor2()
+            Box(
+                modifier = Modifier
+                    .background(CC.secondary(), CircleShape)
+                    .size(iconSize),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = iconDescription,
+                    tint = CC.extraColor2()
+                )
+            }
+            Text("Dark Mode", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
+            Switch(
+                onCheckedChange = {
+                    DeviceTheme.darkMode.value = it
+                    DeviceTheme.saveDarkModePreference(it)
+
+                },
+                checked = DeviceTheme.darkMode.value,
+                colors = switchColors(context),
+                modifier = Modifier.size(iconSize)
             )
         }
-        Text("Dark Mode", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
-        Switch(
-            onCheckedChange = {
-                DeviceTheme.darkMode.value = it
-                DeviceTheme.saveDarkModePreference(it)
-
-            }, checked = DeviceTheme.darkMode.value, colors = SwitchDefaults.colors(
-                checkedThumbColor = CC.extraColor1(),
-                uncheckedThumbColor = CC.extraColor2(),
-                checkedTrackColor = CC.extraColor2(),
-                uncheckedTrackColor = CC.extraColor1(),
-                checkedIconColor = CC.textColor(),
-                uncheckedIconColor = CC.textColor()
-            )
-        )
     }
 }
 
@@ -371,41 +393,45 @@ fun Notifications(context: Context, viewModel: UserViewModel) {
             Log.e("Preferences", "Cannot update preferences: currentUser is null")
         }
     }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .height(50.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
+    BoxWithConstraints {
+        val rowWidth = maxWidth
+        val rowHeight = rowWidth * 0.1f
+        val iconSize = rowWidth * 0.10f
+
+        Row(
             modifier = Modifier
-                .background(CC.secondary(), CircleShape)
-                .size(50.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth(0.9f)
+                .height(rowHeight),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = icon, contentDescription = iconDescription, tint = CC.extraColor2()
+            Box(
+                modifier = Modifier
+                    .background(CC.secondary(), CircleShape)
+                    .size(iconSize),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = iconDescription,
+                    tint = CC.extraColor2()
+                )
+            }
+            Text("Notifications", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
+            Switch(
+                onCheckedChange = { notifications ->
+                    if (!notifications) {
+                        (context as MainActivity).requestNotificationPermission()
+
+                    }
+                    isNotificationEnabled = notifications
+                    updatePreferences(notifications)
+                },
+                checked = isNotificationEnabled,
+                colors = switchColors(context),
+                modifier = Modifier.size(iconSize)
             )
         }
-        Text("Notifications", style = CC.descriptionTextStyle(context), fontSize = 20.sp)
-        Switch(
-            onCheckedChange = { notifications ->
-                if (!notifications) {
-                    (context as MainActivity).requestNotificationPermission()
-
-                }
-                isNotificationEnabled = notifications
-                updatePreferences(notifications)
-            }, checked = isNotificationEnabled, colors = SwitchDefaults.colors(
-                checkedThumbColor = CC.extraColor1(),
-                uncheckedThumbColor = CC.extraColor2(),
-                checkedTrackColor = CC.extraColor2(),
-                uncheckedTrackColor = CC.extraColor1(),
-                checkedIconColor = CC.textColor(),
-                uncheckedIconColor = CC.textColor()
-            )
-        )
     }
 }
 
@@ -442,55 +468,55 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
             Log.e("Preferences", "Cannot update preferences: currentUser is null")
         }
     }
+    BoxWithConstraints {
+        val rowWidth = maxWidth
+        val iconSize = rowWidth * 0.10f
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .height(50.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
+        Row(
             modifier = Modifier
-                .background(CC.secondary(), CircleShape)
-                .size(50.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth(0.9f)
+                .height(50.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = iconDescription,
-                tint = CC.extraColor2(),
+            Box(
+                modifier = Modifier
+                    .background(CC.secondary(), CircleShape)
+                    .size(iconSize),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = iconDescription,
+                    tint = CC.extraColor2(),
+                )
+            }
+            Text(
+                "Biometrics (${if (isBiometricsEnabled) "Enabled" else "Disabled"})",
+                style = CC.descriptionTextStyle(context),
+                fontSize = 20.sp
+            )
+            Switch(
+                onCheckedChange = { isChecked ->
+                    if (isChecked) {
+                        promptManager.showBiometricPrompt(
+                            title = "Authenticate", description = "Please authenticate to continue"
+                        ) { success ->
+                            if (success) {
+                                isBiometricsEnabled = true
+                                updatePreferences(true)
+                            }
+                        }
+                    } else {
+                        isBiometricsEnabled = false
+                        updatePreferences(false)
+                    }
+                },
+                checked = isBiometricsEnabled,
+                colors = switchColors(context),
+                modifier = Modifier.size(iconSize)
             )
         }
-        Text(
-            "Biometrics (${if (isBiometricsEnabled) "Enabled" else "Disabled"})",
-            style = CC.descriptionTextStyle(context),
-            fontSize = 20.sp
-        )
-        Switch(
-            onCheckedChange = { isChecked ->
-                if (isChecked) {
-                    promptManager.showBiometricPrompt(
-                        title = "Authenticate", description = "Please authenticate to continue"
-                    ) { success ->
-                        if (success) {
-                            isBiometricsEnabled = true
-                            updatePreferences(true)
-                        }
-                    }
-                } else {
-                    isBiometricsEnabled = false
-                    updatePreferences(false)
-                }
-            }, checked = isBiometricsEnabled, colors = SwitchDefaults.colors(
-                checkedThumbColor = CC.extraColor1(),
-                uncheckedThumbColor = CC.extraColor2(),
-                checkedTrackColor = CC.extraColor2(),
-                uncheckedTrackColor = CC.extraColor1(),
-                checkedIconColor = CC.textColor(),
-                uncheckedIconColor = CC.textColor()
-            )
-        )
     }
 }
 
@@ -738,8 +764,7 @@ fun MyAbout(context: Context) {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:") // Only email apps should handle this
                         putExtra(
-                            Intent.EXTRA_EMAIL,
-                            arrayOf("mikepremium8@gmail.com")
+                            Intent.EXTRA_EMAIL, arrayOf("mikepremium8@gmail.com")
                         ) // Recipients
                         putExtra(Intent.EXTRA_SUBJECT, "Email Subject")
                         putExtra(Intent.EXTRA_TEXT, "Email body text")
@@ -951,6 +976,16 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
     }
 }
 
-
+@Composable
+fun switchColors(context: Context): SwitchColors {
+    return SwitchDefaults.colors(
+        checkedThumbColor = CC.extraColor1(),
+        uncheckedThumbColor = CC.extraColor2(),
+        checkedTrackColor = CC.extraColor2(),
+        uncheckedTrackColor = CC.extraColor1(),
+        checkedIconColor = CC.textColor(),
+        uncheckedIconColor = CC.textColor()
+    )
+}
 
 
