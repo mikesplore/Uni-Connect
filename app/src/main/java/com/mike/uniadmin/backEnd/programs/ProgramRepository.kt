@@ -16,11 +16,10 @@ val viewModelScope = CoroutineScope(Dispatchers.Main)
 class ProgramRepository(
     private val programDao: ProgramDao, private val programStateDao: ProgramStateDao
 ) {
-    private val programCode = ProgramCode.programCode.value
     private val database =
-        FirebaseDatabase.getInstance().reference.child(programCode).child("Programs")
+        FirebaseDatabase.getInstance().reference.child("Programs")
     private val programStateDatabase =
-        FirebaseDatabase.getInstance().reference.child(programCode).child("ProgramStates")
+        FirebaseDatabase.getInstance().reference.child("ProgramStates")
 
     init {
         startProgramListener()
