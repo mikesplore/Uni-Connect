@@ -13,7 +13,9 @@ import java.util.Calendar
 import java.util.Locale
 
 data class Update(
-    val id: String = "", val version: String = "", val updateLink: String = ""
+    val id: String = "",
+    val version: String = "",
+    val updateLink: String = ""
 )
 
 private val courseCode = CourseCode.courseCode.value
@@ -135,6 +137,7 @@ object MyDatabase {
                 onResult(null) // Handle the case where no update data exists
             }
         }.addOnFailureListener { exception ->
+
             Log.e("FirebaseError", "Error fetching update data: ${exception.message}")
             // Handle potential errors during data retrieval
             onResult(null)
@@ -271,42 +274,21 @@ object MyDatabase {
                 }
         }
     }
-}
 
-val database = FirebaseDatabase.getInstance().reference
-
-fun moveNodesToNewParent() {
-    val sourceRef = database.child("Courses") // Reference to the "Courses" node
-    val destinationRef = sourceRef.child("PR12024") // Reference to the "PR12024" node inside "Courses"
-
-    sourceRef.addListenerForSingleValueEvent(object : ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {
-            if (snapshot.hasChildren()) { // Check if "Courses" has any children
-                val existingData = snapshot.value as Map<*, *>?
-
-                existingData?.let { data ->
-                    destinationRef.setValue(data)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                // Remove the original data from "Courses" (excluding "PR12024")
-                                for (child in snapshot.children) {
-                                    if (child.key != "PR12024") {
-                                        child.ref.removeValue()
-                                    }
-                                }
-                            } else {
-                                println("Failed to move data: ${task.exception?.message}")
-                            }
-                        }
-                }
+    fun setUpdate(update: Update) {
+        val updatesRef = database.child("Updates")
+        updatesRef.setValue(update)
+            .addOnSuccessListener {
+                Log.d("FirebaseSuccess", "Update data written successfully")
+                // Handle successful write operation
             }
-        }
-
-        override fun onCancelled(error: DatabaseError) {
-            println("Error reading data: ${error.message}")
-        }
-    })
+            .addOnFailureListener { exception ->
+                Log.e("FirebaseError", "Error writing update data: ${exception.message}")
+                // Handle potential errors during data writing
+            }
+    }
 }
+
 
 
 
