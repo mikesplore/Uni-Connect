@@ -9,23 +9,23 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class MessageViewModel(private val repository: MessageRepository) : ViewModel() {
-    private val _messages = MutableLiveData<List<MessageEntity>>()
-    val messages: LiveData<List<MessageEntity>> = _messages
+class UserGroupChatViewModel(private val repository: UserGroupChatRepository) : ViewModel() {
+    private val _messages = MutableLiveData<List<UserChatEntity>>()
+    val messages: LiveData<List<UserChatEntity>> = _messages
 
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _messagesMap = MutableLiveData<Map<String, List<MessageEntity>>>()
-    private val messagesMap: LiveData<Map<String, List<MessageEntity>>> get() = _messagesMap
+    private val _messagesMap = MutableLiveData<Map<String, List<UserChatEntity>>>()
+    private val messagesMap: LiveData<Map<String, List<UserChatEntity>>> get() = _messagesMap
 
     private val _isTyping = MutableLiveData<Boolean>()
     val isTyping: LiveData<Boolean> = _isTyping
 
 
 
-    fun markMessageAsRead(message: MessageEntity, path: String) {
+    fun markMessageAsRead(message: UserChatEntity, path: String) {
         viewModelScope.launch {
             repository.markMessageAsRead(message.id, path)
         }
@@ -58,7 +58,7 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
     }
 
 
-    fun getCardMessages(conversationId: String): LiveData<List<MessageEntity>> {
+    fun getCardMessages(conversationId: String): LiveData<List<UserChatEntity>> {
         return messagesMap.map { it[conversationId] ?: emptyList() }
     }
 
@@ -72,7 +72,7 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
         }
     }
 
-    fun saveMessage(message: MessageEntity, path: String, onSuccess: (Boolean) -> Unit) {
+    fun saveMessage(message: UserChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             repository.saveMessage(message, path) { success ->
                 if (success) {
@@ -105,13 +105,13 @@ class MessageViewModel(private val repository: MessageRepository) : ViewModel() 
 
 
 
-    class MessageViewModelFactory(private val repository: MessageRepository) : ViewModelProvider.Factory {
+    class UserGroupChatViewModelFactory(private val repository: UserGroupChatRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MessageViewModel::class.java)) {
-                return MessageViewModel(repository) as T
+            if (modelClass.isAssignableFrom(UserGroupChatViewModel::class.java)) {
+                return UserGroupChatViewModel(repository) as T
             }
-            throw IllegalArgumentException("Unknown ViewModel class for Messages")
+            throw IllegalArgumentException("Unknown ViewModel class for UserChat")
         }
     }
 }
