@@ -45,7 +45,7 @@ import com.mike.uniadmin.backEnd.userchat.MessageViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.getMessageViewModel
+import com.mike.uniadmin.getUserGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.UsersProfile
@@ -57,7 +57,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun UniChat(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
-    val messageViewModel = getMessageViewModel(context)
+    val messageViewModel = getUserGroupChatViewModel(context)
 
     var usersLoading by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
