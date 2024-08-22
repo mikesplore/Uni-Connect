@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.programs
+package com.mike.uniadmin.backEnd.modules
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -6,33 +6,33 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface ProgramDao {
+interface CourseDao {
 
-    @Query("SELECT * FROM programs")
-    suspend fun getPrograms(): List<ProgramEntity>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPrograms(programs: List<ProgramEntity>)
+    @Query("SELECT * FROM courses")
+    suspend fun getCourses(): List<CourseEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProgram(program: ProgramEntity)
+    suspend fun insertCourses(courses: List<CourseEntity>)
 
-    @Query("DELETE FROM programs WHERE programCode = :programCode")
-    suspend fun deleteProgram(programCode: String)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCourse(course: CourseEntity)
 
-    @Query("SELECT * FROM programs WHERE programCode = :programCode")
-    suspend fun getProgram(programCode: String): ProgramEntity?
+    @Query("DELETE FROM courses WHERE courseCode = :courseCode")
+    suspend fun deleteCourse(courseCode: String)
+
+    @Query("SELECT * FROM courses WHERE courseCode = :courseCode")
+    suspend fun getCourse(courseCode: String): CourseEntity?
 
 }
 
 @Dao
-interface  ProgramStateDao{
-    @Query("SELECT * FROM programStates")
-    suspend fun getProgramStates(): List<ProgramState>
+interface  CourseStateDao{
+    @Query("SELECT * FROM courseStates")
+    suspend fun getCourseStates(): List<CourseState>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProgramStates(programStates: List<ProgramState>)
+    suspend fun insertCourseStates(courseStates: List<CourseState>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProgramState(programState: ProgramState)
+    suspend fun insertCourseState(courseState: CourseState)
 }
