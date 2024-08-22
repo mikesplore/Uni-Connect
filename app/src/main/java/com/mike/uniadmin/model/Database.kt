@@ -8,12 +8,15 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.backEnd.users.UserStateEntity
+import com.mike.uniadmin.programs.CourseCode
 import java.util.Calendar
 import java.util.Locale
 
 data class Update(
     val id: String = "", val version: String = "", val updateLink: String = ""
 )
+
+private val courseCode = CourseCode.courseCode.value
 
 
 object MyDatabase {
@@ -28,15 +31,15 @@ object MyDatabase {
         }
     }
 
-    fun generateProgramID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode("Program") { newCode ->
-            val indexNumber = "PR$newCode$year"
+    fun generateCourseID(onIndexNumberGenerated: (String) -> Unit) {
+        updateAndGetCode("Course") { newCode ->
+            val indexNumber = "CR$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
 
-    fun generateCourseID(onIndexNumberGenerated: (String) -> Unit) {
-        updateAndGetCode("Courses") { newCode ->
+    fun generateModuleID(onIndexNumberGenerated: (String) -> Unit) {
+        updateAndGetCode("Modules") { newCode ->
             val indexNumber = "CS$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
@@ -165,8 +168,8 @@ object MyDatabase {
     }
 
 
-    fun writeItem(courseId: String, section: Section, item: GridItem) {
-        database.child("Course Resources").child(courseId).child(section.name).push().setValue(item)
+    fun writeItem(moduleId: String, section: Section, item: GridItem) {
+        database.child(courseCode).child("Module Resources").child(moduleId).child(section.name).push().setValue(item)
             .addOnSuccessListener {
                 // Data successfully written
             }.addOnFailureListener { exception ->
@@ -175,8 +178,8 @@ object MyDatabase {
             }
     }
 
-    fun readItems(courseId: String, section: Section, onItemsRead: (List<GridItem>) -> Unit) {
-        database.child("Course Resources").child(courseId).child(section.name)
+    fun readItems(moduleId: String, section: Section, onItemsRead: (List<GridItem>) -> Unit) {
+        database.child(courseCode).child("Module Resources").child(moduleId).child(section.name)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val items = snapshot.children.mapNotNull { it.getValue(GridItem::class.java) }
@@ -189,8 +192,8 @@ object MyDatabase {
             })
     }
 
-    fun deleteItem(courseId: String, section: Section, item: GridItem) {
-        val itemsRef = database.child("Course Resources").child(courseId).child(section.name)
+    fun deleteItem(moduleId: String, section: Section, item: GridItem) {
+        val itemsRef = database.child(courseCode).child("Module Resources").child(moduleId).child(section.name)
         itemsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (child in snapshot.children) {
@@ -273,19 +276,19 @@ object MyDatabase {
 val database = FirebaseDatabase.getInstance().reference
 
 fun moveNodesToNewParent() {
-    val sourceRef = database.child("Programs") // Reference to the "Programs" node
-    val destinationRef = sourceRef.child("PR12024") // Reference to the "PR12024" node inside "Programs"
+    val sourceRef = database.child("Courses") // Reference to the "Courses" node
+    val destinationRef = sourceRef.child("PR12024") // Reference to the "PR12024" node inside "Courses"
 
     sourceRef.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
-            if (snapshot.hasChildren()) { // Check if "Programs" has any children
+            if (snapshot.hasChildren()) { // Check if "Courses" has any children
                 val existingData = snapshot.value as Map<*, *>?
 
                 existingData?.let { data ->
                     destinationRef.setValue(data)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                // Remove the original data from "Programs" (excluding "PR12024")
+                                // Remove the original data from "Courses" (excluding "PR12024")
                                 for (child in snapshot.children) {
                                     if (child.key != "PR12024") {
                                         child.ref.removeValue()
