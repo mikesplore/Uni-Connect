@@ -7,15 +7,15 @@ import androidx.room.Query
 
 @Dao
 interface UserChatDAO {
-    @Query("SELECT * FROM messages WHERE path = :path")
-    suspend fun getMessages(path: String): List<UserChatEntity>
+    @Query("SELECT * FROM userChats WHERE path = :path")
+    suspend fun getUserChats(path: String): List<UserChatEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMessages(messages: List<UserChatEntity>)
+    suspend fun insertUserChats(userChats: List<UserChatEntity>)
 
-    @Query("DELETE FROM messages WHERE id = :messageId")
+    @Query("DELETE FROM userChats WHERE id = :messageId")
     suspend fun deleteMessage(messageId: String)
 
-    @Query("UPDATE messages SET deliveryStatus = :newStatus WHERE id = :messageId")
+    @Query("UPDATE userChats SET deliveryStatus = :newStatus WHERE id = :messageId")
     suspend fun updateMessageStatus(messageId: String, newStatus: DeliveryStatus)
 }
