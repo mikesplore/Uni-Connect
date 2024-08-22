@@ -9,16 +9,16 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class UserGroupChatViewModel(private val repository: UserGroupChatRepository) : ViewModel() {
-    private val _messages = MutableLiveData<List<UserChatEntity>>()
-    val messages: LiveData<List<UserChatEntity>> = _messages
+class UserChatViewModel(private val repository: UserChatRepository) : ViewModel() {
+    private val _userChats = MutableLiveData<List<UserChatEntity>>()
+    val userChats: LiveData<List<UserChatEntity>> = _userChats
 
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _messagesMap = MutableLiveData<Map<String, List<UserChatEntity>>>()
-    private val messagesMap: LiveData<Map<String, List<UserChatEntity>>> get() = _messagesMap
+    private val _userChatsMap = MutableLiveData<Map<String, List<UserChatEntity>>>()
+    private val userChatsMap: LiveData<Map<String, List<UserChatEntity>>> get() = _userChatsMap
 
     private val _isTyping = MutableLiveData<Boolean>()
     val isTyping: LiveData<Boolean> = _isTyping
@@ -43,31 +43,31 @@ class UserGroupChatViewModel(private val repository: UserGroupChatRepository) : 
 
 
     init {
-        _messagesMap.value = emptyMap()
+        _userChatsMap.value = emptyMap()
         _isTyping.value = false
     }
 
-    fun fetchCardMessages(conversationId: String) {
+    fun fetchCardUserChats(conversationId: String) {
         viewModelScope.launch {
-            repository.fetchMessages(conversationId) { messages -> // Use the callback
-                _messagesMap.value = _messagesMap.value?.toMutableMap()?.apply {
-                    this[conversationId] = messages
+            repository.fetchUserChats(conversationId) { userChats -> // Use the callback
+                _userChatsMap.value = _userChatsMap.value?.toMutableMap()?.apply {
+                    this[conversationId] = userChats
                 }
             }
         }
     }
 
 
-    fun getCardMessages(conversationId: String): LiveData<List<UserChatEntity>> {
-        return messagesMap.map { it[conversationId] ?: emptyList() }
+    fun getCardUserChats(conversationId: String): LiveData<List<UserChatEntity>> {
+        return userChatsMap.map { it[conversationId] ?: emptyList() }
     }
 
 
 
-     fun fetchMessages(path: String) {
+     fun fetchUserChats(path: String) {
          _isLoading.value = true
-        repository.fetchMessages(path) { messages ->
-            _messages.value = messages
+        repository.fetchUserChats(path) { userChats ->
+            _userChats.value = userChats
             _isLoading.value = false
         }
     }
@@ -77,7 +77,7 @@ class UserGroupChatViewModel(private val repository: UserGroupChatRepository) : 
             repository.saveMessage(message, path) { success ->
                 if (success) {
                     onSuccess(true)
-                    fetchMessages(path) // Refresh the message list after saving
+                    fetchUserChats(path) // Refresh the message list after saving
                 } else {
                     onSuccess(false)
                     // Handle save failure if needed
@@ -105,11 +105,11 @@ class UserGroupChatViewModel(private val repository: UserGroupChatRepository) : 
 
 
 
-    class UserGroupChatViewModelFactory(private val repository: UserGroupChatRepository) : ViewModelProvider.Factory {
+    class UserChatViewModelFactory(private val repository: UserChatRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(UserGroupChatViewModel::class.java)) {
-                return UserGroupChatViewModel(repository) as T
+            if (modelClass.isAssignableFrom(UserChatViewModel::class.java)) {
+                return UserChatViewModel(repository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class for UserChat")
         }
