@@ -5,21 +5,19 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.backEnd.users.UserDao
-import com.mike.uniadmin.programs.ProgramCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class MessageRepository(private val messageDao: MessageDao) {
+class UserGroupChatRepository(private val userChatDAO: UserChatDAO) {
     private val database = FirebaseDatabase.getInstance().reference
 
-    fun fetchMessages(path: String, onResult: (List<MessageEntity>) -> Unit) {
+    fun fetchMessages(path: String, onResult: (List<UserChatEntity>) -> Unit) {
         viewModelScope.launch {
             // Fetch messages from the local database first
-            val cachedChats = messageDao.getMessages(path)
+            val cachedChats = userChatDAO.getMessages(path)
             Log.d("Cached Messages","The messages are not fetched")
             if (cachedChats.isNotEmpty()) {
                 onResult(cachedChats)
@@ -28,13 +26,13 @@ class MessageRepository(private val messageDao: MessageDao) {
             // Set up a listener for real-time updates from Firebase
             database.child(path).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val messages = mutableListOf<MessageEntity>()
+                    val messages = mutableListOf<UserChatEntity>()
                     for (childSnapshot in snapshot.children) {
-                        val message = childSnapshot.getValue(MessageEntity::class.java)
+                        val message = childSnapshot.getValue(UserChatEntity::class.java)
                         message?.let { messages.add(it) }
                     }
                     viewModelScope.launch(Dispatchers.IO) {
-                        messageDao.insertMessages(messages)
+                        userChatDAO.insertMessages(messages)
                     }
 
                     // Call onResult on the main thread
@@ -51,10 +49,10 @@ class MessageRepository(private val messageDao: MessageDao) {
         }
     }
 
-    fun saveMessage(message: MessageEntity, path: String, onComplete: (Boolean) -> Unit) {
+    fun saveMessage(message: UserChatEntity, path: String, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             // Save the message to the local database first
-            messageDao.insertMessages(listOf(message))
+            userChatDAO.insertMessages(listOf(message))
             Log.d("Message Saved","The message is saved in path $path")
 
             // Then save the message to Firebase using the message ID
@@ -71,7 +69,7 @@ class MessageRepository(private val messageDao: MessageDao) {
     fun deleteMessage(messageId: String, path: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
         viewModelScope.launch {
             // Delete the message from the local database
-            messageDao.deleteMessage(messageId)
+            userChatDAO.deleteMessage(messageId)
             // Then delete the message from Firebase
             //the user may get delayed feedback
             database.child(path).child(messageId).removeValue()
@@ -111,7 +109,7 @@ class MessageRepository(private val messageDao: MessageDao) {
                 .setValue(DeliveryStatus.READ.name)
 
             // Update local database
-            messageDao.updateMessageStatus(messageId, DeliveryStatus.READ)
+            userChatDAO.updateMessageStatus(messageId, DeliveryStatus.READ)
         }
     }
 
