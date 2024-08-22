@@ -41,7 +41,7 @@ import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
-import com.mike.uniadmin.model.MyDatabase
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatBubble
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatTopAppBar
