@@ -17,8 +17,8 @@ import com.mike.uniadmin.backEnd.users.UserRepository
 
 class UniAdmin : Application() {
     val database by lazy { AppDatabase.getDatabase(this) }
-    val groupChatRepository by lazy { GroupChatRepository(database.chatDao(), database.groupDao()) }
-    val userChatRepository by lazy { UserChatRepository(database.messageDao()) }
+    val groupChatRepository by lazy { GroupChatRepository(database.groupChatDao(), database.groupDao()) }
+    val userChatRepository by lazy { UserChatRepository(database.userChatDao()) }
     val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao(), database.databaseDao()) }
     val announcementRepository by lazy { AnnouncementRepository(database.announcementsDao()) }
     val notificationRepository by lazy { NotificationRepository(database.notificationDao()) }
