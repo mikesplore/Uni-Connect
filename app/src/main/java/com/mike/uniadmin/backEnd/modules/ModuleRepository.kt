@@ -1,10 +1,12 @@
 package com.mike.uniadmin.backEnd.modules
 
+import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.programs.CourseCode
+import com.mike.uniadmin.courses.CourseCode
+import com.mike.uniadmin.model.MyDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,7 +84,7 @@ class ModuleRepository(
         }
     }
 
-    fun saveModule(module: ModuleEntity, onComplete: (Boolean) -> Unit) {
+    fun saveModule(module: ModuleEntity, onComplete: (Boolean) -> Unit = {}) {
         com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
             moduleDao.insertModule(module)
             database.child(module.moduleCode).setValue(module).addOnCompleteListener { task ->
@@ -95,9 +97,7 @@ class ModuleRepository(
     fun fetchModules(onResult: (List<ModuleEntity>) -> Unit) {
         com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
             val cachedData = moduleDao.getModules()
-            if (cachedData.isNotEmpty()) {
-                onResult(cachedData)
-            } else {
+
                 database.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val modules = mutableListOf<ModuleEntity>()
@@ -116,7 +116,7 @@ class ModuleRepository(
                         println("Error reading modules: ${error.message}")
                     }
                 })
-            }
+
         }
     }
 
