@@ -1,6 +1,8 @@
 package com.mike.uniadmin.attendance
 
 import android.content.Context
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -8,14 +10,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,19 +42,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mike.uniadmin.backEnd.modules.AttendanceState
+import com.mike.uniadmin.backEnd.modules.ModuleEntity
 import com.mike.uniadmin.backEnd.modules.ModuleViewModel
-import com.mike.uniadmin.backEnd.modules.ModuleViewModelFactory
 import com.mike.uniadmin.getModuleViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
-
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -58,6 +60,7 @@ fun ManageAttendanceScreen(context: Context) {
     val modules by moduleViewModel.modules.observeAsState(emptyList())
     val attendanceStates by moduleViewModel.attendanceStates.observeAsState(emptyMap())
     var refresh by remember { mutableStateOf(false) }
+    var showAddModule by remember { mutableStateOf(false) }
 
     LaunchedEffect(refresh) {
         moduleViewModel.fetchAttendanceStates()
@@ -68,9 +71,22 @@ fun ManageAttendanceScreen(context: Context) {
             TopAppBar(
                 title = {},
                 actions = {
-                    IconButton(onClick = {refresh = !refresh}) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh",
-                            tint = CC.textColor())
+
+                    IconButton(onClick = {
+                        showAddModule = !showAddModule
+
+                    }) {
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Refresh", tint = CC.textColor()
+                        )
+                    }
+
+                    IconButton(onClick = { refresh = !refresh }) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = CC.textColor()
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -88,18 +104,34 @@ fun ManageAttendanceScreen(context: Context) {
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth(),
+            Row(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center) {
-                Text("Manage Attendance", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 30.sp))
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    "Manage Attendance",
+                    style = CC.titleTextStyle(context)
+                        .copy(fontWeight = FontWeight.Bold, fontSize = 30.sp)
+                )
+            }
+
+            AnimatedVisibility(visible = showAddModule) {
+                AddModule(moduleViewModel, context) { success ->
+                    showAddModule = false
+                    if (success) {
+                        Toast.makeText(context, "Module added successfully", Toast.LENGTH_SHORT)
+                            .show()
+                        refresh = !refresh
+                    }
+                }
             }
 
             if (modules.isEmpty()) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     Text("No modules found", style = CC.descriptionTextStyle(context))
                 }
@@ -131,16 +163,14 @@ fun ManageAttendanceScreen(context: Context) {
                             overflow = TextOverflow.Ellipsis
                         )
                         Switch(
-                            checked = isChecked,
-                            onCheckedChange = { newState ->
+                            checked = isChecked, onCheckedChange = { newState ->
                                 val newAttendanceState = AttendanceState(
                                     moduleID = module.moduleCode,
                                     moduleName = module.moduleName,
                                     state = newState
                                 )
                                 moduleViewModel.saveAttendanceState(newAttendanceState)
-                            },
-                            colors = SwitchDefaults.colors(
+                            }, colors = SwitchDefaults.colors(
                                 checkedThumbColor = CC.primary(),
                                 checkedTrackColor = CC.secondary(),
                                 uncheckedThumbColor = CC.secondary(),
@@ -155,9 +185,70 @@ fun ManageAttendanceScreen(context: Context) {
 }
 
 
-
-@Preview(showBackground = true)
 @Composable
-fun PreviewManageAttendanceScreen() {
-    ManageAttendanceScreen(context = LocalContext.current)
+fun AddModule(
+    moduleViewModel: ModuleViewModel,
+    context: Context,
+    onModuleAdded: (Boolean) -> Unit = {}
+) {
+    val moduleCode = remember { mutableStateOf("") }
+    val moduleName = remember { mutableStateOf("") }
+    val moduleImageLink = remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Add Module", style = CC.titleTextStyle(context))
+        CC.SingleLinedTextField(
+            value = moduleCode.value,
+            onValueChange = { moduleCode.value = it },
+            label = "Module Code",
+            context = context,
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        CC.SingleLinedTextField(
+            value = moduleName.value,
+            onValueChange = { moduleName.value = it },
+            label = "Module Name",
+            context = context,
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        CC.SingleLinedTextField(
+            value = moduleImageLink.value,
+            onValueChange = { moduleImageLink.value = it },
+            label = "Module Image Link",
+            context = context,
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = {
+                val newModule = ModuleEntity(
+                    moduleCode = moduleCode.value,
+                    moduleName = moduleName.value,
+                    moduleImageLink = moduleImageLink.value
+                )
+                moduleViewModel.saveModule(newModule) { success ->
+                    if (success) {
+                        onModuleAdded(true)
+                    } else {
+                        onModuleAdded(false)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = CC.secondary(), contentColor = CC.primary()
+            )
+        ) {
+            Text("Add Module", style = CC.descriptionTextStyle(context))
+        }
+    }
 }
