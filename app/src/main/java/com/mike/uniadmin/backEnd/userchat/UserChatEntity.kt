@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "messages")
-data class MessageEntity(
+data class UserChatEntity(
     @PrimaryKey var id: String,
     var message: String = "",
     var senderID: String = "",
