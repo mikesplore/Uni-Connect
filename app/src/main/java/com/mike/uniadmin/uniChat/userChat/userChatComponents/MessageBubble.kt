@@ -3,6 +3,8 @@ package com.mike.uniadmin.uniChat.userChat.userChatComponents
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -23,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +40,8 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.MessageEntity
 import com.mike.uniadmin.backEnd.userchat.MessageViewModel
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.model.randomColor
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -59,12 +63,14 @@ fun MessageBubble(
     )
 
     val senderBrush = Brush.linearGradient(
-        colors = listOf(CommonComponents.extraColor1(), CommonComponents.extraColor2())
+        colors = listOf(CC.extraColor1(), randomColor.random())
     )
 
     val receiverBrush = Brush.linearGradient(
-        colors = listOf(CommonComponents.tertiary(), CommonComponents.extraColor1())
+        colors = listOf(randomColor.random(), CC.extraColor1())
     )
+
+
     val backgroundColor = if (isUser) senderBrush else receiverBrush
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -99,8 +105,8 @@ fun MessageBubble(
             // Time on the left for the sender
             if (isUser) {
                 Text(
-                    text = CommonComponents.getFormattedTime(message.timeStamp),
-                    style = CommonComponents.descriptionTextStyle(context),
+                    text = CC.getFormattedTime(message.timeStamp),
+                    style = CC.descriptionTextStyle(context),
                     fontSize = 11.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
@@ -118,7 +124,7 @@ fun MessageBubble(
                 SelectionContainer { // Wrap the Text composable with SelectionContainer
                     Text(
                         text = message.message,
-                        style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
                     )
                 }
             }
@@ -131,8 +137,8 @@ fun MessageBubble(
             // Time on the right for the user
             if (!isUser) {
                 Text(
-                    text = CommonComponents.getFormattedTime(message.timeStamp),
-                    style = CommonComponents.descriptionTextStyle(context),
+                    text = CC.getFormattedTime(message.timeStamp),
+                    style = CC.descriptionTextStyle(context),
                     fontSize = 11.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -145,10 +151,10 @@ fun MessageBubble(
     // Delete confirmation dialog
     if (showDeleteDialog) {
         AlertDialog(
-            containerColor = CommonComponents.primary(),
+            containerColor = CC.primary(),
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text(text = "Delete Message", style = CommonComponents.titleTextStyle(context)) },
-            text = { Text(text = "Are you sure you want to delete this message?", style = CommonComponents.descriptionTextStyle(context)) },
+            title = { Text(text = "Delete Message", style = CC.titleTextStyle(context)) },
+            text = { Text(text = "Are you sure you want to delete this message?", style = CC.descriptionTextStyle(context)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -156,14 +162,14 @@ fun MessageBubble(
                         showDeleteDialog = false
                     }
                 ) {
-                    Text("Delete", style = CommonComponents.descriptionTextStyle(context))
+                    Text("Delete", style = CC.descriptionTextStyle(context))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false }
                 ) {
-                    Text("Cancel", style = CommonComponents.descriptionTextStyle(context))
+                    Text("Cancel", style = CC.descriptionTextStyle(context))
                 }
             }
         )
