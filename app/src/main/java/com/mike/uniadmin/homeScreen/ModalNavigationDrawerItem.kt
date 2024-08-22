@@ -58,8 +58,8 @@ import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.model.MyDatabase
-import com.mike.uniadmin.model.Update
+import com.mike.uniadmin.helperFunctions.MyDatabase
+import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
