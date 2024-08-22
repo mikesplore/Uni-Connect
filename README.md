@@ -288,11 +288,11 @@ The `PasswordReset` composable function provides a screen for users to reset the
 - [Assignments](#assignmentscreen-composable)
   - [Assignment Card](#assignmentcard-composable)
 - [Attendance](#manageattendancescreen-composable)
-- [Course Content](#coursecontent-composable)
-  - [Course Announcements](#announcementsitem-composable)
+- [Module Content](#modulecontent-composable)
+  - [Module Announcements](#announcementsitem-composable)
      - [Announcement Card](#announcementitemcard-composable)
      - [Add Announcement Item](#addannouncementitem-composable)
-- [Course Assignments](#assignmentsitem-composable)
+- [Module Assignments](#assignmentsitem-composable)
      - [Add Assignment](#addassignmentitem-composable)
      - [Edit Assignment](#assignmentcarditem-composable)
 
@@ -489,31 +489,31 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 # AssignmentScreen Composable
 
 ## Overview
-`AssignmentScreen` is a Composable function that displays a list of assignments for courses. It allows users to navigate between courses using tabs and view assignments specific to the selected course.
+`AssignmentScreen` is a Composable function that displays a list of assignments for modules. It allows users to navigate between modules using tabs and view assignments specific to the selected module.
 
 ## Dependencies
-- `UniAdmin`: A custom application class that provides repositories for courses and assignments.
-- `CourseViewModel`: ViewModel for managing course-related data and operations.
-- `CourseAssignmentViewModel`: ViewModel for managing course assignment-related data and operations.
+- `UniAdmin`: A custom application class that provides repositories for modules and assignments.
+- `ModuleViewModel`: ViewModel for managing module-related data and operations.
+- `ModuleAssignmentViewModel`: ViewModel for managing module assignment-related data and operations.
 
 ## Parameters
 - `context: Context`: The context of the current application, used for styling and resources.
 
 ## State
-- `selectedTabIndex`: An `Int` state managed using `mutableIntStateOf`, representing the index of the currently selected course tab.
-- `selectedCourseId`: A `String?` state managed using `mutableStateOf`, representing the ID of the currently selected course.
+- `selectedTabIndex`: An `Int` state managed using `mutableIntStateOf`, representing the index of the currently selected module tab.
+- `selectedModuleId`: A `String?` state managed using `mutableStateOf`, representing the ID of the currently selected module.
 - `isLoading`: A `Boolean` state indicating whether the data is still being loaded.
 
 ## UI Components
 - **TopAppBar**: Displays the title "Assignments" with a primary color background.
-- **ScrollableTabRow**: Allows users to navigate between different courses using tabs.
-- **LazyColumn**: Displays a list of assignments for the selected course using `AssignmentCard` Composable.
+- **ScrollableTabRow**: Allows users to navigate between different modules using tabs.
+- **LazyColumn**: Displays a list of assignments for the selected module using `AssignmentCard` Composable.
 - **CircularProgressIndicator**: Displays a loading indicator when data is being fetched.
-- **Text**: Displays messages for "No courses available" and "No assignments available" when appropriate.
+- **Text**: Displays messages for "No modules available" and "No assignments available" when appropriate.
 
 ## Logic
-- Observes assignments and courses from their respective ViewModels.
-- Fetches courses on launch and assignments for the selected course when the tab changes.
+- Observes assignments and modules from their respective ViewModels.
+- Fetches modules on launch and assignments for the selected module when the tab changes.
 - Displays loading indicators or messages when data is not yet available or empty.
 
 ## Customization
@@ -525,7 +525,7 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 `AssignmentCard` is a Composable function that displays the details of a single assignment in a card format.
 
 ## Parameters
-- `assignment: CourseAssignment`: The assignment entity to be displayed in the card.
+- `assignment: ModuleAssignment`: The assignment entity to be displayed in the card.
 - `context: Context`: The context of the current application, used for styling and resources.
 
 ## UI Components
@@ -540,51 +540,51 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 # ManageAttendanceScreen Composable
 
 ## Overview
-`ManageAttendanceScreen` is a Composable function that allows users to manage attendance for courses. Users can view a list of courses and toggle attendance states using switches.
+`ManageAttendanceScreen` is a Composable function that allows users to manage attendance for modules. Users can view a list of modules and toggle attendance states using switches.
 
 ## Dependencies
-- `UniAdmin`: A custom application class that provides a course repository.
-- `CourseViewModel`: ViewModel for managing course-related data and operations.
+- `UniAdmin`: A custom application class that provides a module repository.
+- `ModuleViewModel`: ViewModel for managing module-related data and operations.
 
 ## Parameters
 - `context: Context`: The context of the current application, used for styling and resources.
 
 ## State
-- `courses`: A list of courses fetched from `CourseViewModel`.
-- `attendanceStates`: A map of attendance states keyed by course codes.
+- `modules`: A list of modules fetched from `ModuleViewModel`.
+- `attendanceStates`: A map of attendance states keyed by module codes.
 - `refresh`: A `Boolean` state to trigger the refresh of attendance states.
 
 ## UI Components
 - **TopAppBar**: Displays an icon button for refreshing attendance states.
-- **Column**: Organizes the header and list of courses vertically.
-- **Row**: Displays the header and each course with its attendance toggle.
-- **Text**: Displays the header and course names.
-- **Switch**: Allows users to toggle the attendance state for each course.
+- **Column**: Organizes the header and list of modules vertically.
+- **Row**: Displays the header and each module with its attendance toggle.
+- **Text**: Displays the header and module names.
+- **Switch**: Allows users to toggle the attendance state for each module.
 
 ## Logic
-- Observes courses and attendance states from the `CourseViewModel`.
+- Observes modules and attendance states from the `ModuleViewModel`.
 - Fetches attendance states on launch and when the refresh icon is clicked.
-- Displays a message when no courses are available.
+- Displays a message when no modules are available.
 - Updates the attendance state in the ViewModel when a switch is toggled.
 
 ## Animations
-- Uses `animateColorAsState` to animate the background color of course rows based on attendance state.
-- Uses `animateContentSize` to animate the size changes of course rows.
+- Uses `animateColorAsState` to animate the background color of module rows based on attendance state.
+- Uses `animateContentSize` to animate the size changes of module rows.
 
 ## Customization
 - Styled using a custom theme defined by `CC`, managing colors and text styles.
 
 
-# CourseContent Composable
+# ModuleContent Composable
 
-The `CourseContent` composable is responsible for displaying detailed information about a specific course, including announcements, assignments, timetables, and other details. It dynamically fetches and displays data from various repositories based on the provided course ID.
+The `ModuleContent` composable is responsible for displaying detailed information about a specific module, including announcements, assignments, timetables, and other details. It dynamically fetches and displays data from various repositories based on the provided module ID.
 
 ## Key Components
 
 ### 1. Repositories and ViewModels Initialization
-- **Purpose**: To fetch and manage data related to the course from different sources.
+- **Purpose**: To fetch and manage data related to the module from different sources.
 - **Functionality**:
-  - Initializes various repositories (course, announcements, assignments, timetables, etc.) using a custom application context (`UniAdmin`).
+  - Initializes various repositories (module, announcements, assignments, timetables, etc.) using a custom application context (`UniAdmin`).
   - Creates ViewModel instances for each repository using their respective factories. This ensures that data is managed and accessed in a consistent manner across the composable.
 
 ### 2. State Observers
@@ -594,21 +594,21 @@ The `CourseContent` composable is responsible for displaying detailed informatio
   - Updates the UI based on whether the data is currently being loaded.
 
 ### 3. Data Fetching
-- **Purpose**: To retrieve course-specific data when the component is loaded.
+- **Purpose**: To retrieve module-specific data when the component is loaded.
 - **Functionality**:
-  - Uses `LaunchedEffect` with the `targetCourseID` to trigger data fetching whenever the course ID changes.
-  - Calls methods on ViewModels to fetch announcements, assignments, timetables, and details for the specified course ID.
+  - Uses `LaunchedEffect` with the `targetModuleID` to trigger data fetching whenever the module ID changes.
+  - Calls methods on ViewModels to fetch announcements, assignments, timetables, and details for the specified module ID.
 
 ### 4. UI Layout
-- **Purpose**: To display the course content in a structured and user-friendly manner.
+- **Purpose**: To display the module content in a structured and user-friendly manner.
 - **Functionality**:
   - Uses a `Scaffold` to provide a consistent layout structure with a container color.
-  - Displays a course image and name in a styled header using `AsyncImage` and `Text`.
-  - Implements a `ScrollableTabRow` to allow users to switch between different sections (Announcements, Assignments, Timetable, Details) of the course.
+  - Displays a module image and name in a styled header using `AsyncImage` and `Text`.
+  - Implements a `ScrollableTabRow` to allow users to switch between different sections (Announcements, Assignments, Timetable, Details) of the module.
   - Uses conditional rendering to show loading indicators or the relevant content based on the current tab and loading state.
 
 ### 5. Tab Navigation
-- **Purpose**: To enable navigation between different sections of the course content.
+- **Purpose**: To enable navigation between different sections of the module content.
 - **Functionality**:
   - Defines a list of tab titles (Announcements, Assignments, Timetable, Details).
   - Sets up a custom tab indicator and handles tab selection.
@@ -621,13 +621,13 @@ The `CourseContent` composable is responsible for displaying detailed informatio
   - Shows a loading indicator if the data for the current tab is still being fetched.
 
 ## Summary
-The `CourseContent` composable effectively manages and displays various aspects of a course's content, providing a tabbed interface for users to easily navigate between announcements, assignments, timetables, and other details. It uses ViewModels to handle data fetching and observes loading states to update the UI dynamically.
+The `ModuleContent` composable effectively manages and displays various aspects of a module's content, providing a tabbed interface for users to easily navigate between announcements, assignments, timetables, and other details. It uses ViewModels to handle data fetching and observes loading states to update the UI dynamically.
 
 
 
 # AnnouncementsItem Composable
 
-The `AnnouncementsItem` composable displays a list of course announcements and provides an option to add new announcements. It leverages various UI components and state management to provide an interactive user experience.
+The `AnnouncementsItem` composable displays a list of module announcements and provides an option to add new announcements. It leverages various UI components and state management to provide an interactive user experience.
 
 ## Key Components
 
@@ -635,7 +635,7 @@ The `AnnouncementsItem` composable displays a list of course announcements and p
 - **Purpose**: To handle the visibility of the "Add Announcement" section and manage the list of announcements.
 - **Functionality**:
   - Uses `remember` and `mutableStateOf` to manage the visibility state of the "Add Announcement" section.
-  - Observes announcements data from `CourseAnnouncementViewModel` to display the list of announcements.
+  - Observes announcements data from `ModuleAnnouncementViewModel` to display the list of announcements.
 
 ### 2. UI Layout
 - **Purpose**: To structure the content and actions available in the announcements section.
@@ -678,8 +678,8 @@ The `AddAnnouncementItem` composable provides a form for users to add new announ
 ### 3. Form Submission
 - **Purpose**: To handle the submission of a new announcement.
 - **Functionality**:
-  - Generates a new announcement ID and creates a `CourseAnnouncement` object.
-  - Saves the new announcement using `CourseAnnouncementViewModel` and updates the UI accordingly.
+  - Generates a new announcement ID and creates a `ModuleAnnouncement` object.
+  - Saves the new announcement using `ModuleAnnouncementViewModel` and updates the UI accordingly.
   - Shows a `CircularProgressIndicator` while the announcement is being posted.
 
 ## AddTextField Composable
@@ -695,7 +695,7 @@ The `AddTextField` composable creates a reusable text field with customizable pr
 
 # AssignmentsItem Composable
 
-The `AssignmentsItem` composable displays a list of course assignments and provides an option to add new assignments. It uses various UI components and state management to provide an interactive user experience.
+The `AssignmentsItem` composable displays a list of module assignments and provides an option to add new assignments. It uses various UI components and state management to provide an interactive user experience.
 
 ## Key Components
 
@@ -703,7 +703,7 @@ The `AssignmentsItem` composable displays a list of course assignments and provi
 - **Purpose**: To manage the visibility of the "Add Assignment" section and handle the list of assignments.
 - **Functionality**:
   - Uses `remember` and `mutableStateOf` to manage the visibility state of the "Add Assignment" section.
-  - Observes assignments data from `CourseAssignmentViewModel` to display the list of assignments.
+  - Observes assignments data from `ModuleAssignmentViewModel` to display the list of assignments.
 
 ### 2. UI Layout
 - **Purpose**: To structure the content and actions available in the assignments section.
@@ -749,8 +749,8 @@ The `AddAssignmentItem` composable provides a form for users to add new assignme
 ### 3. Form Submission
 - **Purpose**: To handle the submission of a new assignment.
 - **Functionality**:
-  - Generates a new assignment ID and creates a `CourseAssignment` object.
-  - Saves the new assignment using `CourseAssignmentViewModel` and updates the UI accordingly.
+  - Generates a new assignment ID and creates a `ModuleAssignment` object.
+  - Saves the new assignment using `ModuleAssignmentViewModel` and updates the UI accordingly.
   - Shows a `CircularProgressIndicator` while the assignment is being posted.
   - Displays a `Toast` message if the assignment fails to save.
 
@@ -815,7 +815,7 @@ The `UserChatScreen` composable function is designed to display a chat interface
 ### Key Components
 
 - **ViewModel Integration**
-  - **MessageViewModel**: Manages message data. It's initialized using `MessageViewModelFactory` with a `MessageRepository`.
+  - **MessageViewModel**: Manages message data. It's initialized using `MessageViewModelFactory` with a `UserGroupChatRepository`.
   - **UserViewModel**: Manages user data. It's initialized using `UserViewModelFactory` with a `UserRepository`.
   - These ViewModels observe changes in `messages`, `user`, `user2`, and `userState` LiveData, reflecting real-time updates on the UI.
 
@@ -838,7 +838,7 @@ The `UserChatScreen` composable function is designed to display a chat interface
 - **Message Sending**
   - The `sendMessage` function:
     - Generates a unique chat ID for the new message.
-    - Constructs a `MessageEntity` with details such as message content, sender ID, recipient ID, and timestamp.
+    - Constructs a `UserChatEntity` with details such as message content, sender ID, recipient ID, and timestamp.
     - Saves the message to the database and displays a Snackbar notification if the operation fails.
 
 - **UI Layout**
