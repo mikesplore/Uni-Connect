@@ -1,4 +1,4 @@
-package com.mike.uniadmin.programs
+package com.mike.uniadmin.courses
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -99,6 +99,7 @@ fun CourseScreen(context: Context, navController: NavController) {
     var showAddCourse by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+      //  uploadCoursesData()
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
     }
 
@@ -440,4 +441,64 @@ fun renameNode(){
 }
 
 
+
+fun uploadCoursesData() {
+    val database = FirebaseDatabase.getInstance()
+    val coursesRef = database.getReference("CR12024").child("Modules")
+
+    // Data to be added
+    val coursesData = mapOf(
+        "CCI 4301" to mapOf(
+            "courseCode" to "CCI 4301",
+            "courseImageLink" to "https://bs-uploads.toptal.io/blackfish-uploads/components/seo/5923698/og_image/optimized/0712-Bad_Practices_in_Database_Design_-_Are_You_Making_These_Mistakes_Dan_Social-754bc73011e057dc76e55a44a954e0c3.png",
+            "courseName" to "Advanced Database Management Systems",
+            "visits" to 45
+        ),
+        "CCS 4301" to mapOf(
+            "courseCode" to "CCS 4301",
+            "courseImageLink" to "https://t3.ftcdn.net/jpg/06/69/40/52/360_F_669405248_bH5WPZiAFElWP06vqlPvj2qWcShUR4o8.jpg",
+            "courseName" to "Computer Architecture and Organization",
+            "visits" to 16
+        ),
+        "CCS 4302" to mapOf(
+            "courseCode" to "CCS 4302",
+            "courseImageLink" to "https://incubator.ucf.edu/wp-content/uploads/2023/07/artificial-intelligence-new-technology-science-futuristic-abstract-human-brain-ai-technology-cpu-central-processor-unit-chipset-big-data-machine-learning-cyber-mind-domination-generative-ai-scaled-1-1500x1000.jpg",
+            "courseName" to "Principles of Artificial Intelligence",
+            "visits" to 8
+        ),
+        "CCS 4304" to mapOf(
+            "courseCode" to "CCS 4304",
+            "courseImageLink" to "https://cdn.analyticsvidhya.com/wp-content/uploads/2023/05/human-computer-interaction.webp",
+            "courseName" to "Human Computer Interaction",
+            "visits" to 6
+        ),
+        "CCS 4305" to mapOf(
+            "courseCode" to "CCS 4305",
+            "courseImageLink" to "https://static.javatpoint.com/definition/images/computer-graphics-definition.png",
+            "courseName" to "Computer Graphics",
+            "visits" to 29
+        ),
+        "CIT 4307" to mapOf(
+            "courseCode" to "CIT 4307",
+            "courseImageLink" to "https://www.daltco.com/sites/default/files/img/product-category/data-communication-products.jpg",
+            "courseName" to "Data Communication",
+            "visits" to 7
+        ),
+        "CSE 4301" to mapOf(
+            "courseCode" to "CSE 4301",
+            "courseImageLink" to "https://raygun.com/blog/images/oop-concepts-java/feature.png",
+            "courseName" to "Object Oriented Application Development",
+            "visits" to 12
+        )
+    )
+
+    // Upload the data to the "Courses" node
+    coursesRef.setValue(coursesData).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            println("Courses data uploaded successfully.")
+        } else {
+            println("Failed to upload courses data: ${task.exception?.message}")
+        }
+    }
+}
 
