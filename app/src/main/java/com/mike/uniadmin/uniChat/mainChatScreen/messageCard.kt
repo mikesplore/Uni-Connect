@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.userchat.MessageEntity
+import com.mike.uniadmin.backEnd.userchat.UserChatEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
@@ -61,7 +61,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents
 @Composable
 fun UserMessageCard(
     userEntity: UserEntity,
-    latestMessage: MessageEntity?,
+    latestMessage: UserChatEntity?,
     userState: UserStateEntity?,
     context: Context,
     userViewModel: UserViewModel,
