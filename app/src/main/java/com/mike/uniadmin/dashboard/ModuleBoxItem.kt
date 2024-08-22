@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.moduleResources.ModuleName
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
 import com.mike.uniadmin.backEnd.modules.ModuleViewModel
+import com.mike.uniadmin.moduleResources.ModuleName
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
@@ -48,98 +48,92 @@ fun ModuleBox(
     navController: NavController,
     onClicked: (ModuleEntity) -> Unit
 ) {
-    BaseModuleBox(
-        imageContent = {
-            AsyncImage(
-                model = module.moduleImageLink,
-                contentDescription = module.moduleName,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
-                    .fillMaxSize(),
-                alignment = Alignment.Center,
-                contentScale = ContentScale.Crop
-            )
-        },
-        bodyContent = {
+    BaseModuleBox(imageContent = {
+        AsyncImage(
+            model = module.moduleImageLink,
+            contentDescription = module.moduleName,
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
+                .fillMaxSize(),
+            alignment = Alignment.Center,
+            contentScale = ContentScale.Crop
+        )
+    }, bodyContent = {
+        Text(
+            module.moduleCode,
+            style = CC.descriptionTextStyle(context),
+            modifier = Modifier.padding(start = 10.dp)
+        )
+        Text(
+            module.moduleName,
+            style = CC.titleTextStyle(context).copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 10.dp)
+        )
+        val visits = when (module.visits) {
+            0 -> "Never visited"
+            1 -> "Visited once"
+            else -> "Visited ${module.visits} times"
+        }
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                module.moduleCode,
-                style = CC.descriptionTextStyle(context),
-                modifier = Modifier.padding(start = 10.dp)
+                visits, style = CC.descriptionTextStyle(context).copy(color = CC.tertiary())
             )
-            Text(
-                module.moduleName,
-                style = CC.titleTextStyle(context)
-                    .copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 10.dp)
-            )
-            val visits = when (module.visits) {
-                0 -> "Never visited"
-                1 -> "Visited once"
-                else -> "Visited ${module.visits} times"
-            }
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    visits,
-                    style = CC.descriptionTextStyle(context)
-                        .copy(color = CC.tertiary())
+            IconButton(onClick = {
+                onClicked(module)
+                ModuleName.name.value = module.moduleName
+                Log.d("module navigation", "moduleResource/${module.moduleCode}")
+                navController.navigate("moduleResource/${module.moduleCode}")
+            }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = CC.textColor()
                 )
-                IconButton(
-                    onClick = {
-                        onClicked(module)
-                        ModuleName.name.value = module.moduleName
-                        Log.d("module navigation","moduleResource/${module.moduleCode}")
-                        navController.navigate("moduleResource/${module.moduleCode}")
-                    }
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = CC.textColor()
-                    )
-                }
             }
         }
-    )
+    })
 }
 
 
 @Composable
 fun LoadingModuleBox() {
-    BaseModuleBox(
-        imageContent = {
-            CC.ColorProgressIndicator(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .fillMaxSize()
-            )
-        },
-        bodyContent = {
-            LoadingPlaceholder(modifier = Modifier
+    BaseModuleBox(imageContent = {
+        CC.ColorProgressIndicator(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .fillMaxSize()
+        )
+    }, bodyContent = {
+        LoadingPlaceholder(
+            modifier = Modifier
                 .height(20.dp)
-                .fillMaxWidth(0.5f)) // Adjusted to a fraction of width
-            LoadingPlaceholder(modifier = Modifier
+                .fillMaxWidth(0.5f)
+        ) // Adjusted to a fraction of width
+        LoadingPlaceholder(
+            modifier = Modifier
                 .height(25.dp)
                 .padding(horizontal = 10.dp)
-                .fillMaxWidth())
-            LoadingPlaceholder(modifier = Modifier
+                .fillMaxWidth()
+        )
+        LoadingPlaceholder(
+            modifier = Modifier
                 .height(25.dp)
-                .fillMaxWidth(0.5f)) // Adjusted to a fraction of width
-        }
-    )
+                .fillMaxWidth(0.5f)
+        ) // Adjusted to a fraction of width
+    })
 }
 
 @Composable
 fun BaseModuleBox(
-    imageContent: @Composable BoxScope.() -> Unit,
-    bodyContent: @Composable ColumnScope.() -> Unit
+    imageContent: @Composable BoxScope.() -> Unit, bodyContent: @Composable ColumnScope.() -> Unit
 ) {
     BoxWithConstraints {
         // Dynamically calculate width and height based on screen size
@@ -149,8 +143,7 @@ fun BaseModuleBox(
         Column(
             modifier = Modifier
                 .shadow(
-                    elevation = 4.dp,
-                    shape = RoundedCornerShape(16.dp)
+                    elevation = 4.dp, shape = RoundedCornerShape(16.dp)
                 )
                 .width(boxWidth)
                 .height(boxHeight),
@@ -160,8 +153,7 @@ fun BaseModuleBox(
                 modifier = Modifier
                     .fillMaxHeight(0.4f)
                     .background(CC.extraColor2(), RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
-                    .fillMaxWidth(),
-                content = imageContent
+                    .fillMaxWidth(), content = imageContent
             )
             Column(
                 modifier = Modifier
@@ -176,7 +168,12 @@ fun BaseModuleBox(
 }
 
 @Composable
-fun ModuleBoxList(modules: List<ModuleEntity>, context: Context, navController: NavController, moduleViewModel: ModuleViewModel){
+fun ModuleBoxList(
+    modules: List<ModuleEntity>,
+    context: Context,
+    navController: NavController,
+    moduleViewModel: ModuleViewModel
+) {
     BoxWithConstraints {
         val screenWidth = maxWidth
         val itemWidth = screenWidth * 0.4f // Each item takes 40% of the screen width
@@ -192,15 +189,16 @@ fun ModuleBoxList(modules: List<ModuleEntity>, context: Context, navController: 
                 Box(
                     modifier = Modifier.width(adaptiveItemWidth) // Apply the adaptive width
                 ) {
-                ModuleBox(module, context, navController, onClicked = {
-                    moduleViewModel.saveModule(
-                        module.copy(
-                            visits = module.visits.plus(
-                                1
+                    ModuleBox(module, context, navController, onClicked = {
+                        moduleViewModel.saveModule(
+                            module.copy(
+                                visits = module.visits.plus(
+                                    1
+                                )
                             )
                         )
-                    )
-                })}
+                    })
+                }
             }
         }
     }
