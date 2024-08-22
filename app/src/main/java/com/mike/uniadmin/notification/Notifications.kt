@@ -44,23 +44,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
-import com.mike.uniadmin.backEnd.userchat.MessageEntity
-import com.mike.uniadmin.backEnd.userchat.MessageViewModel
+import com.mike.uniadmin.backEnd.userchat.UserChatEntity
+import com.mike.uniadmin.backEnd.userchat.UserGroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.getAnnouncementViewModel
-import com.mike.uniadmin.getChatViewModel
-import com.mike.uniadmin.getCourseTimetableViewModel
-import com.mike.uniadmin.getCourseViewModel
-import com.mike.uniadmin.getMessageViewModel
 import com.mike.uniadmin.getNotificationViewModel
+import com.mike.uniadmin.getUserGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -71,7 +63,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 
     val userViewModel = getUserViewModel(context)
     val notificationViewModel = getNotificationViewModel(context)
-    val messageViewModel = getMessageViewModel(context)
+    val messageViewModel = getUserGroupChatViewModel(context)
 
     // Keep track of previous notifications
     var previousNotifications by remember { mutableStateOf<List<NotificationEntity>>(emptyList()) }
@@ -190,7 +182,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 fun NotificationItem(
     notification: NotificationEntity,
     context: Context,
-    messageViewModel: MessageViewModel,
+    messageViewModel: UserGroupChatViewModel,
     userViewModel: UserViewModel
 ) {
     val user by userViewModel.user.observeAsState()
@@ -255,11 +247,10 @@ fun NotificationItem(
                             notification.userId.let { notificationUserId ->
                                 val conversationId = "Direct Messages/${
                                     generateConversationId(
-                                        userId1 = currentUser.id,
-                                        userId2 = notificationUserId
+                                        userId1 = currentUser.id, userId2 = notificationUserId
                                     )
                                 }"
-                                messageViewModel.saveMessage(message = MessageEntity(
+                                messageViewModel.saveMessage(message = UserChatEntity(
                                     id = id,
                                     message = "Hi, ${notification.name} 👋",
                                     senderID = currentUser.id,
@@ -271,9 +262,7 @@ fun NotificationItem(
                                     loading = false
                                     if (success) {
                                         Toast.makeText(
-                                            context,
-                                            "Message sent",
-                                            Toast.LENGTH_SHORT
+                                            context, "Message sent", Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
                                         Toast.makeText(
