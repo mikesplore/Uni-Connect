@@ -1,4 +1,4 @@
-package com.mike.uniadmin.model
+package com.mike.uniadmin.helperFunctions
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
