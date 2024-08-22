@@ -42,8 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.model.MyDatabase.getUpdate
-import com.mike.uniadmin.model.Update
+import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
+import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.delay
 
