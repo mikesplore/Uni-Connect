@@ -1,13 +1,13 @@
-package com.mike.uniadmin.backEnd.coursecontent.courseassignments
+package com.mike.uniadmin.backEnd.moduleContent.moduleAssignments
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "courseAssignments")
-data class CourseAssignment(
+@Entity(tableName = "moduleAssignments")
+data class ModuleAssignment(
     @PrimaryKey  val assignmentID: String,
-    val courseCode: String = "",
+    val moduleCode: String = "",
     val dueDate: String = "",
     val title: String = "",
     val description: String = "",
