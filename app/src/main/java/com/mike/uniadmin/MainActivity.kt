@@ -32,7 +32,7 @@ import com.mike.uniadmin.model.Global
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.model.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
-import com.mike.uniadmin.programs.CourseCode
+import com.mike.uniadmin.courses.CourseCode
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
