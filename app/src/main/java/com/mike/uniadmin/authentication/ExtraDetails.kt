@@ -187,7 +187,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                                     notificationViewModel.fetchNotifications()
                                     showNotification(context, "Welcome", "Welcome to Uni Admin, $firstName!")
                                 }
-                                navController.navigate("programs") {
+                                navController.navigate("courses") {
                                     popUpTo("moreDetails") {
                                         inclusive = true
                                     }
