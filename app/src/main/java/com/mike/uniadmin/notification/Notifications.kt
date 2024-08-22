@@ -49,10 +49,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
-import com.mike.uniadmin.backEnd.userchat.UserGroupChatViewModel
+import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getNotificationViewModel
-import com.mike.uniadmin.getUserGroupChatViewModel
+import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -63,7 +63,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 
     val userViewModel = getUserViewModel(context)
     val notificationViewModel = getNotificationViewModel(context)
-    val messageViewModel = getUserGroupChatViewModel(context)
+    val messageViewModel = getUserChatViewModel(context)
 
     // Keep track of previous notifications
     var previousNotifications by remember { mutableStateOf<List<NotificationEntity>>(emptyList()) }
@@ -182,7 +182,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 fun NotificationItem(
     notification: NotificationEntity,
     context: Context,
-    messageViewModel: UserGroupChatViewModel,
+    messageViewModel: UserChatViewModel,
     userViewModel: UserViewModel
 ) {
     val user by userViewModel.user.observeAsState()
