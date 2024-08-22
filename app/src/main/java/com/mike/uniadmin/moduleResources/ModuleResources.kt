@@ -64,11 +64,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.mike.uniadmin.getModuleViewModel
-import com.mike.uniadmin.model.GridItem
-import com.mike.uniadmin.model.MyDatabase.deleteItem
-import com.mike.uniadmin.model.MyDatabase.readItems
-import com.mike.uniadmin.model.MyDatabase.writeItem
-import com.mike.uniadmin.model.Section
+import com.mike.uniadmin.helperFunctions.GridItem
+import com.mike.uniadmin.helperFunctions.MyDatabase.deleteItem
+import com.mike.uniadmin.helperFunctions.MyDatabase.readItems
+import com.mike.uniadmin.helperFunctions.MyDatabase.writeItem
+import com.mike.uniadmin.helperFunctions.Section
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object ModuleName {
