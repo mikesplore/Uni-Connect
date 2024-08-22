@@ -39,9 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +55,7 @@ import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
-import com.mike.uniadmin.model.randomColor
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.uniChat.UsersProfile
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
