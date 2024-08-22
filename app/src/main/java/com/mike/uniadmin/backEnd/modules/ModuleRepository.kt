@@ -33,7 +33,7 @@ class ModuleRepository(
                     val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
                     attendanceState?.let { attendanceStates.add(it) }
                 }
-                com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                viewModelScope.launch {
                     attendanceStateDao.insertAttendanceStates(attendanceStates)
 
                 }
@@ -47,7 +47,7 @@ class ModuleRepository(
     }
 
     fun fetchAttendanceStates(onResult: (List<AttendanceState>) -> Unit) {
-        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+        viewModelScope.launch {
             attendanceStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val attendanceStates = mutableListOf<AttendanceState>()
@@ -55,7 +55,7 @@ class ModuleRepository(
                         val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
                         attendanceState?.let { attendanceStates.add(it) }
                     }
-                    com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                    viewModelScope.launch {
                         attendanceStateDao.insertAttendanceStates(attendanceStates)
                     }
                     onResult(attendanceStates)
@@ -64,7 +64,7 @@ class ModuleRepository(
                 override fun onCancelled(error: DatabaseError) {
                     // Handle the read error (e.g., log the error)
                     println("Error reading modules: ${error.message}")
-                    com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                    viewModelScope.launch {
                         val cachedData = attendanceStateDao.getAttendanceStates()
                         onResult(cachedData)
                     }
@@ -74,7 +74,7 @@ class ModuleRepository(
     }
 
     fun saveAttendanceState(attendanceState: AttendanceState, onComplete: (Boolean) -> Unit) {
-        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+        viewModelScope.launch {
             attendanceStateDao.insertAttendanceState(attendanceState)
             attendanceStateDatabase.child(attendanceState.moduleID).setValue(attendanceState).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -83,7 +83,7 @@ class ModuleRepository(
     }
 
     fun saveModule(module: ModuleEntity, onComplete: (Boolean) -> Unit = {}) {
-        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+        viewModelScope.launch {
             moduleDao.insertModule(module)
             database.child(module.moduleCode).setValue(module).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -93,9 +93,12 @@ class ModuleRepository(
 
 
     fun fetchModules(onResult: (List<ModuleEntity>) -> Unit) {
-        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+        viewModelScope.launch {
             val cachedData = moduleDao.getModules()
-
+                if (cachedData.isNotEmpty()) {
+                    onResult(cachedData)
+                    return@launch
+                }
                 database.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val modules = mutableListOf<ModuleEntity>()
@@ -103,7 +106,7 @@ class ModuleRepository(
                             val module = childSnapshot.getValue(ModuleEntity::class.java)
                             module?.let { modules.add(it) }
                         }
-                        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                       viewModelScope.launch {
                             moduleDao.insertModules(modules)
                         }
                         onResult(modules)
@@ -120,7 +123,7 @@ class ModuleRepository(
 
 
     fun deleteModule(moduleId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+        viewModelScope.launch {
             moduleDao.deleteModule(moduleId)
             database.child(moduleId).removeValue() // Use the consistent database reference
                 .addOnSuccessListener {
@@ -139,7 +142,7 @@ class ModuleRepository(
                     val module = childSnapshot.getValue(ModuleEntity::class.java)
                     module?.let { modules.add(it) }
                 }
-                com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                viewModelScope.launch {
                     moduleDao.insertModules(modules)
                 }
             }
@@ -153,7 +156,7 @@ class ModuleRepository(
 
     fun getModuleDetailsByModuleID(moduleCode: String, onResult: (ModuleEntity?) -> Unit) {
         val moduleDetailsRef = database.child(moduleCode)
-        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+        viewModelScope.launch {
             moduleDao.getModule(moduleCode)
             moduleDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
