@@ -32,15 +32,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.mike.uniadmin.backEnd.programs.ProgramViewModel
-import com.mike.uniadmin.backEnd.programs.ProgramViewModelFactory
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.programs.ProgramCode
+import com.mike.uniadmin.programs.CourseCode
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -61,7 +55,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     val currentUser by userViewModel.signedInUser.observeAsState()
     val destination = when {
         currentUser == null -> "login" // User is null, go to login
-        currentUser != null && ProgramCode.programCode.value.isEmpty() -> "programs" // User is not null and program code is empty, go to programs
+        currentUser != null && CourseCode.courseCode.value.isEmpty() -> "courses" // User is not null and course code is empty, go to courses
         else -> "homeScreen" // Otherwise, go to homeScreen
     }
 
