@@ -6,14 +6,14 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface ChatDao {
-    @Query("SELECT * FROM chats WHERE id LIKE '%' || :path || '%'")
-    suspend fun getChats(path: String): List<ChatEntity>
+interface GroupChatDao {
+    @Query("SELECT * FROM groupChats WHERE id LIKE '%' || :path || '%'")
+    suspend fun getChats(path: String): List<GroupChatEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertChats(chats: List<ChatEntity>)
+    suspend fun insertChats(chats: List<GroupChatEntity>)
 
-    @Query("DELETE FROM chats WHERE id = :chatId")
+    @Query("DELETE FROM groupChats WHERE id = :chatId")
     suspend fun deleteChat(chatId: String)
 }
 
