@@ -1,8 +1,10 @@
 package com.mike.uniadmin.backEnd.groupchat
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 fun generateConversationId(userId1: String, userId2: String): String {
+
     return if (userId1 < userId2) {
         "$userId1$userId2"
     } else {
