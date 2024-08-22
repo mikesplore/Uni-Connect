@@ -25,7 +25,6 @@ import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.localDatabase.UniAdmin
 
-
 //messageViewModel
 @Composable
 fun getMessageViewModel(context: Context): MessageViewModel {
@@ -102,9 +101,9 @@ fun getAnnouncementViewModel(context: Context): AnnouncementViewModel {
 //Notification ViewModel
 @Composable
 fun getNotificationViewModel(context: Context): NotificationViewModel {
-    val announcementResource = context.applicationContext as UniAdmin
-    val announcementRepository = remember { announcementResource.announcementRepository }
-    return viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
+    val notificationResource = context.applicationContext as UniAdmin
+    val notificationRepository = remember { notificationResource.notificationRepository }
+    return viewModel(factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository))
 }
 
 //ProgramViewModel
