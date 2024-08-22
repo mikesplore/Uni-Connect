@@ -104,7 +104,6 @@ fun Dashboard(navController: NavController, context: Context) {
             signedInUser = currentUser,
             context = context,
             navController = navController,
-            userViewModel = userViewModel,
             notificationViewModel = notificationViewModel
         )
         Column(
