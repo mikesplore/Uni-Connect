@@ -1,27 +1,27 @@
-package com.mike.uniadmin.backEnd.courses
+package com.mike.uniadmin.backEnd.modules
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.programs.ProgramCode
+import com.mike.uniadmin.programs.CourseCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class CourseRepository(
-    private val courseDao: CourseDao,
+class ModuleRepository(
+    private val moduleDao: ModuleDao,
     private val attendanceStateDao: AttendanceStateDao,
 ) {
 
-    private val programCode = ProgramCode.programCode.value
-    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("Courses")
-    private val attendanceStateDatabase = FirebaseDatabase.getInstance().reference.child(programCode).child("AttendanceStates")
+    private val courseCode = CourseCode.courseCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Modules")
+    private val attendanceStateDatabase = FirebaseDatabase.getInstance().reference.child(courseCode).child("AttendanceStates")
 
     init {
-        startCourseListener()
+        startModuleListener()
         startAttendanceStateListener()
     }
 
@@ -33,7 +33,7 @@ class CourseRepository(
                     val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
                     attendanceState?.let { attendanceStates.add(it) }
                 }
-                viewModelScope.launch {
+                com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
                     attendanceStateDao.insertAttendanceStates(attendanceStates)
 
                 }
@@ -41,13 +41,13 @@ class CourseRepository(
 
             override fun onCancelled(error: DatabaseError) {
                 // Handle the read error (e.g., log the error)
-                println("Error reading courses: ${error.message}")
+                println("Error reading modules: ${error.message}")
             }
         })
     }
 
     fun fetchAttendanceStates(onResult: (List<AttendanceState>) -> Unit) {
-        viewModelScope.launch {
+        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
             attendanceStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val attendanceStates = mutableListOf<AttendanceState>()
@@ -55,7 +55,7 @@ class CourseRepository(
                         val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
                         attendanceState?.let { attendanceStates.add(it) }
                     }
-                    viewModelScope.launch {
+                    com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
                         attendanceStateDao.insertAttendanceStates(attendanceStates)
                     }
                     onResult(attendanceStates)
@@ -63,8 +63,8 @@ class CourseRepository(
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle the read error (e.g., log the error)
-                    println("Error reading courses: ${error.message}")
-                    viewModelScope.launch {
+                    println("Error reading modules: ${error.message}")
+                    com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
                         val cachedData = attendanceStateDao.getAttendanceStates()
                         onResult(cachedData)
                     }
@@ -74,46 +74,46 @@ class CourseRepository(
     }
 
     fun saveAttendanceState(attendanceState: AttendanceState, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
             attendanceStateDao.insertAttendanceState(attendanceState)
-            attendanceStateDatabase.child(attendanceState.courseID).setValue(attendanceState).addOnCompleteListener { task ->
+            attendanceStateDatabase.child(attendanceState.moduleID).setValue(attendanceState).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
         }
     }
 
-    fun saveCourse(course: CourseEntity, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            courseDao.insertCourse(course)
-            database.child(course.courseCode).setValue(course).addOnCompleteListener { task ->
+    fun saveModule(module: ModuleEntity, onComplete: (Boolean) -> Unit) {
+        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+            moduleDao.insertModule(module)
+            database.child(module.moduleCode).setValue(module).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
         }
     }
 
 
-    fun fetchCourses(onResult: (List<CourseEntity>) -> Unit) {
-        viewModelScope.launch {
-            val cachedData = courseDao.getCourses()
+    fun fetchModules(onResult: (List<ModuleEntity>) -> Unit) {
+        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+            val cachedData = moduleDao.getModules()
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
             } else {
                 database.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val courses = mutableListOf<CourseEntity>()
+                        val modules = mutableListOf<ModuleEntity>()
                         for (childSnapshot in snapshot.children) {
-                            val course = childSnapshot.getValue(CourseEntity::class.java)
-                            course?.let { courses.add(it) }
+                            val module = childSnapshot.getValue(ModuleEntity::class.java)
+                            module?.let { modules.add(it) }
                         }
-                        viewModelScope.launch {
-                            courseDao.insertCourses(courses)
+                        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                            moduleDao.insertModules(modules)
                         }
-                        onResult(courses)
+                        onResult(modules)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
                         // Handle the read error (e.g., log the error)
-                        println("Error reading courses: ${error.message}")
+                        println("Error reading modules: ${error.message}")
                     }
                 })
             }
@@ -121,10 +121,10 @@ class CourseRepository(
     }
 
 
-    fun deleteCourse(courseId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        viewModelScope.launch {
-            courseDao.deleteCourse(courseId)
-            database.child(courseId).removeValue() // Use the consistent database reference
+    fun deleteModule(moduleId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
+        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+            moduleDao.deleteModule(moduleId)
+            database.child(moduleId).removeValue() // Use the consistent database reference
                 .addOnSuccessListener {
                     onSuccess()
                 }.addOnFailureListener { exception ->
@@ -133,38 +133,38 @@ class CourseRepository(
         }
     }
 
-    private fun startCourseListener() {
+    private fun startModuleListener() {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val courses = mutableListOf<CourseEntity>()
+                val modules = mutableListOf<ModuleEntity>()
                 for (childSnapshot in snapshot.children) {
-                    val course = childSnapshot.getValue(CourseEntity::class.java)
-                    course?.let { courses.add(it) }
+                    val module = childSnapshot.getValue(ModuleEntity::class.java)
+                    module?.let { modules.add(it) }
                 }
-                viewModelScope.launch {
-                    courseDao.insertCourses(courses)
+                com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+                    moduleDao.insertModules(modules)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 // Handle the read error (e.g., log the error)
-                println("Error reading courses: ${error.message}")
+                println("Error reading modules: ${error.message}")
             }
         })
     }
 
-    fun getCourseDetailsByCourseID(courseCode: String, onResult: (CourseEntity?) -> Unit) {
-        val courseDetailsRef = database.child(courseCode)
-        viewModelScope.launch {
-            courseDao.getCourse(courseCode)
-            courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    fun getModuleDetailsByModuleID(moduleCode: String, onResult: (ModuleEntity?) -> Unit) {
+        val moduleDetailsRef = database.child(moduleCode)
+        com.mike.uniadmin.backEnd.programs.viewModelScope.launch {
+            moduleDao.getModule(moduleCode)
+            moduleDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val courseInfo = snapshot.getValue(CourseEntity::class.java)
-                    onResult(courseInfo)
+                    val moduleInfo = snapshot.getValue(ModuleEntity::class.java)
+                    onResult(moduleInfo)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    println("Error fetching course details: ${error.message}")
+                    println("Error fetching module details: ${error.message}")
                     onResult(null) // Indicate failure by returning null
                 }
             })
