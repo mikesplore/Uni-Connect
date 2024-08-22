@@ -42,10 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mike.uniadmin.backEnd.courses.AttendanceState
-import com.mike.uniadmin.backEnd.courses.CourseViewModel
-import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
-import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.backEnd.modules.AttendanceState
+import com.mike.uniadmin.backEnd.modules.ModuleViewModel
+import com.mike.uniadmin.backEnd.modules.ModuleViewModelFactory
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -54,13 +54,13 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageAttendanceScreen(context: Context) {
-    val courseViewModel = getCourseViewModel(context)
-    val courses by courseViewModel.courses.observeAsState(emptyList())
-    val attendanceStates by courseViewModel.attendanceStates.observeAsState(emptyMap())
+    val moduleViewModel = getModuleViewModel(context)
+    val modules by moduleViewModel.modules.observeAsState(emptyList())
+    val attendanceStates by moduleViewModel.attendanceStates.observeAsState(emptyMap())
     var refresh by remember { mutableStateOf(false) }
 
     LaunchedEffect(refresh) {
-        courseViewModel.fetchAttendanceStates()
+        moduleViewModel.fetchAttendanceStates()
     }
 
     Scaffold(
@@ -96,16 +96,16 @@ fun ManageAttendanceScreen(context: Context) {
                 Text("Manage Attendance", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 30.sp))
             }
 
-            if (courses.isEmpty()) {
+            if (modules.isEmpty()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text("No courses found", style = CC.descriptionTextStyle(context))
+                    Text("No modules found", style = CC.descriptionTextStyle(context))
                 }
             } else {
-                courses.forEach { course ->
-                    val attendanceState = attendanceStates[course.courseCode]
+                modules.forEach { module ->
+                    val attendanceState = attendanceStates[module.moduleCode]
                     val isChecked = attendanceState?.state ?: false
                     val backgroundColor by animateColorAsState(
                         targetValue = if (isChecked) CC.extraColor2() else CC.primary(),
@@ -123,7 +123,7 @@ fun ManageAttendanceScreen(context: Context) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            course.courseName,
+                            module.moduleName,
                             modifier = Modifier.weight(1f),
                             style = CC.descriptionTextStyle(context),
                             fontSize = 18.sp,
@@ -134,11 +134,11 @@ fun ManageAttendanceScreen(context: Context) {
                             checked = isChecked,
                             onCheckedChange = { newState ->
                                 val newAttendanceState = AttendanceState(
-                                    courseID = course.courseCode,
-                                    courseName = course.courseName,
+                                    moduleID = module.moduleCode,
+                                    moduleName = module.moduleName,
                                     state = newState
                                 )
-                                courseViewModel.saveAttendanceState(newAttendanceState)
+                                moduleViewModel.saveAttendanceState(newAttendanceState)
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = CC.primary(),
