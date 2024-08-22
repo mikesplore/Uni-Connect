@@ -42,6 +42,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents
 @Composable
 fun ChatTopAppBar(
     navController: NavController,
+    targetGroupID: String,
     name: String,
     link: String,
     context: Context,
@@ -134,7 +135,7 @@ fun ChatTopAppBar(
             navigationIcon = {
                 IconButton(onClick = {
                     navController.navigate("uniChat") {
-                        popUpTo("GroupChat/${GroupDetails.groupName.value}") {
+                        popUpTo("GroupChat/$targetGroupID") {
                             inclusive = true
                         }
                     }
