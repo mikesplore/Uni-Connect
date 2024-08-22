@@ -1,25 +1,25 @@
-package com.mike.uniadmin.backEnd.programs
+package com.mike.uniadmin.backEnd.modules
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "programs")
-data class ProgramEntity(
-    @PrimaryKey val programCode: String,
-    val programName: String = "",
+@Entity(tableName = "courses")
+data class CourseEntity(
+    @PrimaryKey val courseCode: String,
+    val courseName: String = "",
     var participants: List<String> = emptyList(),
-    var programImageLink: String = ""
+    var courseImageLink: String = ""
 
 ){
     constructor(): this("", "", emptyList(), "")
 }
 
 
-@Entity(tableName = "programStates")
-data class ProgramState(
-    @PrimaryKey val programID: String,
-    val programName: String = "",
+@Entity(tableName = "courseStates")
+data class CourseState(
+    @PrimaryKey val courseID: String,
+    val courseName: String = "",
     val state: Boolean = false
 ){
     constructor(): this("", "", false)
