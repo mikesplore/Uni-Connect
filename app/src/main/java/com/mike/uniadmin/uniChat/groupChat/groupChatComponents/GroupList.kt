@@ -63,13 +63,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.getChatViewModel
+import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -83,7 +83,7 @@ object GroupDetails {
 @Composable
 fun UniGroups(context: Context, navController: NavController) {
 
-    val chatViewModel = getChatViewModel(context)
+    val chatViewModel = getGroupChatViewModel(context)
     val userViewModel = getUserViewModel(context)
 
     val groups by chatViewModel.groups.observeAsState(emptyList())
@@ -169,7 +169,7 @@ fun UniGroups(context: Context, navController: NavController) {
 fun AddGroupSection(
     signedInUser: UserEntity,
     context: Context,
-    chatViewModel: ChatViewModel,
+    chatViewModel: GroupChatViewModel,
     users: List<UserEntity>,
     onComplete: (Boolean) -> Unit = {}
 ) {
@@ -409,7 +409,7 @@ fun UserSelectionItem(
 fun EditGroupSection(
     group: GroupEntity,
     context: Context,
-    chatViewModel: ChatViewModel,
+    chatViewModel: GroupChatViewModel,
     users: List<UserEntity>,
     onDismiss: () -> Unit
 ) {
@@ -527,7 +527,7 @@ fun GroupItem(
     group: GroupEntity,
     context: Context,
     navController: NavController,
-    chatViewModel: ChatViewModel,
+    chatViewModel: GroupChatViewModel,
     userViewModel: UserViewModel,
     user: UserEntity
 ) {
