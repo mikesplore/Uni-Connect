@@ -1,15 +1,15 @@
-package com.mike.uniadmin.backEnd.coursecontent.coursedetails
+package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
 
 import com.google.firebase.database.*
-import com.mike.uniadmin.backEnd.courses.CourseEntity
-import com.mike.uniadmin.programs.ProgramCode
+import com.mike.uniadmin.backEnd.modules.ModuleEntity
+import com.mike.uniadmin.programs.CourseCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
-    private val programCode = ProgramCode.programCode.value
-    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("CourseContent")
+class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
+    private val courseCode = CourseCode.courseCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
 
     // Scope for running coroutines
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
@@ -30,10 +30,11 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
-               // val courseID = snapshot.key ?: return
-                val details = snapshot.child("Course Details").children.mapNotNull { it.getValue(CourseDetail::class.java) }
+               // val moduleID = snapshot.key ?: return
+                val details = snapshot.child("Module Details").children.mapNotNull { it.getValue(
+                    ModuleDetail::class.java) }
                 viewModelScope.launch {
-                    details.forEach { courseDetailDao.deleteCourseDetail(it.detailID) }
+                    details.forEach { moduleDetailDao.deleteModuleDetail(it.detailID) }
                 }
             }
 
@@ -43,30 +44,31 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
             }
 
             private fun updateLocalDatabase(snapshot: DataSnapshot) {
-               // val courseID = snapshot.key ?: return
-                val details = snapshot.child("Course Details").children.mapNotNull { it.getValue(CourseDetail::class.java) }
+               // val moduleID = snapshot.key ?: return
+                val details = snapshot.child("Module Details").children.mapNotNull { it.getValue(
+                    ModuleDetail::class.java) }
                 viewModelScope.launch {
-                    details.forEach { courseDetailDao.insertCourseDetail(it) }
+                    details.forEach { moduleDetailDao.insertModuleDetail(it) }
                 }
             }
         })
     }
 
-    fun getCourseDetailsByCourseID(courseCode: String, onResult: (CourseEntity?) -> Unit) {
-        val courseDetailsRef = FirebaseDatabase.getInstance().reference.child("Courses").child(courseCode)
+    fun getModuleDetailsByModuleID(moduleCode: String, onResult: (ModuleEntity?) -> Unit) {
+        val moduleDetailsRef = FirebaseDatabase.getInstance().reference.child("Modules").child(moduleCode)
         viewModelScope.launch {
-            val cachedData = courseDetailDao.getCourseDetailsByID(courseCode)
+            val cachedData = moduleDetailDao.getModuleDetailsByID(moduleCode)
             if (cachedData != null) {
                 onResult(cachedData)
             } else {
-                courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                moduleDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val courseInfo = snapshot.getValue(CourseEntity::class.java)
-                        onResult(courseInfo)
+                        val moduleInfo = snapshot.getValue(ModuleEntity::class.java)
+                        onResult(moduleInfo)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        println("Error fetching course details: ${error.message}")
+                        println("Error fetching module details: ${error.message}")
                         onResult(null) // Indicate failure by returning null
                     }
                 })
@@ -74,14 +76,14 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
         }
     }
 
-    fun writeCourseDetail(courseID: String, courseDetail: CourseDetail, onResult: (Boolean) -> Unit) {
+    fun writeModuleDetail(moduleID: String, moduleDetail: ModuleDetail, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
                 // Insert into local database
-                courseDetailDao.insertCourseDetail(courseDetail)
+                moduleDetailDao.insertModuleDetail(moduleDetail)
                 // Insert into Firebase
-                val courseDetailRef = database.child(courseID).child("Course Details")
-                courseDetailRef.child(courseDetail.detailID).setValue(courseDetail)
+                val moduleDetailRef = database.child(moduleID).child("Module Details")
+                moduleDetailRef.child(moduleDetail.detailID).setValue(moduleDetail)
                     .addOnSuccessListener { onResult(true) } // Indicate success
                     .addOnFailureListener { exception ->
                         println("Error writing detail: ${exception.message}")
@@ -94,25 +96,25 @@ class CourseDetailRepository(private val courseDetailDao: CourseDetailDao) {
         }
     }
 
-    fun getCourseDetails(courseID: String, onResult: (CourseDetail?) -> Unit) {
+    fun getModuleDetails(moduleID: String, onResult: (ModuleDetail?) -> Unit) {
         viewModelScope.launch {
-            val cachedData = courseDetailDao.getCourseDetail(courseID)
+            val cachedData = moduleDetailDao.getModuleDetail(moduleID)
             if (cachedData != null) {
                 onResult(cachedData)
             } else {
-                val courseDetailRef = database.child(courseID).child("Course Details").limitToFirst(1)
-                courseDetailRef.addValueEventListener(object : ValueEventListener {
+                val moduleDetailRef = database.child(moduleID).child("Module Details").limitToFirst(1)
+                moduleDetailRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.hasChildren()) {
-                            val detail = snapshot.children.first().getValue(CourseDetail::class.java)
+                            val detail = snapshot.children.first().getValue(ModuleDetail::class.java)
                             detail?.let {
                                 viewModelScope.launch {
-                                    courseDetailDao.insertCourseDetail(it)
+                                    moduleDetailDao.insertModuleDetail(it)
                                 }
                                 onResult(it)
                             }
                         } else {
-                            onResult(null) // No course detail found
+                            onResult(null) // No module detail found
                         }
                     }
 
