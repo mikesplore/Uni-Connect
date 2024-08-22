@@ -54,7 +54,6 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
 import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object Sidebar {
@@ -69,10 +68,8 @@ fun TopAppBarContent(
     signedInUser: UserEntity,
     context: Context,
     navController: NavController,
-    userViewModel: UserViewModel,
     notificationViewModel: NotificationViewModel,
 ) {
-    val loading by userViewModel.isLoading.observeAsState()
     val notifications by notificationViewModel.notifications.observeAsState()
     var expanded by remember { mutableStateOf(false) }
     val unreadCount = notifications?.size ?: 0
@@ -178,9 +175,7 @@ fun TopAppBarContent(
                     .size(profileImageSize),
                 contentAlignment = Alignment.Center
             ) {
-                if (loading == true) {
-                    CircularProgressIndicator(color = CC.textColor())
-                } else if (signedInUser.firstName.isEmpty()) {
+                if (signedInUser.firstName.isEmpty()) {
                     Icon(
                         Icons.Default.AccountCircle,
                         contentDescription = null,
