@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,135 +75,149 @@ fun ModalNavigationDrawerItem(
     signedInUserLoading: Boolean?,
     signedInUser: SignedInUser?,
     fetchedUserDetails: UserEntity?,
-    showBottomSheet:(Boolean) -> Unit,
+    showBottomSheet: (Boolean) -> Unit,
     userStatus: UserStateEntity?,
     update: Update
 
-){
+) {
     var showSignOutDialog by remember { mutableStateOf(false) }
-    Column(
-        modifier = Modifier
-            .background(
-                CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
-            )
-            .fillMaxHeight()
-            .fillMaxWidth(0.5f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (signedInUserLoading == true) {
-                CircularProgressIndicator(color = CC.textColor())
-            } else if (signedInUser != null) {
-                fetchedUserDetails?.let { SideProfile(it, context) }
-            } else{
-                Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
-            }
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 10.dp)
-        ) {
-            SideBarItem(
-                icon = Icons.Default.AccountCircle,
-                text = "Profile",
-                context,
-                onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    navController.navigate("profile")
-                })
-            SideBarItem(icon = Icons.AutoMirrored.Filled.Message,
-                text = "Uni Chat",
-                context,
-                onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    userViewModel.fetchUsers()
-                    chatViewModel.fetchGroups()
-                    navController.navigate("uniChat")
-                })
-            SideBarItem(icon = Icons.Default.Notifications,
-                text = "Notifications",
-                context,
-                onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    userViewModel.fetchUsers()
-                    chatViewModel.fetchGroups()
-                    navController.navigate("notifications")
-                })
-            SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
-                scope.launch {
-                    drawerState.close()
-                }
-                navController.navigate("settings")
-            })
-            SideBarItem(icon = Icons.Default.Share, text = "Share App", context, onClicked = {
-                scope.launch {
-                    drawerState.close()
-                }
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        "${fetchedUserDetails?.firstName} invites you to join Uni Admin! Get organized and ace your studies.\n Download now: ${update.updateLink}"
-                    ) // Customize the text
-                    type = "text/plain"
-                }
-                context.startActivity(Intent.createChooser(sendIntent, null))
-                scope.launch { drawerState.close() }
-            })
-            SideBarItem(
-                icon = Icons.Default.ArrowDownward,
-                text = "More",
-                context,
-                onClicked = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    userViewModel.fetchUsers()
-                    chatViewModel.fetchGroups()
-                    showBottomSheet(true)
-                })
-        }
-        Row(
-            modifier = Modifier
-                .background(CC.extraColor1())
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            TextButton(onClick = {
-                scope.launch {
-                    drawerState.close()
-                }
-                showSignOutDialog = true
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val columnHeight = columnWidth * 0.45f
+        val iconSize = columnWidth * 0.15f
 
-            }) {
-                Text(
-                    "Sign Out",
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+        val density = LocalDensity.current
+        val textSize = with(density) { (columnWidth * 0.07f).toSp() }
+
+
+        Column(
+            modifier = Modifier
+                .background(
+                    CC.extraColor1()
                 )
+                .fillMaxHeight()
+                .fillMaxWidth(0.5f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(columnHeight),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (signedInUserLoading == true) {
+                    CircularProgressIndicator(color = CC.textColor())
+                } else if (signedInUser != null) {
+                    fetchedUserDetails?.let { SideProfile(it, context) }
+                } else {
+                    Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
+                }
             }
-            if (showSignOutDialog) {
-                SignOut(
-                    userStatus = userStatus,
-                    onVisibleChange = {visible -> showSignOutDialog = visible},
-                    context = context,
-                    navController = navController,
-                    userViewModel = userViewModel
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)
+            ) {
+                SideBarItem(icon = Icons.Default.AccountCircle,
+                    text = "Profile",
+                    context,
+                    onClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        navController.navigate("profile")
+                    })
+                SideBarItem(icon = Icons.AutoMirrored.Filled.Message,
+                    text = "Uni Chat",
+                    context,
+                    onClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
+                        navController.navigate("uniChat")
+                    })
+                SideBarItem(icon = Icons.Default.Notifications,
+                    text = "Notifications",
+                    context,
+                    onClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
+                        navController.navigate("notifications")
+                    })
+                SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    navController.navigate("settings")
+                })
+                SideBarItem(icon = Icons.Default.Share, text = "Share App", context, onClicked = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    val sendIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "${fetchedUserDetails?.firstName} invites you to join Uni Admin! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                        ) // Customize the text
+                        type = "text/plain"
+                    }
+                    context.startActivity(Intent.createChooser(sendIntent, null))
+                    scope.launch { drawerState.close() }
+                })
+                SideBarItem(icon = Icons.Default.ArrowDownward,
+                    text = "More",
+                    context,
+                    onClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        userViewModel.fetchUsers()
+                        chatViewModel.fetchGroups()
+                        showBottomSheet(true)
+                    })
+            }
+            Row(
+                modifier = Modifier
+                    .background(CC.extraColor1())
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                TextButton(onClick = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    showSignOutDialog = true
 
-                )}
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CC.secondary()
+                    ),
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    Text(
+                        "Sign Out",
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+                if (showSignOutDialog) {
+                    SignOut(
+                        userStatus = userStatus,
+                        onVisibleChange = { visible -> showSignOutDialog = visible },
+                        context = context,
+                        navController = navController,
+                        userViewModel = userViewModel
+
+                    )
+                }
+            }
         }
     }
 }
@@ -282,9 +299,7 @@ fun SignOut(
                                     popUpTo("homeScreen") { inclusive = true }
                                 }
                                 Toast.makeText(
-                                    context,
-                                    "Signed Out Successfully!",
-                                    Toast.LENGTH_SHORT
+                                    context, "Signed Out Successfully!", Toast.LENGTH_SHORT
                                 ).show()
                                 onVisibleChange(false)
                             } else {
@@ -310,52 +325,63 @@ fun SignOut(
 
 @Composable
 fun SideProfile(user: UserEntity, context: Context) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .background(
-                CC
-                    .extraColor2()
-                    .copy(0.5f)
-            ),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(15.dp))
-        Box(
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val rowHeight = columnWidth * 0.25f
+        val iconSize = columnWidth * 0.45f
+
+        val density = LocalDensity.current
+        val textSize = with(density) { (columnWidth * 0.07f).toSp() }
+        Column(
             modifier = Modifier
-                .border(
-                    1.dp, CC.textColor(), CircleShape
-                )
-                .clip(CircleShape)
-                .background(CC.extraColor1(), CircleShape)
-                .size(100.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .background(
+                    CC
+                        .extraColor2()
+                        .copy(0.5f)
+                ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (user.profileImageLink.isNotEmpty()) {
-                AsyncImage(
-                    model = user.profileImageLink,
-                    contentDescription = "Profile Image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Text(
-                    "${user.firstName[0]}${user.lastName[0]}",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
-                )
+            Spacer(modifier = Modifier.height(15.dp))
+            Box(
+                modifier = Modifier
+                    .border(
+                        1.dp, CC.textColor(), CircleShape
+                    )
+                    .clip(CircleShape)
+                    .background(CC.extraColor1(), CircleShape)
+                    .size(iconSize),
+                contentAlignment = Alignment.Center
+            ) {
+                if (user.profileImageLink.isNotEmpty()) {
+                    AsyncImage(
+                        model = user.profileImageLink,
+                        contentDescription = "Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        "${user.firstName[0]}${user.lastName[0]}",
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = textSize),
+                    )
+                }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                user.firstName + " " + user.lastName,
+                style = CC.titleTextStyle(context).copy(
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp
+                    ),
+                maxLines = 2
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(user.id, style = CC.descriptionTextStyle(context))
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            user.firstName + " " + user.lastName,
-            style = CC.titleTextStyle(context)
-                .copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 18.sp),
-            maxLines = 2
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(user.id, style = CC.descriptionTextStyle(context))
     }
 }

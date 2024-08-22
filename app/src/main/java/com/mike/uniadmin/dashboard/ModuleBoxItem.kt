@@ -48,104 +48,110 @@ fun ModuleBox(
     navController: NavController,
     onClicked: (ModuleEntity) -> Unit
 ) {
-    BaseModuleBox(imageContent = {
-        AsyncImage(
-            model = module.moduleImageLink,
-            contentDescription = module.moduleName,
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
-                .fillMaxSize(),
-            alignment = Alignment.Center,
-            contentScale = ContentScale.Crop
-        )
-    }, bodyContent = {
-        Text(
-            module.moduleCode,
-            style = CC.descriptionTextStyle(context),
-            modifier = Modifier.padding(start = 10.dp)
-        )
-        Text(
-            module.moduleName,
-            style = CC.titleTextStyle(context).copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 10.dp)
-        )
-        val visits = when (module.visits) {
-            0 -> "Never visited"
-            1 -> "Visited once"
-            else -> "Visited ${module.visits} times"
-        }
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                visits, style = CC.descriptionTextStyle(context).copy(color = CC.tertiary())
+    ModuleBoxContent(
+        imageContent = {
+            AsyncImage(
+                model = module.moduleImageLink,
+                contentDescription = module.moduleName,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
+                    .fillMaxSize(),
+                alignment = Alignment.Center,
+                contentScale = ContentScale.Crop
             )
-            IconButton(onClick = {
-                onClicked(module)
-                ModuleName.name.value = module.moduleName
-                Log.d("module navigation", "moduleResource/${module.moduleCode}")
-                navController.navigate("moduleResource/${module.moduleCode}")
-            }) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = null,
-                    tint = CC.textColor()
+        },
+        bodyContent = {
+            Text(
+                module.moduleCode,
+                style = CC.descriptionTextStyle(context),
+                modifier = Modifier.padding(start = 10.dp)
+            )
+            Text(
+                module.moduleName,
+                style = CC.titleTextStyle(context).copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 10.dp)
+            )
+            val visits = when (module.visits) {
+                0 -> "Never visited"
+                1 -> "Visited once"
+                else -> "Visited ${module.visits} times"
+            }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    visits, style = CC.descriptionTextStyle(context).copy(color = CC.tertiary())
                 )
+                IconButton(onClick = {
+                    onClicked(module)
+                    ModuleName.name.value = module.moduleName
+                    navController.navigate("moduleResource/${module.moduleCode}")
+                }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        tint = CC.textColor()
+                    )
+                }
             }
         }
-    })
+    )
 }
-
 
 @Composable
 fun LoadingModuleBox() {
-    BaseModuleBox(imageContent = {
-        CC.ColorProgressIndicator(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .fillMaxSize()
-        )
-    }, bodyContent = {
-        LoadingPlaceholder(
-            modifier = Modifier
-                .height(20.dp)
-                .fillMaxWidth(0.5f)
-        ) // Adjusted to a fraction of width
-        LoadingPlaceholder(
-            modifier = Modifier
-                .height(25.dp)
-                .padding(horizontal = 10.dp)
-                .fillMaxWidth()
-        )
-        LoadingPlaceholder(
-            modifier = Modifier
-                .height(25.dp)
-                .fillMaxWidth(0.5f)
-        ) // Adjusted to a fraction of width
-    })
+    ModuleBoxContent(
+        imageContent = {
+            CC.ColorProgressIndicator(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
+                    .fillMaxSize()
+            )
+        },
+        bodyContent = {
+            LoadingPlaceholder(
+                modifier = Modifier
+                    .height(20.dp)
+                    .fillMaxWidth(0.5f)
+            ) // Adjusted to a fraction of width
+            LoadingPlaceholder(
+                modifier = Modifier
+                    .height(25.dp)
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth()
+            )
+            LoadingPlaceholder(
+                modifier = Modifier
+                    .height(25.dp)
+                    .fillMaxWidth(0.5f)
+            ) // Adjusted to a fraction of width
+        }
+    )
 }
 
 @Composable
-fun BaseModuleBox(
-    imageContent: @Composable BoxScope.() -> Unit, bodyContent: @Composable ColumnScope.() -> Unit
+fun ModuleBoxContent(
+    imageContent: @Composable BoxScope.() -> Unit,
+    bodyContent: @Composable ColumnScope.() -> Unit
 ) {
     BoxWithConstraints {
-        // Dynamically calculate width and height based on screen size
-        val boxWidth = maxWidth * 0.95f  // 40% of available width
-        val boxHeight = boxWidth * 1.25f // Maintain an aspect ratio
+        val boxWidth = maxWidth * 0.4f // Each item takes 40% of the screen width
+        val adaptiveWidth = boxWidth.coerceIn(minimumValue = 150.dp, maximumValue = 185.dp)
+        val boxHeight = adaptiveWidth * 1.15f
 
         Column(
             modifier = Modifier
+                .padding(end = 10.dp)
                 .shadow(
                     elevation = 4.dp, shape = RoundedCornerShape(16.dp)
                 )
-                .width(boxWidth)
+                .width(adaptiveWidth)
                 .height(boxHeight),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -153,7 +159,8 @@ fun BaseModuleBox(
                 modifier = Modifier
                     .fillMaxHeight(0.4f)
                     .background(CC.extraColor2(), RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
-                    .fillMaxWidth(), content = imageContent
+                    .fillMaxWidth(),
+                content = imageContent
             )
             Column(
                 modifier = Modifier
@@ -176,31 +183,38 @@ fun ModuleBoxList(
 ) {
     BoxWithConstraints {
         val screenWidth = maxWidth
-        val itemWidth = screenWidth * 0.4f // Each item takes 40% of the screen width
+        val itemWidth = screenWidth * 0.4f
 
-        // Set a minimum and maximum width for the items
-        val adaptiveItemWidth = itemWidth.coerceIn(minimumValue = 200.dp, maximumValue = 250.dp)
-        LazyRow(
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .fillMaxWidth(),
-        ) {
-            items(modules) { module -> // Use the sorted list
-                Box(
-                    modifier = Modifier.width(adaptiveItemWidth) // Apply the adaptive width
-                ) {
-                    ModuleBox(module, context, navController, onClicked = {
-                        moduleViewModel.saveModule(
-                            module.copy(
-                                visits = module.visits.plus(
-                                    1
-                                )
-                            )
-                        )
-                    })
+        if (modules.isEmpty()) {
+            LazyRow(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth(),
+            ) {
+                // Display loading placeholders when the list is empty
+                items(3) {
+                    LoadingModuleBox()
+                }
+            }
+        } else {
+            LazyRow(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth(),
+            ) {
+                items(modules) { module ->
+                    ModuleBox(
+                        module = module,
+                        context = context,
+                        navController = navController,
+                        onClicked = { updatedModule ->
+                            moduleViewModel.saveModule(updatedModule.copy(visits = updatedModule.visits.plus(1)))
+                        }
+                    )
                 }
             }
         }
     }
 }
+
 
