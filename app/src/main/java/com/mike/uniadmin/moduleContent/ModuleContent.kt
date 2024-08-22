@@ -56,7 +56,7 @@ import com.mike.uniadmin.getModuleDetailViewModel
 import com.mike.uniadmin.getModuleTimetableViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.randomColor
+import com.mike.uniadmin.helperFunctions.randomColor
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
