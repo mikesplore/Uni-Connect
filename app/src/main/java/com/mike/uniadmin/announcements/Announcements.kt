@@ -400,6 +400,7 @@ fun AnnouncementTextField(
 ) {
     TextField(
         value = value,
+        textStyle = CC.descriptionTextStyle(context),
         onValueChange = onValueChange,
         placeholder = { Text(placeholder, style = CC.descriptionTextStyle(context)) },
         singleLine = singleLine,
