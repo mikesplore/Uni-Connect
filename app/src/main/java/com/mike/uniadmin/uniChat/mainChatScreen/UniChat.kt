@@ -41,11 +41,11 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
-import com.mike.uniadmin.backEnd.userchat.MessageViewModel
+import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.getUserGroupChatViewModel
+import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.UsersProfile
@@ -57,7 +57,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun UniChat(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
-    val messageViewModel = getUserGroupChatViewModel(context)
+    val messageViewModel = getUserChatViewModel(context)
 
     var usersLoading by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -166,13 +166,13 @@ fun ChatsScreen(
     filteredUsers: List<UserEntity>,
     context: Context,
     navController: NavController,
-    messageViewModel: MessageViewModel,
+    userChatViewModel: UserChatViewModel,
     userStates: Map<String, UserStateEntity>,
     userViewModel: UserViewModel
 ) {
     val usersWithMessages = filteredUsers.filter { user ->
         val conversationId = "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
-        val messages by messageViewModel.getCardMessages(conversationId).observeAsState(emptyList())
+        val messages by userChatViewModel.getCardUserChats(conversationId).observeAsState(emptyList())
         messages.isNotEmpty()
     }
 
@@ -195,10 +195,10 @@ fun ChatsScreen(
 
             LaunchedEffect(conversationId) {
                 Log.d("Card Messages", "fetching messages for the path: $conversationId")
-                messageViewModel.fetchCardMessages(conversationId)
+                userChatViewModel.fetchCardUserChats(conversationId)
             }
 
-            val messages by messageViewModel.getCardMessages(conversationId)
+            val messages by userChatViewModel.getCardUserChats(conversationId)
                 .observeAsState(emptyList())
             Log.d("Card Messages", "fetched messages are: $messages")
 
