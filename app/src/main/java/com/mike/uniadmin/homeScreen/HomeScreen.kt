@@ -34,14 +34,14 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
-import com.mike.uniadmin.backEnd.groupchat.ChatViewModel
+import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.getAnnouncementViewModel
-import com.mike.uniadmin.getChatViewModel
-import com.mike.uniadmin.getCourseTimetableViewModel
-import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getGroupChatViewModel
+import com.mike.uniadmin.getModuleTimetableViewModel
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.MyDatabase.getUpdate
@@ -67,7 +67,7 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val userViewModel = getUserViewModel(context)
-    val chatViewModel = getChatViewModel(context)
+    val chatViewModel = getGroupChatViewModel(context)
 
 
     // State observation
