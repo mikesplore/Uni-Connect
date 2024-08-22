@@ -1,16 +1,16 @@
-package com.mike.uniadmin.backEnd.coursecontent.coursedetails
+package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "courseDetails")
-data class CourseDetail(
+@Entity(tableName = "moduleDetails")
+data class ModuleDetail(
     @PrimaryKey val detailID: String,
-    val courseName: String = "",
-    val courseCode: String = "",
+    val moduleName: String = "",
+    val moduleCode: String = "",
     val lecturer: String = "",
     val numberOfVisits: String = "",
-    val courseDepartment: String = "",
+    val moduleDepartment: String = "",
     val overview: String = "",
     val learningOutcomes: List<String> = emptyList(),
     val schedule: String = "",
