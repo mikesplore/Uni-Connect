@@ -1,4 +1,4 @@
-package com.mike.uniadmin.courseContent
+package com.mike.uniadmin.moduleContent
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -54,8 +54,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignment
-import com.mike.uniadmin.backEnd.coursecontent.courseassignments.CourseAssignmentViewModel
+import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
+import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -67,7 +67,7 @@ import java.util.Locale
 
 @Composable
 fun AssignmentsItem(
-    courseID: String, assignmentViewModel: CourseAssignmentViewModel, context: Context, userViewModel: UserViewModel
+    moduleID: String, assignmentViewModel: ModuleAssignmentViewModel, context: Context, userViewModel: UserViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
     val assignment = assignmentViewModel.assignments.observeAsState(initial = emptyList())
@@ -89,7 +89,7 @@ fun AssignmentsItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { assignmentViewModel.getCourseAssignments(courseID) },
+                IconButton(onClick = { assignmentViewModel.getModuleAssignments(moduleID) },
 
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = background,
@@ -114,7 +114,7 @@ fun AssignmentsItem(
             }
             Spacer(modifier = Modifier.height(10.dp))
             AnimatedVisibility(visible = expanded) {
-                AddAssignmentItem(courseID,
+                AddAssignmentItem(moduleID,
                     assignmentViewModel,
                     userViewModel,
                     context,
@@ -138,7 +138,7 @@ fun AssignmentsItem(
 
 @Composable
 fun AssignmentCard(
-    assignment: CourseAssignment, context: Context, userViewModel: UserViewModel
+    assignment: ModuleAssignment, context: Context, userViewModel: UserViewModel
 ) {
     var senderName by remember { mutableStateOf("") }
     var profileImageLink by remember { mutableStateOf("") }
@@ -220,8 +220,8 @@ fun AssignmentCard(
 
 @Composable
 fun AddAssignmentItem(
-    courseID: String,
-    assignmentViewModel: CourseAssignmentViewModel,
+    moduleID: String,
+    assignmentViewModel: ModuleAssignmentViewModel,
     userViewModel: UserViewModel,
     context: Context,
     expanded: Boolean,
@@ -359,21 +359,21 @@ fun AddAssignmentItem(
                     loading = true
                     val completeDueDate = "$dueDate at $dueTime"
                     MyDatabase.generateAssignmentID { iD ->
-                        val newAssignment = CourseAssignment(
+                        val newAssignment = ModuleAssignment(
                             authorID = currentUser,
-                            courseCode = courseID,
+                            moduleCode = moduleID,
                             assignmentID = iD,
                             title = title,
                             description = description,
                             dueDate = completeDueDate,
                             publishedDate = CC.getCurrentDate(CC.getTimeStamp())
                         )
-                        assignmentViewModel.saveCourseAssignment(
-                            courseID = courseID,
+                        assignmentViewModel.saveModuleAssignment(
+                            moduleID = moduleID,
                             assignment = newAssignment,
                             onComplete = { success ->
                                 if (success) {
-                                    assignmentViewModel.getCourseAssignments(courseID)
+                                    assignmentViewModel.getModuleAssignments(moduleID)
                                     loading = false
                                     onExpandedChange(expanded)
                                 } else {
