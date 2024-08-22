@@ -37,24 +37,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.MessageViewModel
-import com.mike.uniadmin.backEnd.userchat.MessageViewModel.MessageViewModelFactory
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.getAnnouncementViewModel
-import com.mike.uniadmin.getChatViewModel
-import com.mike.uniadmin.getCourseTimetableViewModel
-import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.getMessageViewModel
-import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.UsersProfile
@@ -85,7 +76,7 @@ fun UniChat(navController: NavController, context: Context) {
     } ?: emptyList()
 
 
-    val tabs = listOf("Chats", "Groups", "Status", "Users")
+    val tabs = listOf("Chats", "Groups", "Contacts")
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email!!) {}
@@ -122,18 +113,19 @@ fun UniChat(navController: NavController, context: Context) {
                 selectedTabIndex = selectedTabIndex,
                 containerColor = CC.secondary(),
                 contentColor = CC.textColor(),
-                edgePadding = 16.dp, // Padding at the start and end of the row
                 modifier = Modifier.background(CC.secondary())
             ) {
                 tabs.forEachIndexed { index, title ->
-                    Tab(selected = selectedTabIndex == index,
+                    Tab(
+                        selected = selectedTabIndex == index,
                         onClick = { selectedTabIndex = index },
+                        modifier = Modifier.weight(1f), // Add weight modifier here
                         text = {
                             Box(
                                 modifier = Modifier.background(
-                                        if (selectedTabIndex == index) CC.primary() else CC.secondary(),
-                                        RoundedCornerShape(10.dp)
-                                    )
+                                    if (selectedTabIndex == index) CC.primary() else CC.secondary(),
+                                    RoundedCornerShape(10.dp)
+                                )
                             ) {
                                 Text(
                                     text = title,
@@ -141,13 +133,11 @@ fun UniChat(navController: NavController, context: Context) {
                                         fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
                                         color = CC.textColor()
                                     ),
-                                    modifier = Modifier.padding(
-                                        vertical = 5.dp,
-                                        horizontal = 8.dp
-                                    ) //padding inside the tab
+                                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 8.dp)
                                 )
                             }
-                        })
+                        }
+                    )
                 }
             }
 
@@ -155,7 +145,6 @@ fun UniChat(navController: NavController, context: Context) {
             when (selectedTabIndex) {
                 0 -> ChatsScreen(
                     currentUser,
-                    users,
                     filteredUsers,
                     context,
                     navController,
@@ -165,9 +154,7 @@ fun UniChat(navController: NavController, context: Context) {
                 )
 
                 1 -> UniGroups(context, navController)
-                2 -> ContactsScreen()
-                3 -> UsersProfile(context, navController)
-                4 -> StatusScreen()
+                2 -> UsersProfile(context, navController)
             }
         }
     }
@@ -176,7 +163,6 @@ fun UniChat(navController: NavController, context: Context) {
 @Composable
 fun ChatsScreen(
     currentUser: UserEntity?,
-    users: List<UserEntity>?,
     filteredUsers: List<UserEntity>,
     context: Context,
     navController: NavController,
@@ -184,10 +170,16 @@ fun ChatsScreen(
     userStates: Map<String, UserStateEntity>,
     userViewModel: UserViewModel
 ) {
+    val usersWithMessages = filteredUsers.filter { user ->
+        val conversationId = "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
+        val messages by messageViewModel.getCardMessages(conversationId).observeAsState(emptyList())
+        messages.isNotEmpty()
+    }
+
     LazyRow(
         modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
     ) {
-        items(users ?: emptyList()) { user ->
+        items(usersWithMessages) { user ->
             UserItem(user, context, navController, userViewModel)
         }
     }
@@ -234,8 +226,6 @@ fun ChatsScreen(
             }
         }
     }
-
-
 }
 
 @Composable
@@ -247,18 +237,6 @@ fun ContactsScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(text = "Contacts Screen", style = TextStyle(fontSize = 24.sp))
-    }
-}
-
-@Composable
-fun StatusScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Yellow),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Status Screen", style = TextStyle(fontSize = 24.sp))
     }
 }
 
