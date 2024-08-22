@@ -1,30 +1,30 @@
-package com.mike.uniadmin.backEnd.coursecontent.courseassignments
+package com.mike.uniadmin.backEnd.moduleContent.moduleAssignments
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.programs.ProgramCode
+import com.mike.uniadmin.programs.CourseCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class CourseAssignmentRepository(private val courseAssignmentDao: CourseAssignmentDao) {
-    private val programCode = ProgramCode.programCode.value
-    private val database = FirebaseDatabase.getInstance().reference.child(programCode).child("CourseContent")
+class ModuleAssignmentRepository(private val moduleAssignmentDao: ModuleAssignmentDao) {
+    private val courseCode = CourseCode.courseCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
 
-    //Course Content database
-    fun writeCourseAssignment(
-        courseID: String,
-        courseAssignment: CourseAssignment,
+    //Module Content database
+    fun writeModuleAssignment(
+        moduleID: String,
+        moduleAssignment: ModuleAssignment,
         onResult: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
-            courseAssignmentDao.insertCourseAssignment(courseAssignment)
-            database.child(courseID).child("Course Assignments").child(courseAssignment.assignmentID)
-                .setValue(courseAssignment).addOnSuccessListener {
+            moduleAssignmentDao.insertModuleAssignment(moduleAssignment)
+            database.child(moduleID).child("Module Assignments").child(moduleAssignment.assignmentID)
+                .setValue(moduleAssignment).addOnSuccessListener {
                     onResult(true) // Indicate success
                 }.addOnFailureListener { exception ->
                     println("Error writing assignment: ${exception.message}")
@@ -34,21 +34,21 @@ class CourseAssignmentRepository(private val courseAssignmentDao: CourseAssignme
     }
 
 
-    fun getCourseAssignments(courseID: String, onResult: (List<CourseAssignment>) -> Unit) {
+    fun getModuleAssignments(moduleID: String, onResult: (List<ModuleAssignment>) -> Unit) {
         viewModelScope.launch {
-            val cachedData = courseAssignmentDao.getCourseAssignments(courseID)
+            val cachedData = moduleAssignmentDao.getModuleAssignments(moduleID)
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
             } else {
-                val courseAssignmentRef =
-                    database.child(courseID).child("Course Assignments")
+                val moduleAssignmentRef =
+                    database.child(moduleID).child("Module Assignments")
 
-                courseAssignmentRef.addValueEventListener(object : ValueEventListener {
+                moduleAssignmentRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val assignments = mutableListOf<CourseAssignment>()
+                        val assignments = mutableListOf<ModuleAssignment>()
                         for (childSnapshot in snapshot.children) {
                             val assignment =
-                                childSnapshot.getValue(CourseAssignment::class.java)
+                                childSnapshot.getValue(ModuleAssignment::class.java)
                             assignment?.let { assignments.add(it) }
                         }
                         onResult(assignments)
