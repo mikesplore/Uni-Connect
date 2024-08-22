@@ -1,6 +1,7 @@
 package com.mike.uniadmin.dashboard
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -94,6 +95,7 @@ fun ModuleBox(
                     onClick = {
                         onClicked(module)
                         ModuleName.name.value = module.moduleName
+                        Log.d("module navigation","moduleResource/${module.moduleCode}")
                         navController.navigate("moduleResource/${module.moduleCode}")
                     }
                 ) {
@@ -107,6 +109,7 @@ fun ModuleBox(
         }
     )
 }
+
 
 @Composable
 fun LoadingModuleBox() {
