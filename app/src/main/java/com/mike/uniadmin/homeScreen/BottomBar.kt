@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.model.Screen
+import com.mike.uniadmin.helperFunctions.Screen
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
