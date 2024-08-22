@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -74,135 +73,140 @@ fun TopAppBarContent(
     var expanded by remember { mutableStateOf(false) }
     val unreadCount = notifications?.size ?: 0
 
-    TopAppBar(title = {
-        Row(
-            modifier = Modifier.fillMaxHeight(),
-            verticalAlignment = Alignment.CenterVertically
+    TopAppBar(navigationIcon = {
+        IconButton(onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value },
+            modifier = Modifier.padding(bottom = 21.dp)
         ) {
-            // Menu Button
-            IconButton(onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value }) {
-                Icon(
-                    Icons.Default.Menu,
-                    contentDescription = null,
-                    tint = CC.textColor()
-                )
-            }
-
-            // Greeting and Name
-            Column(
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = CC.getGreetingMessage(),
-                    style = CC.descriptionTextStyle(context)
-                        .copy(color = CC.textColor().copy(alpha = 0.5f))
-                )
-                Text(
-                    text = signedInUser.firstName,
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
-                )
-            }
+            Icon(
+                Icons.Default.Menu, contentDescription = null, tint = CC.textColor()
+            )
         }
-    }, actions = {
-        BoxWithConstraints(modifier = Modifier.padding(end = 10.dp)) {
-            // Calculate dynamic sizes based on available width or height
-            val iconSize = maxWidth * 0.08f // For example, 8% of the available width
-            val badgeSize = maxWidth * 0.045f // Adjust the badge size similarly
+    },
 
-            Box(modifier = Modifier.clickable { expanded = !expanded }) {
-                BadgedBox(badge = {
-                    if (unreadCount > 0) {
-                        Badge(
-                            modifier = Modifier.size(badgeSize) // Dynamic badge size
-                        ) {
-                            Text(text = unreadCount.toString())
-                        }
-                    }
-                }) {
-                    Icon(
-                        Icons.Default.Notifications,
-                        contentDescription = null,
-                        tint = CC.secondary(),
-                        modifier = Modifier.size(iconSize) // Dynamic icon size
-                    )
-                }
-            }
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+        title = {
+            Row(
                 modifier = Modifier
-                    .heightIn(max = maxHeight * 0.4f) // Max height is 40% of available height
-                    .width(maxWidth * 0.4f) // Width is 40% of available width
-                    .background(CC.extraColor1())
+                    .padding(bottom = 21.dp)
+                    .fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Greeting and Name
                 Column(
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .weight(1f),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    if (notifications != null && notifications!!.isNotEmpty()) {
-                        notifications!!.take(5).forEach { notification ->
-                            NotificationTitleContent(notification, context)
-                        }
-                        HorizontalDivider()
-                        TextButton(
-                            onClick = {
-                                navController.navigate("notifications")
-                                expanded = false
-                            }, modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("View All", style = CC.descriptionTextStyle(context))
-                        }
-                    } else {
-                        Text("No notifications", style = CC.descriptionTextStyle(context))
-                    }
-                }
-            }
-        }
-
-        // Profile Image
-        BoxWithConstraints(modifier = Modifier.padding(end = 10.dp)) {
-            val profileImageSize = maxWidth * 0.12f // Dynamic size for profile image (e.g., 12% of available width)
-
-            Box(
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .border(1.dp, CC.textColor(), CircleShape)
-                    .background(CC.secondary(), CircleShape)
-                    .clip(CircleShape)
-                    .size(profileImageSize),
-                contentAlignment = Alignment.Center
-            ) {
-                if (signedInUser.firstName.isEmpty()) {
-                    Icon(
-                        Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        tint = CC.textColor()
+                    Text(
+                        text = CC.getGreetingMessage(),
+                        style = CC.descriptionTextStyle(context)
+                            .copy(color = CC.textColor().copy(alpha = 0.5f))
                     )
-                } else {
-                    if (signedInUser.profileImageLink.isNotEmpty()) {
-                        AsyncImage(
-                            model = signedInUser.profileImageLink,
-                            contentDescription = signedInUser.firstName,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Text(
-                            "${signedInUser.firstName[0]}${signedInUser.lastName[0]}",
-                            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    Text(
+                        text = signedInUser.firstName,
+                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
+                    )
+                }
+            }
+        }, actions = {
+            BoxWithConstraints(modifier = Modifier.padding(end = 10.dp, bottom = 21.dp)) {
+                // Calculate dynamic sizes based on available width or height
+                val iconSize = maxWidth * 0.08f
+                val badgeSize = maxWidth * 0.045f
+
+                Box(modifier = Modifier.clickable { expanded = !expanded }) {
+                    BadgedBox(badge = {
+                        if (unreadCount > 0) {
+                            Badge(
+                                modifier = Modifier.size(badgeSize) // Dynamic badge size
+                            ) {
+                                Text(text = unreadCount.toString())
+                            }
+                        }
+                    }) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = null,
+                            tint = CC.secondary(),
+                            modifier = Modifier.size(iconSize) // Dynamic icon size
                         )
                     }
                 }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .heightIn(max = maxHeight * 0.4f) // Max height is 40% of available height
+                        .width(maxWidth * 0.4f) // Width is 40% of available width
+                        .background(CC.extraColor1())
+                ) {
+                    Column(
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        if (notifications != null && notifications!!.isNotEmpty()) {
+                            notifications!!.take(5).forEach { notification ->
+                                NotificationTitleContent(notification, context)
+                            }
+                            HorizontalDivider()
+                            TextButton(
+                                onClick = {
+                                    navController.navigate("notifications")
+                                    expanded = false
+                                }, modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("View All", style = CC.descriptionTextStyle(context))
+                            }
+                        } else {
+                            Text("No notifications", style = CC.descriptionTextStyle(context))
+                        }
+                    }
+                }
             }
-        }
-    }, colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = CC.primary()
-    ))
+
+            // Profile Image
+            BoxWithConstraints(modifier = Modifier.padding(end = 10.dp, bottom = 21.dp)) {
+                val profileImageSize =
+                    maxWidth * 0.12f // Dynamic size for profile image (e.g., 12% of available width)
+
+                Box(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .border(1.dp, CC.textColor(), CircleShape)
+                        .background(CC.secondary(), CircleShape)
+                        .clip(CircleShape)
+                        .size(profileImageSize), contentAlignment = Alignment.Center
+                ) {
+                    if (signedInUser.firstName.isEmpty()) {
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = null,
+                            tint = CC.textColor()
+                        )
+                    } else {
+                        if (signedInUser.profileImageLink.isNotEmpty()) {
+                            AsyncImage(
+                                model = signedInUser.profileImageLink,
+                                contentDescription = signedInUser.firstName,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text(
+                                "${signedInUser.firstName[0]}${signedInUser.lastName[0]}",
+                                style = CC.titleTextStyle(context)
+                                    .copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+                    }
+                }
+            }
+        }, colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = CC.primary()
+        )
+    )
 }
 
 
