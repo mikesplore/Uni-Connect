@@ -95,10 +95,13 @@ fun DiscussionScreen(
     }
 
 
-    Scaffold(topBar = {
+    Scaffold(
+        topBar = {
         GroupDetails.groupName.value?.let { groupName ->
             GroupDetails.groupImageLink.value?.let { imageLink ->
-                ChatTopAppBar(navController = navController,
+                ChatTopAppBar(
+                    navController = navController,
+                    targetGroupID = targetGroupID,
                     name = groupName,
                     link = imageLink,
                     context = context,
