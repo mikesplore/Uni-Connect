@@ -93,7 +93,7 @@ fun LoadingModuleItem() {
     BoxWithConstraints(
         contentAlignment = Alignment.Center, modifier = Modifier.padding(8.dp)
     ) {
-        val cardSize = minOf(maxWidth, maxHeight) * 0.2f // Adaptive size based on available space
+        val cardSize = minOf(maxWidth, maxHeight) * 0.6f // Adaptive size based on available space
 
         Column(
             verticalArrangement = Arrangement.Center,
