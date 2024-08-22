@@ -34,7 +34,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.backEnd.groupchat.ChatEntity
+import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
@@ -90,7 +90,7 @@ fun DiscussionScreen(
             scrollState.animateScrollToItem(chats.size - 1)
         }
         userViewModel.checkAllUserStatuses()
-        chatViewModel.fetchChats(groupPath)
+        chatViewModel.fetchGroupChats(groupPath)
         chatViewModel.fetchGroupById(targetGroupID)
     }
 
@@ -165,7 +165,7 @@ fun DiscussionScreen(
                         onSendClick = {
                             if (messageText.isNotBlank() && currentUser.firstName.isNotBlank()) {
                                 MyDatabase.generateChatID { chatID ->
-                                    val chat = ChatEntity(
+                                    val chat = GroupChatEntity(
                                         message = messageText,
                                         senderName = currentUser.firstName,
                                         senderID = currentUser.id,
