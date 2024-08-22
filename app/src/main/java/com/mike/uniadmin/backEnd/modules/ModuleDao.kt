@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.courses
+package com.mike.uniadmin.backEnd.modules
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -6,22 +6,22 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface CourseDao {
+interface ModuleDao {
 
-    @Query("SELECT * FROM courses")
-    suspend fun getCourses(): List<CourseEntity>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourses(courses: List<CourseEntity>)
+    @Query("SELECT * FROM modules")
+    suspend fun getModules(): List<ModuleEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourse(course: CourseEntity)
+    suspend fun insertModules(modules: List<ModuleEntity>)
 
-    @Query("DELETE FROM courses WHERE courseCode = :courseCode")
-    suspend fun deleteCourse(courseCode: String)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertModule(module: ModuleEntity)
 
-    @Query("SELECT * FROM courses WHERE courseCode = :courseCode")
-    suspend fun getCourse(courseCode: String): CourseEntity?
+    @Query("DELETE FROM modules WHERE moduleCode = :moduleCode")
+    suspend fun deleteModule(moduleCode: String)
+
+    @Query("SELECT * FROM modules WHERE moduleCode = :moduleCode")
+    suspend fun getModule(moduleCode: String): ModuleEntity?
 
 
 }
