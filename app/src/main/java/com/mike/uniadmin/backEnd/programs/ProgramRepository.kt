@@ -5,7 +5,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.programs.ProgramCode
+import com.mike.uniadmin.backEnd.modules.CourseDao
+import com.mike.uniadmin.backEnd.modules.CourseEntity
+import com.mike.uniadmin.backEnd.modules.CourseState
+import com.mike.uniadmin.backEnd.modules.CourseStateDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,59 +16,59 @@ import kotlinx.coroutines.launch
 
 val viewModelScope = CoroutineScope(Dispatchers.Main)
 
-class ProgramRepository(
-    private val programDao: ProgramDao, private val programStateDao: ProgramStateDao
+class CourseRepository(
+    private val courseDao: CourseDao, private val courseStateDao: CourseStateDao
 ) {
     private val database =
-        FirebaseDatabase.getInstance().reference.child("Programs")
-    private val programStateDatabase =
-        FirebaseDatabase.getInstance().reference.child("ProgramStates")
+        FirebaseDatabase.getInstance().reference.child("Courses")
+    private val courseStateDatabase =
+        FirebaseDatabase.getInstance().reference.child("CourseStates")
 
     init {
-        startProgramListener()
-        startProgramStateListener()
+        startCourseListener()
+        startCourseStateListener()
     }
 
 
-    private fun startProgramStateListener() {
-        programStateDatabase.addValueEventListener(object : ValueEventListener {
+    private fun startCourseStateListener() {
+        courseStateDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val programStates = mutableListOf<ProgramState>()
+                val courseStates = mutableListOf<CourseState>()
                 for (childSnapshot in snapshot.children) {
-                    val programState = childSnapshot.getValue(ProgramState::class.java)
-                    programState?.let { programStates.add(it) }
+                    val courseState = childSnapshot.getValue(CourseState::class.java)
+                    courseState?.let { courseStates.add(it) }
                 }
                 viewModelScope.launch {
-                    programStateDao.insertProgramStates(programStates)
+                    courseStateDao.insertCourseStates(courseStates)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Error reading program states: ${error.message}")
+                println("Error reading course states: ${error.message}")
             }
         })
     }
 
-    fun fetchProgramStates(onResult: (List<ProgramState>) -> Unit) {
+    fun fetchCourseStates(onResult: (List<CourseState>) -> Unit) {
         viewModelScope.launch {
-            programStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
+            courseStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val programStates = mutableListOf<ProgramState>()
+                    val courseStates = mutableListOf<CourseState>()
                     for (childSnapshot in snapshot.children) {
-                        val programState = childSnapshot.getValue(ProgramState::class.java)
-                        programState?.let { programStates.add(it) }
+                        val courseState = childSnapshot.getValue(CourseState::class.java)
+                        courseState?.let { courseStates.add(it) }
                     }
                     viewModelScope.launch {
-                        programStateDao.insertProgramStates(programStates)
+                        courseStateDao.insertCourseStates(courseStates)
                     }
-                    onResult(programStates)
+                    onResult(courseStates)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle the read error (e.g., log the error)
-                    println("Error reading programs: ${error.message}")
+                    println("Error reading courses: ${error.message}")
                     viewModelScope.launch {
-                        val cachedData = programStateDao.getProgramStates()
+                        val cachedData = courseStateDao.getCourseStates()
                         onResult(cachedData)
                     }
                 }
@@ -73,47 +76,47 @@ class ProgramRepository(
         }
     }
 
-    fun saveProgramState(programState: ProgramState, onComplete: (Boolean) -> Unit) {
+    fun saveCourseState(courseState: CourseState, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
-            programStateDao.insertProgramState(programState)
-            programStateDatabase.child(programState.programID).setValue(programState)
+            courseStateDao.insertCourseState(courseState)
+            courseStateDatabase.child(courseState.courseID).setValue(courseState)
                 .addOnCompleteListener { task ->
                     onComplete(task.isSuccessful)
                 }
         }
     }
 
-    fun saveProgram(program: ProgramEntity, onComplete: (Boolean) -> Unit) {
+    fun saveCourse(course: CourseEntity, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
-            programDao.insertProgram(program)
-            database.child(program.programCode).setValue(program).addOnCompleteListener { task ->
+            courseDao.insertCourse(course)
+            database.child(course.courseCode).setValue(course).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
         }
     }
 
 
-    fun fetchPrograms(onResult: (List<ProgramEntity>) -> Unit) {
+    fun fetchCourses(onResult: (List<CourseEntity>) -> Unit) {
         viewModelScope.launch {
-            val cachedData = programDao.getPrograms()
+            val cachedData = courseDao.getCourses()
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
             } else {
                 database.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val programs = mutableListOf<ProgramEntity>()
+                        val courses = mutableListOf<CourseEntity>()
                         for (childSnapshot in snapshot.children) {
-                            val program = childSnapshot.getValue(ProgramEntity::class.java)
-                            program?.let { programs.add(it) }
+                            val course = childSnapshot.getValue(CourseEntity::class.java)
+                            course?.let { courses.add(it) }
                         }
                         viewModelScope.launch {
-                            programDao.insertPrograms(programs)
+                            courseDao.insertCourses(courses)
                         }
-                        onResult(programs)
+                        onResult(courses)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        println("Error reading programs: ${error.message}")
+                        println("Error reading courses: ${error.message}")
                     }
                 })
             }
@@ -121,10 +124,10 @@ class ProgramRepository(
     }
 
 
-    fun deleteProgram(programId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
+    fun deleteCourse(courseId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
         viewModelScope.launch {
-            programDao.deleteProgram(programId)
-            database.child(programId).removeValue() // Use the consistent database reference
+            courseDao.deleteCourse(courseId)
+            database.child(courseId).removeValue() // Use the consistent database reference
                 .addOnSuccessListener {
                     onSuccess()
                 }.addOnFailureListener { exception ->
@@ -133,49 +136,49 @@ class ProgramRepository(
         }
     }
 
-    private fun startProgramListener() {
+    private fun startCourseListener() {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val programs = mutableListOf<ProgramEntity>()
+                val courses = mutableListOf<CourseEntity>()
                 for (childSnapshot in snapshot.children) {
-                    val program = childSnapshot.getValue(ProgramEntity::class.java)
-                    program?.let { programs.add(it) }
+                    val course = childSnapshot.getValue(CourseEntity::class.java)
+                    course?.let { courses.add(it) }
                 }
                 viewModelScope.launch {
-                    programDao.insertPrograms(programs) // Update local cache
+                    courseDao.insertCourses(courses) // Update local cache
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Error reading programs: ${error.message}")
+                println("Error reading courses: ${error.message}")
             }
         })
 
         // Use ChildEventListener for more detailed events, especially handling deletions
         database.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                val program = snapshot.getValue(ProgramEntity::class.java)
-                program?.let {
+                val course = snapshot.getValue(CourseEntity::class.java)
+                course?.let {
                     viewModelScope.launch {
-                        programDao.insertProgram(it)
+                        courseDao.insertCourse(it)
                     }
                 }
             }
 
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                val program = snapshot.getValue(ProgramEntity::class.java)
-                program?.let {
+                val course = snapshot.getValue(CourseEntity::class.java)
+                course?.let {
                     viewModelScope.launch {
-                        programDao.insertProgram(it)
+                        courseDao.insertCourse(it)
                     }
                 }
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
-                val program = snapshot.getValue(ProgramEntity::class.java)
-                program?.let {
+                val course = snapshot.getValue(CourseEntity::class.java)
+                course?.let {
                     viewModelScope.launch {
-                        programDao.deleteProgram(it.programCode)
+                        courseDao.deleteCourse(it.courseCode)
                     }
                 }
             }
@@ -190,18 +193,18 @@ class ProgramRepository(
         })
     }
 
-    fun getProgramDetailsByProgramID(programCode: String, onResult: (ProgramEntity?) -> Unit) {
-        val programDetailsRef = database.child(programCode)
+    fun getCourseDetailsByCourseID(courseCode: String, onResult: (CourseEntity?) -> Unit) {
+        val courseDetailsRef = database.child(courseCode)
         viewModelScope.launch {
-            programDao.getProgram(programCode)
-            programDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            courseDao.getCourse(courseCode)
+            courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val programInfo = snapshot.getValue(ProgramEntity::class.java)
-                    onResult(programInfo)
+                    val courseInfo = snapshot.getValue(CourseEntity::class.java)
+                    onResult(courseInfo)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    println("Error fetching program details: ${error.message}")
+                    println("Error fetching course details: ${error.message}")
                     onResult(null) // Indicate failure by returning null
                 }
             })
