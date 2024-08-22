@@ -1,4 +1,4 @@
-package com.mike.uniadmin.courseContent
+package com.mike.uniadmin.moduleContent
 
 import android.content.Context
 import android.widget.Toast
@@ -49,14 +49,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetable
-import com.mike.uniadmin.backEnd.coursecontent.coursetimetable.CourseTimetableViewModel
+import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetable
+import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetableViewModel
 import com.mike.uniadmin.model.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun TimetableItem(
-    courseID: String, timetableViewModel: CourseTimetableViewModel, context: Context
+    moduleID: String, timetableViewModel: ModuleTimetableViewModel, context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
     val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
@@ -80,7 +80,7 @@ fun TimetableItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = { timetableViewModel.getCourseTimetables(courseID) },
+                onClick = { timetableViewModel.getModuleTimetables(moduleID) },
 
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = background,
@@ -108,7 +108,7 @@ fun TimetableItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedVisibility(visible = expanded) {
-                AddTimetableItem(courseID,
+                AddTimetableItem(moduleID,
                     timetableViewModel,
                     context,
                     onExpandedChange = { expanded = !expanded })
@@ -131,7 +131,7 @@ fun TimetableItem(
 
 @Composable
 fun TimetableCard(
-    timetable: CourseTimetable, context: Context
+    timetable: ModuleTimetable, context: Context
 ) {
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -212,8 +212,8 @@ fun TimetableCard(
 
 @Composable
 fun AddTimetableItem(
-    courseID: String,
-    timetableViewModel: CourseTimetableViewModel,
+    moduleID: String,
+    timetableViewModel: ModuleTimetableViewModel,
     context: Context,
     onExpandedChange: (Boolean) -> Unit
 ) {
@@ -293,22 +293,22 @@ fun AddTimetableItem(
                     }
                     loading = true
                     MyDatabase.generateTimetableID { iD ->
-                        val newTimetable = CourseTimetable(
+                        val newTimetable = ModuleTimetable(
                             day = day,
-                            courseID = courseID,
+                            moduleID = moduleID,
                             timetableID = iD,
                             startTime = startTime,
                             endTime = endTime,
                             venue = venue,
                             lecturer = lecturer
                         )
-                        timetableViewModel.saveCourseTimetable(
-                            courseID = courseID,
+                        timetableViewModel.saveModuleTimetable(
+                            moduleID = moduleID,
                             timetable = newTimetable,
                             onCompletion = { success ->
                                 loading = false
                                 if (success) {
-                                    timetableViewModel.getCourseTimetables(courseID)
+                                    timetableViewModel.getModuleTimetables(moduleID)
                                     onExpandedChange(false)
                                     day = ""
                                     startTime = ""
