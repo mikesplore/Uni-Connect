@@ -3,8 +3,6 @@ package com.mike.uniadmin.uniChat.userChat.userChatComponents
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -25,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,8 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
-import com.mike.uniadmin.backEnd.userchat.MessageEntity
-import com.mike.uniadmin.backEnd.userchat.MessageViewModel
+import com.mike.uniadmin.backEnd.userchat.UserChatEntity
+import com.mike.uniadmin.backEnd.userchat.UserGroupChatViewModel
 import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -47,10 +44,10 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MessageBubble(
-    message: MessageEntity,
+    message: UserChatEntity,
     isUser: Boolean,
     context: Context,
-    messageViewModel: MessageViewModel,
+    userGroupChatViewModel: UserGroupChatViewModel,
     path: String,
     senderID: String
 ) {
@@ -77,30 +74,23 @@ fun MessageBubble(
 
 
     fun deleteMessage() {
-        messageViewModel.deleteMessage(message.id, path, onSuccess = {
+        userGroupChatViewModel.deleteMessage(message.id, path, onSuccess = {
             Toast.makeText(context, "Message deleted", Toast.LENGTH_SHORT).show()
         })
     }
 
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-            .combinedClickable(
-                onClick = {},
-                onLongClick = {
-                    if (message.senderID != senderID)
-                        return@combinedClickable
-                    showDeleteDialog = true
-                }
-            ),
-        contentAlignment = alignment
+    BoxWithConstraints(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 8.dp, vertical = 2.dp)
+        .combinedClickable(onClick = {}, onLongClick = {
+            if (message.senderID != senderID) return@combinedClickable
+            showDeleteDialog = true
+        }), contentAlignment = alignment
     ) {
         val maxBubbleWidth = maxWidth * 0.75f
 
         Row(
-            modifier = Modifier.align(alignment),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.align(alignment), verticalAlignment = Alignment.CenterVertically
         ) {
             // Time on the left for the sender
             if (isUser) {
@@ -109,8 +99,7 @@ fun MessageBubble(
                     style = CC.descriptionTextStyle(context),
                     fontSize = 11.sp,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .padding(end = 4.dp)
+                    modifier = Modifier.padding(end = 4.dp)
                 )
             }
 
@@ -141,8 +130,7 @@ fun MessageBubble(
                     style = CC.descriptionTextStyle(context),
                     fontSize = 11.sp,
                     textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
+                    modifier = Modifier.padding(start = 4.dp)
                 )
             }
         }
@@ -150,29 +138,28 @@ fun MessageBubble(
 
     // Delete confirmation dialog
     if (showDeleteDialog) {
-        AlertDialog(
-            containerColor = CC.primary(),
+        AlertDialog(containerColor = CC.primary(),
             onDismissRequest = { showDeleteDialog = false },
             title = { Text(text = "Delete Message", style = CC.titleTextStyle(context)) },
-            text = { Text(text = "Are you sure you want to delete this message?", style = CC.descriptionTextStyle(context)) },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete this message?",
+                    style = CC.descriptionTextStyle(context)
+                )
+            },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        deleteMessage()
-                        showDeleteDialog = false
-                    }
-                ) {
+                TextButton(onClick = {
+                    deleteMessage()
+                    showDeleteDialog = false
+                }) {
                     Text("Delete", style = CC.descriptionTextStyle(context))
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { showDeleteDialog = false }
-                ) {
+                TextButton(onClick = { showDeleteDialog = false }) {
                     Text("Cancel", style = CC.descriptionTextStyle(context))
                 }
-            }
-        )
+            })
     }
 }
 
@@ -189,6 +176,7 @@ fun DeliveryStatusIcon(
                 modifier = Modifier.size(16.dp)
             )
         }
+
         DeliveryStatus.READ -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
