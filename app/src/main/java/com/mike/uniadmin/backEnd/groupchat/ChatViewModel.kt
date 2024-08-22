@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
+class GroupChatViewModel(private val repository: GroupChatRepository) : ViewModel() {
     private val _chats = MutableLiveData<List<ChatEntity>>()
     val chats: LiveData<List<ChatEntity>> = _chats
 
@@ -81,11 +81,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         }
     }
 
-    class ChatViewModelFactory(private val repository: ChatRepository) : ViewModelProvider.Factory {
+    class GroupChatViewModelFactory(private val repository: GroupChatRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {
-                return ChatViewModel(repository) as T
+            if (modelClass.isAssignableFrom(GroupChatViewModel::class.java)) {
+                return GroupChatViewModel(repository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class for Chats")
         }
