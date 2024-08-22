@@ -6,13 +6,19 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -31,13 +37,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
@@ -48,6 +57,7 @@ import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.homeScreen.UserItem
+import com.mike.uniadmin.model.randomColor
 import com.mike.uniadmin.uniChat.UsersProfile
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -184,6 +194,19 @@ fun ChatsScreen(
         }
     }
     // Chats Section
+    if (usersWithMessages.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            ){
+
+            UsersList(userViewModel, context)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "No Chats", style = CC.descriptionTextStyle(context).copy(fontSize = 20.sp))
+        }
+    }
     LazyColumn {
         items(filteredUsers) { user ->
 
@@ -229,15 +252,42 @@ fun ChatsScreen(
 }
 
 @Composable
-fun ContactsScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Cyan),
-        contentAlignment = Alignment.Center
+private fun UsersList(userViewModel: UserViewModel, context: Context) {
+    val users by userViewModel.users.observeAsState()
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy((-8).dp)
     ) {
-        Text(text = "Contacts Screen", style = TextStyle(fontSize = 24.sp))
+        items(users ?: emptyList()) { user ->
+            UserCard(user, context)
+        }
     }
+}
+
+@Composable
+private fun UserCard(user: UserEntity, context: Context){
+    Box(modifier = Modifier
+        .background(randomColor.random(), CircleShape)
+        .clip(CircleShape)
+        .border(
+            1.dp,
+            CC.secondary(),
+            CircleShape
+        )
+        .size(40.dp),
+        contentAlignment = Alignment.Center){
+        if (user.profileImageLink.isNotBlank()){
+        AsyncImage(
+            model = user.profileImageLink,
+            contentDescription = user.firstName,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+        else{
+            Text(text = user.firstName[0].toString(), style = CC.descriptionTextStyle(context))
+        }
+    }
+
 }
 
 
