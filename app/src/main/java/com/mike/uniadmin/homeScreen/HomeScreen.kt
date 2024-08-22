@@ -26,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.announcements.AnnouncementsScreen
@@ -34,19 +33,11 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
-import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
-import com.mike.uniadmin.localDatabase.UniAdmin
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getGroupChatViewModel
-import com.mike.uniadmin.getModuleTimetableViewModel
-import com.mike.uniadmin.getModuleViewModel
-import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.model.MyDatabase.getUpdate
-import com.mike.uniadmin.model.Screen
-import com.mike.uniadmin.model.Update
+import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
+import com.mike.uniadmin.helperFunctions.Screen
+import com.mike.uniadmin.helperFunctions.Update
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -156,7 +147,6 @@ fun HomeScreen(
             update = update
 
         )
-
 
     }) {
         Scaffold(
