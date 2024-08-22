@@ -10,13 +10,13 @@ import kotlinx.coroutines.launch
 
 val chatViewModelScope = CoroutineScope(Dispatchers.Main)
 
-class GroupChatRepository(private val chatDao: ChatDao, private val groupDao: GroupDao) {
+class GroupChatRepository(private val groupChatDao: GroupChatDao, private val groupDao: GroupDao) {
     private val database = FirebaseDatabase.getInstance().getReference()
 
-    fun fetchChats(path: String, onResult: (List<ChatEntity>) -> Unit) {
+    fun fetchGroupChats(path: String, onResult: (List<GroupChatEntity>) -> Unit) {
         chatViewModelScope.launch {
             // Fetch from Room database first
-            val cachedChats = chatDao.getChats(path)
+            val cachedChats = groupChatDao.getChats(path)
             if (cachedChats.isNotEmpty()) {
                 onResult(cachedChats)
             }
@@ -24,15 +24,15 @@ class GroupChatRepository(private val chatDao: ChatDao, private val groupDao: Gr
             // Fetch from Firebase and update Room database
             database.child(path).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val chats = mutableListOf<ChatEntity>()
+                    val chats = mutableListOf<GroupChatEntity>()
                     for (childSnapshot in snapshot.children) {
-                        val chat = childSnapshot.getValue(ChatEntity::class.java)
+                        val chat = childSnapshot.getValue(GroupChatEntity::class.java)
                         chat?.let { chats.add(it) }
                     }
 
                     // Update Room database and notify UI with fresh data
                     chatViewModelScope.launch {
-                        chatDao.insertChats(chats)
+                        groupChatDao.insertChats(chats)
                         onResult(chats)
                     }
                 }
@@ -44,11 +44,11 @@ class GroupChatRepository(private val chatDao: ChatDao, private val groupDao: Gr
         }
     }
 
-    fun saveChat(chat: ChatEntity, path: String, onComplete: (Boolean) -> Unit) {
+    fun saveGroupChat(chat: GroupChatEntity, path: String, onComplete: (Boolean) -> Unit) {
         chatViewModelScope.launch {
             try {
                 // Save to Room database first
-                chatDao.insertChats(listOf(chat))
+                groupChatDao.insertChats(listOf(chat))
 
                 // Then save to Firebase
                 database.child(path).child(chat.id).setValue(chat)
@@ -147,7 +147,7 @@ class GroupChatRepository(private val chatDao: ChatDao, private val groupDao: Gr
         chatViewModelScope.launch {
             try {
                 // Delete from Room database first
-                chatDao.deleteChat(chatId)
+                groupChatDao.deleteChat(chatId)
 
                 // Then delete from Firebase
                 database.child(chatId).removeValue()
