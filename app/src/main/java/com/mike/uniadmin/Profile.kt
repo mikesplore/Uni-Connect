@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,6 +56,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -80,6 +82,8 @@ fun ProfileScreen(navController: NavController, context: Context) {
     var currentUser by remember { mutableStateOf<UserEntity?>(null) }
     var updated by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
+
+
 
     LaunchedEffect(signedInUser) {
 
@@ -126,6 +130,11 @@ fun ProfileScreen(navController: NavController, context: Context) {
                 )
             }, containerColor = CC.primary()
         ) {
+            BoxWithConstraints {
+                val columnWidth = maxWidth
+                val rowHeight = columnWidth * 0.15f
+                val density = LocalDensity.current
+                val textSize = with(density) { (columnWidth * 0.07f).toSp() }
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
@@ -136,14 +145,14 @@ fun ProfileScreen(navController: NavController, context: Context) {
             ) {
                 Row(
                     modifier = Modifier
-                        .height(100.dp)
+                        .height(rowHeight)
                         .fillMaxWidth(0.9f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         "Profile",
                         style = CC.titleTextStyle(context),
-                        fontSize = 40.sp,
+                        fontSize = textSize * 1.2f,
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
@@ -169,7 +178,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
                     onUpdateChange = { updated = !updated })
                 Spacer(modifier = Modifier.height(50.dp))
                 DangerZone(context, userViewModel)
-            }
+            }}
         }
     }
 }
@@ -268,7 +277,8 @@ fun DisplayImage(
             onClick = {
                 currentUser?.let {
                     viewModel.writeUser(it.copy(profileImageLink = link), onSuccess = {
-                        viewModel.getSignedInUser()
+                        Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
+                        viewModel.fetchUsers()
                         showImageLinkBox = false
                         onUpdateChange(updated)
                     })
