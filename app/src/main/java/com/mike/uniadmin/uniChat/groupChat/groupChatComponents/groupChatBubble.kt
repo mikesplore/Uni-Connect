@@ -35,7 +35,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
 import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
-import com.mike.uniadmin.model.randomColor
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
