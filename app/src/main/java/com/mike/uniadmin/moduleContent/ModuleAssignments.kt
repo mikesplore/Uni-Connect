@@ -59,19 +59,23 @@ import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmen
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
-import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AssignmentsItem(
-    moduleID: String, assignmentViewModel: ModuleAssignmentViewModel, context: Context, userViewModel: UserViewModel
+    moduleID: String,
+    assignmentViewModel: ModuleAssignmentViewModel,
+    context: Context,
+    userViewModel: UserViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
     val assignment = assignmentViewModel.assignments.observeAsState(initial = emptyList())
+    val userType = UniAdminPreferences.userType.value
 
 
     Column(
@@ -94,27 +98,34 @@ fun AssignmentsItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { assignmentViewModel.getModuleAssignments(moduleID) },
+                IconButton(
+                    onClick = { assignmentViewModel.getModuleAssignments(moduleID) },
 
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = background,
-                    )) {
+                    )
+                ) {
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = "Refresh",
                         tint = CC.textColor()
                     )
                 }
-                Text("${assignment.value.size} assignments", style = CC.descriptionTextStyle(context))
-                FloatingActionButton(
-                    onClick = { expanded = !expanded },
-                    modifier = Modifier
-                        .padding(end = 10.dp)
-                        .size(35.dp),
-                    containerColor = background,
-                    contentColor = CC.textColor()
-                ) {
-                    Icon(Icons.Default.Add, "Add assignment")
+                Text(
+                    "${assignment.value.size} assignments",
+                    style = CC.descriptionTextStyle(context)
+                )
+                if (userType == "admin") {
+                    FloatingActionButton(
+                        onClick = { expanded = !expanded },
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .size(35.dp),
+                        containerColor = background,
+                        contentColor = CC.textColor()
+                    ) {
+                        Icon(Icons.Default.Add, "Add assignment")
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
@@ -148,15 +159,17 @@ fun AssignmentCard(
     var senderName by remember { mutableStateOf("") }
     var profileImageLink by remember { mutableStateOf("") }
     val currentDate = Date()
-    val formatter = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()) // Use default locale
+    val formatter =
+        DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()) // Use default locale
     val formattedDate = formatter.format(currentDate)
 
-    LaunchedEffect (Unit){
-        userViewModel.findUserByAdmissionNumber(assignment.authorID){ user ->
-        if (user != null) {
-            senderName = user.firstName
-            profileImageLink = user.profileImageLink
-        }}
+    LaunchedEffect(Unit) {
+        userViewModel.findUserByAdmissionNumber(assignment.authorID) { user ->
+            if (user != null) {
+                senderName = user.firstName
+                profileImageLink = user.profileImageLink
+            }
+        }
     }
 
     Card(
@@ -264,7 +277,10 @@ fun AddAssignmentItem(
             .padding(16.dp)
     ) {
         // Sender Information
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
             AsyncImage(
                 model = profileImageLink,
                 contentDescription = "Sender Profile Image",
