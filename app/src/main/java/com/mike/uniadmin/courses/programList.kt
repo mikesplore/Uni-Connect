@@ -136,7 +136,6 @@ fun CourseScreen(context: Context, navController: NavController) {
     ) {
         Column(
             modifier = Modifier
-                .border(1.dp, CC.secondary(), RoundedCornerShape(16.dp))
                 .padding(it)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
