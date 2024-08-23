@@ -1,7 +1,6 @@
 package com.mike.uniadmin.homeScreen
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,14 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mike.uniadmin.MainActivity
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
+import com.mike.uniadmin.attendance.AttendanceScreen
 import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
 import com.mike.uniadmin.helperFunctions.Screen
 import com.mike.uniadmin.helperFunctions.Update
@@ -62,7 +62,6 @@ fun HomeScreen(
     val chatViewModel = getGroupChatViewModel(context)
 
     // State observation
-    val signedInUser by userViewModel.signedInUser.observeAsState()
     val fetchedUserDetails by userViewModel.user.observeAsState()
     val userStatus by userViewModel.userState.observeAsState()
 
@@ -75,15 +74,14 @@ fun HomeScreen(
 
     val signedInUserLoading by userViewModel.isLoading.observeAsState()
     val pagerState = rememberPagerState(pageCount = { screens.size })
+    val email = UniAdminPreferences.userEmail.value
 
 
     // Side effects
-    LaunchedEffect(signedInUser, fetchedUserDetails) {
+    LaunchedEffect(fetchedUserDetails) {
         //MyDatabase.setUpdate(update = Update(version = "1.0.0", updateLink = ""))
-        userViewModel.getSignedInUser()
-        signedInUser?.email?.let { email ->
-            userViewModel.findUserByEmail(email) { user -> Log.d("Fetched User details", "$user") }
-        }
+            userViewModel.findUserByEmail(email) {}
+
 
         launch {
             getUpdate { fetched ->
@@ -138,9 +136,8 @@ fun HomeScreen(
             navController = navController,
             userViewModel = userViewModel,
             chatViewModel = chatViewModel,
+            signedInUser = fetchedUserDetails ,
             signedInUserLoading = signedInUserLoading,
-            signedInUser = signedInUser,
-            fetchedUserDetails = fetchedUserDetails,
             showBottomSheet = { value -> showBottomSheet = value },
             userStatus = userStatus,
             update = update
@@ -172,7 +169,7 @@ fun HomeScreen(
                         Screen.Home -> Dashboard(navController, context)
                         Screen.Assignments -> AssignmentScreen(context)
                         Screen.Announcements -> AnnouncementsScreen(context)
-                        Screen.Attendance -> ManageAttendanceScreen(context)
+                        Screen.Attendance -> AttendanceScreen(context)
                     }
                 }
             }
