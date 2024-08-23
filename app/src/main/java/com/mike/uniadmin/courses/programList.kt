@@ -1,8 +1,6 @@
 package com.mike.uniadmin.courses
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -33,7 +31,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -51,39 +48,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.mike.uniadmin.R
-import com.mike.uniadmin.backEnd.modules.CourseEntity
+import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.courses.CourseEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
-
-object CourseCode {
-    // Define the shared preferences key for storing the value
-    private const val PREF_KEY_PROGRAM_CODE = "course_code_key"
-    private lateinit var preferences: SharedPreferences
-
-    // MutableState to hold the course code value
-    val courseCode: MutableState<String> = mutableStateOf("")
-
-    // Function to initialize shared preferences and load the initial value
-    fun initialize(context: Context) {
-        preferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        // Load the value from SharedPreferences when initializing
-        courseCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
-        Log.d("CourseCode", "Course code initialized: ${courseCode.value}")
-    }
-
-    // Save the value to SharedPreferences whenever it changes
-    fun saveCourseCode(newCourseCode: String) {
-        courseCode.value = newCourseCode
-        preferences.edit().putString(PREF_KEY_PROGRAM_CODE, newCourseCode).apply()
-        Log.d("CourseCode", "Course code saved: $newCourseCode")
-    }
-}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,11 +65,11 @@ fun CourseScreen(context: Context, navController: NavController) {
     val courseViewModel = getCourseViewModel(context)
     val userViewModel = getUserViewModel(context)
 
-
     val currentUser by userViewModel.user.observeAsState()
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val isLoading by courseViewModel.isLoading.observeAsState(false)
     var showAddCourse by remember { mutableStateOf(false) }
+    val userTypes = UniAdminPreferences.userType.value
 
     LaunchedEffect(Unit) {
       //  uploadCoursesData()
@@ -112,13 +85,14 @@ fun CourseScreen(context: Context, navController: NavController) {
                     )
                 )
             }, actions = {
+                if (userTypes == "admin"){
                 IconButton(onClick = { showAddCourse = !showAddCourse }) {
                     Icon(
                         if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
                         contentDescription = "Add Course",
                         tint = CC.textColor()
                     )
-                }
+                }}
                 IconButton(onClick = {courseViewModel.fetchCourses()}) {
                     Icon(
                         Icons.Default.Refresh,
@@ -155,6 +129,14 @@ fun CourseScreen(context: Context, navController: NavController) {
                     }
                 })
             }
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    CC.ColorProgressIndicator()
+                }
+            }
             if (courses?.isEmpty() == true) {
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
@@ -184,8 +166,8 @@ fun CourseScreen(context: Context, navController: NavController) {
                                             ).show()
 
                                             //get the course code
-                                            CourseCode.saveCourseCode(course.courseCode)
-                                            if (CourseCode.courseCode.value.isNotEmpty()) {
+                                            UniAdminPreferences.saveCourseCode(course.courseCode)
+                                            if (UniAdminPreferences.courseCode.value.isNotEmpty()) {
                                                 navController.navigate("homeScreen")
                                             } else {
                                                 Toast.makeText(
@@ -205,8 +187,8 @@ fun CourseScreen(context: Context, navController: NavController) {
                                 }
                             } else {
                                 //get the course code
-                                CourseCode.saveCourseCode(course.courseCode)
-                                if (CourseCode.courseCode.value.isNotEmpty()) {
+                                UniAdminPreferences.saveCourseCode(course.courseCode)
+                                if (UniAdminPreferences.courseCode.value.isNotEmpty()) {
                                     navController.navigate("homeScreen")
                                 } else {
                                     Toast.makeText(
@@ -415,89 +397,3 @@ fun AddCourse(
         }
     }
 }
-
-fun renameNode(){
-    val database = FirebaseDatabase.getInstance().reference
-    val oldNodeRef = database.child("PR22024")
-    val newNodeRef = database.child("CR12024")
-
-    oldNodeRef.get().addOnSuccessListener { dataSnapshot ->
-        if (dataSnapshot.exists()) {
-            newNodeRef.setValue(dataSnapshot.value)
-                .addOnSuccessListener {
-                    oldNodeRef.removeValue()
-                }
-                .addOnFailureListener { e ->
-                    // Handle failure to write to the new node
-                }
-        } else {
-            // Handle case where old node doesn't exist
-        }
-    }
-        .addOnFailureListener { e ->
-            // Handle failure to read from the old node
-        }
-}
-
-
-
-fun uploadCoursesData() {
-    val database = FirebaseDatabase.getInstance()
-    val coursesRef = database.getReference("CR12024").child("Modules")
-
-    // Data to be added
-    val coursesData = mapOf(
-        "CCI 4301" to mapOf(
-            "courseCode" to "CCI 4301",
-            "courseImageLink" to "https://bs-uploads.toptal.io/blackfish-uploads/components/seo/5923698/og_image/optimized/0712-Bad_Practices_in_Database_Design_-_Are_You_Making_These_Mistakes_Dan_Social-754bc73011e057dc76e55a44a954e0c3.png",
-            "courseName" to "Advanced Database Management Systems",
-            "visits" to 45
-        ),
-        "CCS 4301" to mapOf(
-            "courseCode" to "CCS 4301",
-            "courseImageLink" to "https://t3.ftcdn.net/jpg/06/69/40/52/360_F_669405248_bH5WPZiAFElWP06vqlPvj2qWcShUR4o8.jpg",
-            "courseName" to "Computer Architecture and Organization",
-            "visits" to 16
-        ),
-        "CCS 4302" to mapOf(
-            "courseCode" to "CCS 4302",
-            "courseImageLink" to "https://incubator.ucf.edu/wp-content/uploads/2023/07/artificial-intelligence-new-technology-science-futuristic-abstract-human-brain-ai-technology-cpu-central-processor-unit-chipset-big-data-machine-learning-cyber-mind-domination-generative-ai-scaled-1-1500x1000.jpg",
-            "courseName" to "Principles of Artificial Intelligence",
-            "visits" to 8
-        ),
-        "CCS 4304" to mapOf(
-            "courseCode" to "CCS 4304",
-            "courseImageLink" to "https://cdn.analyticsvidhya.com/wp-content/uploads/2023/05/human-computer-interaction.webp",
-            "courseName" to "Human Computer Interaction",
-            "visits" to 6
-        ),
-        "CCS 4305" to mapOf(
-            "courseCode" to "CCS 4305",
-            "courseImageLink" to "https://static.javatpoint.com/definition/images/computer-graphics-definition.png",
-            "courseName" to "Computer Graphics",
-            "visits" to 29
-        ),
-        "CIT 4307" to mapOf(
-            "courseCode" to "CIT 4307",
-            "courseImageLink" to "https://www.daltco.com/sites/default/files/img/product-category/data-communication-products.jpg",
-            "courseName" to "Data Communication",
-            "visits" to 7
-        ),
-        "CSE 4301" to mapOf(
-            "courseCode" to "CSE 4301",
-            "courseImageLink" to "https://raygun.com/blog/images/oop-concepts-java/feature.png",
-            "courseName" to "Object Oriented Application Development",
-            "visits" to 12
-        )
-    )
-
-    // Upload the data to the "Courses" node
-    coursesRef.setValue(coursesData).addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            println("Courses data uploaded successfully.")
-        } else {
-            println("Failed to upload courses data: ${task.exception?.message}")
-        }
-    }
-}
-
