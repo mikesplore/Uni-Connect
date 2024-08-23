@@ -4,15 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "SignedInUser")
-data class SignedInUser(
-   @PrimaryKey val id: String,
-    val email: String = ""
-){
-    constructor(): this("", "")
-}
-
-
 @Entity(tableName = "admins")
 data class UserEntity(
     @PrimaryKey val id: String = "",
@@ -20,9 +11,10 @@ data class UserEntity(
     val lastName: String = "",
     val email: String = "",
     val phoneNumber: String = "",
-    val profileImageLink: String = ""
+    val profileImageLink: String = "",
+    val userType: String = ""
 ){
-    constructor(): this("", "", "", "", "", "")
+    constructor(): this("", "", "", "", "","", "")
 }
 
 
