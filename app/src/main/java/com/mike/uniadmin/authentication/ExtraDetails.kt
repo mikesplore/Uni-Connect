@@ -46,13 +46,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.notification.showNotification
-
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -164,7 +162,6 @@ fun MoreDetails(context: Context, navController: NavController) {
                                 lastName = lastName,
                                 profileImageLink = imageLink.toString()
                             )
-                            userViewModel.setSignedInUser(signedInUser = SignedInUser(id = "userID", email = email.toString()))
                             userViewModel.writeUser(newUser, onSuccess = {
                                 MyDatabase.generateNotificationID { id ->
                                     notificationViewModel.writeNotification(
