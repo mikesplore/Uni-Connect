@@ -23,7 +23,6 @@ android {
     }
 
     buildTypes {
-
         debug{
             applicationIdSuffix = ".debug"
         }
@@ -59,10 +58,7 @@ dependencies {
     //I've added these dependencies
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler.v250) {
-        exclude(group = "com.intellij", module = "annotations")
-    }
-
+    ksp(libs.androidx.room.compiler.v250) {exclude(group = "com.intellij", module = "annotations")}
     implementation(libs.core)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
@@ -75,7 +71,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.runtime.livedata)
-
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
