@@ -11,16 +11,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,65 +37,75 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.mike.uniadmin.courses.CourseCode
+import com.mike.uniadmin.authentication.UserType
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SplashScreen(navController: NavController, context: Context) {
     var startAnimation by remember { mutableStateOf(false) }
-    var userLoaded by remember { mutableStateOf(false) }
-    var isDatabaseChecked by remember { mutableStateOf(false) }
+    var showBottomSheet by remember { mutableStateOf(false) }
 
-    val scale by animateFloatAsState(targetValue = if (startAnimation) 1f else 0.8f,
-        animationSpec = tween(durationMillis = 800,
-            easing = { OvershootInterpolator(2f).getInterpolation(it) }),
+    val scale by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0.8f,
+        animationSpec = tween(durationMillis = 800, easing = { OvershootInterpolator(2f).getInterpolation(it) }),
         label = ""
     )
 
-    val userViewModel = getUserViewModel(context)
+    val userType = UniAdminPreferences.userType.value
+    val email = UniAdminPreferences.userEmail.value
+    val courseCode = UniAdminPreferences.courseCode.value
 
-    val currentUser by userViewModel.signedInUser.observeAsState()
     val destination = when {
-        currentUser == null -> "login" // User is null, go to login
-        currentUser != null && CourseCode.courseCode.value.isEmpty() -> "courses" // User is not null and course code is empty, go to courses
-        else -> "homeScreen" // Otherwise, go to homeScreen
+        userType.isEmpty() -> null // Show bottom sheet if userType is not selected
+        email.isEmpty() -> "login" // User type selected but email is empty, go to login
+        courseCode.isEmpty() -> "courses" // Email is set but courseCode is empty, go to courses
+        else -> "homeScreen" // All data is present, go to homeScreen
     }
 
-    LaunchedEffect(currentUser) {
-        if (!isDatabaseChecked) {
-            userViewModel.getSignedInUser()
-            isDatabaseChecked = true
-        }
-
-
-        startAnimation = true // Start the animation
-        delay(3000)
-
-        // Check if user data has been fetched
-        if (isDatabaseChecked && currentUser != null) {
-            userLoaded = true
-        } else if (isDatabaseChecked) {
-            userLoaded = true
-        }
-    }
-
-    LaunchedEffect(userLoaded) {
-        if (userLoaded) {
+    LaunchedEffect(userType) {
+        if (userType.isEmpty()) {
+            delay(1000) // Delay to complete the splash animation first
+            showBottomSheet = true // Show the bottom sheet if userType is empty
+        } else if (destination != null) {
             navController.navigate(destination) {
                 popUpTo("splashScreen") { inclusive = true }
             }
         }
     }
 
-    if (currentUser != null) {
-        Log.d("Found User", "User found in the database ${currentUser?.email}")
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    if (email.isNotEmpty()) {
+        Log.d("Found User", "User found in the database $email")
     } else {
         Log.e("Found User", "No User found in the database")
     }
 
+    if (showBottomSheet) {
+        val maxHeight = LocalContext.current.resources.displayMetrics.heightPixels.dp / 2
+        ModalBottomSheet(
+            onDismissRequest = { /* Prevent dismissing until a type is selected */ },
+            containerColor = CC.primary(),
+            modifier = Modifier.heightIn(max = maxHeight * 0.4f) // Adjusted height
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                UserType(context, navController)
+            }
+        }
+    }
+
     Box(
-        contentAlignment = Alignment.Center, modifier = Modifier
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
@@ -123,6 +136,7 @@ fun SplashScreen(navController: NavController, context: Context) {
                 text = "Your Ultimate Educational Companion",
                 style = CC.descriptionTextStyle(context)
             )
+            Spacer(modifier = Modifier.height(24.dp)) // Added more space for better visual balance
         }
 
         CircularProgressIndicator(
@@ -130,11 +144,10 @@ fun SplashScreen(navController: NavController, context: Context) {
             trackColor = CC.primary(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
+                .padding(bottom = 48.dp) // More padding for better positioning
         )
     }
 }
-
 
 @Preview
 @Composable
