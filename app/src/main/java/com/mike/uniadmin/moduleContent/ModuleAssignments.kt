@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
@@ -84,7 +85,11 @@ fun AssignmentsItem(
         ) {
             Row(
                 modifier = Modifier
-                    .background(CC.tertiary().copy(0.1f), RoundedCornerShape(10.dp))
+                    .background(
+                        CC
+                            .tertiary()
+                            .copy(0.1f), RoundedCornerShape(10.dp)
+                    )
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -235,21 +240,16 @@ fun AddAssignmentItem(
     val calendar = Calendar.getInstance()
     val dateFormatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
     val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    val user by userViewModel.signedInUser.observeAsState()
     var senderName by remember { mutableStateOf("") }
     var profileImageLink by remember { mutableStateOf("") }
     var currentUser by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        userViewModel.getSignedInUser()
-        user?.let { signedInUser ->
-            signedInUser.email.let {
-                userViewModel.findUserByEmail(it) { fetchedUser ->
-                    senderName = fetchedUser!!.firstName
-                    profileImageLink = fetchedUser.profileImageLink
-                    currentUser = fetchedUser.id
-                }
-            }
+        val email = UniAdminPreferences.userEmail.value
+        userViewModel.findUserByEmail(email) { fetchedUser ->
+            senderName = fetchedUser!!.firstName
+            profileImageLink = fetchedUser.profileImageLink
+            currentUser = fetchedUser.id
         }
     }
 
