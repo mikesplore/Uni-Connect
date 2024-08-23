@@ -9,13 +9,13 @@ import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetableRe
 import com.mike.uniadmin.backEnd.modules.ModuleRepository
 import com.mike.uniadmin.backEnd.groupchat.GroupChatRepository
 import com.mike.uniadmin.backEnd.notifications.NotificationRepository
-import com.mike.uniadmin.backEnd.programs.CourseRepository
+import com.mike.uniadmin.backEnd.courses.CourseRepository
 import com.mike.uniadmin.backEnd.userchat.UserChatRepository
 import com.mike.uniadmin.backEnd.users.UserRepository
 
 
 class UniAdmin : Application() {
-    val database by lazy { AppDatabase.getDatabase(this) }
+    val database by lazy { UniAdminDatabase.getDatabase(this) }
     val groupChatRepository by lazy { GroupChatRepository(database.groupChatDao(), database.groupDao()) }
     val userChatRepository by lazy { UserChatRepository(database.userChatDao()) }
     val userRepository by lazy { UserRepository(database.userDao(), database.userStateDao(), database.accountDeletionDao(), database.userPreferencesDao(), database.databaseDao()) }
