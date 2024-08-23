@@ -9,7 +9,7 @@ object Global {
 
 object Details {
     var email: MutableState<String> = mutableStateOf("")
-    var firstName: MutableState<String> = mutableStateOf("🔃")
+    var firstName: MutableState<String> = mutableStateOf("")
     var lastName: MutableState<String> = mutableStateOf("")
 
 }
