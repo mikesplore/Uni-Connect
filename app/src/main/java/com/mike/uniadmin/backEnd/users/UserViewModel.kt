@@ -27,36 +27,13 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     private val _accountStatus = MutableLiveData<AccountDeletionEntity?>()
     var accountStatus: LiveData<AccountDeletionEntity?> = _accountStatus
 
-    private val _signedInUser = MutableLiveData<SignedInUser?>()
-    val signedInUser: LiveData<SignedInUser?> = _signedInUser
+
 
     private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
 
     init {
         fetchUsers()
-        getSignedInUser()
-    }
-
-    fun getSignedInUser() {
-        _isLoading.value = true // Set loading to true before fetching
-        repository.getSignedInUser { fetchedUser ->
-            _signedInUser.value = fetchedUser
-            _isLoading.value = false // Set loading to false after fetching
-            Log.d("UserViewModel", "Fetched user: $fetchedUser")
-        }
-    }
-
-    fun setSignedInUser(signedInUser: SignedInUser) {
-        viewModelScope.launch {
-            repository.setSignedInUser(signedInUser)
-        }
-    }
-
-    fun deleteSignedInUser() {
-        viewModelScope.launch {
-            repository.deleteSignedInUser()
-        }
     }
 
     fun deleteAllTables(){
