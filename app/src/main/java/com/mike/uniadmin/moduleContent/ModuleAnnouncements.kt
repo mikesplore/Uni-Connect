@@ -69,6 +69,7 @@ fun AnnouncementsItem(
     userViewModel: UserViewModel
 ) {
     var visible by remember { mutableStateOf(false) }
+    val userType = UniAdminPreferences.userType.value
     val announcements =
         moduleAnnouncementViewModel.announcements.observeAsState(initial = emptyList())
 
@@ -102,6 +103,8 @@ fun AnnouncementsItem(
                 )
             }
             Text("${announcements.value.size} announcements", style = CC.descriptionTextStyle(context))
+
+            if (userType == "admin"){
             FloatingActionButton(
                 onClick = { visible = !visible },
                 modifier = Modifier
@@ -111,7 +114,7 @@ fun AnnouncementsItem(
                 contentColor = CC.textColor()
             ) {
                 Icon(Icons.Default.Add, "Add announcement")
-            }
+            }}
         }
         Spacer(modifier = Modifier.height(10.dp))
         Column(
@@ -163,7 +166,6 @@ fun AnnouncementCard(
             user?.profileImageLink?.let {
                 profileImageLink = it
                 authorName = user.firstName
-
             }
         }
     }
