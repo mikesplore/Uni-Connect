@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
@@ -251,23 +252,20 @@ fun AddAnnouncementItem(
     moduleViewModel: ModuleAnnouncementViewModel,
     userViewModel: UserViewModel
 ) {
-    val user by userViewModel.signedInUser.observeAsState()
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var senderName by remember { mutableStateOf("") }
     var profileImageLink by remember { mutableStateOf("") }
 
+
     LaunchedEffect(Unit) {
-        userViewModel.getSignedInUser()
-        user?.let { signedInUser ->
-            signedInUser.email.let { email ->
-                userViewModel.findUserByEmail(email) { fetchedUser ->
-                    fetchedUser?.let {
-                        senderName = it.id
-                        profileImageLink = it.profileImageLink
-                    }
-                }
+        val email = UniAdminPreferences.userEmail.value
+
+        userViewModel.findUserByEmail(email) { fetchedUser ->
+            fetchedUser?.let {
+                senderName = it.id
+                profileImageLink = it.profileImageLink
             }
         }
     }
