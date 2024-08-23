@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getModuleTimetableViewModel
@@ -59,21 +58,19 @@ fun Dashboard(navController: NavController, context: Context) {
     val fetchedModule by moduleViewModel.fetchedModule.observeAsState()
     val timetable by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
-    val user by userViewModel.user.observeAsState()
+    val currentUser by userViewModel.user.observeAsState()
     val modules by moduleViewModel.modules.observeAsState(emptyList())
-    val signedInUser by userViewModel.signedInUser.observeAsState()
-    var currentUser by remember { mutableStateOf(UserEntity()) }
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
     val modulesLoading by moduleViewModel.isLoading.observeAsState()
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     val moduleName by remember { mutableStateOf(fetchedModule?.moduleName) }
+    val loggedInUserEmail  = UniAdminPreferences.userEmail.value
 
 
 
-    LaunchedEffect(user) {
+    LaunchedEffect(Unit) {
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
-        userViewModel.getSignedInUser()
         timetableViewModel.getTimetableByDay(CC.currentDay())
 
         timetable?.let {
@@ -82,13 +79,9 @@ fun Dashboard(navController: NavController, context: Context) {
             Log.d("TIMETABLE", moduleName.toString())
         }
 
-        signedInUser?.email?.let {
-            userViewModel.findUserByEmail(it) { fetchedUser ->
-                if (fetchedUser != null) {
-                    currentUser = fetchedUser
-                }
-            }
-        }
+            userViewModel.findUserByEmail(loggedInUserEmail) {}
+
+
         while (true) {
             isOnline.value = isDeviceOnline(context)
             delay(10000L) // Check every 10 seconds
@@ -100,12 +93,14 @@ fun Dashboard(navController: NavController, context: Context) {
             .background(CC.primary())
             .fillMaxSize(),
     ) {
-        TopAppBarContent(
-            signedInUser = currentUser,
-            context = context,
-            navController = navController,
-            notificationViewModel = notificationViewModel
-        )
+        currentUser?.let {
+            TopAppBarContent(
+                signedInUser = it,
+                context = context,
+                navController = navController,
+                notificationViewModel = notificationViewModel
+            )
+        }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
