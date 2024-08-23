@@ -32,13 +32,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -247,7 +245,6 @@ fun LoginScreen(navController: NavController, context: Context) {
                             password,
                             userViewModel,
 
-
                             ) {
                             loading = false
                         } else handleSignIn(
@@ -381,10 +378,12 @@ fun handleSignUp(
                         lastName = lastName,
                         profileImageLink = "",
                         phoneNumber = "",
+                        userType = "student"
                     )
                     //save user email to shared preferences
                     UniAdminPreferences.saveUserEmail(email)
 
+                    //save user to database
                     userViewModel.writeUser(newUser) {
                         Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
                     }
@@ -430,25 +429,25 @@ fun handleSignIn(
         firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Details.email.value = email
-                firebaseAuth.currentUser?.email?.let { current ->
-                    userViewModel.findUserByEmail(current) { user ->
-                        if (user != null) {
-                            navController.navigate("courses")
-                            Toast.makeText(
-                                context,
-                                "Welcome back to UniAdmin, ${user.firstName}!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                userViewModel.findUserByEmail(email) { user ->
+                    if (user != null) {
+                        navController.navigate("courses")
+                        Toast.makeText(
+                            context,
+                            "Welcome back to UniAdmin, ${user.firstName}!",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                            //save user email to shared preferences
-                            UniAdminPreferences.saveUserEmail(email)
+                        //save user email and UserType to shared preferences
+                        UniAdminPreferences.saveUserEmail(email)
+                        UniAdminPreferences.saveUserType(user.userType)
 
-                        } else {
-                            Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
-                            navController.navigate("moreDetails")
-                        }
+                    } else {
+                        Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
+                        navController.navigate("moreDetails")
                     }
                 }
+
 
                 FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { tokenTask ->
                     if (!tokenTask.isSuccessful) {
@@ -479,3 +478,4 @@ fun handleSignIn(
 fun SignInScreenPreview() {
     LoginScreen(rememberNavController(), LocalContext.current)
 }
+
