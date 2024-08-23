@@ -1,11 +1,10 @@
-package com.mike.uniadmin.backEnd.modules
+package com.mike.uniadmin.backEnd.courses
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.mike.uniadmin.backEnd.programs.CourseRepository
 import kotlinx.coroutines.launch
 
 class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
@@ -22,14 +21,11 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
     
 
-
-
     init {
         fetchCourses()
         fetchCourseStates()
     }
     
-
 
     private fun fetchCourseStates() {
         repository.fetchCourseStates { fetchedStates ->
