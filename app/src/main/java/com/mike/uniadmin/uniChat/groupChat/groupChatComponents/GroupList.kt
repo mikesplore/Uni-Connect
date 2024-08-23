@@ -38,7 +38,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -62,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
@@ -76,7 +76,7 @@ object GroupDetails {
     var groupImageLink: MutableState<String?> = mutableStateOf("")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun UniGroups(context: Context, navController: NavController) {
 
@@ -85,19 +85,14 @@ fun UniGroups(context: Context, navController: NavController) {
 
     val groups by chatViewModel.groups.observeAsState(emptyList())
     val users by userViewModel.users.observeAsState(emptyList())
-    val signedInUser by userViewModel.signedInUser.observeAsState(initial = null)
     val fetchedUserDetails by userViewModel.user.observeAsState()
     var showAddGroup by remember { mutableStateOf(false) }
+    val email = UniAdminPreferences.userEmail.value
 
-    LaunchedEffect(signedInUser) {
-        userViewModel.getSignedInUser()
-        signedInUser?.email?.let { email ->
-            userViewModel.findUserByEmail(email) {}
-            chatViewModel.fetchGroups()
-        }
+    LaunchedEffect(Unit) {
+        userViewModel.findUserByEmail(email) {}
+        chatViewModel.fetchGroups()
     }
-
-
 
     val userGroups = groups.filter { it.members.contains(fetchedUserDetails?.id) }
     Scaffold(topBar = {
