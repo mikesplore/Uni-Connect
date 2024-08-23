@@ -4,7 +4,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.courses.CourseCode
+import com.mike.uniadmin.UniAdminPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ class ModuleRepository(
     private val attendanceStateDao: AttendanceStateDao,
 ) {
 
-    private val courseCode = CourseCode.courseCode.value
+    private val courseCode = UniAdminPreferences.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Modules")
     private val attendanceStateDatabase = FirebaseDatabase.getInstance().reference.child(courseCode).child("AttendanceStates")
 
