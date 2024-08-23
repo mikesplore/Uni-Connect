@@ -42,7 +42,6 @@ import com.mike.uniadmin.uniChat.userChat.userChatComponents.TopAppBarComponent
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-
 @Composable
 fun UserChatScreen(navController: NavController, context: Context, targetUserId: String) {
 
@@ -204,8 +203,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
                         item {
                             RowDate(
-                                originalTimestamp,
-                                context
+                                originalTimestamp, context
                             ) // Pass the original timestamp to RowDate
                             Spacer(modifier = Modifier.height(8.dp))
                         }
