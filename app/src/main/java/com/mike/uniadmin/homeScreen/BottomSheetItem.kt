@@ -54,8 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -70,15 +70,12 @@ fun ModalDrawerItem(
     activity: MainActivity
 ) {
     val signedInUser by userViewModel.user.observeAsState()
-    val currentUser by userViewModel.signedInUser.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
+    val email = UniAdminPreferences.userEmail.value
 
     LaunchedEffect(Unit) {
-        userViewModel.getSignedInUser()
-        currentUser?.email?.let { email ->
-            userViewModel.findUserByEmail(email) {}
-        }
+        userViewModel.findUserByEmail(email) {}
         userViewModel.fetchUsers()
         chatViewModel.fetchGroups()
     }
@@ -258,7 +255,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                     .size(iconSize)
             ) {
                 Icon(
-                    if (DeviceTheme.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
+                    if (UniAdminPreferences.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
                     "theme",
                     tint = CC.textColor()
                 )
@@ -267,9 +264,9 @@ fun QuickSettings(context: Context, activity: MainActivity) {
             Text("Dark theme ", style = CC.descriptionTextStyle(context))
             Switch(
                 onCheckedChange = {
-                    DeviceTheme.darkMode.value = it
-                    DeviceTheme.saveDarkModePreference(it)
-                }, checked = DeviceTheme.darkMode.value,
+                    UniAdminPreferences.darkMode.value = it
+                    UniAdminPreferences.saveDarkModePreference(it)
+                }, checked = UniAdminPreferences.darkMode.value,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = CC.extraColor1(),
                     uncheckedThumbColor = CC.extraColor2(),
