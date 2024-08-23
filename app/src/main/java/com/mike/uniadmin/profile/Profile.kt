@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getUserViewModel
@@ -68,31 +69,20 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun ProfileScreen(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
-    val signedInUser by userViewModel.signedInUser.observeAsState()
-    var currentUser by remember { mutableStateOf<UserEntity?>(null) }
+    val currentUser by userViewModel.user.observeAsState()
     var updated by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(false) }
+    val email = UniAdminPreferences.userEmail.value
 
-
-    LaunchedEffect(signedInUser) {
-        userViewModel.fetchUsers()
-        userViewModel.getSignedInUser()
-
-        if (signedInUser != null) {
-            val email = signedInUser!!.email
-            Log.d("ProfileScreen", "Finding user by email: $email")
-            userViewModel.findUserByEmail(email) { fetchedUser ->
-                Log.d("ProfileScreen", "Fetched User: $fetchedUser")
-                currentUser = fetchedUser
+    LaunchedEffect(updated) {
+        userViewModel.findUserByEmail(email){ user ->
+            if (user != null) {
                 isLoading = false
             }
-        } else {
-            isLoading = false
         }
     }
 
-    if (isLoading || signedInUser == null || currentUser == null) {
-
+    if (isLoading) {
         // Display a loading indicator while data is being fetched
         Box(
             contentAlignment = Alignment.Center,
@@ -123,6 +113,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
                 val rowHeight = columnWidth * 0.15f
                 val density = LocalDensity.current
                 val textSize = with(density) { (columnWidth * 0.07f).toSp() }
+
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
@@ -145,9 +136,13 @@ fun ProfileScreen(navController: NavController, context: Context) {
                         )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
-                    DisplayImage(context, userViewModel, updated, onUpdateChange = { update ->
+                    DisplayImage(
+                        currentUser,
+                        context,
+                        userViewModel,
+                        updated,
+                        onUpdateChange = { update ->
                         if (update) {
-                            userViewModel.getSignedInUser()
                             userViewModel.fetchUsers()
                             Toast.makeText(
                                 context, "Updated!, please relaunch the screen", Toast.LENGTH_SHORT
@@ -172,9 +167,12 @@ fun ProfileScreen(navController: NavController, context: Context) {
 
 @Composable
 fun DisplayImage(
-    context: Context, viewModel: UserViewModel, updated: Boolean, onUpdateChange: (Boolean) -> Unit
+    currentUser: UserEntity?,
+    context: Context,
+    viewModel: UserViewModel,
+    updated: Boolean,
+    onUpdateChange: (Boolean) -> Unit
 ) {
-    val currentUser by viewModel.user.observeAsState()
     var showImageLinkBox by remember { mutableStateOf(false) }
     var link by remember { mutableStateOf("") }
     var imageClicked by remember { mutableStateOf(false) }
