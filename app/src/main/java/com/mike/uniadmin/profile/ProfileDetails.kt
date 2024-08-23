@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents
 
@@ -34,25 +35,20 @@ fun ProfileDetails(
     updated: Boolean,
     onUpdateChange: (Boolean) -> Unit
 ) {
-    val signedUser by viewModel.signedInUser.observeAsState()
-    val currentUser by viewModel.user.observeAsState()
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
+    val email = UniAdminPreferences.userEmail.value
+    val currentUser by viewModel.user.observeAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getSignedInUser()
-        signedUser?.let {
-            it.email.let { email ->
-                viewModel.findUserByEmail(email, onUserFetched = { fetchedUser ->
-                    firstName = fetchedUser?.firstName.toString()
-                    lastName = fetchedUser?.lastName.toString()
-                    phoneNumber = fetchedUser?.phoneNumber.toString()
+        viewModel.findUserByEmail(email, onUserFetched = { fetchedUser ->
+            firstName = fetchedUser?.firstName.toString()
+            lastName = fetchedUser?.lastName.toString()
+            phoneNumber = fetchedUser?.phoneNumber.toString()
 
-                })
-            }
-        }
+        })
     }
 
     fun saveUserData() {
@@ -84,7 +80,8 @@ fun ProfileDetails(
                     isEditing = !isEditing
                     onUpdateChange(updated)
                 }, colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = CommonComponents.secondary(), contentColor = CommonComponents.textColor()
+                    containerColor = CommonComponents.secondary(),
+                    contentColor = CommonComponents.textColor()
 
                 )
             ) {
