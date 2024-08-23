@@ -102,7 +102,8 @@ fun LoginScreen(navController: NavController, context: Context) {
     LaunchedEffect(Unit) {
         auth.currentUser?.email?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            userViewModel.findUserByEmail(it) {} }
+            userViewModel.findUserByEmail(it) {}
+        }
         visible = true
     }
 
@@ -322,8 +323,21 @@ fun LoginScreen(navController: NavController, context: Context) {
 
 
 fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel) {
-    userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") { user ->
+    val email = FirebaseAuth.getInstance().currentUser?.email ?: ""
+    userViewModel.findUserByEmail(email) { user ->
         if (user != null) {
+            userViewModel.deleteAllTables()
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { tokenTask ->
+                if (!tokenTask.isSuccessful) {
+                    Log.w("FCM", "Fetching FCM registration token failed", tokenTask.exception)
+                    return@OnCompleteListener
+                }
+                val token = tokenTask.result
+                generateFCMID { id ->
+                    val fcmToken = Fcm(id = id, token = token, userId = email)
+                    writeFcmToken(token = fcmToken)
+                }
+            })
             userViewModel.setSignedInUser(
                 SignedInUser(
                     id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
@@ -332,6 +346,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
             navController.navigate("courses") {
                 popUpTo("login") { inclusive = true }
             }
+
         } else {
             navController.navigate("moreDetails") {
                 popUpTo("login") { inclusive = true }
@@ -437,10 +452,11 @@ fun handleSignIn(
                     if (!tokenTask.isSuccessful) {
                         Log.w("FCM", "Fetching FCM registration token failed", tokenTask.exception)
                         return@OnCompleteListener
+
                     }
                     val token = tokenTask.result
                     generateFCMID { id ->
-                        val fcmToken = Fcm(id = id, token = token)
+                        val fcmToken = Fcm(id = id, token = token, userId = email)
                         writeFcmToken(token = fcmToken)
                     }
                 })
