@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,14 +52,13 @@ import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckUpdate(context: Context) {
     var update by remember { mutableStateOf(false) }
     val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
     val versionName = packageInfo.versionName
     var isDownloading by remember { mutableStateOf(false) }
-    var downloadId by remember { mutableLongStateOf(-1L) }
+    val downloadId by remember { mutableLongStateOf(-1L) }
     var myUpdate by remember { mutableStateOf(Update()) }
 
     LaunchedEffect(Unit) {
@@ -171,7 +169,6 @@ fun CheckUpdate(context: Context) {
             downloadUrl = myUpdate.updateLink,
             onDownloadChange = { isDownloading = it }
         )
-
 
     }
 
