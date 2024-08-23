@@ -18,8 +18,8 @@ import com.mike.uniadmin.backEnd.modules.ModuleViewModel
 import com.mike.uniadmin.backEnd.modules.ModuleViewModelFactory
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
-import com.mike.uniadmin.backEnd.modules.CourseViewModel
-import com.mike.uniadmin.backEnd.modules.CourseViewModelFactory
+import com.mike.uniadmin.backEnd.courses.CourseViewModel
+import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
 import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
