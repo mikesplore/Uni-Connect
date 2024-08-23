@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetail
 import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetailViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -64,6 +65,7 @@ fun DetailsItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val details = detailsViewModel.details.observeAsState()
+    val userType = UniAdminPreferences.userType.value
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -93,6 +95,7 @@ fun DetailsItem(
                     Icons.Default.Refresh, contentDescription = "Refresh", tint = CC.textColor()
                 )
             }
+            if (userType == "admin") {
             FloatingActionButton(
                 onClick = { expanded = !expanded },
                 modifier = Modifier
@@ -102,7 +105,7 @@ fun DetailsItem(
                 contentColor = CC.textColor()
             ) {
                 Icon(Icons.Default.Add, "Add timetable")
-            }
+            }}
         }
         Spacer(modifier = Modifier.height(10.dp))
         Column(
