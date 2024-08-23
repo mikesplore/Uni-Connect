@@ -5,7 +5,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.courses.CourseCode
+import com.mike.uniadmin.UniAdminPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 val announcementViewModelScope = CoroutineScope(Dispatchers.Main)
 
 class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
-    private val courseCode = CourseCode.courseCode.value
+    private val courseCode = UniAdminPreferences.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Announcements")
 
     init {
