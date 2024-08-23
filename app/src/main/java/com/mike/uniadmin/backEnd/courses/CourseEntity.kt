@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.modules
+package com.mike.uniadmin.backEnd.courses
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
