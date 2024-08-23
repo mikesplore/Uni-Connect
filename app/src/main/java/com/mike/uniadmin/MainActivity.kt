@@ -15,8 +15,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -32,32 +30,9 @@ import com.mike.uniadmin.helperFunctions.Global
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
-import com.mike.uniadmin.courses.CourseCode
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
-
-
-object DeviceTheme {
-    private lateinit var sharedPreferences: SharedPreferences
-
-    val darkMode: MutableState<Boolean> = mutableStateOf(false)
-
-    fun init(sharedPrefs: SharedPreferences) {
-        sharedPreferences = sharedPrefs
-        darkMode.value = loadDarkModePreference()
-    }
-
-    fun saveDarkModePreference(isDarkMode: Boolean) {
-        val editor = sharedPreferences.edit()
-        editor.putBoolean("DARK_MODE", isDarkMode)
-        editor.apply()
-    }
-
-    private fun loadDarkModePreference(): Boolean {
-        return sharedPreferences.getBoolean("DARK_MODE", true) // Default to true if not found
-    }
-}
 
 
 class MainActivity : AppCompatActivity() {
@@ -106,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
-        CourseCode.initialize(this)
+        UniAdminPreferences.initialize(this)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTheme(R.style.Theme_UniAdmin)
         super.onCreate(savedInstanceState)
@@ -117,11 +92,10 @@ class MainActivity : AppCompatActivity() {
         createNotificationChannel(this)
 
         // Initialize DeviceTheme with sharedPreferences
-        DeviceTheme.init(sharedPreferences)
         auth.addAuthStateListener(authStateListener)
 
         setContent {
-            UniAdminTheme(dynamicColor = false, darkTheme = DeviceTheme.darkMode.value) {
+            UniAdminTheme(dynamicColor = false, darkTheme = UniAdminPreferences.darkMode.value) {
                 NavigationGraph(this, this)
             }
         }
@@ -237,21 +211,4 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-//clear shared preferences
-
-//fun clearAllPreferences(context: Context) {
-//    val prefsDir = File(context.filesDir.parentFile, "shared_prefs")
-//    if (prefsDir.exists() && prefsDir.isDirectory) {
-//        for (file in prefsDir.listFiles() ?: emptyArray()) {
-//            if (file.isFile && file.name.endsWith(".xml")) {
-//                val prefsName = file.name.substringBeforeLast(".xml")
-//                val sharedPreferences =
-//                    context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-//                val editor = sharedPreferences.edit()
-//                editor.clear()
-//                editor.apply()
-//            }
-//        }
-//    }
-//}
 
