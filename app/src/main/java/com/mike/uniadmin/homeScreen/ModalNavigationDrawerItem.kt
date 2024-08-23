@@ -54,15 +54,14 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
-import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.Update
-import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun ModalNavigationDrawerItem(
@@ -73,8 +72,7 @@ fun ModalNavigationDrawerItem(
     userViewModel: UserViewModel,
     chatViewModel: GroupChatViewModel,
     signedInUserLoading: Boolean?,
-    signedInUser: SignedInUser?,
-    fetchedUserDetails: UserEntity?,
+    signedInUser: UserEntity?,
     showBottomSheet: (Boolean) -> Unit,
     userStatus: UserStateEntity?,
     update: Update
@@ -106,7 +104,7 @@ fun ModalNavigationDrawerItem(
                 if (signedInUserLoading == true) {
                     CircularProgressIndicator(color = CC.textColor())
                 } else if (signedInUser != null) {
-                    fetchedUserDetails?.let { SideProfile(it, context) }
+                    SideProfile(signedInUser, context)
                 } else {
                     Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
                 }
@@ -161,7 +159,7 @@ fun ModalNavigationDrawerItem(
                         action = Intent.ACTION_SEND
                         putExtra(
                             Intent.EXTRA_TEXT,
-                            "${fetchedUserDetails?.firstName} invites you to join Uni Admin! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                            "${signedInUser?.firstName} invites you to join Uni Admin! Get organized and ace your studies.\n Download now: ${update.updateLink}"
                         ) // Customize the text
                         type = "text/plain"
                     }
@@ -186,13 +184,14 @@ fun ModalNavigationDrawerItem(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                TextButton(onClick = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                    showSignOutDialog = true
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        showSignOutDialog = true
 
-                },
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = CC.secondary()
                     ),
@@ -289,7 +288,6 @@ fun SignOut(
                         MyDatabase.writeUserActivity(updatedUserStatus, onSuccess = { success ->
                             if (success) {
                                 userViewModel.deleteAllTables()
-                                userViewModel.deleteSignedInUser()
                                 FirebaseAuth.getInstance().signOut()
                                 navController.navigate("login") {
                                     popUpTo("homeScreen") { inclusive = true }
@@ -369,10 +367,10 @@ fun SideProfile(user: UserEntity, context: Context) {
             Text(
                 user.firstName + " " + user.lastName,
                 style = CC.titleTextStyle(context).copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp
-                    ),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp
+                ),
                 maxLines = 2
             )
             Spacer(modifier = Modifier.height(10.dp))
