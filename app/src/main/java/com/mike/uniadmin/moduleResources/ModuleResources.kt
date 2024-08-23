@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.helperFunctions.GridItem
 import com.mike.uniadmin.helperFunctions.MyDatabase.deleteItem
@@ -92,7 +93,7 @@ fun ModuleResources(moduleCode: String, context: Context) {
     LaunchedEffect(moduleCode) {
 
         moduleViewModel.getModuleDetailsByModuleID(moduleCode)
-        
+
         isLoading = true
         readItems(moduleCode, Section.NOTES) { fetchedNotes ->
             notes.addAll(fetchedNotes)
@@ -138,12 +139,13 @@ fun ModuleResources(moduleCode: String, context: Context) {
                 horizontalAlignment = Alignment.CenterHorizontally
 
             ) {
-                Box(modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .height(200.dp)
-                    .fillMaxWidth(),
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .height(200.dp)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
-                    ) {
+                ) {
                     AsyncImage(
                         model = module?.moduleImageLink,
                         contentDescription = "Module Image",
@@ -163,7 +165,11 @@ fun ModuleResources(moduleCode: String, context: Context) {
                     Text(
                         ModuleName.name.value,
                         style = CC.titleTextStyle(context)
-                            .copy(fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, brush = textBrush),
+                            .copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 30.sp,
+                                brush = textBrush
+                            ),
                         modifier = Modifier.fillMaxSize(),
                         textAlign = TextAlign.Center
                     )
@@ -171,14 +177,21 @@ fun ModuleResources(moduleCode: String, context: Context) {
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                Section(title = "Notes",
+                Section(
+                    title = "Notes",
                     items = notes,
                     onAddClick = { showAddSection = Section.NOTES },
-                    onDelete = { gridItem -> notes.remove(gridItem); deleteItem(moduleCode, Section.NOTES, gridItem) },
+                    onDelete = { gridItem ->
+                        notes.remove(gridItem); deleteItem(
+                        moduleCode,
+                        Section.NOTES,
+                        gridItem
+                    )
+                    },
                     context = context
                 )
                 AnimatedVisibility(showAddSection == Section.NOTES) {
-                AddItemSection(context) { title, description, imageUrl, fileUrl ->
+                    AddItemSection(context) { title, description, imageUrl, fileUrl ->
                         val newItem = GridItem(
                             title = title,
                             description = description,
@@ -231,7 +244,7 @@ fun ModuleResources(moduleCode: String, context: Context) {
                     context = context
                 )
                 AnimatedVisibility(showAddSection == Section.RESOURCES) {
-                AddItemSection(context) { title, description, imageUrl, fileUrl ->
+                    AddItemSection(context) { title, description, imageUrl, fileUrl ->
                         val newItem = GridItem(
                             title = title,
                             description = description,
@@ -256,8 +269,11 @@ fun Section(
     onDelete: (GridItem) -> Unit,
     context: Context
 ) {
+    val userType = UniAdminPreferences.userType.value
     Text(
-        text = title, style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(start = 15.dp)
+        text = title,
+        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
+        modifier = Modifier.padding(start = 15.dp)
     )
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -277,13 +293,14 @@ fun Section(
     }
 
     Spacer(modifier = Modifier.height(10.dp))
-
-    Button(
-        onClick = onAddClick, colors = ButtonDefaults.buttonColors(
-            containerColor = CC.extraColor2(), contentColor = Color.White
-        ), shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(start = 15.dp)
-    ) {
-        Text("Add Item", style = CC.descriptionTextStyle(context = context))
+    if (userType == "admin") {
+        Button(
+            onClick = onAddClick, colors = ButtonDefaults.buttonColors(
+                containerColor = CC.extraColor2(), contentColor = Color.White
+            ), shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(start = 15.dp)
+        ) {
+            Text("Add Item", style = CC.descriptionTextStyle(context = context))
+        }
     }
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -357,7 +374,9 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
         modifier = Modifier
             .border(
                 width = 1.dp,
-                color = CC.extraColor2().copy(alpha = 0.5f),
+                color = CC
+                    .extraColor2()
+                    .copy(alpha = 0.5f),
                 shape = RoundedCornerShape(12.dp)
             )
             .fillMaxWidth(0.9f)
@@ -365,7 +384,11 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
             .padding(16.dp)
             .imePadding()
     ) {
-        Text("Add New Item", style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 20.sp))
+        Text(
+            "Add New Item",
+            style = CC.descriptionTextStyle(context)
+                .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -400,19 +423,21 @@ fun AddItemSection(context: Context, onAddItem: (String, String, String, String)
         Row(
             horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
         ) {
-            Button(onClick = {
-                if (title.isEmpty() || description.isEmpty() || imageUrl.isEmpty() || fileUrl.isEmpty()) {
-                    Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-                onAddItem(
-                    title, description, imageUrl, fileUrl)
-                     title = ""
-                     description = ""
+            Button(
+                onClick = {
+                    if (title.isEmpty() || description.isEmpty() || imageUrl.isEmpty() || fileUrl.isEmpty()) {
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    onAddItem(
+                        title, description, imageUrl, fileUrl
+                    )
+                    title = ""
+                    description = ""
                     imageUrl = ""
                     fileUrl = ""
 
-                             },
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CC.secondary()
                 ),
@@ -441,7 +466,12 @@ fun InputDialogTextField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(label, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f))) },
+        placeholder = {
+            Text(
+                label,
+                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f))
+            )
+        },
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = CC.tertiary(),
             unfocusedIndicatorColor = CC.secondary(),
