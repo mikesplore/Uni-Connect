@@ -54,8 +54,8 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.helperFunctions.randomColor
+import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.UsersProfile
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -66,12 +66,9 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun UniChat(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
     val messageViewModel = getUserChatViewModel(context)
-
     val searchQuery by remember { mutableStateOf("") }
-
     val userStates by userViewModel.userStates.observeAsState(emptyMap())
     val currentUser by userViewModel.user.observeAsState()
-
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val users by userViewModel.users.observeAsState()
@@ -178,8 +175,10 @@ fun ChatsScreen(
     userViewModel: UserViewModel
 ) {
     val usersWithMessages = filteredUsers.filter { user ->
-        val conversationId = "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
-        val messages by userChatViewModel.getCardUserChats(conversationId).observeAsState(emptyList())
+        val conversationId =
+            "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
+        val messages by userChatViewModel.getCardUserChats(conversationId)
+            .observeAsState(emptyList())
         messages.isNotEmpty()
     }
 
@@ -197,7 +196,7 @@ fun ChatsScreen(
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            ){
+        ) {
 
             UsersList(userViewModel, context)
             Spacer(modifier = Modifier.height(16.dp))
@@ -261,39 +260,29 @@ private fun UsersList(userViewModel: UserViewModel, context: Context) {
 }
 
 @Composable
-private fun UserCard(user: UserEntity, context: Context){
-    Box(modifier = Modifier
-        .background(randomColor.random(), CircleShape)
-        .clip(CircleShape)
-        .border(
-            1.dp,
-            CC.secondary(),
-            CircleShape
-        )
-        .size(40.dp),
-        contentAlignment = Alignment.Center){
-        if (user.profileImageLink.isNotBlank()){
-        AsyncImage(
-            model = user.profileImageLink,
-            contentDescription = user.firstName,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-        else{
+private fun UserCard(user: UserEntity, context: Context) {
+    Box(
+        modifier = Modifier
+            .background(randomColor.random(), CircleShape)
+            .clip(CircleShape)
+            .border(
+                1.dp,
+                CC.secondary(),
+                CircleShape
+            )
+            .size(40.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (user.profileImageLink.isNotBlank()) {
+            AsyncImage(
+                model = user.profileImageLink,
+                contentDescription = user.firstName,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
             Text(text = user.firstName[0].toString(), style = CC.descriptionTextStyle(context))
         }
     }
 
 }
-
-
-
-
-//AnimatedVisibility(pagerState.currentPage == 0, enter = fadeIn(), exit = fadeOut()) {
-//    LazyRow(modifier = Modifier.padding(start = 15.dp)) {
-//        items(users ?: emptyList()) { user ->
-//            UserItem(user, context, navController, userViewModel)
-//        }
-//    }
-//}
