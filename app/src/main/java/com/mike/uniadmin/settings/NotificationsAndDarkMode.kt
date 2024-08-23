@@ -29,8 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.DeviceTheme
 import com.mike.uniadmin.MainActivity
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase.generateSharedPreferencesID
@@ -38,9 +38,9 @@ import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
 fun DarkMode(context: Context) {
-    val icon = if (DeviceTheme.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
+    val icon = if (UniAdminPreferences.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
     val iconDescription =
-        if (DeviceTheme.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
+        if (UniAdminPreferences.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
     BoxWithConstraints {
         val columnWidth = maxWidth
         val iconSize = columnWidth * 0.10f
@@ -67,11 +67,11 @@ fun DarkMode(context: Context) {
             Text("Dark Mode", style = CommonComponents.descriptionTextStyle(context), fontSize = 20.sp)
             Switch(
                 onCheckedChange = {
-                    DeviceTheme.darkMode.value = it
-                    DeviceTheme.saveDarkModePreference(it)
+                    UniAdminPreferences.darkMode.value = it
+                    UniAdminPreferences.saveDarkModePreference(it)
 
                 },
-                checked = DeviceTheme.darkMode.value,
+                checked = UniAdminPreferences.darkMode.value,
                 colors = switchColors(),
                 modifier = Modifier.size(iconSize)
             )
