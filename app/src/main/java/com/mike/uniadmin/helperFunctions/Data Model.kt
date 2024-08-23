@@ -35,7 +35,8 @@ data class Feedback(
 
 data class Fcm(
     val id: String = "",
-    val token: String = ""
+    val token: String = "",
+    val userId: String = ""
 )
 
 
