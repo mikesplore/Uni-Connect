@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
@@ -57,10 +57,7 @@ fun UserItem(
     var visible by remember { mutableStateOf(false) }
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
-    val signedInUser by viewModel.signedInUser.observeAsState()
-    LaunchedEffect(Unit) {
-        viewModel.getSignedInUser()
-    }
+
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -122,7 +119,8 @@ fun UserItem(
             )
         }
         Spacer(modifier = Modifier.height(5.dp))
-        val displayName = if(signedInUser?.id == user.id) "You" else user.firstName
+        val email = UniAdminPreferences.userEmail.value
+        val displayName = if(email == user.email) "You" else user.firstName
         Text(
             text = displayName.let {
                 if (it.length > 10) it.substring(0, 10) + "..." else it
