@@ -49,6 +49,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetable
 import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetableViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
@@ -60,6 +61,7 @@ fun TimetableItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
+    val userType = UniAdminPreferences.userType.value
 
     Column(
         modifier = Modifier
@@ -91,6 +93,7 @@ fun TimetableItem(
                 )
             }
             Text("${timetables.value.size} timetables", style = CC.descriptionTextStyle(context))
+            if (userType == "admin"){
             FloatingActionButton(
                 onClick = { expanded = !expanded },
                 modifier = Modifier
@@ -100,7 +103,7 @@ fun TimetableItem(
                 contentColor = CC.textColor()
             ) {
                 Icon(Icons.Default.Add, "Add timetable")
-            }
+            }}
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(
