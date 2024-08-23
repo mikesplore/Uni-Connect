@@ -31,25 +31,6 @@ class UserRepository(
     }
 
 
-    fun getSignedInUser(onSuccess: (SignedInUser?) -> Unit) {
-        viewModelScope.launch {
-            val signedInUser = userDao.getSignedInUser()
-            onSuccess(signedInUser)
-        }
-    }
-
-
-    fun setSignedInUser(signedInUser: SignedInUser) {
-        viewModelScope.launch {
-            userDao.insertSignedInUser(signedInUser)
-        }
-    }
-
-    fun deleteSignedInUser() {
-        viewModelScope.launch {
-            userDao.deleteSignedInUser()
-        }
-    }
 
     fun deleteAllTables() {
         viewModelScope.launch {
