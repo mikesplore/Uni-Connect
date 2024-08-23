@@ -25,16 +25,15 @@ import com.mike.uniadmin.backEnd.groupchat.GroupDao
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.notifications.NotificationDao
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.modules.CourseDao
-import com.mike.uniadmin.backEnd.modules.CourseEntity
-import com.mike.uniadmin.backEnd.modules.CourseState
-import com.mike.uniadmin.backEnd.modules.CourseStateDao
+import com.mike.uniadmin.backEnd.courses.CourseDao
+import com.mike.uniadmin.backEnd.courses.CourseEntity
+import com.mike.uniadmin.backEnd.courses.CourseState
+import com.mike.uniadmin.backEnd.courses.CourseStateDao
 import com.mike.uniadmin.backEnd.userchat.UserChatDAO
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
 import com.mike.uniadmin.backEnd.users.AccountDeletionDao
 import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
 import com.mike.uniadmin.backEnd.users.DatabaseDao
-import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserDao
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserPreferencesDao
@@ -59,7 +58,6 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
         ModuleDetail::class,
         ModuleTimetable::class,
         AttendanceState::class,
-        SignedInUser::class,
         CourseEntity::class,
         CourseState::class,
                ],
@@ -67,7 +65,7 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
     exportSchema = false
 )
 @TypeConverters(Converters::class)
-abstract class AppDatabase : RoomDatabase() {
+abstract class UniAdminDatabase : RoomDatabase() {
     abstract fun groupChatDao(): GroupChatDao
     abstract fun groupDao(): GroupDao
     abstract fun userChatDao(): UserChatDAO
@@ -89,24 +87,17 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
-        private var INSTANCE: AppDatabase? = null
+        private var INSTANCE: UniAdminDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        fun getDatabase(context: Context): UniAdminDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext, AppDatabase::class.java, "Uni_Admin_Database"
+                    context.applicationContext, UniAdminDatabase::class.java, "UniAdmin_Database"
                 ).build()
                 INSTANCE = instance
                 instance
             }
         }
     }
-
 }
-
-//val MIGRATION_2_3 = object : Migration(1, 2) {
-//    override fun migrate(db: SupportSQLiteDatabase) {
-//        db.execSQL("ALTER TABLE moduleAssignments ADD COLUMN authorID TEXT")
-//    }
-//}
 
