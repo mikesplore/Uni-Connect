@@ -27,15 +27,6 @@ interface UserDao {
     @Query("SELECT * FROM admins WHERE id = :userID")
     suspend fun getUserByID(userID: String): UserEntity?
 
-    @Query("SELECT * FROM SignedInUser")
-    suspend fun getSignedInUser(): SignedInUser
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSignedInUser(signedInUser: SignedInUser)
-
-    @Query("DELETE FROM SignedInUser")
-    suspend fun deleteSignedInUser()
-
     @Query("SELECT id FROM admins")
     suspend fun getAllUserIds(): List<String>
 
@@ -126,8 +117,6 @@ interface DatabaseDao {
     @Query("DELETE FROM userState")
     suspend fun deleteUserStates()
 
-    @Query("DELETE FROM SignedInUser")
-    suspend fun deleteSignedInUser()
 
     @Query("DELETE FROM notifications")
     suspend fun deleteAllNotifications()
@@ -150,6 +139,5 @@ interface DatabaseDao {
         deleteAccountDeletions()
         deleteUserPreferences()
         deleteUserStates()
-        deleteSignedInUser()
     }
 }
