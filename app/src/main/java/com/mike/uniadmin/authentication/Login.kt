@@ -32,11 +32,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,9 +59,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
 import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
-import com.mike.uniadmin.backEnd.users.SignedInUser
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getNotificationViewModel
@@ -93,6 +95,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
     val notificationViewModel = getNotificationViewModel(context)
 
+
     val brush = Brush.verticalGradient(
         colors = listOf(
             CC.primary(), CC.secondary()
@@ -107,7 +110,6 @@ fun LoginScreen(navController: NavController, context: Context) {
         visible = true
     }
 
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -115,7 +117,8 @@ fun LoginScreen(navController: NavController, context: Context) {
                     containerColor = CC.primary()
                 )
             )
-        }, containerColor = CC.primary()
+        },
+        containerColor = CC.primary()
     ) {
         Column(
             modifier = Modifier
@@ -338,11 +341,8 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                     writeFcmToken(token = fcmToken)
                 }
             })
-            userViewModel.setSignedInUser(
-                SignedInUser(
-                    id = "userID", email = FirebaseAuth.getInstance().currentUser?.email ?: ""
-                )
-            )
+
+            UniAdminPreferences.saveUserEmail(email)
             navController.navigate("courses") {
                 popUpTo("login") { inclusive = true }
             }
@@ -382,8 +382,8 @@ fun handleSignUp(
                         profileImageLink = "",
                         phoneNumber = "",
                     )
-                    val signedInUser = SignedInUser(id = "userID", email = email)
-                    userViewModel.setSignedInUser(signedInUser)
+                    //save user email to shared preferences
+                    UniAdminPreferences.saveUserEmail(email)
 
                     userViewModel.writeUser(newUser) {
                         Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
@@ -439,8 +439,10 @@ fun handleSignIn(
                                 "Welcome back to UniAdmin, ${user.firstName}!",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            val signedInUser = SignedInUser(id = "userID", email = email)
-                            userViewModel.setSignedInUser(signedInUser)
+
+                            //save user email to shared preferences
+                            UniAdminPreferences.saveUserEmail(email)
+
                         } else {
                             Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
                             navController.navigate("moreDetails")
