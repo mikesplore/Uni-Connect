@@ -7,8 +7,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.users.UserStateEntity
-import com.mike.uniadmin.courses.CourseCode
 import java.util.Calendar
 import java.util.Locale
 
@@ -18,7 +18,7 @@ data class Update(
     val updateLink: String = ""
 )
 
-private val courseCode = CourseCode.courseCode.value
+private val courseCode = UniAdminPreferences.courseCode.value
 
 
 object MyDatabase {
