@@ -275,6 +275,48 @@ object MyDatabase {
         }
     }
 
+    private fun checkAttendanceRecord(
+        studentID: String,
+        courseCode: String,
+        date: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        val key = "Attendances/$courseCode/$studentID"
+        database.child(key).orderByChild("date").equalTo(date)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        onResult(true) // Attendance record found for today
+                    } else {
+                        onResult(false) // No attendance record found for today
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Error checking attendance record: ${error.message}")
+                    onResult(false) // Error occurred, consider it as no record found
+                }
+            })
+    }
+
+    fun fetchAttendances(
+        studentID: String, courseCode: String, onAttendanceFetched: (List<Attendance>) -> Unit
+    ) {
+        val attendanceRef = database.child("Attendances/$courseCode/$studentID")
+        attendanceRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val attendances =
+                    snapshot.children.mapNotNull { it.getValue(Attendance::class.java) }
+                onAttendanceFetched(attendances)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle the error, maybe pass an empty list or an error state to the callback
+                onAttendanceFetched(emptyList())
+            }
+        })
+    }
+
     fun setUpdate(update: Update) {
         val updatesRef = database.child("Updates")
         updatesRef.setValue(update)
