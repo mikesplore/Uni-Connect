@@ -1,14 +1,10 @@
-package com.mike.uniadmin.backEnd.programs
+package com.mike.uniadmin.backEnd.courses
 
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.backEnd.modules.CourseDao
-import com.mike.uniadmin.backEnd.modules.CourseEntity
-import com.mike.uniadmin.backEnd.modules.CourseState
-import com.mike.uniadmin.backEnd.modules.CourseStateDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
