@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
+import com.mike.uniadmin.attendance.SignAttendance
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
@@ -31,10 +32,15 @@ import com.mike.uniadmin.ui.theme.Appearance
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "homeScreen") {
+    NavHost(navController = navController, startDestination = "attendance") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
+        }
+        composable("attendance", exitTransition = {
+            fadeOut(animationSpec = tween(300))
+        }) {
+            SignAttendance(context)
         }
 
         composable("login", exitTransition = {
