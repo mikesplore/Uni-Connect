@@ -71,7 +71,6 @@ fun ManageAttendanceScreen(context: Context) {
             TopAppBar(
                 title = {},
                 actions = {
-
                     IconButton(onClick = {
                         showAddModule = !showAddModule
 
