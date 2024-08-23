@@ -32,6 +32,13 @@ data class Feedback(
     val admissionNumber: String = ""
 )
 
+data class Attendance(
+    val id: String = "",
+    val date: String = "",
+    val status: String = "",
+    val studentId: String = ""
+)
+
 
 data class Fcm(
     val id: String = "",
