@@ -56,7 +56,7 @@ import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun UserMessageCard(
@@ -88,7 +88,7 @@ fun UserMessageCard(
             IconButton(
                 onClick = { },
                 modifier = Modifier
-                    .border(1.dp, CommonComponents.secondary(), CircleShape)
+                    .border(1.dp, CC.secondary(), CircleShape)
                     .clip(CircleShape)
                     .size(50.dp)
             ) {
@@ -105,7 +105,7 @@ fun UserMessageCard(
                 Row {
                     Text(
                         text = if (userEntity.id == currentUser?.id) "You" else userEntity.firstName,
-                        style = CommonComponents.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle(context)
                             .copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -114,13 +114,13 @@ fun UserMessageCard(
                     if (messageCounter.toString() != "0") {
                         Box(
                             modifier = Modifier.background(
-                                CommonComponents.secondary(),
+                                CC.secondary(),
                                 CircleShape
                             )
                         ) {
                             Text(
                                 messageCounter.toString(),
-                                style = CommonComponents.descriptionTextStyle(context)
+                                style = CC.descriptionTextStyle(context)
                                     .copy(fontSize = 10.sp),
                                 modifier = Modifier.padding(2.dp)
                             )
@@ -133,9 +133,9 @@ fun UserMessageCard(
 
                     Text(
                         text = "$senderName ${createAnnotatedMessage(createAnnotatedText(it).toString())}",
-                        style = CommonComponents.descriptionTextStyle(context).copy(
+                        style = CC.descriptionTextStyle(context).copy(
                                 fontSize = 14.sp,
-                                color = CommonComponents.extraColor2().copy(alpha = 0.8f)
+                                color = CC.extraColor2().copy(alpha = 0.8f)
                             ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -152,7 +152,7 @@ fun UserMessageCard(
                 if (userState == null) {
                     Text(
                         text = "Never Online",
-                        style = CommonComponents.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle(context)
                             .copy(fontSize = 10.sp),
                         color = Color.Gray // Or any color you prefer for "Never Online"
                     )
@@ -163,18 +163,18 @@ fun UserMessageCard(
                             text = when {
                                 status.online == "online" -> "Online"
                                 else -> "${
-                                    CommonComponents.getRelativeDate(
-                                        CommonComponents.getCurrentDate(
+                                    CC.getRelativeDate(
+                                        CC.getDateFromTimeStamp(
                                             status.lastDate
                                         )
                                     )
                                 } at ${
-                                    CommonComponents.getFormattedTime(
+                                    CC.getFormattedTime(
                                         status.lastTime
                                     )
                                 }"
                             },
-                            style = CommonComponents.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle(context)
                                 .copy(fontSize = 10.sp),
                             color = textColor
                         )
@@ -184,10 +184,10 @@ fun UserMessageCard(
 
                 latestMessage?.timeStamp?.let {
                     Text(
-                        text = CommonComponents.getRelativeTime(it),
-                        style = CommonComponents.descriptionTextStyle(context)
+                        text = CC.getRelativeTime(it),
+                        style = CC.descriptionTextStyle(context)
                             .copy(fontSize = 12.sp),
-                        color = CommonComponents.textColor().copy(alpha = 0.6f)
+                        color = CC.textColor().copy(alpha = 0.6f)
                     )
                 }
             }
@@ -222,7 +222,7 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
                 if (currentUser != null) {
                     Text(
                         (currentUser.firstName[0].toString()) + currentUser.lastName[0],
-                        style = CommonComponents.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle(context)
                             .copy(fontWeight = FontWeight.Bold)
                     )
                 }
@@ -266,14 +266,14 @@ fun AlertDialogComponent(
             } else {
                 Box(
                     modifier = Modifier
-                        .background(CommonComponents.extraColor1())
+                        .background(CC.extraColor1())
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = "Profile Image",
-                        tint = CommonComponents.textColor()
+                        tint = CC.textColor()
                     )
                 }
             }
@@ -281,7 +281,7 @@ fun AlertDialogComponent(
                 modifier = Modifier
                     .height(30.dp)
                     .background(
-                        CommonComponents
+                        CC
                             .primary()
                             .copy(0.5f)
                     )
@@ -292,7 +292,7 @@ fun AlertDialogComponent(
                 currentUser?.let { user ->
                     Text(
                         "${user.firstName} ${user.lastName}",
-                        style = CommonComponents.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle(context)
                             .copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.padding(start = 10.dp)
                     )
@@ -302,7 +302,7 @@ fun AlertDialogComponent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(CommonComponents.primary())
+                    .background(CC.primary())
                     .align(Alignment.BottomCenter),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
@@ -315,7 +315,7 @@ fun AlertDialogComponent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Message,
                         contentDescription = "Chat",
-                        tint = CommonComponents.textColor() // Use a custom color from your theme
+                        tint = CC.textColor() // Use a custom color from your theme
                     )
                 }
                 IconButton(onClick = {
@@ -327,7 +327,7 @@ fun AlertDialogComponent(
                     Icon(
                         imageVector = Icons.Filled.Call,
                         contentDescription = "Call",
-                        tint = CommonComponents.textColor() // Use a custom color from your theme
+                        tint = CC.textColor() // Use a custom color from your theme
                     )
                 }
             }
@@ -356,7 +356,7 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
 
             append(message.substring(startIndex, emojiIndex))
             addStyle(
-                SpanStyle(color = CommonComponents.textColor().copy(alpha = 0.5f)), startIndex, emojiIndex
+                SpanStyle(color = CC.textColor().copy(alpha = 0.5f)), startIndex, emojiIndex
             ) // Apply color to non-emoji text
 
             append(emoji)
@@ -366,7 +366,7 @@ fun createAnnotatedMessage(message: String): AnnotatedString {
 
         append(message.substring(startIndex))
         addStyle(
-            SpanStyle(color = CommonComponents.secondary().copy(alpha = 0.5f)), startIndex, message.length
+            SpanStyle(color = CC.secondary().copy(alpha = 0.5f)), startIndex, message.length
         ) // Apply color to non-emoji text
     }
 }
