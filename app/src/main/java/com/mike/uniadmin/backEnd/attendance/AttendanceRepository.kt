@@ -54,8 +54,8 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
         viewModelScope.launch {
             attendanceDao.insertAttendance(attendance)
             // Update Firebase under the specific course and student
-            database.child(attendance.courseId).child(attendance.studentId)
-                .push().setValue(attendance)
+            database.child(attendance.moduleId).child(attendance.studentId)
+                .child(attendance.id).setValue(attendance)
         }
     }
 
