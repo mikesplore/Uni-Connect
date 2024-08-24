@@ -382,7 +382,7 @@ fun AddAssignmentItem(
                             title = title,
                             description = description,
                             dueDate = completeDueDate,
-                            publishedDate = CC.getCurrentDate(CC.getTimeStamp())
+                            publishedDate = CC.getDateFromTimeStamp(CC.getTimeStamp())
                         )
                         assignmentViewModel.saveModuleAssignment(
                             moduleID = moduleID,
