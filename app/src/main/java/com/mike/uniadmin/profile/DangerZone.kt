@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlin.random.Random
 
 @Composable
@@ -72,51 +72,51 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
             Row {
                 Text(
                     "Danger Zone",
-                    style = CommonComponents.titleTextStyle(context).copy(color = Color.Red.copy(0.7f))
+                    style = CC.titleTextStyle(context).copy(color = Color.Red.copy(0.7f))
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row {
-                Text("Delete Account", style = CommonComponents.descriptionTextStyle(context))
+                Text("Delete Account", style = CC.descriptionTextStyle(context))
             }
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = {
                     showPuzzle = !showPuzzle
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = CommonComponents.secondary()),
+                colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Solve a Puzzle before proceeding", style = CommonComponents.descriptionTextStyle(context))
+                Text("Solve a Puzzle before proceeding", style = CC.descriptionTextStyle(context))
             }
 
             if (showPuzzle) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     "Please enter the following code:",
-                    style = CommonComponents.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+                    style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    puzzleWords, style = CommonComponents.titleTextStyle(context), color = CommonComponents.tertiary()
+                    puzzleWords, style = CC.titleTextStyle(context), color = CC.tertiary()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 TextField(
-                    value = userInput, textStyle = CommonComponents.titleTextStyle(context).copy(
-                        fontSize = 18.sp, color = if (isError) Color.Red else CommonComponents.textColor()
+                    value = userInput, textStyle = CC.titleTextStyle(context).copy(
+                        fontSize = 18.sp, color = if (isError) Color.Red else CC.textColor()
                     ), onValueChange = {
                         isError = false
                         userInput = it
                     }, isError = isError, colors = TextFieldDefaults.colors(
-                        unfocusedIndicatorColor = CommonComponents.tertiary(),
-                        focusedIndicatorColor = CommonComponents.tertiary(),
+                        unfocusedIndicatorColor = CC.tertiary(),
+                        focusedIndicatorColor = CC.tertiary(),
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
-                        focusedTextColor = CommonComponents.textColor(),
-                        unfocusedTextColor = CommonComponents.textColor(),
+                        focusedTextColor = CC.textColor(),
+                        unfocusedTextColor = CC.textColor(),
                         errorIndicatorColor = Color.Red,
-                        errorContainerColor = CommonComponents.primary(),
-                        cursorColor = CommonComponents.textColor()
+                        errorContainerColor = CC.primary(),
+                        cursorColor = CC.textColor()
                     ), singleLine = true, modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(60.dp)
@@ -137,17 +137,17 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                                 puzzleWords = generateRandomNonsenseWord()
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = CommonComponents.secondary()),
+                        colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Proceed", style = CommonComponents.descriptionTextStyle(context))
+                        Text("Proceed", style = CC.descriptionTextStyle(context))
                     }
                     Button(
                         onClick = { showPuzzle = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = CommonComponents.secondary()),
+                        colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Abort", style = CommonComponents.descriptionTextStyle(context))
+                        Text("Abort", style = CC.descriptionTextStyle(context))
                     }
                 }
 
@@ -158,43 +158,43 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                     ) {
                         Text(
                             text = "Important Notice: Account Deletion",
-                            style = CommonComponents.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle(context).copy(
                                 fontWeight = FontWeight.Bold, color = Color.Red
                             )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Deletion Timeline",
-                            style = CommonComponents.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle(context)
                                 .copy(fontWeight = FontWeight.SemiBold)
                         )
                         Text(
                             text = "Your account will be permanently deleted within 30 days. You will have full access until then.",
-                            style = CommonComponents.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle(context).copy(
                                 textAlign = TextAlign.Center, color = Color.Red.copy(0.5f)
                             )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Data Deletion",
-                            style = CommonComponents.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle(context)
                                 .copy(fontWeight = FontWeight.SemiBold)
                         )
                         Text(
                             text = "Upon deletion, all associated data will be permanently erased, including profile information, user content, and settings.",
-                            style = CommonComponents.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle(context).copy(
                                 textAlign = TextAlign.Center
                             )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Account Reversal",
-                            style = CommonComponents.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle(context)
                                 .copy(fontWeight = FontWeight.SemiBold)
                         )
                         Text(
                             text = "If you wish to reverse the deletion process, please contact our support team before the 30-day period expires.",
-                            style = CommonComponents.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle(context).copy(
                                 textAlign = TextAlign.Center
                             )
                         )
@@ -209,7 +209,7 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                                     id = it.id,
                                     email = it.email,
                                     admissionNumber = it.id,
-                                    date = CommonComponents.getTimeStamp(),
+                                    date = CC.getTimeStamp(),
                                     status = "pending"
                                 )
                             }
@@ -240,12 +240,12 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                     ) {
                         if (loading) {
                             CircularProgressIndicator(
-                                color = CommonComponents.primary(), modifier = Modifier.size(24.dp)
+                                color = CC.primary(), modifier = Modifier.size(24.dp)
                             )
                         } else {
                             Text(
                                 "Send Account Deletion Request",
-                                style = CommonComponents.descriptionTextStyle(context)
+                                style = CC.descriptionTextStyle(context)
                             )
                         }
                     }
@@ -272,17 +272,17 @@ fun AccountDeletionRequests(
         ) {
             Text(
                 "Pending Account Deletion Request",
-                style = CommonComponents.titleTextStyle(context = context),
+                style = CC.titleTextStyle(context = context),
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "You have a pending account deletion request that was initiated on ${
-                    CommonComponents.getCurrentDate(
+                    CC.getDateFromTimeStamp(
                         accountStatus.date
                     )
                 }. Your account will be permanently deleted after 30 days from this date.",
-                style = CommonComponents.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle(context)
             )
         }
     }
