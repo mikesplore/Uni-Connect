@@ -1,5 +1,6 @@
 package com.mike.uniadmin.backEnd.attendance
 
+import android.util.Log
 import com.google.firebase.database.*
 import com.mike.uniadmin.UniAdminPreferences
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
                         val attendance = attendanceSnapshot.getValue(AttendanceEntity::class.java)
                         attendance?.let {
                             attendanceList.add(it)
+                            Log.d("AttendanceRepository", "Attendance fetched from Firebase: $it")
                         }
                     }
 
@@ -49,15 +51,23 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
         }
     }
 
-    // Function to insert attendance into both local and Firebase database
-    fun insertAttendance(attendance: AttendanceEntity) {
+    fun signAttendance(attendance: AttendanceEntity, success: (Boolean) -> Unit) {
         viewModelScope.launch {
+            // Insert into Room database
             attendanceDao.insertAttendance(attendance)
             // Update Firebase under the specific course and student
             database.child(attendance.moduleId).child(attendance.studentId)
                 .child(attendance.id).setValue(attendance)
+                .addOnSuccessListener {
+                    success(true)
+                }
+                .addOnFailureListener {
+                    success(false)
+                }
+
         }
     }
+
 
     // Function to continuously listen for attendance updates from Firebase
     fun syncAttendanceUpdates() {
