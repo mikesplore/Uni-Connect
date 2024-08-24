@@ -46,7 +46,7 @@ import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.notification.showNotification
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AddAnnouncement(
@@ -79,7 +79,7 @@ fun AddAnnouncement(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .imePadding()
-            .border(1.dp, CommonComponents.extraColor2(), RoundedCornerShape(10.dp))
+            .border(1.dp, CC.extraColor2(), RoundedCornerShape(10.dp))
             .fillMaxWidth(0.9f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -91,7 +91,7 @@ fun AddAnnouncement(
         ) {
             Text(
                 "Add new Announcement",
-                style = CommonComponents.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -107,10 +107,10 @@ fun AddAnnouncement(
             Box(
                 modifier = Modifier
                     .border(
-                        1.dp, CommonComponents.textColor(), CircleShape
+                        1.dp, CC.textColor(), CircleShape
                     )
                     .clip(CircleShape)
-                    .background(CommonComponents.secondary(), CircleShape)
+                    .background(CC.secondary(), CircleShape)
                     .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -124,15 +124,15 @@ fun AddAnnouncement(
                 } else {
                     Text(
                         "${user?.firstName?.get(0)}",
-                        style = CommonComponents.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
 
-            Text(CommonComponents.getCurrentDate(CommonComponents.getTimeStamp()), style = CommonComponents.descriptionTextStyle(context))
+            Text(CC.getDateFromTimeStamp(CC.getTimeStamp()), style = CC.descriptionTextStyle(context))
         }
 
-        Text("Enter announcement title", style = CommonComponents.descriptionTextStyle(context))
+        Text("Enter announcement title", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
 
         AnnouncementTextField(
@@ -144,7 +144,7 @@ fun AddAnnouncement(
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-        Text("Enter announcement description", style = CommonComponents.descriptionTextStyle(context))
+        Text("Enter announcement description", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
 
         AnnouncementTextField(
@@ -166,7 +166,7 @@ fun AddAnnouncement(
                             id = id,
                             title = title,
                             description = description,
-                            date = CommonComponents.getTimeStamp(),
+                            date = CC.getTimeStamp(),
                             authorName = author,
                             authorID = senderId,
                             imageLink = profileLink
@@ -178,8 +178,8 @@ fun AddAnnouncement(
                                         showNotification(context, title, description)
                                         notificationViewModel.writeNotification(
                                             notificationEntity = NotificationEntity(
-                                                time = CommonComponents.getTimeStamp(),
-                                                date = CommonComponents.getTimeStamp(),
+                                                time = CC.getTimeStamp(),
+                                                date = CC.getTimeStamp(),
                                                 name = author,
                                                 userId = senderId,
                                                 description = description,
@@ -206,13 +206,13 @@ fun AddAnnouncement(
                     }
                 }, modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CommonComponents.extraColor2(),
+                    containerColor = CC.extraColor2(),
                 )
             ) {
                 if (loading) {
-                    CircularProgressIndicator(color = CommonComponents.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(20.dp))
+                    CircularProgressIndicator(color = CC.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(20.dp))
                 }else{
-                    Text("Post", style = CommonComponents.descriptionTextStyle(context))
+                    Text("Post", style = CC.descriptionTextStyle(context))
                 }
             }
         }
@@ -231,20 +231,20 @@ fun AnnouncementTextField(
 ) {
     TextField(
         value = value,
-        textStyle = CommonComponents.descriptionTextStyle(context),
+        textStyle = CC.descriptionTextStyle(context),
         onValueChange = onValueChange,
-        placeholder = { Text(placeholder, style = CommonComponents.descriptionTextStyle(context)) },
+        placeholder = { Text(placeholder, style = CC.descriptionTextStyle(context)) },
         singleLine = singleLine,
         colors = TextFieldDefaults.colors(
-            focusedTextColor = CommonComponents.textColor(),
-            unfocusedTextColor = CommonComponents.textColor(),
-            focusedContainerColor = CommonComponents.primary(),
-            unfocusedContainerColor = CommonComponents.primary(),
-            focusedIndicatorColor = CommonComponents.extraColor2(),
-            unfocusedIndicatorColor = CommonComponents.textColor(),
-            focusedPlaceholderColor = CommonComponents.textColor(),
-            unfocusedPlaceholderColor = CommonComponents.textColor(),
-            cursorColor = CommonComponents.textColor()
+            focusedTextColor = CC.textColor(),
+            unfocusedTextColor = CC.textColor(),
+            focusedContainerColor = CC.primary(),
+            unfocusedContainerColor = CC.primary(),
+            focusedIndicatorColor = CC.extraColor2(),
+            unfocusedIndicatorColor = CC.textColor(),
+            focusedPlaceholderColor = CC.textColor(),
+            unfocusedPlaceholderColor = CC.textColor(),
+            cursorColor = CC.textColor()
         ),
         modifier = modifier
 
