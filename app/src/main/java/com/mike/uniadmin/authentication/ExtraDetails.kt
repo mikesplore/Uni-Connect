@@ -156,6 +156,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                         addLoading = true
                         MyDatabase.generateIndexNumber { userId ->
                             val newUser = UserEntity(
+                                userType = "student",
                                 id = userId,
                                 email = email.toString(),
                                 firstName = firstName,
