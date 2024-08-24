@@ -324,7 +324,7 @@ fun AddAnnouncementItem(
                     )
                 )
                 Text(
-                    text = "New announcement for date: ${CC.getCurrentDate(CC.getTimeStamp())}",
+                    text = "New announcement for date: ${CC.getDateFromTimeStamp(CC.getTimeStamp())}",
                     style = CC.descriptionTextStyle(context).copy(
                         color = CC.textColor().copy(alpha = 0.6f)
                     )
@@ -381,7 +381,7 @@ fun AddAnnouncementItem(
                             title = title,
                             description = description,
                             author = senderName,
-                            date = CC.getCurrentDate(CC.getTimeStamp())
+                            date = CC.getDateFromTimeStamp(CC.getTimeStamp())
                         )
                         moduleViewModel.saveModuleAnnouncement(
                             moduleID = moduleID, announcement = newAnnouncement
