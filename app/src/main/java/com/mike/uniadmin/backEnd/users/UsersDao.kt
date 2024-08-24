@@ -117,12 +117,72 @@ interface DatabaseDao {
     @Query("DELETE FROM userState")
     suspend fun deleteUserStates()
 
-
     @Query("DELETE FROM notifications")
     suspend fun deleteAllNotifications()
 
+    @Query("DELETE FROM attendanceStates")
+    suspend fun deleteAllAttendanceStates()
+
+    @Query("DELETE FROM announcements")
+    suspend fun deleteAllAnnouncements()
+
+    @Query("DELETE FROM moduleAnnouncements")
+    suspend fun deleteAllModuleAnnouncements()
+
+    @Query("DELETE FROM moduleAssignments")
+    suspend fun deleteAllModuleAssignments()
+
+    @Query("DELETE FROM moduleDetails")
+    suspend fun deleteAllModuleDetails()
+
+    @Query("DELETE FROM moduleTimetable")
+    suspend fun deleteAllModuleTimetables()
+
+    @Query("DELETE FROM modules")
+    suspend fun deleteAllModules()
+
+    @Query("DELETE FROM groupChats")
+    suspend fun deleteAllChats()
+
+    @Query("DELETE FROM groups")
+    suspend fun deleteAllGroups()
+
+    @Query("DELETE FROM userChats")
+    suspend fun deleteAllMessages()
+
+    @Query("DELETE FROM admins")
+    suspend fun deleteAllUsers()
+
+    @Query("DELETE FROM accountDeletion")
+    suspend fun deleteAllAccountDeletions()
+
+    @Query("DELETE FROM userPreferences")
+    suspend fun deleteAllUserPreferences()
+
+    @Query("DELETE FROM userState")
+    suspend fun deleteAllUserStates()
+
+    @Query("DELETE FROM attendance")
+    suspend fun deleteAllAttendance()
+
+
     @Transaction
     suspend fun deleteAllTables() {
+        deleteAllAttendance()
+        deleteAllUserStates()
+        deleteAllUserPreferences()
+        deleteAllAccountDeletions()
+        deleteAllUsers()
+        deleteAllMessages()
+        deleteAllGroups()
+        deleteAllChats()
+        deleteAllModules()
+        deleteAllModuleTimetables()
+        deleteAllModuleDetails()
+        deleteAllModuleAssignments()
+        deleteAllModuleAnnouncements()
+        deleteAllAnnouncements()
+        deleteAllAttendanceStates()
         deleteAllNotifications()
         deleteAnnouncements()
         deleteNotifications()
