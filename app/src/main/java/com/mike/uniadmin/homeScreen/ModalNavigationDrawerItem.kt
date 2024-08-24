@@ -49,11 +49,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.attendance.deleteDataFromPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
@@ -70,6 +72,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun ModalNavigationDrawerItem(
+    activity: MainActivity,
     drawerState: DrawerState,
     scope: CoroutineScope,
     context: Context,
@@ -132,12 +135,21 @@ fun ModalNavigationDrawerItem(
                     text = "Uni Chat",
                     context,
                     onClicked = {
-                        scope.launch {
-                            drawerState.close()
+                        if(UniAdminPreferences.biometricEnabled.value){
+                            activity.promptManager.showBiometricPrompt(
+                                title = "Authenticate",
+                                description = "Please authenticate to continue",
+                            ){success ->
+                                if(success){
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                    userViewModel.fetchUsers()
+                                    chatViewModel.fetchGroups()
+                                    navController.navigate("uniChat")
+                                }
+                            }
                         }
-                        userViewModel.fetchUsers()
-                        chatViewModel.fetchGroups()
-                        navController.navigate("uniChat")
                     })
                 SideBarItem(icon = Icons.Default.Notifications,
                     text = "Notifications",
@@ -396,11 +408,8 @@ fun SideProfile(user: UserEntity, context: Context) {
                 maxLines = 2
             )
             Spacer(modifier = Modifier.height(10.dp))
-            val userType = UniAdminPreferences.userType.value.replaceFirstChar {
-                if (it.isLowerCase()) it.titlecase(
-                    Locale.ROOT
-                ) else it.toString()
-            }
+            val userType = UniAdminPreferences.userType.value.uppercase(Locale.ROOT)
+
             Text(userType, style = CC.descriptionTextStyle(context))
         }
     }
