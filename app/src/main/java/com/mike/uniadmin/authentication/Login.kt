@@ -89,9 +89,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     var loading by remember { mutableStateOf(false) }
 
     val firebaseAuth = FirebaseAuth.getInstance()
-
     val userViewModel = getUserViewModel(context)
-    val notificationViewModel = getNotificationViewModel(context)
 
 
     val brush = Brush.verticalGradient(
@@ -236,15 +234,10 @@ fun LoginScreen(navController: NavController, context: Context) {
                     onClick = {
                         loading = true
                         if (isSigningUp) handleSignUp(
-                            notificationViewModel,
                             context,
                             firebaseAuth,
                             firstName,
                             lastName,
-                            email,
-                            password,
-                            userViewModel,
-
                             ) {
                             loading = false
                         } else handleSignIn(
@@ -354,55 +347,17 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
 
 
 fun handleSignUp(
-    notificationViewModel: NotificationViewModel,
     context: Context,
     firebaseAuth: FirebaseAuth,
-    firstName: String,
-    lastName: String,
     email: String,
     password: String,
-    userViewModel: UserViewModel,
     onComplete: (Boolean) -> Unit,
 
     ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-
                 Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
-                generateIndexNumber { userID ->
-                    val newUser = UserEntity(
-                        id = userID,
-                        email = email,
-                        firstName = firstName,
-                        lastName = lastName,
-                        profileImageLink = "",
-                        phoneNumber = "",
-                        userType = "student"
-                    )
-                    //save user email to shared preferences
-                    UniAdminPreferences.saveUserEmail(email)
-
-                    //save user to database
-                    userViewModel.writeUser(newUser) {
-                        Toast.makeText(context, "Details saved!", Toast.LENGTH_SHORT).show()
-                    }
-                    MyDatabase.generateNotificationID { id ->
-                        notificationViewModel.writeNotification(
-                            notificationEntity = NotificationEntity(
-                                category = "New User",
-                                name = firstName,
-                                userId = userID,
-                                id = id,
-                                title = "$firstName $lastName has Joined Uni Admin!",
-                                description = "Start a conversation by sending  a 👋",
-                                date = CC.getTimeStamp(),
-                                time = CC.getTimeStamp()
-                            )
-                        )
-                        notificationViewModel.fetchNotifications()
-                    }
-                }
                 onComplete(true)
 
             } else {
@@ -434,13 +389,14 @@ fun handleSignIn(
                         navController.navigate("courses")
                         Toast.makeText(
                             context,
-                            "Welcome back to UniAdmin, ${user.firstName}!",
+                            "Welcome back, ${user.firstName}!",
                             Toast.LENGTH_SHORT
                         ).show()
 
                         //save user email and UserType to shared preferences
+                        val userType = user.userType.ifEmpty { "student" }
                         UniAdminPreferences.saveUserEmail(email)
-                        UniAdminPreferences.saveUserType(user.userType)
+                        UniAdminPreferences.saveUserType(userType)
 
                     } else {
                         Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
