@@ -35,6 +35,7 @@ class BiometricPromptManager(
                 onResult(false)
                 return
             }
+
             else -> Unit
         }
 
