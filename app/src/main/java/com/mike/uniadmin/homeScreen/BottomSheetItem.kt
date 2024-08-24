@@ -58,6 +58,7 @@ import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.settings.switchColors
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupItem
 
@@ -231,7 +232,7 @@ fun ModalDrawerItem(
 }
 @Composable
 fun QuickSettings(context: Context, activity: MainActivity) {
-    var isBiometricsEnabled by remember { mutableStateOf(false) }
+    var isBiometricsEnabled by remember { mutableStateOf(UniAdminPreferences.biometricEnabled.value) }
     BoxWithConstraints {
      val columnWidth = maxWidth
      val iconSize = columnWidth * 0.11f
@@ -267,14 +268,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                     UniAdminPreferences.darkMode.value = it
                     UniAdminPreferences.saveDarkModePreference(it)
                 }, checked = UniAdminPreferences.darkMode.value,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = CC.extraColor1(),
-                    uncheckedThumbColor = CC.extraColor2(),
-                    checkedTrackColor = CC.extraColor2(),
-                    uncheckedTrackColor = CC.extraColor1(),
-                    checkedIconColor = CC.textColor(),
-                    uncheckedIconColor = CC.textColor()
-                ),
+                colors = switchColors(),
                 modifier = Modifier.size(iconSize)
             )
         }
@@ -303,7 +297,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                         activity.promptManager.showBiometricPrompt(title = "User Authentication",
                             description = "Please Authenticate",
                             onResult = { success ->
-                                isBiometricsEnabled = success // Update state based on success
+                                UniAdminPreferences.saveBiometricPreference(success)
                                 if (success) {
                                     Toast.makeText(
                                         context,
@@ -319,17 +313,10 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                                 }
                             })
                     } else {
-                        isBiometricsEnabled = false // Update state if switch is turned off manually
+                        UniAdminPreferences.saveBiometricPreference(false) // Update state if switch is turned off manually
                     }
                 }, checked = isBiometricsEnabled,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = CC.extraColor1(),
-                    uncheckedThumbColor = CC.extraColor2(),
-                    checkedTrackColor = CC.extraColor2(),
-                    uncheckedTrackColor = CC.extraColor1(),
-                    checkedIconColor = CC.textColor(),
-                    uncheckedIconColor = CC.textColor()
-                ),
+                colors = switchColors(),
                 modifier = Modifier.size(iconSize)
             )
         }
