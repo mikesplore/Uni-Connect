@@ -219,7 +219,7 @@ fun NotificationItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${CC.getCurrentDate(notification.date)} at ${
+                text = "${CC.getDateFromTimeStamp(notification.date)} at ${
                     CC.getFormattedTime(
                         notification.time
                     )
@@ -332,7 +332,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
         )
 
         Text(
-            text = CC.getRelativeDate(CC.getCurrentDate(notification.date)),
+            text = CC.getRelativeDate(CC.getDateFromTimeStamp(notification.date)),
             style = CC.descriptionTextStyle(context).copy(
                 color = CC.textColor().copy(0.7f), fontSize = 12.sp
             ),
