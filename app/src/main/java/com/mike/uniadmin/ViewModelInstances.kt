@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModelFactory
+import com.mike.uniadmin.backEnd.attendance.AttendanceViewModel
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModelFactory
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentViewModel
@@ -24,6 +25,7 @@ import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
 import com.mike.uniadmin.localDatabase.UniAdmin
+import com.mike.uniadmin.backEnd.attendance.AttendanceViewModel.AttendanceViewModelFactory
 
 //messageViewModel
 @Composable
@@ -112,5 +114,13 @@ fun getCourseViewModel(context: Context): CourseViewModel {
     val courseResource = context.applicationContext as UniAdmin
     val courseRepository = remember { courseResource.courseRepository }
     return viewModel(factory = CourseViewModelFactory(courseRepository))
+}
+
+//AttendanceViewModel
+@Composable
+fun getAttendanceViewModel(context: Context): AttendanceViewModel {
+    val attendanceResource = context.applicationContext as UniAdmin
+    val attendanceRepository = remember { attendanceResource.attendanceRepository }
+    return viewModel(factory = AttendanceViewModelFactory(attendanceRepository))
 }
 
