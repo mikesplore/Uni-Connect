@@ -30,7 +30,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,44 +42,18 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.helperFunctions.MyDatabase.generateSharedPreferencesID
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.helperFunctions.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
-fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserViewModel) {
-    var isBiometricsEnabled by remember { mutableStateOf(false) }
-    val icon = if (isBiometricsEnabled) Icons.Filled.Security else Icons.Filled.Security
-    val iconDescription = if (isBiometricsEnabled) "Biometrics enabled" else "Biometrics disabled"
+fun Biometrics(context: Context, mainActivity: MainActivity) {
+    // Properly track the state of the biometrics preference with remember and mutableStateOf
+    val isBiometricsEnabled = remember { mutableStateOf(UniAdminPreferences.biometricEnabled.value) }
+    val icon = if (isBiometricsEnabled.value) Icons.Filled.Security else Icons.Filled.Security
+    val iconDescription = if (isBiometricsEnabled.value) "Biometrics enabled" else "Biometrics disabled"
     val promptManager = mainActivity.promptManager
-    val currentUser by viewModel.user.observeAsState()
 
-    LaunchedEffect(Unit) {
-        currentUser?.id?.let { userId -> // Use safe call and let
-            viewModel.fetchPreferences(userId, onPreferencesFetched = { userPreferences ->
-                isBiometricsEnabled = userPreferences?.biometrics == "enabled"
-            })
-        }
-    }
-
-    fun updatePreferences(isEnabled: Boolean) {
-        if (currentUser != null) { // Check if currentUser is not null
-            generateSharedPreferencesID { id ->
-                val myPreferences = UserPreferencesEntity(
-                    studentID = currentUser!!.id, // Now safe to access currentUser.id
-                    id = id, notifications = if (isEnabled) "enabled" else "disabled"
-                )
-                viewModel.writePreferences(myPreferences) {
-                    Log.d("Preferences", "Preferences successfully updated: $myPreferences")
-                }
-            }
-        } else {
-            // Handle the case where currentUser is null (e.g., show an error message)
-            Log.e("Preferences", "Cannot update preferences: currentUser is null")
-        }
-    }
     BoxWithConstraints {
         val rowWidth = maxWidth
         val iconSize = rowWidth * 0.10f
@@ -105,7 +78,7 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
                 )
             }
             Text(
-                "Biometrics (${if (isBiometricsEnabled) "Enabled" else "Disabled"})",
+                "Biometrics (${if (isBiometricsEnabled.value) "Enabled" else "Disabled"})",
                 style = CommonComponents.descriptionTextStyle(context),
                 fontSize = 20.sp
             )
@@ -116,22 +89,24 @@ fun Biometrics(context: Context, mainActivity: MainActivity, viewModel: UserView
                             title = "Authenticate", description = "Please authenticate to continue"
                         ) { success ->
                             if (success) {
-                                isBiometricsEnabled = true
-                                updatePreferences(true)
+                                isBiometricsEnabled.value = true // Update state
+                                UniAdminPreferences.saveBiometricPreference(true) // Save preference
                             }
                         }
                     } else {
-                        isBiometricsEnabled = false
-                        updatePreferences(false)
+                        isBiometricsEnabled.value = false // Update state
+                        UniAdminPreferences.saveBiometricPreference(false) // Save preference
                     }
                 },
-                checked = isBiometricsEnabled,
+                checked = isBiometricsEnabled.value, // Reflect the current state of the switch
                 colors = switchColors(),
                 modifier = Modifier.size(iconSize)
             )
         }
     }
 }
+
+
 
 
 @Composable
@@ -145,7 +120,11 @@ fun PasswordUpdateSection(context: Context) {
     var signInMethod by remember { mutableStateOf("") }
 
     Row(modifier = Modifier.fillMaxWidth(0.8f)) {
-        Text("Change your Password", style = CommonComponents.titleTextStyle(context), fontSize = 18.sp)
+        Text(
+            "Change your Password",
+            style = CommonComponents.titleTextStyle(context),
+            fontSize = 18.sp
+        )
     }
     Spacer(modifier = Modifier.height(10.dp))
     LaunchedEffect(key1 = Unit) {
@@ -278,7 +257,10 @@ fun PasswordUpdateSection(context: Context) {
                             modifier = Modifier.size(20.dp)
                         )
                     } else {
-                        Text("Change Password", style = CommonComponents.descriptionTextStyle(context))
+                        Text(
+                            "Change Password",
+                            style = CommonComponents.descriptionTextStyle(context)
+                        )
                     }
                 }
 
