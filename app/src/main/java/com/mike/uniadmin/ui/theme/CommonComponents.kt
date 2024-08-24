@@ -266,7 +266,7 @@ object CommonComponents {
         return timeFormat.format(dateTime).uppercase(Locale.getDefault())
     }
 
-    fun getCurrentDate(timestamp: String): String {
+    fun getDateFromTimeStamp(timestamp: String): String {
         val instant = Instant.ofEpochMilli(timestamp.toLong())
         val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yy", Locale.getDefault())
@@ -280,8 +280,8 @@ object CommonComponents {
             todayTimestamp.toLong() - (24 * 60 * 60 * 1000) // Subtract a day in milliseconds
 
         return when (date) {
-            getCurrentDate(todayTimestamp) -> "Today"
-            getCurrentDate(yesterdayTimestamp.toString()) -> "Yesterday"
+            getDateFromTimeStamp(todayTimestamp) -> "Today"
+            getDateFromTimeStamp(yesterdayTimestamp.toString()) -> "Yesterday"
             else -> date
         }
     }
@@ -298,7 +298,7 @@ object CommonComponents {
 
             isSameDay(timestamp.toLong(), todayTimestamp) -> "Today"
             isSameDay(timestamp.toLong(), yesterdayTimestamp) -> "Yesterday"
-            else -> getCurrentDate(timestamp) // Display date
+            else -> getDateFromTimeStamp(timestamp) // Display date
         }
     }
 
