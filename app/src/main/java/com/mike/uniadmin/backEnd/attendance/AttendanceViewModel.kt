@@ -1,5 +1,6 @@
 package com.mike.uniadmin.backEnd.attendance
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,18 +11,24 @@ class AttendanceViewModel (private val attendanceRepository: AttendanceRepositor
     private val _attendance = MutableLiveData<List<AttendanceEntity>>()
     val attendance: LiveData<List<AttendanceEntity>> get() = _attendance
 
+    private val _loading = MutableLiveData<Boolean>()
+    val loading: LiveData<Boolean> get() = _loading
+
     init {
         syncAttendanceUpdates()
     }
 
-    fun getAttendanceForStudent(studentId: String, courseId: String) {
+    fun getAttendanceForStudent(studentId: String, courseId: String, callback: (List<AttendanceEntity>) -> Unit) {
         attendanceRepository.getAttendanceForStudent(studentId, courseId) { attendanceList ->
-            _attendance.value = attendanceList
+            callback(attendanceList)
+            _attendance.postValue(attendanceList)
         }
     }
 
-    fun signAttendance(attendance: AttendanceEntity) {
-        attendanceRepository.insertAttendance(attendance)
+    fun signAttendance(attendance: AttendanceEntity, success: (Boolean) -> Unit) {
+        attendanceRepository.signAttendance(attendance){ success ->
+            success(success)
+        }
     }
 
     private fun syncAttendanceUpdates() {
