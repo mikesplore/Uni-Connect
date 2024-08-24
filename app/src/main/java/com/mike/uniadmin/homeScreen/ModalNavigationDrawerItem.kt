@@ -65,6 +65,7 @@ import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.settings.switchColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.Locale
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
@@ -187,11 +188,11 @@ fun ModalNavigationDrawerItem(
                 Row (modifier = Modifier.fillMaxWidth(0.9f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceAround){
-                    Text(if (role == "admin") "Admin" else "User", style = CC.descriptionTextStyle(context))
+                    Text(if (role == "admin") "Admin" else "Student", style = CC.descriptionTextStyle(context))
                     Switch(
                         checked = role == "admin",
                         onCheckedChange = { isAdmin ->
-                            role = if (isAdmin) "admin" else "user"
+                            role = if (isAdmin) "admin" else "student"
                             UniAdminPreferences.saveUserType(role)
                         },
                         colors = switchColors()
@@ -395,7 +396,12 @@ fun SideProfile(user: UserEntity, context: Context) {
                 maxLines = 2
             )
             Spacer(modifier = Modifier.height(10.dp))
-            Text(user.id, style = CC.descriptionTextStyle(context))
+            val userType = UniAdminPreferences.userType.value.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(
+                    Locale.ROOT
+                ) else it.toString()
+            }
+            Text(userType, style = CC.descriptionTextStyle(context))
         }
     }
 }
