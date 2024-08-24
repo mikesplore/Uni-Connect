@@ -80,40 +80,14 @@ fun DarkMode(context: Context) {
 }
 
 @Composable
-fun Notifications(context: Context, viewModel: UserViewModel) {
-    var isNotificationEnabled by remember { mutableStateOf(false) }
+fun Notifications(context: Context) {
+    var isNotificationEnabled by remember { mutableStateOf(UniAdminPreferences.notificationsEnabled.value) }
     val icon =
         if (isNotificationEnabled) Icons.Filled.Notifications else Icons.Filled.NotificationsOff
     val iconDescription =
         if (isNotificationEnabled) "Enable Notifications" else "Disable Notifications"
-    val currentUser by viewModel.user.observeAsState()
-
-    LaunchedEffect(Unit) {
-        currentUser?.id?.let { userId -> // Use safe call and let
-            viewModel.fetchPreferences(userId, onPreferencesFetched = { userPreferences ->
-                isNotificationEnabled = userPreferences?.notifications == "enabled"
-            })
-        }
-    }
 
 
-
-    fun updatePreferences(isEnabled: Boolean) {
-        if (currentUser != null) { // Check if currentUser is not null
-            generateSharedPreferencesID { id ->
-                val myPreferences = UserPreferencesEntity(
-                    studentID = currentUser!!.id, // Now safe to access currentUser.id
-                    id = id, notifications = if (isEnabled) "enabled" else "disabled"
-                )
-                viewModel.writePreferences(myPreferences) {
-                    Log.d("Preferences", "Preferences successfully updated: $myPreferences")
-                }
-            }
-        } else {
-            // Handle the case where currentUser is null (e.g., show an error message)
-            Log.e("Preferences", "Cannot update preferences: currentUser is null")
-        }
-    }
     BoxWithConstraints {
         val rowWidth = maxWidth
         val rowHeight = rowWidth * 0.1f
@@ -142,11 +116,10 @@ fun Notifications(context: Context, viewModel: UserViewModel) {
             Switch(
                 onCheckedChange = { notifications ->
                     if (!notifications) {
-                        (context as MainActivity).requestNotificationPermission()
+                        (context as MainActivity).checkAndRequestNotificationPermission()
 
                     }
                     isNotificationEnabled = notifications
-                    updatePreferences(notifications)
                 },
                 checked = isNotificationEnabled,
                 colors = switchColors(),
