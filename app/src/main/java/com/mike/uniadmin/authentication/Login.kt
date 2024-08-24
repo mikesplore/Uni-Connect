@@ -58,17 +58,11 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
-import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.Details
 import com.mike.uniadmin.helperFunctions.Fcm
-import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.generateFCMID
-import com.mike.uniadmin.helperFunctions.MyDatabase.generateIndexNumber
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeFcmToken
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -238,7 +232,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                             firebaseAuth,
                             firstName,
                             lastName,
-                            ) {
+                        ) {
                             loading = false
                         } else handleSignIn(
                             context, firebaseAuth, email, password, navController, userViewModel
@@ -403,7 +397,6 @@ fun handleSignIn(
                         navController.navigate("moreDetails")
                     }
                 }
-
 
                 FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { tokenTask ->
                     if (!tokenTask.isSuccessful) {
