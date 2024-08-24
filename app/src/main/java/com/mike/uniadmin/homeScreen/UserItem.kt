@@ -128,11 +128,11 @@ fun UserItem(
             style = CC.descriptionTextStyle(context),
             maxLines = 1
         )
-        val date = if (userState?.lastDate?.let { CC.getCurrentDate(it) } == CC.getCurrentDate(
+        val date = if (userState?.lastDate?.let { CC.getDateFromTimeStamp(it) } == CC.getDateFromTimeStamp(
                 CC.getTimeStamp())) {
             "Today at ${userState.lastTime.let { CC.getFormattedTime(it) }}"
         } else {
-            "${userState?.lastDate?.let { CC.getCurrentDate(it) } ?: ""} at ${userState?.lastTime?.let { CC.getFormattedTime(it) } ?: ""}"
+            "${userState?.lastDate?.let { CC.getDateFromTimeStamp(it) } ?: ""} at ${userState?.lastTime?.let { CC.getFormattedTime(it) } ?: ""}"
         }
 
         val state = when (userState?.online) {
