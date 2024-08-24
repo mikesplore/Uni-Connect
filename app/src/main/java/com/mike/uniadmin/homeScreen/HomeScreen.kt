@@ -31,7 +31,6 @@ import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.attendance.AttendanceScreen
-import com.mike.uniadmin.attendance.ManageAttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
 import com.mike.uniadmin.getGroupChatViewModel
@@ -130,6 +129,7 @@ fun HomeScreen(
     CheckUpdate(context)
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         ModalNavigationDrawerItem(
+            activity = activity,
             drawerState = drawerState,
             scope = coroutineScope,
             context = context,
