@@ -7,6 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementsDao
+import com.mike.uniadmin.backEnd.attendance.AttendanceDao
+import com.mike.uniadmin.backEnd.attendance.AttendanceEntity
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementDao
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
@@ -60,6 +62,7 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
         AttendanceState::class,
         CourseEntity::class,
         CourseState::class,
+        AttendanceEntity::class
                ],
     version = 1,
     exportSchema = false
@@ -84,6 +87,7 @@ abstract class UniAdminDatabase : RoomDatabase() {
     abstract fun databaseDao(): DatabaseDao
     abstract fun courseDao(): CourseDao
     abstract fun courseStateDao(): CourseStateDao
+    abstract fun attendanceDao(): AttendanceDao
 
     companion object {
         @Volatile
