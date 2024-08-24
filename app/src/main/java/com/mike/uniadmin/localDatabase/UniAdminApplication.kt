@@ -2,6 +2,7 @@ package com.mike.uniadmin.localDatabase
 
 import android.app.Application
 import com.mike.uniadmin.backEnd.announcements.AnnouncementRepository
+import com.mike.uniadmin.backEnd.attendance.AttendanceRepository
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementRepository
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentRepository
 import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetailRepository
@@ -27,5 +28,7 @@ class UniAdmin : Application() {
     val moduleDetailRepository by lazy { ModuleDetailRepository(database.moduleDetailsDao()) }
     val moduleTimetableRepository by lazy { ModuleTimetableRepository(database.moduleTimetableDao()) }
     val courseRepository by lazy { CourseRepository(database.courseDao(), database.courseStateDao()) }
+    val attendanceRepository by lazy { AttendanceRepository(database.attendanceDao()) }
+
 
 }
