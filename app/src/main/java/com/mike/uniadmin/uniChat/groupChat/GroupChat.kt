@@ -139,7 +139,7 @@ fun DiscussionScreen(
                             .weight(1f)
                     ) {
 
-                        val groupedChats = chats.groupBy { CC.getCurrentDate(it.date) }
+                        val groupedChats = chats.groupBy { CC.getDateFromTimeStamp(it.date) }
 
                         groupedChats.forEach { (_, chatsForDate) ->
                             item {
