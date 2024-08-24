@@ -186,7 +186,7 @@ fun AnnouncementFooter(date: String, authorName: String, context: Context) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = CC.getRelativeDate(CC.getCurrentDate(date)),
+            text = CC.getRelativeDate(CC.getDateFromTimeStamp(date)),
             style = CC.descriptionTextStyle(context)
                 .copy(color = CC.textColor().copy(alpha = 0.7f))
         )
