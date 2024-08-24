@@ -2,25 +2,33 @@ package com.mike.uniadmin.attendance
 
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -32,21 +40,27 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.attendance.AttendanceEntity
 import com.mike.uniadmin.backEnd.attendance.AttendanceViewModel
+import com.mike.uniadmin.backEnd.modules.ModuleEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.getAttendanceViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
+import java.util.Locale
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -57,95 +71,175 @@ fun SignAttendance(context: Context) {
     val userViewModel = getUserViewModel(context)
     val attendanceViewModel = getAttendanceViewModel(context)
 
-    val attendanceState by moduleViewModel.attendanceStates.observeAsState()
     val signedInUser by userViewModel.user.observeAsState()
-    val modules by moduleViewModel.modules.observeAsState()
-    val attendanceRecords by attendanceViewModel.attendance.observeAsState()
+    val modules by moduleViewModel.modules.observeAsState(emptyList())
+    val attendanceState by moduleViewModel.attendanceStates.observeAsState()
+    val isLoading by moduleViewModel.isLoading.observeAsState(false)
 
+
+    var attendanceRecords by remember { mutableStateOf(emptyList<AttendanceEntity>()) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabNames = modules?.map { it.moduleCode } ?: emptyList()
-    val tabsLoading by moduleViewModel.isLoading.observeAsState()
     val email = UniAdminPreferences.userEmail.value
+    val tabNames = modules.map { it.moduleCode }
+    var refresh by remember { mutableStateOf(false) }
 
-    LaunchedEffect(email) {
-        userViewModel.findUserByEmail(email){}
-        moduleViewModel.fetchModules()
-        Log.d("SignAttendance", "Fetching modules: $modules")
+    // Load persisted data and then fetch fresh data from ViewModel
+    LaunchedEffect(Unit) {
+        // Load persisted data first (for quick UI access)
+        val (persistedModules, persistedAttendance) = loadDataFromPreferences(context)
+        attendanceRecords = persistedAttendance
 
-        Log.d("SignAttendance", "Fetching attendance for student: ${signedInUser?.id}")
-        tabNames.forEach { tabName ->
-            attendanceViewModel.getAttendanceForStudent(signedInUser?.id ?: "", tabName)
+        // Fetch fresh data from ViewModel (actual source of truth)
+        userViewModel.findUserByEmail(email) {}
+        moduleViewModel.fetchModules() // This will update the modules in the ViewModel
+        moduleViewModel.fetchAttendanceStates()
+
+        // Once ViewModel fetches fresh data, persist it again
+        saveDataToPreferences(context, modules, attendanceRecords)
+    }
+
+    // Fetch attendance records whenever a module is selected or refreshed
+    LaunchedEffect(modules, refresh, selectedTabIndex) {
+        if (signedInUser != null && modules.isNotEmpty()) {
+            val currentModuleCode = tabNames.getOrNull(selectedTabIndex) ?: ""
+            if (currentModuleCode.isNotEmpty()) {
+                attendanceViewModel.getAttendanceForStudent(
+                    signedInUser!!.id,
+                    currentModuleCode
+                ) { freshAttendanceRecords ->
+                    attendanceRecords = freshAttendanceRecords // Update the attendance records
+                    saveDataToPreferences(context, modules, attendanceRecords) // Persist to JSON
+                }
+            }
         }
     }
 
-
+    // UI for SignAttendance
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sign Attendance", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp )) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CC.secondary()
-                )
+                title = { Text("Sign Attendance", style = CC.titleTextStyle(context)) },
+                actions = {
+                    IconButton(onClick = { refresh = !refresh }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.secondary())
             )
         },
         containerColor = CC.primary()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            // Tabs for selecting modules
-            if (tabsLoading == true) {
-                CC.ColorProgressIndicator(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp))
-            } else if (tabNames.isEmpty()) {
-                Text("No modules found", style = CC.descriptionTextStyle(context))
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(it)) {
+            // Full-screen loading indicator when data is being fetched
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             } else {
+                // Show Tabs and attendance records
                 Tabs(
                     context = context,
                     tabs = tabNames,
                     selectedTabIndex = selectedTabIndex,
                     onTabSelected = { index ->
                         selectedTabIndex = index
+                        refresh = !refresh
                     }
                 )
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Sign Attendance Card
-            SignAttendanceCard(
-                user = signedInUser,
-                attendanceViewModel = attendanceViewModel,
-                context = context,
-                moduleCode = tabNames.getOrNull(selectedTabIndex))
+                // Sign attendance or show "not open" message
+                val attendanceStateForModule =
+                    attendanceState?.get(tabNames.getOrNull(selectedTabIndex))
+                if (attendanceStateForModule?.state == true) {
+                    SignAttendanceCard(
+                        user = signedInUser,
+                        attendanceViewModel = attendanceViewModel,
+                        context = context,
+                        moduleCode = tabNames.getOrNull(selectedTabIndex),
+                        onSignAttendance = {success ->
+                            if (success){
+                                refresh = !refresh
+                            }
+                        }
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Attendance is not open for this module.",
+                            style = CC.descriptionTextStyle(context)
+                        )
+                    }
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Attendance Records LazyColumn
-            LazyColumn(
-                modifier = Modifier
+                // Filter attendance records for selected module
+                val filteredAttendanceRecords = attendanceRecords.filter { attendance ->
+                    attendance.moduleId == tabNames.getOrNull(selectedTabIndex)
+                }
+
+                // Display attendance records in a LazyColumn
+                LazyColumn(modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                items(attendanceRecords ?: emptyList()) { attendanceRecord ->
-                    AttendanceRecordCard(attendanceRecord, context)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    .padding(16.dp)) {
+                    items(filteredAttendanceRecords) { attendanceRecord ->
+                        AttendanceRecordCard(attendanceRecord, context)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
     }
 }
 
+fun saveDataToPreferences(
+    context: Context,
+    modules: List<ModuleEntity>,
+    attendance: List<AttendanceEntity>
+) {
+    val sharedPreferences = context.getSharedPreferences("UniAdminPrefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+
+    val modulesJson = Gson().toJson(modules)
+    val attendanceJson = Gson().toJson(attendance)
+    editor.putString("modules", modulesJson)
+    editor.putString("attendanceRecords", attendanceJson)
+    editor.apply()
+}
+
+
 @Composable
-fun SignAttendanceCard(user: UserEntity?, context: Context, moduleCode: String?, attendanceViewModel: AttendanceViewModel) {
+fun SignAttendanceCard(
+    user: UserEntity?,
+    context: Context,
+    moduleCode: String?,
+    attendanceViewModel: AttendanceViewModel,
+    onSignAttendance: (Boolean) -> Unit
+) {
+    var loading by remember { mutableStateOf(false) }
+    val attendance by attendanceViewModel.attendance.observeAsState(emptyList())
+
+    // Get today's date
+    val todayDate = CC.getDateFromTimeStamp(CC.getTimeStamp())
+
+    // Filter attendance records for the current user and module, and check if the date matches today's date
+    val hasSignedToday = attendance.any { record ->
+        record.studentId == user?.id && record.moduleId == moduleCode && CC.getDateFromTimeStamp(record.date) == todayDate
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clickable { /* Trigger attendance signing logic */ },
+            .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(containerColor = CC.extraColor1())
     ) {
         Column(
@@ -153,57 +247,103 @@ fun SignAttendanceCard(user: UserEntity?, context: Context, moduleCode: String?,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Sign Attendance for ${moduleCode ?: "Unknown"}",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                text = "Sign attendance for today",
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(8.dp))
+
             Button(
                 onClick = {
                     // Handle attendance sign logic
                     MyDatabase.generateAttendanceID { id ->
-                    val attendance = AttendanceEntity(
-                        id = id,
-                        studentId = user?.id ?: "",
-                        moduleId = moduleCode ?: "",
-                        date = CC.getTimeStamp(),
-                        isPresent = true
-                    )
-                    attendanceViewModel.signAttendance(attendance)
+                        val newAttendance = AttendanceEntity(
+                            id = id,
+                            studentId = user?.id ?: "",
+                            moduleId = moduleCode ?: "",
+                            date = CC.getTimeStamp(),
+                            record = "signed"
+                        )
+                        attendanceViewModel.signAttendance(newAttendance){ success ->
+                            loading = false
+                            if (success) {
+                                onSignAttendance(true)
+                            }else{
+                                onSignAttendance(false)
+                            }
+
+                        }
                     }
+
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !hasSignedToday // Disable button if the user has already signed today
             ) {
-                Text("Sign Attendance")
+                if (loading) {
+                    CircularProgressIndicator(
+                        color = CC.textColor(),
+                        strokeWidth = 1.dp,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Text("Sign Attendance", style = CC.descriptionTextStyle(context))
+                }
+            }
+
+            if (hasSignedToday) {
+                Text(
+                    text = "You have already signed attendance for today.",
+                    color = Color.Red,
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
     }
 }
 
+
 @Composable
 fun AttendanceRecordCard(attendance: AttendanceEntity, context: Context) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = CC.extraColor1())
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp), // Add padding around the card
+        colors = CardDefaults.cardColors(containerColor = CC.extraColor1()),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // Reduce elevation
+        shape = RoundedCornerShape(8.dp) // Add rounded corners
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Course: ${attendance.moduleId}",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Add an icon or image (optional)
+            Icon(
+                imageVector = if (attendance.record == "signed") Icons.Filled.CheckCircle else Icons.Filled.Cancel,
+                contentDescription = "Attendance status",
+                tint = if (attendance.record == "signed") Color.Green else Color.Red
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Date: ${attendance.date}",
-                style = CC.descriptionTextStyle(context)
-            )
-            Text(
-                text = "Status: ${if (attendance.isPresent) "Present" else "Absent"}",
-                style = CC.descriptionTextStyle(context)
-            )
+
+            Spacer(modifier = Modifier.width(16.dp)) // Add space between icon and text
+
+            Column {
+                Text(
+                    text = CC.getDateFromTimeStamp(attendance.date),
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = attendance.record.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(
+                            Locale.getDefault()
+                        ) else it.toString()
+                    },
+                    style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
+                )
+            }
         }
     }
 }
-
-
 
 @Composable
 fun Tabs(
@@ -214,7 +354,7 @@ fun Tabs(
 ) {
     BoxWithConstraints {
         val screenWidth = maxWidth
-        val boxWidth = screenWidth * 0.3f
+        val boxWidth = screenWidth * 0.28f
         val density = LocalDensity.current
         val textSize = with(density) { (screenWidth * 0.03f).toSp() }
 
@@ -225,11 +365,11 @@ fun Tabs(
             tabs.forEachIndexed { index, title ->
                 Tab(
                     modifier = Modifier
-                        .height(boxWidth * 0.35f)
+                        .height(boxWidth * 0.3f)
                         .width(boxWidth)
                         .background(
                             if (selectedTabIndex == index) CC.primary() else CC.secondary(),
-                            RoundedCornerShape(20.dp)
+                            RoundedCornerShape(10.dp)
                         ),
                     selected = selectedTabIndex == index,
                     onClick = { onTabSelected(index) },
@@ -247,4 +387,25 @@ fun Tabs(
             }
         }
     }
+}
+
+
+// Load data from JSON
+fun loadDataFromPreferences(context: Context): Pair<List<ModuleEntity>, List<AttendanceEntity>> {
+    val sharedPreferences = context.getSharedPreferences("UniAdminPrefs", Context.MODE_PRIVATE)
+    val modulesJson = sharedPreferences.getString("modules", "[]")
+    val attendanceJson = sharedPreferences.getString("attendanceRecords", "[]")
+
+    val modules = Gson().fromJson(modulesJson, Array<ModuleEntity>::class.java).toList()
+    val attendance = Gson().fromJson(attendanceJson, Array<AttendanceEntity>::class.java).toList()
+
+    return Pair(modules, attendance)
+}
+
+fun deleteDataFromPreferences(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("UniAdminPrefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.remove("modules") // Remove modules data
+    editor.remove("attendanceRecords") // Remove attendance data
+    editor.apply()
 }
