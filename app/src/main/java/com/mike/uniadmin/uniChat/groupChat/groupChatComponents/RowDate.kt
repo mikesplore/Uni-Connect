@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun DateHeader(context: Context) {
@@ -34,14 +34,14 @@ fun DateHeader(context: Context) {
     ) {
         Box(
             modifier = Modifier
-                .background(CommonComponents.secondary(), RoundedCornerShape(10.dp))
+                .background(CC.secondary(), RoundedCornerShape(10.dp))
                 .padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = CommonComponents.getRelativeDate(
-                    CommonComponents.getCurrentDate(
-                        CommonComponents.getTimeStamp())),
-                style = CommonComponents.descriptionTextStyle(context),
+                text = CC.getRelativeDate(
+                    CC.getDateFromTimeStamp(
+                        CC.getTimeStamp())),
+                style = CC.descriptionTextStyle(context),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
             )
@@ -57,16 +57,16 @@ fun DateHeader(context: Context) {
         Box(
             modifier = Modifier
                 .background(
-                    CommonComponents.secondary(), RoundedCornerShape(10.dp)
+                    CC.secondary(), RoundedCornerShape(10.dp)
                 )
                 .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Group chats are moderated by admin.",
                 modifier = Modifier.padding(5.dp),
-                style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 13.sp),
+                style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
                 textAlign = TextAlign.Center,
-                color = CommonComponents.textColor()
+                color = CC.textColor()
             )
         }
     }
@@ -90,14 +90,14 @@ fun SearchBar(
                 .fillMaxWidth()
                 .padding(8.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = CommonComponents.primary(),
-                unfocusedIndicatorColor = CommonComponents.textColor(),
-                focusedIndicatorColor = CommonComponents.secondary(),
-                unfocusedContainerColor = CommonComponents.primary(),
-                focusedTextColor = CommonComponents.textColor(),
-                unfocusedTextColor = CommonComponents.textColor(),
-                focusedLabelColor = CommonComponents.secondary(),
-                unfocusedLabelColor = CommonComponents.textColor()
+                focusedContainerColor = CC.primary(),
+                unfocusedIndicatorColor = CC.textColor(),
+                focusedIndicatorColor = CC.secondary(),
+                unfocusedContainerColor = CC.primary(),
+                focusedTextColor = CC.textColor(),
+                unfocusedTextColor = CC.textColor(),
+                focusedLabelColor = CC.secondary(),
+                unfocusedLabelColor = CC.textColor()
             ),
             shape = RoundedCornerShape(10.dp)
         )
