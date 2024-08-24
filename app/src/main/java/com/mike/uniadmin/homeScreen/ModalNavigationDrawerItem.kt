@@ -33,6 +33,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,12 +54,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.Update
+import com.mike.uniadmin.settings.switchColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -177,6 +180,22 @@ fun ModalNavigationDrawerItem(
                         chatViewModel.fetchGroups()
                         showBottomSheet(true)
                     })
+
+                var role by remember { mutableStateOf(UniAdminPreferences.userType.value) }
+
+                Row (modifier = Modifier.fillMaxWidth(0.9f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround){
+                    Text(if (role == "admin") "Admin" else "User", style = CC.descriptionTextStyle(context))
+                    Switch(
+                        checked = role == "admin",
+                        onCheckedChange = { isAdmin ->
+                            role = if (isAdmin) "admin" else "user"
+                            UniAdminPreferences.saveUserType(role)
+                        },
+                        colors = switchColors()
+                    )
+                }
             }
             Row(
                 modifier = Modifier
