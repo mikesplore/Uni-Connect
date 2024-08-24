@@ -1,7 +1,6 @@
 package com.mike.uniadmin.homeScreen
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material3.Card
@@ -34,7 +32,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,9 +55,10 @@ import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.settings.Biometrics
 import com.mike.uniadmin.settings.switchColors
-import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.GroupItem
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun ModalDrawerItem(
@@ -146,7 +144,8 @@ fun ModalDrawerItem(
                     ) {
                         Text(
                             text = "${signedInUser?.firstName} ${signedInUser?.lastName}",
-                            style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize),
+                            style = CC.titleTextStyle(context)
+                                .copy(fontWeight = FontWeight.Bold, fontSize = textSize),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -161,7 +160,10 @@ fun ModalDrawerItem(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            Text("Chat", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize*0.8f))
+            Text("Chat",
+                style = CC.titleTextStyle(context)
+                    .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
+            )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 "Select a user to open chat",
@@ -181,7 +183,8 @@ fun ModalDrawerItem(
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Group Discussions",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize*0.8f)
+                style = CC.titleTextStyle(context)
+                    .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
@@ -201,7 +204,7 @@ fun ModalDrawerItem(
                     modifier = Modifier.animateContentSize()
                 ) {
                     items(groups, key = { it.id }) { group ->
-                        if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
+                        if (group.name.isNotEmpty() && group.description.isNotEmpty() && group.members.contains(signedInUser?.id.toString())) {
                             signedInUser?.let {
                                 GroupItem(
                                     group,
@@ -222,7 +225,8 @@ fun ModalDrawerItem(
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Quick Settings",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = textSize*0.8f)
+                style = CC.titleTextStyle(context)
+                    .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
             )
             Spacer(modifier = Modifier.height(10.dp))
             QuickSettings(context, activity)
@@ -230,95 +234,51 @@ fun ModalDrawerItem(
         }
     }
 }
+
 @Composable
 fun QuickSettings(context: Context, activity: MainActivity) {
-    var isBiometricsEnabled by remember { mutableStateOf(UniAdminPreferences.biometricEnabled.value) }
     BoxWithConstraints {
-     val columnWidth = maxWidth
-     val iconSize = columnWidth * 0.11f
-    Column(
-        modifier = Modifier
-            .background(CC.primary())
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        val columnWidth = maxWidth
+        val iconSize = columnWidth * 0.10f
+        Column(
+            modifier = Modifier
+                .background(CC.primary())
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            IconButton(
-                onClick = {},
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(CC.secondary())
-                    .size(iconSize)
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    if (UniAdminPreferences.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
-                    "theme",
-                    tint = CC.textColor()
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(CC.secondary())
+                        .size(iconSize)
+                ) {
+                    Icon(
+                        if (UniAdminPreferences.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
+                        "theme",
+                        tint = CC.textColor()
+                    )
+                }
+
+                Text("Dark theme ", style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp))
+                Switch(
+                    onCheckedChange = {
+                        UniAdminPreferences.darkMode.value = it
+                        UniAdminPreferences.saveDarkModePreference(it)
+                    }, checked = UniAdminPreferences.darkMode.value,
+                    colors = switchColors(),
+                    modifier = Modifier.size(iconSize)
                 )
             }
+            Spacer(modifier = Modifier.height(20.dp))
+            Biometrics(context, activity)
 
-            Text("Dark theme ", style = CC.descriptionTextStyle(context))
-            Switch(
-                onCheckedChange = {
-                    UniAdminPreferences.darkMode.value = it
-                    UniAdminPreferences.saveDarkModePreference(it)
-                }, checked = UniAdminPreferences.darkMode.value,
-                colors = switchColors(),
-                modifier = Modifier.size(iconSize)
-            )
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {},
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(CC.secondary())
-                    .size(iconSize)
-            ) {
-                Icon(
-                    Icons.Default.Fingerprint, "theme", tint = CC.textColor()
-                )
-            }
-
-            Text("Biometrics", style = CC.descriptionTextStyle(context))
-            Switch(
-                onCheckedChange = { checked -> // Add checked parameter
-                    if (checked) {
-                        activity.promptManager.showBiometricPrompt(title = "User Authentication",
-                            description = "Please Authenticate",
-                            onResult = { success ->
-                                UniAdminPreferences.saveBiometricPreference(success)
-                                if (success) {
-                                    Toast.makeText(
-                                        context,
-                                        "Authenticated Successfully",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Authentication Failed",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            })
-                    } else {
-                        UniAdminPreferences.saveBiometricPreference(false) // Update state if switch is turned off manually
-                    }
-                }, checked = isBiometricsEnabled,
-                colors = switchColors(),
-                modifier = Modifier.size(iconSize)
-            )
-        }
-    }}
+    }
 }
