@@ -1,4 +1,4 @@
-package com.mike.uniadmin.localDatabase
+package com.mike.uniadmin.backEnd.localDatabase
 
 import android.app.Application
 import com.mike.uniadmin.backEnd.announcements.AnnouncementRepository

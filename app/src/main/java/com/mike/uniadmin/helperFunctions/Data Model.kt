@@ -78,13 +78,19 @@ sealed class Screen(
 
 //random color for the module contents
 val randomColor = listOf(
-    Color(0xff00A9FF),
-    Color(0xffE68369),
-    Color(0xff009FBD),
-    Color(0xffA34343),
-    Color(0xff83A2FF),
-    Color(0xff399918)
-
+    Color(0xFF00A9FF),
+    Color(0xFFE68369),
+    Color(0xFF009FBD),
+    Color(0xFFA34343),
+    Color(0xFF83A2FF),
+    Color(0xFF399918),
+    Color(0xFF9C27B0), // Purple
+    Color(0xFF00BCD4), // Cyan
+    Color(0xFF4CAF50), // Green
+    Color(0xFFFF5722), // Deep Orange
+    Color(0xFF795548), // Brown
+    Color(0xFF607D8B), // Blue Grey
+    Color(0xFFE91E63), // Pink
 )
 
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,10 +27,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -55,6 +56,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     }
 
     LaunchedEffect(Unit) {
+        delay(3000)
         navController.navigate(destination) {
             popUpTo("splashScreen") { inclusive = true }
         }
@@ -100,13 +102,16 @@ fun SplashScreen(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(24.dp)) // Added more space for better visual balance
         }
 
-        CircularProgressIndicator(
-            color = CC.textColor(),
-            trackColor = CC.primary(),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 48.dp) // More padding for better positioning
-        )
+        Box(modifier = Modifier
+            .height(50.dp)
+            .padding(bottom = 16.dp)
+            .align(Alignment.BottomCenter),
+            contentAlignment = Alignment.Center){
+            Text("Developed by Mike", style = CC.descriptionTextStyle(context).copy(
+                color = CC.textColor(), fontWeight = FontWeight.Bold
+            ), modifier = Modifier.align(Alignment.Center).padding(bottom = 16.dp))
+        }
+
     }
 }
 

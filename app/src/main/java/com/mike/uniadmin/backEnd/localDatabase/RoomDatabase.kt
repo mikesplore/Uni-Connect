@@ -1,4 +1,4 @@
-package com.mike.uniadmin.localDatabase
+package com.mike.uniadmin.backEnd.localDatabase
 
 import android.content.Context
 import androidx.room.Database
@@ -35,7 +35,6 @@ import com.mike.uniadmin.backEnd.userchat.UserChatDAO
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
 import com.mike.uniadmin.backEnd.users.AccountDeletionDao
 import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
-import com.mike.uniadmin.backEnd.users.DatabaseDao
 import com.mike.uniadmin.backEnd.users.UserDao
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserPreferencesDao

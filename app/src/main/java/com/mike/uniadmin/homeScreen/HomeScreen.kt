@@ -1,6 +1,8 @@
 package com.mike.uniadmin.homeScreen
 
 import android.content.Context
+import android.view.Window
+import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,6 +76,7 @@ fun HomeScreen(
     val signedInUserLoading by userViewModel.isLoading.observeAsState()
     val pagerState = rememberPagerState(pageCount = { screens.size })
     val email = UniAdminPreferences.userEmail.value
+
 
 
     // Side effects

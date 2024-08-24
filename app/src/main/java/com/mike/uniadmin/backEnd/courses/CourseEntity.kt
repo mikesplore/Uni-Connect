@@ -15,12 +15,9 @@ data class CourseEntity(
     constructor(): this("", "", emptyList(), "")
 }
 
-
 @Entity(tableName = "courseStates")
 data class CourseState(
     @PrimaryKey val courseID: String,
     val courseName: String = "",
     val state: Boolean = false
-){
-    constructor(): this("", "", false)
-}
+)

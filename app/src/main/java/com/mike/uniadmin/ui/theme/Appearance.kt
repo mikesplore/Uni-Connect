@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -291,7 +292,7 @@ fun Background() {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = CC.secondary().copy(0.1f),
+                tint = randomColor.random().copy(0.1f),
                 modifier = Modifier
                     .padding(8.dp)
             )

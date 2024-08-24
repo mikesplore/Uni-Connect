@@ -41,7 +41,7 @@ fun showNotification(context: Context, title: String, message: String) {
     )
 
     val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.notification)
+        .setSmallIcon(R.drawable.logo)
         .setContentTitle(title)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_HIGH)  // Set priority to HIGH

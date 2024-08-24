@@ -23,6 +23,4 @@ interface AttendanceDao {
     @Query("DELETE FROM attendance")
     suspend fun deleteAllAttendance()
 
-    @Query("SELECT * FROM attendance")
-    suspend fun getAllAttendance(): List<AttendanceEntity>
 }

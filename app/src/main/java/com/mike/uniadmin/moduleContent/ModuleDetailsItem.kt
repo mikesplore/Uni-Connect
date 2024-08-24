@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -123,7 +124,16 @@ fun DetailsItem(
             }
             //card here
             if (details.value == null) {
-                Text("No Details", style = CC.descriptionTextStyle(context))
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center)
+                ){
+                    Text("No Details",
+                        style = CC.descriptionTextStyle(context),
+                        modifier = Modifier.wrapContentSize(Alignment.Center)
+                    )}
             } else {
                 details.value?.let {
                     DetailsItemCard(it, context)

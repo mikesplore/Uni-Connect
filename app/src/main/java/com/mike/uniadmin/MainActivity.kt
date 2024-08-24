@@ -14,10 +14,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -79,7 +82,6 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         UniAdminPreferences.initialize(this)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setTheme(R.style.Theme_UniAdmin)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -91,6 +93,18 @@ class MainActivity : AppCompatActivity() {
         checkAndRequestNotificationPermission()
 
         setContent {
+            val systemUiController = rememberSystemUiController()
+            if (UniAdminPreferences.darkMode.value) {
+                systemUiController.setSystemBarsColor(
+                    color = Color.Transparent ,
+                    darkIcons = false
+                )
+            } else {
+                systemUiController.setSystemBarsColor(
+                    color = Color.Transparent,
+                    darkIcons = true
+                )
+            }
             UniAdminTheme(dynamicColor = false, darkTheme = UniAdminPreferences.darkMode.value) {
                 NavigationGraph(this, this)
             }

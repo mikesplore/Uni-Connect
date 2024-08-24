@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -144,16 +146,22 @@ fun TopAppBarContent(
                     Column(
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        if (notifications != null && notifications!!.isNotEmpty()) {
-                            notifications!!.take(5).forEach { notification ->
+                        val sortedNotifications = notifications?.sortedByDescending { it.date } // Sort by timestamp
+
+                        if (!sortedNotifications.isNullOrEmpty()) {
+                            sortedNotifications.take(5).forEach { notification ->
                                 NotificationTitleContent(notification, context)
+                                Divider() // Use Divider for better visual separation
                             }
-                            HorizontalDivider()
+
+                            Spacer(modifier = Modifier.height(8.dp)) // Add space before "View All" button
+
                             TextButton(
                                 onClick = {
                                     navController.navigate("notifications")
                                     expanded = false
-                                }, modifier = Modifier.fillMaxWidth()
+                                },
+                                modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text("View All", style = CC.descriptionTextStyle(context))
                             }

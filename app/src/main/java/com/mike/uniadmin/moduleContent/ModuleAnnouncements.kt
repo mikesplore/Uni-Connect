@@ -102,7 +102,8 @@ fun AnnouncementsItem(
                     tint = CC.textColor()
                 )
             }
-            Text("${announcements.value.size} announcements", style = CC.descriptionTextStyle(context))
+            Text("${announcements.value.size} announcements", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
+                modifier = Modifier.weight(1f))
 
             if (userType == "admin"){
             FloatingActionButton(

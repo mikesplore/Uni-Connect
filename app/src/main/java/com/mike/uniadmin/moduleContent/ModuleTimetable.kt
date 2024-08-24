@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -47,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.UniAdminPreferences
@@ -92,7 +95,9 @@ fun TimetableItem(
                     Icons.Default.Refresh, contentDescription = "Refresh", tint = CC.textColor()
                 )
             }
-            Text("${timetables.value.size} timetables", style = CC.descriptionTextStyle(context))
+            Text("${timetables.value.size} timetables", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
+                modifier = Modifier.weight(1f))
+
             if (userType == "admin"){
             FloatingActionButton(
                 onClick = { expanded = !expanded },
@@ -118,7 +123,16 @@ fun TimetableItem(
             }
             //timetable card
             if (timetables.value.isEmpty()) {
-                Text("No Timetables", style = CC.descriptionTextStyle(context))
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center)
+                ){
+                    Text("No Timetables",
+                        style = CC.descriptionTextStyle(context),
+                        modifier = Modifier.wrapContentSize(Alignment.Center)
+                    )}
             } else {
                 LazyColumn {
                     items(timetables.value) { timetable ->

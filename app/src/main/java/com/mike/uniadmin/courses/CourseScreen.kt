@@ -5,19 +5,25 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -40,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,7 +79,7 @@ fun CourseScreen(context: Context, navController: NavController) {
     val userTypes = UniAdminPreferences.userType.value
 
     LaunchedEffect(Unit) {
-      //  uploadCoursesData()
+        //  uploadCoursesData()
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
     }
 
@@ -85,15 +92,16 @@ fun CourseScreen(context: Context, navController: NavController) {
                     )
                 )
             }, actions = {
-                if (userTypes == "admin"){
-                IconButton(onClick = { showAddCourse = !showAddCourse }) {
-                    Icon(
-                        if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
-                        contentDescription = "Add Course",
-                        tint = CC.textColor()
-                    )
-                }}
-                IconButton(onClick = {courseViewModel.fetchCourses()}) {
+                if (userTypes == "admin") {
+                    IconButton(onClick = { showAddCourse = !showAddCourse }) {
+                        Icon(
+                            if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = "Add Course",
+                            tint = CC.textColor()
+                        )
+                    }
+                }
+                IconButton(onClick = { courseViewModel.fetchCourses() }) {
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = "Add Course",
@@ -133,7 +141,7 @@ fun CourseScreen(context: Context, navController: NavController) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ){
+                ) {
                     CC.ColorProgressIndicator()
                 }
             }
@@ -212,93 +220,128 @@ fun CourseItem(
     context: Context,
     onCourseClicked: () -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp)) // Smoothen corners for the entire card
-            .border(
-                1.dp, CC.secondary(), RoundedCornerShape(16.dp)
-            ) // Add a border with rounded corners
-            .background(CC.primary()) // Set a background color
-            .padding(10.dp) // Inner padding for content
-            .fillMaxWidth(0.85f)
-            .wrapContentHeight()
-    ) {
-        // Module Image
-        Box(
+
+
+    val buttonText = if (courseEntity?.participants?.contains(currentUser?.id) == true) {
+        "Open Course"
+    } else {
+        "Join Course"
+    }
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val height = columnWidth * 0.65f
+        val density = LocalDensity.current
+        val textSize = with(density) { (columnWidth * 0.045f).toSp() }
+
+        val titleStyle = CC.titleTextStyle(context).copy(
+            fontWeight = FontWeight.Bold,
+            fontSize = textSize,
+            textAlign = TextAlign.Center
+        )
+
+        val buttonStyle = CC.titleTextStyle(context).copy(
+            fontWeight = FontWeight.Bold,
+            fontSize = textSize * 0.8f,
+        )
+
+        Box( // Use Box to overlay components
             modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .clip(RoundedCornerShape(16.dp)) // Clip the image with rounded corners
+                .clip(RoundedCornerShape(16.dp))
+                .border(1.dp, CC.secondary(), RoundedCornerShape(16.dp))
+                .background(CC.primary())
+                .padding(10.dp)
+                .width(columnWidth * 0.85f)
+                .height(height)
         ) {
-            AsyncImage(
-                model = courseEntity?.courseImageLink,
-                contentScale = ContentScale.Crop,
-                contentDescription = "Module Image",
-                placeholder = painterResource(R.drawable.logo),
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+            // Add the background as the first layer
+            CourseBackground()
 
-        Spacer(modifier = Modifier.height(12.dp)) // Add spacing between image and text
-
-        // Module Title and Details
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-        ) {
-            courseEntity?.courseName?.let {
-                Text(
-                    it, style = CC.titleTextStyle(context).copy(
-                        fontWeight = FontWeight.Bold, fontSize = 20.sp, textAlign = TextAlign.Center
-                    ), modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp)) // Space between title and details
-
-            Text(
-                "Participants: ${courseEntity?.participants?.size}",
-                style = CC.descriptionTextStyle(context).copy(
-                    fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp)) // Space before button
-
-        // Open Course Button
-        Button(
-            onClick = {
-                onCourseClicked()
-
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp)), // Rounded button corners
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = randomColor.random(), contentColor = CC.textColor()
-            ),
-            // enabled = courseEntity?.participants?.contains(currentUser?.id) == false
-        ) {
-            if (courseEntity?.participants?.contains(currentUser?.id) == true) {
-                Text(
-                    "Open Course", style = CC.titleTextStyle(context).copy(
-                        fontWeight = FontWeight.Bold, fontSize = 16.sp
+            // Overlay the content on top of the background
+            Column(
+                modifier = Modifier
+                    .padding(8.dp) // Add padding so content is not flush against the edges
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                ) {
+                    AsyncImage(
+                        model = courseEntity?.courseImageLink,
+                        contentScale = ContentScale.Crop,
+                        contentDescription = "Module Image",
+                        placeholder = painterResource(R.drawable.newcourse),
+                        error = painterResource(R.drawable.newcourse),
+                        modifier = Modifier.fillMaxSize()
                     )
-                )
-            } else {
-                Text(
-                    "Join Course", style = CC.titleTextStyle(context).copy(
-                        fontWeight = FontWeight.Bold, fontSize = 16.sp
-                    )
-                )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Column(
+                    modifier = Modifier
+
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                ) {
+                    courseEntity?.courseName?.let {
+                        Text(
+                            it.uppercase(),
+                            style = titleStyle,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { onCourseClicked() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp)),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = randomColor.random(),
+                        contentColor = CC.textColor()
+                    ),
+                ) {
+                    Text(buttonText, style = buttonStyle)
+                }
             }
         }
     }
+}
 
+
+@Composable
+fun CourseBackground() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        val rows = 10 // Number of rows
+        val columns = 10 // Number of columns
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            repeat(rows) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    repeat(columns) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = randomColor.random().copy(alpha = 0.3f),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -397,3 +440,4 @@ fun AddCourse(
         }
     }
 }
+

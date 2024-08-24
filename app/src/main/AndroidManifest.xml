@@ -17,7 +17,7 @@
 
 
     <application
-        android:name=".localDatabase.UniAdmin"
+        android:name=".backEnd.localDatabase.UniAdmin"
         android:allowBackup="true"
         android:appCategory="productivity"
         android:dataExtractionRules="@xml/data_extraction_rules"

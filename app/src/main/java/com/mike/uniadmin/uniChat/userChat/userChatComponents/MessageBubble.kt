@@ -163,6 +163,9 @@ fun MessageBubble(
     }
 }
 
+//I wasn't able to implement the DELIVERED status icon.
+//We only have the send and read status.
+
 @Composable
 fun DeliveryStatusIcon(
     deliveryStatus: DeliveryStatus
@@ -184,14 +187,14 @@ fun DeliveryStatusIcon(
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Delivered",
-                    tint = Color.Gray, // First gray tick
+                    contentDescription = "Read",
+                    tint = Color.Green, // First green tick
                     modifier = Modifier.size(16.dp)
                 )
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Delivered",
-                    tint = Color.Gray, // Second gray tick
+                    contentDescription = "Read",
+                    tint = Color.Green, // Second green tick
                     modifier = Modifier.size(16.dp)
                 )
             }

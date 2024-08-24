@@ -1,6 +1,5 @@
 package com.mike.uniadmin.backEnd.attendance
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,8 +25,8 @@ class AttendanceViewModel (private val attendanceRepository: AttendanceRepositor
     }
 
     fun signAttendance(attendance: AttendanceEntity, success: (Boolean) -> Unit) {
-        attendanceRepository.signAttendance(attendance){ success ->
-            success(success)
+        attendanceRepository.signAttendance(attendance){ onSuccess ->
+            success(onSuccess)
         }
     }
 

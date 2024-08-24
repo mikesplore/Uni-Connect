@@ -1,4 +1,4 @@
-package com.mike.uniadmin.localDatabase
+package com.mike.uniadmin.backEnd.localDatabase
 
 
 import androidx.room.TypeConverter

@@ -76,4 +76,16 @@ object UniAdminPreferences {
         preferences.edit().putBoolean(PREF_KEY_BIOMETRIC_ENABLED, isEnabled).apply()
         Log.d("UniAdminPreferences", "Biometric enabled saved: $isEnabled")
     }
+
+    fun clearAllData() {
+        courseCode.value = ""
+        userEmail.value = ""
+        userType.value = ""
+        darkMode.value = true // Or set to your default value
+        notificationsEnabled.value = false // Or set to your default value
+        biometricEnabled.value = false // Or set to your default value
+
+        preferences.edit().clear().apply()
+        Log.d("UniAdminPreferences", "All preferences cleared")
+    }
 }

@@ -204,7 +204,7 @@ fun DisplayImage(
                     .blur(30.dp)
                     .fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                onError = { R.drawable.notification },
+                onError = { R.drawable.logo },
                 onLoading = { R.drawable.logo })
             IconButton(
                 onClick = {
@@ -223,7 +223,7 @@ fun DisplayImage(
                         contentDescription = "Profile Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
-                        onError = { R.drawable.notification },
+                        onError = { R.drawable.logo },
                         onLoading = { R.drawable.logo }
 
                     )

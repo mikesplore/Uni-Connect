@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
@@ -86,7 +85,7 @@ fun SignAttendance(context: Context) {
     // Load persisted data and then fetch fresh data from ViewModel
     LaunchedEffect(Unit) {
         // Load persisted data first (for quick UI access)
-        val (persistedModules, persistedAttendance) = loadDataFromPreferences(context)
+        val (_, persistedAttendance) = loadDataFromPreferences(context)
         attendanceRecords = persistedAttendance
 
         // Fetch fresh data from ViewModel (actual source of truth)

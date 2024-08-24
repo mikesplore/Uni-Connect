@@ -14,7 +14,7 @@ data class UserEntity(
     val profileImageLink: String = "",
     val userType: String = ""
 ){
-    constructor(): this("", "", "", "", "","", "")
+    constructor(): this("", "", "", "", "","", "student")
 }
 
 

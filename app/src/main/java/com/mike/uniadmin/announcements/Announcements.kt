@@ -146,7 +146,7 @@ fun AnnouncementsScreen(context: Context) {
                     LazyColumn(modifier = Modifier.fillMaxWidth(0.9f)) {
                         announcements?.let { announcements ->
                             val sortedAnnouncements =
-                                announcements.sortedByDescending { sortedAnn -> sortedAnn.id }
+                                announcements.sortedByDescending { sortedAnn -> sortedAnn.date }
                             items(sortedAnnouncements) { announcement ->
                                 val isEditing = editingAnnouncementId == announcement.id
                                 AnnouncementCard(

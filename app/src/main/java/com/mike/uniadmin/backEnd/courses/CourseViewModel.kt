@@ -44,7 +44,7 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
         }
     }
 
-    fun getCourseDetailsByCourseID(courseCode: String) {
+    private fun getCourseDetailsByCourseID(courseCode: String) {
         repository.getCourseDetailsByCourseID(courseCode) { course ->
             _fetchedCourse.value = course
         }

@@ -24,7 +24,7 @@ import com.mike.uniadmin.backEnd.courses.CourseViewModelFactory
 import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModelFactory
-import com.mike.uniadmin.localDatabase.UniAdmin
+import com.mike.uniadmin.backEnd.localDatabase.UniAdmin
 import com.mike.uniadmin.backEnd.attendance.AttendanceViewModel.AttendanceViewModelFactory
 
 //messageViewModel

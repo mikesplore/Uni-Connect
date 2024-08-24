@@ -164,7 +164,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                                     contentDescription = "Profile Image",
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop,
-                                    onError = { R.drawable.notification },
+                                    onError = { R.drawable.logo },
                                     onLoading = { R.drawable.logo }
 
                                 )

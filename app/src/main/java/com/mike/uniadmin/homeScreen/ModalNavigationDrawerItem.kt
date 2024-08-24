@@ -44,12 +44,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -131,26 +131,36 @@ fun ModalNavigationDrawerItem(
                         }
                         navController.navigate("profile")
                     })
-                SideBarItem(icon = Icons.AutoMirrored.Filled.Message,
+                SideBarItem(
+                    icon = Icons.AutoMirrored.Filled.Message,
                     text = "Uni Chat",
                     context,
                     onClicked = {
-                        if(UniAdminPreferences.biometricEnabled.value){
+                        // Check if biometrics is enabled
+                        if (UniAdminPreferences.biometricEnabled.value) {
+                            // Show biometric prompt
                             activity.promptManager.showBiometricPrompt(
                                 title = "Authenticate",
-                                description = "Please authenticate to continue",
-                            ){success ->
-                                if(success){
-                                    scope.launch {
-                                        drawerState.close()
-                                    }
+                                description = "Please authenticate to continue"
+                            ) { success ->
+                                if (success) {
+                                    // If authentication is successful, proceed with actions
+                                    scope.launch { drawerState.close() }
                                     userViewModel.fetchUsers()
                                     chatViewModel.fetchGroups()
                                     navController.navigate("uniChat")
                                 }
                             }
+                        } else {
+                            // If biometrics are disabled, proceed directly
+                            scope.launch { drawerState.close() }
+                            userViewModel.fetchUsers()
+                            chatViewModel.fetchGroups()
+                            navController.navigate("uniChat")
                         }
-                    })
+                    }
+                )
+
                 SideBarItem(icon = Icons.Default.Notifications,
                     text = "Notifications",
                     context,
@@ -197,18 +207,25 @@ fun ModalNavigationDrawerItem(
 
                 var role by remember { mutableStateOf(UniAdminPreferences.userType.value) }
 
-                Row (modifier = Modifier.fillMaxWidth(0.9f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround){
-                    Text(if (role == "admin") "Admin" else "Student", style = CC.descriptionTextStyle(context))
-                    Switch(
-                        checked = role == "admin",
-                        onCheckedChange = { isAdmin ->
-                            role = if (isAdmin) "admin" else "student"
-                            UniAdminPreferences.saveUserType(role)
-                        },
-                        colors = switchColors()
-                    )
+                if (signedInUser?.userType == "admin") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(0.9f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Text(
+                            if (role == "admin") "Admin" else "Student",
+                            style = CC.descriptionTextStyle(context)
+                        )
+                        Switch(
+                            checked = role == "admin",
+                            onCheckedChange = { isAdmin ->
+                                role = if (isAdmin) "admin" else "student"
+                                UniAdminPreferences.saveUserType(role)
+                            },
+                            colors = switchColors()
+                        )
+                    }
                 }
             }
             Row(
@@ -225,10 +242,11 @@ fun ModalNavigationDrawerItem(
                         showSignOutDialog = true
 
                     },
+                    shape = RectangleShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = CC.secondary()
                     ),
-                    modifier = Modifier.fillMaxWidth(0.9f)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         "Sign Out",
@@ -302,7 +320,7 @@ fun SignOut(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Signing out will clear the app database.",
+                text = "Signing out will clear app settings and data.",
                 style = CC.descriptionTextStyle(context),
                 modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
             )
@@ -312,38 +330,51 @@ fun SignOut(
             Row(
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TextButton(onClick = {
-                    userStatus?.copy(
-                        online = "offline",
-                        lastDate = CC.getTimeStamp(),
-                        lastTime = CC.getTimeStamp()
-                    )?.let { updatedUserStatus ->
-                        MyDatabase.writeUserActivity(updatedUserStatus, onSuccess = { success ->
-                            if (success) {
-                                userViewModel.deleteAllTables()
-                                deleteDataFromPreferences(context)
-                                FirebaseAuth.getInstance().signOut()
-                                navController.navigate("login") {
-                                    popUpTo("homeScreen") { inclusive = true }
+                TextButton(
+                    onClick = {
+                        userStatus?.copy(
+                            online = "offline",
+                            lastDate = CC.getTimeStamp(),
+                            lastTime = CC.getTimeStamp()
+                        )?.let { updatedUserStatus ->
+                            MyDatabase.writeUserActivity(updatedUserStatus, onSuccess = { success ->
+                                if (success) {
+                                    UniAdminPreferences.clearAllData()
+                                    userViewModel.deleteAllTables()
+                                    deleteDataFromPreferences(context)
+                                    FirebaseAuth.getInstance().signOut()
+                                    navController.navigate("login") {
+                                        popUpTo("homeScreen") { inclusive = true }
+                                    }
+                                    Toast.makeText(
+                                        context, "Signed Out Successfully!", Toast.LENGTH_SHORT
+                                    ).show()
+                                    onVisibleChange(false)
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Error signing out. Please try again.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                                Toast.makeText(
-                                    context, "Signed Out Successfully!", Toast.LENGTH_SHORT
-                                ).show()
-                                onVisibleChange(false)
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "Error signing out. Please try again.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        })
-                    }
-                }) {
+                            })
+                        }
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CC.extraColor1()
+                    )
+                ) {
                     Text("Sign Out", style = CC.descriptionTextStyle(context))
                 }
 
-                TextButton(onClick = { onVisibleChange(false) }) {
+                TextButton(
+                    onClick = { onVisibleChange(false) },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CC.secondary()
+                    )
+                ) {
                     Text("Cancel", style = CC.descriptionTextStyle(context))
                 }
             }

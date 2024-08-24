@@ -72,7 +72,8 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.work.runtime.ktx)
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
+    implementation (libs.accompanist.systemuicontroller)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
