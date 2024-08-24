@@ -7,11 +7,11 @@ import androidx.room.PrimaryKey
 data class AttendanceEntity(
     @PrimaryKey val id: String,
     val studentId: String,
-    val courseId: String,
+    val moduleId: String,
     val date: String,
-    val status: String
+    val isPresent: Boolean
 
 ){
-    constructor() : this("", "", "","", "")
+    constructor() : this("", "", "","", false)
 
 }
