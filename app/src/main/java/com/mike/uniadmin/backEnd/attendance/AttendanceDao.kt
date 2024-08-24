@@ -8,7 +8,7 @@ import androidx.room.Update
 
 @Dao
 interface AttendanceDao {
-    @Query("SELECT * FROM attendance WHERE studentId = :studentId AND courseId = :courseId")
+    @Query("SELECT * FROM attendance WHERE studentId = :studentId AND moduleId = :courseId")
     suspend fun getAttendanceForStudent(studentId: String, courseId: String): List<AttendanceEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
