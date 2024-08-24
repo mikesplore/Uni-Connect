@@ -55,6 +55,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.attendance.deleteDataFromPreferences
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
@@ -307,6 +308,7 @@ fun SignOut(
                         MyDatabase.writeUserActivity(updatedUserStatus, onSuccess = { success ->
                             if (success) {
                                 userViewModel.deleteAllTables()
+                                deleteDataFromPreferences(context)
                                 FirebaseAuth.getInstance().signOut()
                                 navController.navigate("login") {
                                     popUpTo("homeScreen") { inclusive = true }
