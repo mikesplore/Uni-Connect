@@ -91,7 +91,7 @@ object MyDatabase {
         }
     }
 
-    private fun generateAttendanceID(onIndexNumberGenerated: (String) -> Unit) {
+     fun generateAttendanceID(onIndexNumberGenerated: (String) -> Unit) {
         updateAndGetCode("Attendance") { newCode ->
             val indexNumber = "AT$newCode$year"
             onIndexNumberGenerated(indexNumber)
