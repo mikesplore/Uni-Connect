@@ -16,7 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun RowDate(date: String, context: Context) {
@@ -26,14 +26,14 @@ fun RowDate(date: String, context: Context) {
         Box(
             modifier = Modifier
                 .background(
-                    CommonComponents.secondary(), RoundedCornerShape(10.dp)
+                    CC.secondary(), RoundedCornerShape(10.dp)
                 )
                 .clip(RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = CommonComponents.getRelativeDate(CommonComponents.getCurrentDate(date)),
+                text = CC.getRelativeDate(CC.getDateFromTimeStamp(date)),
                 modifier = Modifier.padding(5.dp),
-                style = CommonComponents.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(context),
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )
