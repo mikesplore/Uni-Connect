@@ -50,7 +50,7 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AnnouncementCard(
@@ -82,7 +82,7 @@ fun AnnouncementCard(
     ) {
         Column(
             modifier = Modifier
-                .background(CommonComponents.secondary(), shape = RoundedCornerShape(8.dp))
+                .background(CC.secondary(), shape = RoundedCornerShape(8.dp))
                 .padding(16.dp)
                 .imePadding()
         ) {
@@ -94,9 +94,9 @@ fun AnnouncementCard(
                 // Profile image or author's initial
                 Box(
                     modifier = Modifier
-                        .border(1.dp, CommonComponents.textColor(), CircleShape)
+                        .border(1.dp, CC.textColor(), CircleShape)
                         .clip(CircleShape)
-                        .background(CommonComponents.secondary(), CircleShape)
+                        .background(CC.secondary(), CircleShape)
                         .size(40.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -112,7 +112,7 @@ fun AnnouncementCard(
                         // Display author's initial if no image is available
                         Text(
                             "${announcement.authorName[0]}",
-                            style = CommonComponents.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                         )
                     }
                 }
@@ -122,9 +122,9 @@ fun AnnouncementCard(
                 // Announcement title
                 Text(
                     text = announcement.title,
-                    style = CommonComponents.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(context),
                     fontWeight = FontWeight.Bold,
-                    color = CommonComponents.textColor(),
+                    color = CC.textColor(),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -134,8 +134,8 @@ fun AnnouncementCard(
                 IconButton(
                     onClick = { expanded = !expanded },
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = CommonComponents.primary().copy(0.3f),
-                        contentColor = CommonComponents.textColor()
+                        containerColor = CC.primary().copy(0.3f),
+                        contentColor = CC.textColor()
                     )
                 ) {
                     Icon(
@@ -153,8 +153,8 @@ fun AnnouncementCard(
                     // Announcement description
                     Text(
                         text = announcement.description,
-                        style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 14.sp),
-                        color = CommonComponents.textColor().copy(alpha = descriptionAlpha),
+                        style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
+                        color = CC.textColor().copy(alpha = descriptionAlpha),
                         overflow = TextOverflow.Ellipsis
                     )
 
@@ -168,14 +168,14 @@ fun AnnouncementCard(
                     ) {
                         Text(
                             text = announcement.authorName,
-                            style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                            color = CommonComponents.textColor().copy(alpha = 0.6f),
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                            color = CC.textColor().copy(alpha = 0.6f),
                         )
 
                         Text(
-                            text = CommonComponents.getRelativeDate(CommonComponents.getCurrentDate(announcement.date)),
-                            style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 12.sp),
-                            color = CommonComponents.textColor().copy(alpha = 0.6f),
+                            text = CC.getRelativeDate(CC.getDateFromTimeStamp(announcement.date)),
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                            color = CC.textColor().copy(alpha = 0.6f),
                         )
                     }
 
@@ -188,16 +188,16 @@ fun AnnouncementCard(
                     ) {
                         Button(
                             onClick = { onEdit() },
-                            colors = ButtonDefaults.buttonColors(containerColor = CommonComponents.primary())
+                            colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
                         ) {
-                            Text("Edit", style = CommonComponents.descriptionTextStyle(context))
+                            Text("Edit", style = CC.descriptionTextStyle(context))
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = { onDelete(announcement.id) },
-                            colors = ButtonDefaults.buttonColors(containerColor = CommonComponents.tertiary())
+                            colors = ButtonDefaults.buttonColors(containerColor = CC.tertiary())
                         ) {
-                            Text("Delete", style = CommonComponents.descriptionTextStyle(context))
+                            Text("Delete", style = CC.descriptionTextStyle(context))
                         }
                     }}
                 }
