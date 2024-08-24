@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun EditAnnouncement(
@@ -48,7 +48,7 @@ fun EditAnnouncement(
     Column(
         modifier = Modifier
             .imePadding()
-            .border(1.dp, CommonComponents.extraColor2(), RoundedCornerShape(10.dp))
+            .border(1.dp, CC.extraColor2(), RoundedCornerShape(10.dp))
             .fillMaxWidth(0.9f), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Title of the editing section
@@ -59,7 +59,7 @@ fun EditAnnouncement(
         ) {
             Text(
                 "Edit Announcement",
-                style = CommonComponents.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -75,9 +75,9 @@ fun EditAnnouncement(
             // Profile image or author's initial
             Box(
                 modifier = Modifier
-                    .border(1.dp, CommonComponents.textColor(), CircleShape)
+                    .border(1.dp, CC.textColor(), CircleShape)
                     .clip(CircleShape)
-                    .background(CommonComponents.secondary(), CircleShape)
+                    .background(CC.secondary(), CircleShape)
                     .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -93,17 +93,17 @@ fun EditAnnouncement(
                     // Show the initial of the author's name if no image is available
                     Text(
                         "${announcement.authorName[0]}",
-                        style = CommonComponents.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
 
             // Display the current date
-            Text(CommonComponents.getCurrentDate(CommonComponents.getTimeStamp()), style = CommonComponents.descriptionTextStyle(context))
+            Text(CC.getDateFromTimeStamp(CC.getTimeStamp()), style = CC.descriptionTextStyle(context))
         }
 
         // Title input section
-        Text("Enter announcement title", style = CommonComponents.descriptionTextStyle(context))
+        Text("Enter announcement title", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
             value = title, onValueChange = { newTitle ->
@@ -114,7 +114,7 @@ fun EditAnnouncement(
         Spacer(modifier = Modifier.height(20.dp))
 
         // Description input section
-        Text("Enter announcement description", style = CommonComponents.descriptionTextStyle(context))
+        Text("Enter announcement description", style = CC.descriptionTextStyle(context))
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
             value = description, onValueChange = { newDescription ->
@@ -131,7 +131,7 @@ fun EditAnnouncement(
                     announcementViewModel.saveAnnouncement(announcement.copy(
                         title = title,
                         description = description,
-                        date = CommonComponents.getTimeStamp()
+                        date = CC.getTimeStamp()
                     ), onComplete = { success ->
                         if (success) {
                             onComplete() // Call the onComplete callback if save is successful
@@ -139,9 +139,9 @@ fun EditAnnouncement(
                     })
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = CommonComponents.extraColor2())
+                colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
             ) {
-                Text("Edit", style = CommonComponents.descriptionTextStyle(context))
+                Text("Edit", style = CC.descriptionTextStyle(context))
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
