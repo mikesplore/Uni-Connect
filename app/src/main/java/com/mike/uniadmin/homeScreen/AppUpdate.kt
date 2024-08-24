@@ -17,13 +17,16 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -55,10 +58,10 @@ import kotlinx.coroutines.delay
 @Composable
 fun CheckUpdate(context: Context) {
     var update by remember { mutableStateOf(false) }
+    var isDownloading by remember { mutableStateOf(false) }
+    var downloadProgress by remember { mutableStateOf(0) }
     val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
     val versionName = packageInfo.versionName
-    var isDownloading by remember { mutableStateOf(false) }
-    val downloadId by remember { mutableLongStateOf(-1L) }
     var myUpdate by remember { mutableStateOf(Update()) }
 
     LaunchedEffect(Unit) {
@@ -74,6 +77,7 @@ fun CheckUpdate(context: Context) {
             delay(60000) // Wait for 60 seconds
         }
     }
+
     fun installApk(context: Context, uri: Uri) {
         val installIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
@@ -83,21 +87,23 @@ fun CheckUpdate(context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    fun startDownload(context: Context, url: String, onProgress: (Int, Long) -> Unit) {
-        val request = DownloadManager.Request(Uri.parse(url)).setTitle("Uni Admin Update")
+    fun startDownload(context: Context, url: String, onProgress: (Int) -> Unit) {
+        val request = DownloadManager.Request(Uri.parse(url))
+            .setTitle("Uni Admin Update")
             .setDescription("Downloading update")
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Uni Admin.apk${myUpdate.version}")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setAllowedOverMetered(true).setAllowedOverRoaming(true)
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(true)
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadid = downloadManager.enqueue(request)
+        val downloadId = downloadManager.enqueue(request)
 
-        // Registering receiver for download complete
+        // Register receiver for download complete
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                if (id == downloadid) {
+                if (id == downloadId) {
                     context.unregisterReceiver(this)
                     val apkUri = downloadManager.getUriForDownloadedFile(id)
                     installApk(context, apkUri)
@@ -121,34 +127,25 @@ fun CheckUpdate(context: Context) {
 
                 cursor?.use {
                     if (it.moveToFirst()) {
-                        val bytesDownloadedIndex =
-                            it.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-                        val bytesTotalIndex =
-                            it.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                        val bytesDownloadedIndex = it.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                        val bytesTotalIndex = it.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
 
                         if (bytesDownloadedIndex != -1 && bytesTotalIndex != -1) {
                             val bytesDownloaded = it.getLong(bytesDownloadedIndex)
                             val bytesTotal = it.getLong(bytesTotalIndex)
 
-                            // Log for debugging
-                            Log.d(
-                                "DownloadManager",
-                                "Downloaded: $bytesDownloaded, Total: $bytesTotal"
-                            )
-
                             if (bytesTotal > 0) {
-                                val progress = ((bytesDownloaded * 100) / bytesTotal).toInt()
-                                onProgress(progress, downloadId)
+                                downloadProgress = ((bytesDownloaded * 100) / bytesTotal).toInt()
+                                onProgress(downloadProgress)
 
                                 // Update progress in UI
-                                Log.d("DownloadProgress", "Progress: $progress%")
-
-                                if (progress < 100) {
+                                if (downloadProgress < 100) {
                                     progressHandler.postDelayed(this, 1000)
+                                } else {
+                                    onProgress(100)
+                                    isDownloading = false
                                 }
                             }
-                        } else {
-                            Log.e("DownloadManager", "Column index not found")
                         }
                     }
                 }
@@ -157,22 +154,23 @@ fun CheckUpdate(context: Context) {
         })
     }
 
-    if (update){
+    if (update) {
         UpdateDialog(
             onDismiss = { update = false },
             context = context,
             versionName = myUpdate.version,
-            isDownloading = isDownloading,
-            startDownload = { context, url, onProgress ->
-                startDownload(context, url, onProgress)
+            startDownload = { url ->
+                isDownloading = true
+                startDownload(context, url) { progress ->
+                    downloadProgress = progress
+                }
             },
-            downloadUrl = myUpdate.updateLink,
-            onDownloadChange = { isDownloading = it }
+            downloadUrl = myUpdate.updateLink
         )
-
     }
-
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,111 +178,95 @@ fun UpdateDialog(
     onDismiss: () -> Unit,
     context: Context,
     versionName: String,
-    isDownloading: Boolean,
-    onDownloadChange: (Boolean) -> Unit,
-    startDownload: (Context, String, (Int, Long) -> Unit) -> Unit,
+    startDownload: (String) -> Unit,
     downloadUrl: String,
 ) {
-        BasicAlertDialog(
-            onDismissRequest = {
-                onDismiss()
-            },
+    BasicAlertDialog(
+        onDismissRequest = {
+            onDismiss()
+        },
+        modifier = Modifier
+            .padding(16.dp)
+            .background(Color.Transparent)
+    ) {
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-                .background(Color.Transparent)
+                .background(CC.secondary(), RoundedCornerShape(16.dp))
+                .padding(24.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            // App Logo
+            Image(
+                painter = painterResource(R.drawable.logo),
+                contentDescription = null,
                 modifier = Modifier
-                    .background(CC.secondary(), RoundedCornerShape(16.dp))
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .size(50.dp)
+                    .padding(bottom = 16.dp)
+            )
+
+            // Title and Version
+            Text(
+                "New Update Available!",
+                style = CC.titleTextStyle(context).copy(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                "Version $versionName",
+                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(alpha = 0.7f)),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Description
+            Text(
+                "A new version will be downloaded in the background. An install prompt will appear shortly. If dismissed, find the update in your Downloads folder and install it manually",
+                style = CC.descriptionTextStyle(context),
+                modifier = Modifier.padding(bottom = 16.dp),
+                textAlign = TextAlign.Center
+            )
+
+            // Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // App Logo
-                Image(
-                    painter = painterResource(R.drawable.notification),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .padding(bottom = 16.dp)
-                )
-
-                // Title and Version
-                Text(
-                    "New Update Available!",
-                    style = CC.titleTextStyle(context).copy(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    "Version $versionName",
-                    style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(alpha = 0.7f)),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                // Description
-                Text(
-                    "A new version of this app is available. The update contains bug fixes and improvements.",
-                    style = CC.descriptionTextStyle(context),
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                if (isDownloading) {
-                    // Progress Indicator
-                    Text(
-                        "Downloading update... please wait",
-                        style = CC.descriptionTextStyle(context),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    LinearProgressIndicator(
-                        color = CC.textColor(),
-                        trackColor = CC.extraColor1(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
+                Button(
+                    onClick = {
+                        if (downloadUrl.isNotEmpty()) {
+                            startDownload(downloadUrl)
+                            onDismiss()  // Dismiss dialog after initiating download
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Download failed: Could not get download link",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
+                ) {
+                    Text("Update", style = CC.descriptionTextStyle(context))
                 }
 
-                // Action Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Button(
+                    onClick = { onDismiss() },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
                 ) {
-                    Button(
-                        onClick = {
-                            if (!isDownloading && downloadUrl.isNotEmpty()) {
-                                startDownload(context, downloadUrl) { progress, id ->
-                                    onDownloadChange(true)
-                                    //isDownloading = progress < 100
-                                }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "Download failed: Could not get download link",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
-                    ) {
-                        Text("Update", style = CC.descriptionTextStyle(context))
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Button(
-                        onClick = { onDismiss() },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
-                    ) {
-                        Text("Cancel", color = CC.primary())
-                    }
+                    Text("Cancel", color = CC.primary())
                 }
             }
         }
-
+    }
 }
+
+
+
+
+
