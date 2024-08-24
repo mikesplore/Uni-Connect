@@ -2,7 +2,6 @@ package com.mike.uniadmin
 
 import android.Manifest
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -26,23 +25,20 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
-import com.mike.uniadmin.helperFunctions.Global
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeUserActivity
-import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var auth: FirebaseAuth
     private var currentUser: UserEntity = UserEntity()
-    val promptManager by lazy {
-        BiometricPromptManager(this)
-    }
     private val database = FirebaseDatabase.getInstance()
+    val promptManager by lazy { BiometricPromptManager(this) }
+
+    // Listener to track authentication state changes
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         val user = firebaseAuth.currentUser
         if (user != null) {
@@ -51,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 if (fetchedUser == null) {
                     Log.e("UniAdminMainActivity", "User not found for email: $userEmail")
                     Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
-                    return@fetchUserDataByEmail // Exit the callback
+                    return@fetchUserDataByEmail
                 } else {
                     Log.d("UniAdminMainActivity", "User found: ${fetchedUser.id}")
                     currentUser = fetchedUser
@@ -65,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Lifecycle observer to track online/offline status
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
             writeUserOnlineStatus(currentUser.id)
@@ -88,11 +85,10 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         auth = FirebaseAuth.getInstance()
-        sharedPreferences = getSharedPreferences("NotificationPrefs", Context.MODE_PRIVATE)
-        createNotificationChannel(this)
-
-        // Initialize DeviceTheme with sharedPreferences
         auth.addAuthStateListener(authStateListener)
+
+        // Check and request notification permission
+        checkAndRequestNotificationPermission()
 
         setContent {
             UniAdminTheme(dynamicColor = false, darkTheme = UniAdminPreferences.darkMode.value) {
@@ -106,11 +102,35 @@ class MainActivity : AppCompatActivity() {
         auth.removeAuthStateListener(authStateListener)
     }
 
+    // Checks if notification permission is granted, updates preferences, and requests if needed
+    fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val isPermissionGranted = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!isPermissionGranted) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                UniAdminPreferences.saveNotificationsPreference(false)
+            } else {
+                UniAdminPreferences.saveNotificationsPreference(true)
+            }
+        }
+    }
+
+    // Permission launcher for notification permission
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            UniAdminPreferences.saveNotificationsPreference(isGranted)
+        }
+
+    // Lifecycle observer setup
     private fun setupLifecycleObservers(userId: String) {
         lifecycle.addObserver(lifecycleObserver)
         registerConnectivityListener(this, userId)
     }
 
+    // Writes user's online status to Firebase
     private fun writeUserOnlineStatus(userId: String) {
         val userStatusRef = database.getReference().child("Users Online Status").child(userId)
         val userState = UserStateEntity(
@@ -120,18 +140,17 @@ class MainActivity : AppCompatActivity() {
             lastTime = CC.getTimeStamp(),
             lastDate = CC.getTimeStamp()
         )
-        userStatusRef.setValue(userState) // Set the whole UserStateEntity object
-        userStatusRef.onDisconnect()
-            .setValue(userState.copy(online = "offline")) // Set offline on disconnect
-        Log.d("User status", "Online: $userState")
+        userStatusRef.setValue(userState)
+        userStatusRef.onDisconnect().setValue(userState.copy(online = "offline"))
+
         writeUserActivity(userState) { success ->
             if (!success) {
                 Log.e("MainActivity", "Failed to write user online status")
             }
         }
-
     }
 
+    // Writes user's offline status to Firebase
     private fun writeUserOfflineStatus(userId: String) {
         val userStatusRef = database.getReference().child("Users Online Status").child(userId)
         val userState = UserStateEntity(
@@ -141,8 +160,8 @@ class MainActivity : AppCompatActivity() {
             lastTime = CC.getTimeStamp(),
             lastDate = CC.getTimeStamp()
         )
-        userStatusRef.setValue(userState) // Set the whole UserStateEntity object
-        Log.d("User status", "Offline: $userState")
+        userStatusRef.setValue(userState)
+
         writeUserActivity(userState) { success ->
             if (!success) {
                 Log.e("MainActivity", "Failed to write user offline status")
@@ -150,65 +169,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                Global.showAlert.value = false
-            } else {
-                // Permission already granted
-                Global.showAlert.value = true
-                sharedPreferences.edit().putBoolean("NotificationPermissionGranted", true).apply()
-            }
-        }
-    }
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                Global.showAlert.value = true
-                Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show()
-                sharedPreferences.edit().putBoolean("NotificationPermissionGranted", true).apply()
-            } else {
-                Global.showAlert.value = false
-                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
-            }
-        }
-
+    // Fetches user data from Firebase by email
     private fun fetchUserDataByEmail(email: String, onUserFetched: (UserEntity?) -> Unit) {
         MyDatabase.database.child("Admins").orderByChild("email").equalTo(email)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val userSnapshot = snapshot.children.firstOrNull()
                     val user = userSnapshot?.getValue(UserEntity::class.java)
-                    onUserFetched(user) // Call the trailing lambda with the fetched user
+                    onUserFetched(user)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    onUserFetched(null) // Handle error by passing null to the callback
+                    onUserFetched(null)
                 }
             })
     }
 
+    // Registers a network connectivity listener
     private fun registerConnectivityListener(context: Context, userId: String) {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager.registerDefaultNetworkCallback(object :
             ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                super.onAvailable(network)
                 writeUserOnlineStatus(userId)
             }
 
             override fun onLost(network: Network) {
-                super.onLost(network)
                 writeUserOfflineStatus(userId)
             }
         })
     }
 }
+
 
 
