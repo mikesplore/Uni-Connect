@@ -208,7 +208,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 Spacer(modifier = Modifier.height(20.dp))
                 DarkMode(context)
                 Spacer(modifier = Modifier.height(20.dp))
-                Notifications(context, userViewModel)
+                Notifications(context)
                 Spacer(modifier = Modifier.height(40.dp))
                 Row(modifier = Modifier.fillMaxWidth(0.9f)) {
                     Text(
@@ -217,7 +217,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                Biometrics(context, mainActivity, userViewModel)
+                Biometrics(context, mainActivity)
                 Spacer(modifier = Modifier.height(20.dp))
                 PasswordUpdateSection(context)
                 Spacer(modifier = Modifier.height(20.dp))
