@@ -69,7 +69,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
     myUserState = when {
         userState == null -> "Never online"
         userState!!.online == "online" -> "Online"
-        else -> "Last seen ${CC.getRelativeDate(CC.getCurrentDate(userState!!.lastDate))} at ${
+        else -> "Last seen ${CC.getRelativeDate(CC.getDateFromTimeStamp(userState!!.lastDate))} at ${
             CC.getFormattedTime(
                 userState!!.lastTime
             )
@@ -186,7 +186,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                     modifier = Modifier.weight(1f), state = scrollState
                 ) {
                     val groupedMessages = messages.groupBy { message ->
-                        CC.getCurrentDate(message.date)
+                        CC.getDateFromTimeStamp(message.date)
                     }.also { _ ->
                         messages.forEach { message ->
                             // If the current user is not the sender (and thus the receiver), or if it's a self-chat
