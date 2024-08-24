@@ -12,6 +12,8 @@ object UniAdminPreferences {
     private const val PREF_KEY_USER_EMAIL = "user_email_key"
     private const val PREF_KEY_USER_TYPE = "user_id_key"
     private const val PREF_KEY_DARK_MODE = "dark_mode_key"
+    private const val PREF_KEY_NOTIFICATIONS_ENABLED = "notifications_enabled_key"
+    private const val PREF_KEY_BIOMETRIC_ENABLED = "biometric_enabled_key"
 
     private lateinit var preferences: SharedPreferences
 
@@ -20,6 +22,8 @@ object UniAdminPreferences {
     val userEmail: MutableState<String> = mutableStateOf("")
     val userType: MutableState<String> = mutableStateOf("")
     val darkMode: MutableState<Boolean> = mutableStateOf(false)
+    val notificationsEnabled: MutableState<Boolean> = mutableStateOf(false)
+    val biometricEnabled: MutableState<Boolean> = mutableStateOf(false)
 
     // Initialize preferences and load stored values
     fun initialize(context: Context) {
@@ -29,7 +33,8 @@ object UniAdminPreferences {
         userEmail.value = preferences.getString(PREF_KEY_USER_EMAIL, "") ?: ""
         userType.value = preferences.getString(PREF_KEY_USER_TYPE, "") ?: ""
         darkMode.value = preferences.getBoolean(PREF_KEY_DARK_MODE, true)
-        Log.d("UniAdminPreferences", "Preferences initialized")
+        notificationsEnabled.value = preferences.getBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, true)
+        biometricEnabled.value = preferences.getBoolean(PREF_KEY_BIOMETRIC_ENABLED, true)
     }
 
     // Save course code
@@ -58,5 +63,17 @@ object UniAdminPreferences {
         darkMode.value = isDarkMode
         preferences.edit().putBoolean(PREF_KEY_DARK_MODE, isDarkMode).apply()
         Log.d("UniAdminPreferences", "Dark mode saved: $isDarkMode")
+    }
+    //save notifications preference
+    fun saveNotificationsPreference(isEnabled: Boolean) {
+        notificationsEnabled.value = isEnabled
+        preferences.edit().putBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, isEnabled).apply()
+        Log.d("UniAdminPreferences", "Notifications enabled saved: $isEnabled")
+    }
+    //save biometric preference
+    fun saveBiometricPreference(isEnabled: Boolean) {
+        biometricEnabled.value = isEnabled
+        preferences.edit().putBoolean(PREF_KEY_BIOMETRIC_ENABLED, isEnabled).apply()
+        Log.d("UniAdminPreferences", "Biometric enabled saved: $isEnabled")
     }
 }
