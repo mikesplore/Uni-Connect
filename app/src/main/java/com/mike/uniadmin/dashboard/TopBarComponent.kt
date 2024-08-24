@@ -167,8 +167,7 @@ fun TopAppBarContent(
             // Profile Image
             BoxWithConstraints(modifier = Modifier.padding(end = 10.dp, bottom = 21.dp)) {
                 val profileImageSize =
-                    maxWidth * 0.12f // Dynamic size for profile image (e.g., 12% of available width)
-
+                    maxWidth * 0.12f
                 Box(
                     modifier = Modifier
                         .padding(start = 10.dp)
