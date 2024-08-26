@@ -133,7 +133,7 @@ fun ModalNavigationDrawerItem(
                     })
                 SideBarItem(
                     icon = Icons.AutoMirrored.Filled.Message,
-                    text = "Uni Chat",
+                    text = "Campus Chat",
                     context,
                     onClicked = {
                         // Check if biometrics is enabled
@@ -186,7 +186,7 @@ fun ModalNavigationDrawerItem(
                         action = Intent.ACTION_SEND
                         putExtra(
                             Intent.EXTRA_TEXT,
-                            "${signedInUser?.firstName} invites you to join Uni Admin! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                            "${signedInUser?.firstName} invites you to join Campus Connect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
                         ) // Customize the text
                         type = "text/plain"
                     }
