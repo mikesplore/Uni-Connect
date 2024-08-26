@@ -89,9 +89,9 @@ fun CheckUpdate(context: Context) {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun startDownload(context: Context, url: String, onProgress: (Int) -> Unit) {
         val request = DownloadManager.Request(Uri.parse(url))
-            .setTitle("Uni Admin Update")
+            .setTitle("Campus Connect Update")
             .setDescription("Downloading update")
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Uni Admin.apk${myUpdate.version}")
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Campus Connect.apkV${myUpdate.version}")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setAllowedOverMetered(true)
             .setAllowedOverRoaming(true)
