@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -173,7 +175,7 @@ fun DeliveryStatusIcon(
     when (deliveryStatus) {
         DeliveryStatus.SENT -> {
             Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = Icons.Default.Done,
                 contentDescription = "Sent",
                 tint = Color.Gray, // Single gray tick
                 modifier = Modifier.size(16.dp)
@@ -186,15 +188,9 @@ fun DeliveryStatusIcon(
                 horizontalArrangement = Arrangement.spacedBy((-8).dp) // Slight overlap for double tick
             ) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    imageVector = Icons.Default.DoneAll,
                     contentDescription = "Read",
                     tint = Color.Green, // First green tick
-                    modifier = Modifier.size(16.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Read",
-                    tint = Color.Green, // Second green tick
                     modifier = Modifier.size(16.dp)
                 )
             }
