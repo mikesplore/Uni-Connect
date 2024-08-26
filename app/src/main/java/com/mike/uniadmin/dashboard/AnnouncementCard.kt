@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -140,7 +141,7 @@ fun AnnouncementTitleRow(
         } else {
             Text(
                 text = title,
-                style = CC.titleTextStyle(context),
+                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,
