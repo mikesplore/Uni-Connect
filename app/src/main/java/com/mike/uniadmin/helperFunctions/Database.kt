@@ -40,9 +40,9 @@ object MyDatabase {
         }
     }
 
-    fun generateModuleID(onIndexNumberGenerated: (String) -> Unit) {
+    fun generateGridItemID(onIndexNumberGenerated: (String) -> Unit) {
         updateAndGetCode("Modules") { newCode ->
-            val indexNumber = "CS$newCode$year"
+            val indexNumber = "GI$newCode$year"
             onIndexNumberGenerated(indexNumber)
         }
     }
@@ -172,7 +172,7 @@ object MyDatabase {
 
 
     fun writeItem(moduleId: String, section: Section, item: GridItem) {
-        database.child(courseCode).child("Module Resources").child(moduleId).child(section.name).push().setValue(item)
+        database.child(courseCode).child("Module Resources").child(moduleId).child(section.name).child(item.id).setValue(item)
             .addOnSuccessListener {
                 // Data successfully written
             }.addOnFailureListener { exception ->
