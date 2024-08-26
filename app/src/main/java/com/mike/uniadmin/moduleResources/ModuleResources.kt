@@ -1,40 +1,34 @@
 package com.mike.uniadmin.moduleResources
 
+import ScatteredCirclesBackground
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -53,67 +47,81 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.dashboard.isDeviceOnline
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.helperFunctions.GridItem
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.deleteItem
 import com.mike.uniadmin.helperFunctions.MyDatabase.readItems
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeItem
 import com.mike.uniadmin.helperFunctions.Section
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-object ModuleName {
-    var name: MutableState<String> = mutableStateOf("")
-    var moduleID: MutableState<String> = mutableStateOf("")
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModuleResources(moduleCode: String, context: Context) {
+fun ModuleResources(moduleCode: String, context: Context, navController: NavController) {
     val notes = remember { mutableStateListOf<GridItem>() }
     val pastPapers = remember { mutableStateListOf<GridItem>() }
     val resources = remember { mutableStateListOf<GridItem>() }
-    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
     var showAddSection by remember { mutableStateOf<Section?>(null) }
 
     val moduleViewModel = getModuleViewModel(context)
     val module by moduleViewModel.fetchedModule.observeAsState()
+    var refresh by remember { mutableStateOf(false) }
 
 
-    LaunchedEffect(moduleCode) {
-
+    LaunchedEffect(refresh) {
+        isLoading = true
         moduleViewModel.getModuleDetailsByModuleID(moduleCode)
 
-        isLoading = true
         readItems(moduleCode, Section.NOTES) { fetchedNotes ->
             notes.addAll(fetchedNotes)
-            isLoading = false
         }
         readItems(moduleCode, Section.PAST_PAPERS) { fetchedPastPapers ->
             pastPapers.addAll(fetchedPastPapers)
-            isLoading = false
         }
         readItems(moduleCode, Section.RESOURCES) { fetchedResources ->
             resources.addAll(fetchedResources)
-            isLoading = false
         }
+        isLoading = false
 
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {}, colors = TopAppBarDefaults.topAppBarColors(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigate("homeScreen") }) {
+                        Icon(
+                            Icons.Default.ArrowBackIosNew,
+                            contentDescription = "Back",
+                            tint = CC.textColor()
+                        )
+                    }
+                },
+
+                actions = {
+                    TextButton(onClick = { showAddSection = null }) {
+                        if (showAddSection != null) {
+                            Text("Cancel", style = CC.descriptionTextStyle(context))
+                        }
+                    }
+                    TextButton(onClick = { navController.navigate("downloads") }) {
+                        Text("Downloads", style = CC.descriptionTextStyle(context))
+                    }
+
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CC.primary(), titleContentColor = CC.textColor()
                 )
             )
@@ -128,132 +136,161 @@ fun ModuleResources(moduleCode: String, context: Context) {
             ) {
                 CircularProgressIndicator(color = CC.textColor())
             }
+        } else if (!isDeviceOnline(context)) {
+            Offline(context, { refresh = true }, navController)
+
         } else {
-            Column(
+            Box(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
                     .fillMaxSize()
                     .background(CC.primary())
-                    .padding(it)
-                    .imePadding(),
-                horizontalAlignment = Alignment.CenterHorizontally
-
             ) {
-                Box(
+                ScatteredCirclesBackground()
+
+                Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .height(200.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
+                        .padding(it)
+                        .imePadding(),
+                    horizontalAlignment = Alignment.Start
+
                 ) {
-                    AsyncImage(
-                        model = module?.moduleImageLink,
-                        contentDescription = "Module Image",
+                    Box(
                         modifier = Modifier
-                            .blur(2.2.dp)
-                            .fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                    val textBrush = Brush.horizontalGradient(
-                        listOf(
-                            CC.extraColor2(),
-                            CC.textColor(),
-                            CC.extraColor1()
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .height(150.dp)
+                                .fillMaxWidth(0.95f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = module?.moduleImageLink,
+                                contentDescription = "Module Image",
+                                modifier = Modifier
+                                    .blur(2.6.dp)
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                            val textBrush = Brush.horizontalGradient(
+                                listOf(
+                                    CC.extraColor2(),
+                                    CC.textColor(),
+                                    CC.extraColor1()
 
-                        )
-                    )
-                    Text(
-                        ModuleName.name.value,
-                        style = CC.titleTextStyle(context)
-                            .copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 30.sp,
-                                brush = textBrush
-                            ),
-                        modifier = Modifier.fillMaxSize(),
-                        textAlign = TextAlign.Center
-                    )
+                                )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .background(
+                                        CC
+                                            .primary()
+                                            .copy(0.5f), RoundedCornerShape(10.dp)
+                                    )
+                            ) {
+                                Text(
+                                    UniAdminPreferences.moduleName.value,
+                                    style = CC.titleTextStyle(context)
+                                        .copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 30.sp,
+                                            brush = textBrush
+                                        ),
+                                    modifier = Modifier
+                                        .padding(10.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
 
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-                Section(
-                    title = "Notes",
-                    items = notes,
-                    onAddClick = { showAddSection = Section.NOTES },
-                    onDelete = { gridItem ->
-                        notes.remove(gridItem); deleteItem(
-                        moduleCode,
-                        Section.NOTES,
-                        gridItem
-                    )
-                    },
-                    context = context
-                )
-                AnimatedVisibility(showAddSection == Section.NOTES) {
-                    AddItemSection(context) { title, description, imageUrl, fileUrl ->
-                        val newItem = GridItem(
-                            title = title,
-                            description = description,
-                            fileLink = fileUrl,
-                            imageLink = imageUrl
-                        )
-                        notes.add(newItem)
-                        writeItem(moduleCode, Section.NOTES, newItem)
-                        showAddSection = null
+                        }
                     }
-                }
-                Section(
-                    title = "Past Papers",
-                    items = pastPapers,
-                    onAddClick = { showAddSection = Section.PAST_PAPERS },
-                    onDelete = { gridItem ->
-                        pastPapers.remove(gridItem); deleteItem(
-                        moduleCode,
-                        Section.PAST_PAPERS,
-                        gridItem
-                    )
-                    },
-                    context = context
-                )
-                AnimatedVisibility(showAddSection == Section.PAST_PAPERS) {
-                    AddItemSection(context) { title, description, fileUrl, imageUrl ->
-                        val newItem = GridItem(
-                            title = title,
-                            description = description,
-                            fileLink = fileUrl,
-                            imageLink = imageUrl
-                        )
-                        pastPapers.add(newItem)
-                        writeItem(moduleCode, Section.PAST_PAPERS, newItem)
-                        showAddSection = null
-                    }
-                }
 
-                Section(
-                    title = "Additional Resources",
-                    items = resources,
-                    onAddClick = { showAddSection = Section.RESOURCES },
-                    onDelete = { gridItem ->
-                        resources.remove(gridItem); deleteItem(
-                        moduleCode,
-                        Section.RESOURCES,
-                        gridItem
-                    )
-                    },
-                    context = context
-                )
-                AnimatedVisibility(showAddSection == Section.RESOURCES) {
-                    AddItemSection(context) { title, description, imageUrl, fileUrl ->
-                        val newItem = GridItem(
-                            title = title,
-                            description = description,
-                            fileLink = fileUrl,
-                            imageLink = imageUrl
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Section(
+                        title = "Notes",
+                        items = notes,
+                        onAddClick = { showAddSection = Section.NOTES },
+                        onDelete = { gridItem ->
+                            notes.remove(gridItem); deleteItem(
+                            moduleCode,
+                            Section.NOTES,
+                            gridItem
                         )
-                        resources.add(newItem)
-                        writeItem(moduleCode, Section.RESOURCES, newItem)
-                        showAddSection = null
+                        },
+                        context = context
+                    )
+                    AnimatedVisibility(showAddSection == Section.NOTES) {
+                        AddItemSection(context) { title, imageUrl, fileUrl ->
+                            MyDatabase.generateGridItemID { id ->
+                                val newItem = GridItem(
+                                    title = title,
+                                    id = id,
+                                    fileLink = fileUrl,
+                                    imageLink = imageUrl
+                                )
+                                notes.add(newItem)
+                                writeItem(moduleCode, Section.NOTES, newItem)
+                                showAddSection = null
+                            }
+                        }
+                    }
+                    Section(
+                        title = "Past Papers",
+                        items = pastPapers,
+                        onAddClick = { showAddSection = Section.PAST_PAPERS },
+                        onDelete = { gridItem ->
+                            pastPapers.remove(gridItem); deleteItem(
+                            moduleCode,
+                            Section.PAST_PAPERS,
+                            gridItem
+                        )
+                        },
+                        context = context
+                    )
+                    AnimatedVisibility(showAddSection == Section.PAST_PAPERS) {
+                        AddItemSection(context) { title, fileUrl, imageUrl ->
+                            val newItem = GridItem(
+                                title = title,
+
+                                fileLink = fileUrl,
+                                imageLink = imageUrl
+                            )
+                            pastPapers.add(newItem)
+                            writeItem(moduleCode, Section.PAST_PAPERS, newItem)
+                            showAddSection = null
+                        }
+                    }
+
+                    Section(
+                        title = "Additional Resources",
+                        items = resources,
+                        onAddClick = { showAddSection = Section.RESOURCES },
+                        onDelete = { gridItem ->
+                            resources.remove(gridItem); deleteItem(
+                            moduleCode,
+                            Section.RESOURCES,
+                            gridItem
+                        )
+                        },
+                        context = context
+                    )
+                    AnimatedVisibility(showAddSection == Section.RESOURCES) {
+                        AddItemSection(context) { title, imageUrl, fileUrl ->
+                            val newItem = GridItem(
+                                title = title,
+
+                                fileLink = fileUrl,
+                                imageLink = imageUrl
+                            )
+                            resources.add(newItem)
+                            writeItem(moduleCode, Section.RESOURCES, newItem)
+                            showAddSection = null
+                        }
                     }
                 }
             }
@@ -261,226 +298,55 @@ fun ModuleResources(moduleCode: String, context: Context) {
     }
 }
 
-@Composable
-fun Section(
-    title: String,
-    items: List<GridItem>,
-    onAddClick: () -> Unit,
-    onDelete: (GridItem) -> Unit,
-    context: Context
-) {
-    val userType = UniAdminPreferences.userType.value
-    Text(
-        text = title,
-        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(start = 15.dp)
-    )
-
-    Spacer(modifier = Modifier.height(10.dp))
-
-    if (items.isEmpty()) {
-        Text(
-            text = "No items available",
-            style = CC.descriptionTextStyle(context),
-            modifier = Modifier.padding(start = 15.dp)
-        )
-    } else {
-        LazyRow {
-            items(items) { item ->
-                GridItemCard(item = item, onDelete = onDelete, context = context)
-            }
-        }
-    }
-
-    Spacer(modifier = Modifier.height(10.dp))
-    if (userType == "admin") {
-        Button(
-            onClick = onAddClick, colors = ButtonDefaults.buttonColors(
-                containerColor = CC.extraColor2(), contentColor = Color.White
-            ), shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(start = 15.dp)
-        ) {
-            Text("Add Item", style = CC.descriptionTextStyle(context = context))
-        }
-    }
-
-    Spacer(modifier = Modifier.height(20.dp))
-}
 
 @Composable
-fun GridItemCard(item: GridItem, onDelete: (GridItem) -> Unit, context: Context) {
-    val uriHandler = LocalUriHandler.current
-
-    Surface(
-        modifier = Modifier
-            .width(200.dp)
-            .padding(start = 15.dp),
-        shape = RoundedCornerShape(8.dp),
-        color = CC.secondary(),
-        shadowElevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(10.dp)
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter(model = item.imageLink),
-                contentDescription = item.title,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .background(Color.LightGray, RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = item.title,
-                style = CC.titleTextStyle(context),
-                fontSize = 20.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = item.description,
-                style = CC.descriptionTextStyle(context),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Button(
-                onClick = { uriHandler.openUri(item.fileLink) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2()),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Text("Open", style = CC.descriptionTextStyle(context))
-            }
-            IconButton(
-                onClick = { onDelete(item) }, modifier = Modifier.align(Alignment.End)
-            ) {
-                Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = Color.Red)
-            }
-        }
-    }
-}
-
-@Composable
-fun AddItemSection(context: Context, onAddItem: (String, String, String, String) -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var imageUrl by remember { mutableStateOf("") }
-    var fileUrl by remember { mutableStateOf("") }
-
+fun Offline(context: Context, onRefresh: () -> Unit, navController: NavController) {
     Column(
         modifier = Modifier
-            .border(
-                width = 1.dp,
-                color = CC
-                    .extraColor2()
-                    .copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .fillMaxWidth(0.9f)
-            .background(CC.extraColor1(), RoundedCornerShape(8.dp))
-            .padding(16.dp)
-            .imePadding()
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Icon(
+            imageVector = Icons.Outlined.WifiOff, // Example icon
+            contentDescription = "Offline",
+            tint = Color.Yellow // Example color
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
-            "Add New Item",
-            style = CC.descriptionTextStyle(context)
-                .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            "Oops! It seems you're offline.",
+            style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        InputDialogTextField(
-            value = title, onValueChange = { title = it }, label = "Title", context = context
+        Text(
+            "Connect to the internet to view this page or view your downloads.",
+            style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        InputDialogTextField(
-            value = description,
-            onValueChange = { description = it },
-            label = "Description",
-            context = context
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        InputDialogTextField(
-            value = fileUrl, onValueChange = { fileUrl = it }, label = "File URL", context = context
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        InputDialogTextField(
-            value = imageUrl,
-            onValueChange = { imageUrl = it },
-            label = "Image URL",
-            context = context
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
+        Button(
+            onClick = {
+                onRefresh()
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = CC.extraColor2(), contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .padding(16.dp)
         ) {
-            Button(
-                onClick = {
-                    if (title.isEmpty() || description.isEmpty() || imageUrl.isEmpty() || fileUrl.isEmpty()) {
-                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
-                    onAddItem(
-                        title, description, imageUrl, fileUrl
-                    )
-                    title = ""
-                    description = ""
-                    imageUrl = ""
-                    fileUrl = ""
+            Text("Refresh", style = CC.descriptionTextStyle(context))
+        }
 
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CC.secondary()
-                ),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Add", style = CC.descriptionTextStyle(context))
-            }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(onClick = { navController.navigate("downloads") }) {
+            Text("View Downloads", style = CC.descriptionTextStyle(context))
         }
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun ModuleScreenPreview() {
-    ModuleResources(
-        moduleCode = "CP123456", context = LocalContext.current
-    )
-}
-
-@Composable
-fun InputDialogTextField(
-    value: String, onValueChange: (String) -> Unit, label: String, context: Context
-
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                label,
-                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f))
-            )
-        },
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = CC.tertiary(),
-            unfocusedIndicatorColor = CC.secondary(),
-            focusedTextColor = CC.textColor(),
-            unfocusedTextColor = CC.textColor(),
-            focusedContainerColor = CC.secondary(),
-            unfocusedContainerColor = CC.secondary(),
-            cursorColor = CC.textColor()
-        ),
-        modifier = Modifier.fillMaxWidth()
-    )
-}
