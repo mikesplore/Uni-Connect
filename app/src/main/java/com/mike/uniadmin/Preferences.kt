@@ -14,6 +14,8 @@ object UniAdminPreferences {
     private const val PREF_KEY_DARK_MODE = "dark_mode_key"
     private const val PREF_KEY_NOTIFICATIONS_ENABLED = "notifications_enabled_key"
     private const val PREF_KEY_BIOMETRIC_ENABLED = "biometric_enabled_key"
+    private const val PREF_KEY_MODULE_NAME = "module_name_key"
+    private const val PREF_KEY_MODULE_ID = "module_id_key"
 
     private lateinit var preferences: SharedPreferences
 
@@ -21,6 +23,8 @@ object UniAdminPreferences {
     val courseCode: MutableState<String> = mutableStateOf("")
     val userEmail: MutableState<String> = mutableStateOf("")
     val userType: MutableState<String> = mutableStateOf("")
+    val moduleName: MutableState<String> = mutableStateOf("")
+    val moduleID: MutableState<String> = mutableStateOf("")
     val darkMode: MutableState<Boolean> = mutableStateOf(false)
     val notificationsEnabled: MutableState<Boolean> = mutableStateOf(false)
     val biometricEnabled: MutableState<Boolean> = mutableStateOf(false)
@@ -32,9 +36,25 @@ object UniAdminPreferences {
         courseCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
         userEmail.value = preferences.getString(PREF_KEY_USER_EMAIL, "") ?: ""
         userType.value = preferences.getString(PREF_KEY_USER_TYPE, "") ?: ""
+        moduleName.value = preferences.getString(PREF_KEY_MODULE_NAME, "") ?: ""
+        moduleID.value = preferences.getString(PREF_KEY_MODULE_ID, "") ?: ""
         darkMode.value = preferences.getBoolean(PREF_KEY_DARK_MODE, true)
         notificationsEnabled.value = preferences.getBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, true)
         biometricEnabled.value = preferences.getBoolean(PREF_KEY_BIOMETRIC_ENABLED, true)
+    }
+
+    // Save module name
+    fun saveModuleName(newModuleName: String) {
+        moduleName.value = newModuleName
+        preferences.edit().putString(PREF_KEY_MODULE_NAME, newModuleName).apply()
+        Log.d("UniAdminPreferences", "Module name saved: $newModuleName")
+    }
+
+    // Save module
+    fun saveModuleID(newModuleID: String) {
+        moduleID.value = newModuleID
+        preferences.edit().putString(PREF_KEY_MODULE_ID, newModuleID).apply()
+        Log.d("UniAdminPreferences", "Module ID saved: $newModuleID")
     }
 
     // Save course code
