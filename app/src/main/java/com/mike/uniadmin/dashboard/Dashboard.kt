@@ -1,10 +1,8 @@
 package com.mike.uniadmin.dashboard
 
-
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,8 +36,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.getAnnouncementViewModel
-import com.mike.uniadmin.getGroupChatViewModel
-import com.mike.uniadmin.getModuleTimetableViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
@@ -51,36 +47,21 @@ fun Dashboard(navController: NavController, context: Context) {
     val moduleViewModel = getModuleViewModel(context)
     val userViewModel = getUserViewModel(context)
     val announcementViewModel = getAnnouncementViewModel(context)
-    val chatViewModel = getGroupChatViewModel(context)
     val notificationViewModel = getNotificationViewModel(context)
-    val timetableViewModel = getModuleTimetableViewModel(context)
 
-    val fetchedModule by moduleViewModel.fetchedModule.observeAsState()
-    val timetable by timetableViewModel.timetablesToday.observeAsState()
     val announcements by announcementViewModel.announcements.observeAsState()
     val currentUser by userViewModel.user.observeAsState()
     val modules by moduleViewModel.modules.observeAsState(emptyList())
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
     val modulesLoading by moduleViewModel.isLoading.observeAsState()
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
-    val moduleName by remember { mutableStateOf(fetchedModule?.moduleName) }
-    val loggedInUserEmail  = UniAdminPreferences.userEmail.value
+    val loggedInUserEmail = UniAdminPreferences.userEmail.value
 
 
 
     LaunchedEffect(Unit) {
         userViewModel.checkAllUserStatuses()
-        chatViewModel.fetchGroups()
-        timetableViewModel.getTimetableByDay(CC.currentDay())
-
-        timetable?.let {
-            Log.d("TIMETABLE", it.toString())
-            moduleViewModel.getModuleDetailsByModuleID(it.moduleID)
-            Log.d("TIMETABLE", moduleName.toString())
-        }
-
-            userViewModel.findUserByEmail(loggedInUserEmail) {}
-
+        userViewModel.findUserByEmail(loggedInUserEmail) {}
 
         while (true) {
             isOnline.value = isDeviceOnline(context)
@@ -121,6 +102,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     )
                 }
             }
+
             Spacer(modifier = Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -224,7 +206,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text("No announcements found", style = CC.descriptionTextStyle(context))
                 }
             } else {
-                announcements?.lastOrNull()?.let { announcement ->
+                announcements?.maxByOrNull { it.date }?.let { announcement ->
                     AnnouncementCard(announcement, context)
                 }
             }
