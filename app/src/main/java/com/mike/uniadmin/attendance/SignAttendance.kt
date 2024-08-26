@@ -80,6 +80,7 @@ fun SignAttendance(context: Context) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val email = UniAdminPreferences.userEmail.value
     val tabNames = modules.map { it.moduleCode }
+    val moduleNames = modules.map { it.moduleName }
     var refresh by remember { mutableStateOf(false) }
 
     // Load persisted data and then fetch fresh data from ViewModel
@@ -126,9 +127,10 @@ fun SignAttendance(context: Context) {
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.secondary())
             )
         },
-        containerColor = CC.primary()
+        containerColor = CC.secondary()
     ) {
         Column(modifier = Modifier
+            .background(CC.primary())
             .fillMaxSize()
             .padding(it)) {
             // Full-screen loading indicator when data is being fetched
@@ -148,7 +150,17 @@ fun SignAttendance(context: Context) {
                     }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                moduleNames.forEachIndexed { index, name ->
+                    if (index == selectedTabIndex) {
+                        Box(modifier = Modifier
+                            .background(CC.secondary().copy(alpha = 0.5f))
+                            .fillMaxWidth(), contentAlignment = Alignment.Center){
+                            Text(name, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+
 
                 // Sign attendance or show "not open" message
                 val attendanceStateForModule =
@@ -178,8 +190,6 @@ fun SignAttendance(context: Context) {
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
 
                 // Filter attendance records for selected module
                 val filteredAttendanceRecords = attendanceRecords.filter { attendance ->
@@ -245,10 +255,18 @@ fun SignAttendanceCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
+            if (hasSignedToday) {
+                Text(
+                    text = "Good job! You have already signed today",
+                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold, color = CC.textColor().copy(alpha = 0.8f)),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+
+            }else{
             Text(
                 text = "Sign attendance for today",
                 style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
-            )
+            )}
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
@@ -284,17 +302,12 @@ fun SignAttendanceCard(
                         modifier = Modifier.size(20.dp)
                     )
                 } else {
+                    if (hasSignedToday) {
+                        Text("👍", style = CC.descriptionTextStyle(context))
+                        return@Button
+                    }
                     Text("Sign Attendance", style = CC.descriptionTextStyle(context))
                 }
-            }
-
-            if (hasSignedToday) {
-                Text(
-                    text = "You have already signed attendance for today.",
-                    color = Color.Red,
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(top = 8.dp)
-                )
             }
         }
     }
