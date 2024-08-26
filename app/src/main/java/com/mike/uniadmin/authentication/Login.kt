@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,13 +48,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
@@ -81,6 +79,8 @@ fun LoginScreen(navController: NavController, context: Context) {
 
     var visible by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
+    var loginfailed by remember { mutableStateOf(false) }
+    var registerfailed by remember { mutableStateOf(false) }
 
     val firebaseAuth = FirebaseAuth.getInstance()
     val userViewModel = getUserViewModel(context)
@@ -98,6 +98,14 @@ fun LoginScreen(navController: NavController, context: Context) {
             userViewModel.findUserByEmail(it) {}
         }
         visible = true
+    }
+
+    if(loginfailed){
+        AuthFailed(onDismissRequest = {value -> loginfailed = value }, context)
+    }
+
+    if(registerfailed){
+        RegistrationFailed(onDismissRequest = {value -> registerfailed = value }, context)
     }
 
     Scaffold(
@@ -232,11 +240,19 @@ fun LoginScreen(navController: NavController, context: Context) {
                             firebaseAuth,
                             firstName,
                             lastName,
-                        ) {
+                        ) { success ->
+                            if (success){
+                                isSigningUp = false
+                            }else{
+                                registerfailed = true
+                            }
                             loading = false
                         } else handleSignIn(
                             context, firebaseAuth, email, password, navController, userViewModel
-                        ) {
+                        ) { success ->
+                            if (!success){
+                                loginfailed = true
+                            }
                             loading = false
                         }
                     },
@@ -327,6 +343,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
             })
 
             UniAdminPreferences.saveUserEmail(email)
+            UniAdminPreferences.saveUserType(user.userType.ifEmpty { "student" })
             navController.navigate("courses") {
                 popUpTo("login") { inclusive = true }
             }
@@ -355,7 +372,6 @@ fun handleSignUp(
                 onComplete(true)
 
             } else {
-                Toast.makeText(context, "Wrong credentials.", Toast.LENGTH_SHORT).show()
                 onComplete(false)
             }
         }
@@ -412,7 +428,6 @@ fun handleSignIn(
                 })
                 onComplete(true)
             } else {
-                Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
                 onComplete(false)
             }
         }
@@ -422,9 +437,50 @@ fun handleSignIn(
     }
 }
 
-@Preview
 @Composable
-fun SignInScreenPreview() {
-    LoginScreen(rememberNavController(), LocalContext.current)
+fun RegistrationFailed(onDismissRequest: (Boolean) -> Unit, context: Context){
+    ErrorDialog(
+        title = "Registration Failed",
+        message = "Check your email and password and try again",
+        onDismissRequest = onDismissRequest,
+        context = context
+    )
 }
 
+@Composable
+fun AuthFailed(onDismissRequest: (Boolean) -> Unit, context: Context) {
+    ErrorDialog(
+        title = "Login Failed🥲",
+        message = "Check your email and password and try again",
+        onDismissRequest = onDismissRequest,
+        context = context
+    )
+}
+
+
+@Composable
+fun ErrorDialog(title: String, message: String, onDismissRequest: (Boolean) -> Unit, context: Context) {
+    AlertDialog(
+        containerColor = CC.primary(),
+        onDismissRequest = {onDismissRequest(false)},
+        title = { Text(text = title, style = CC.titleTextStyle(context)) },
+        text = {
+            Text(
+                text = message,
+                style = CC.descriptionTextStyle(context)
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onDismissRequest(false) },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = CC.primary(),
+                    containerColor = CC.secondary()
+                )
+
+            ) {
+                Text(text = "OK", style = CC.descriptionTextStyle(context))
+            }
+        }
+    )
+}
