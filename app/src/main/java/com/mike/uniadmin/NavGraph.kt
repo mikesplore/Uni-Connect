@@ -39,7 +39,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             SplashScreen(navController = navController, context)
         }
 
-
         composable("attendance", exitTransition = {
             fadeOut(animationSpec = tween(300))
         }) {
