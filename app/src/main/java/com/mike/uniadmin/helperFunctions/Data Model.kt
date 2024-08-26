@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import java.util.UUID
 
 data class GridItem(
+    val id: String = "",
     val title: String = "",
-    val description: String = "",
     val fileLink: String = "",
     val imageLink: String = "",
 )
