@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,12 +25,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
@@ -41,7 +48,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     var startAnimation by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.8f,
+        targetValue = if (startAnimation) 0.8f else 0.6f,
         animationSpec = tween(durationMillis = 800, easing = { OvershootInterpolator(2f).getInterpolation(it) }),
         label = ""
     )
@@ -56,14 +63,9 @@ fun SplashScreen(navController: NavController, context: Context) {
     }
 
     LaunchedEffect(Unit) {
-        delay(3000)
-        navController.navigate(destination) {
-            popUpTo("splashScreen") { inclusive = true }
-        }
-    }
-
-    LaunchedEffect(Unit) {
         startAnimation = true
+        delay(3000)
+        navController.navigate(destination)
     }
 
     Box(
@@ -85,35 +87,61 @@ fun SplashScreen(navController: NavController, context: Context) {
             modifier = Modifier.scale(scale)
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.logo), // Replace with your logo
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "App Logo",
                 tint = CC.extraColor2(),
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(150.dp) // Slightly bigger logo for better focus
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Improved Text Style with Gradients and Shadows
             Text(
-                text = "Uni Admin", style = CC.titleTextStyle(context)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                text = "Campus Connect",
+                style = CC.titleTextStyle(context).copy(
+                    fontSize = 32.sp, // Larger font for emphasis
+                    fontWeight = FontWeight.ExtraBold,
+                    shadow = Shadow( // Add shadow for a slight 3D effect
+                        color = Color.Black,
+                        blurRadius = 8f,
+                        offset = Offset(4f, 4f)
+                    ),
+                    brush = Brush.linearGradient( // Gradient for the title
+                        colors = listOf(CC.secondary(), CC.tertiary(), CC.secondary()))
+                    )
+                )
+            Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 text = "Your Ultimate Educational Companion",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle(context).copy(
+                    fontSize = 18.sp, // Smaller font for description
+                    fontWeight = FontWeight.Normal,
+                )
             )
-            Spacer(modifier = Modifier.height(24.dp)) // Added more space for better visual balance
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
-        Box(modifier = Modifier
-            .height(50.dp)
-            .padding(bottom = 16.dp)
-            .align(Alignment.BottomCenter),
-            contentAlignment = Alignment.Center){
-            Text("Developed by Mike", style = CC.descriptionTextStyle(context).copy(
-                color = CC.textColor(), fontWeight = FontWeight.Bold
-            ), modifier = Modifier.align(Alignment.Center).padding(bottom = 16.dp))
+        // Footer text styled with bold font
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .align(Alignment.BottomCenter),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Developed by Mike",
+                style = CC.descriptionTextStyle(context).copy(
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    shadow = Shadow(Color.Gray, Offset(2f, 2f), blurRadius = 4f)
+                )
+            )
         }
-
     }
 }
+
 
 @Preview
 @Composable
