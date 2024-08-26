@@ -92,7 +92,7 @@ fun UniChat(navController: NavController, context: Context) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "UNI CHAT", style = CC.titleTextStyle(context).copy(
+                        text = "CAMPUS CHAT", style = CC.titleTextStyle(context).copy(
                             fontSize = 30.sp,
                             fontWeight = FontWeight.ExtraBold,
                             brush = Brush.verticalGradient(
@@ -222,19 +222,15 @@ fun ChatsScreen(
             Log.d("Card Messages", "fetched messages are: $messages")
 
             if (messages.isNotEmpty()) {
-
-                val sortedMessages = messages.sortedBy { content -> content.timeStamp }
-                val latestMessage = sortedMessages.lastOrNull()
-
                 val messageCounter =
-                    sortedMessages.count { unreadMessages -> unreadMessages.deliveryStatus == DeliveryStatus.SENT && unreadMessages.senderID == user.id }
+                    messages.count { unreadMessages -> unreadMessages.deliveryStatus == DeliveryStatus.SENT && unreadMessages.senderID == user.id }
 
                 AnimatedVisibility(
                     visible = true, enter = fadeIn(), exit = fadeOut()
                 ) {
                     UserMessageCard(
                         userEntity = user,
-                        latestMessage = latestMessage,
+                        latestMessage = messages.lastOrNull(),
                         userState = userStates[user.id],
                         context = context,
                         userViewModel = userViewModel,
@@ -246,6 +242,9 @@ fun ChatsScreen(
         }
     }
 }
+
+
+
 
 @Composable
 private fun UsersList(userViewModel: UserViewModel, context: Context) {
