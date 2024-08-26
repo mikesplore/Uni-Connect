@@ -1,8 +1,6 @@
 package com.mike.uniadmin.homeScreen
 
 import android.content.Context
-import android.view.Window
-import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
