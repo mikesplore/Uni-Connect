@@ -24,6 +24,7 @@ import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.homeScreen.HomeScreen
 import com.mike.uniadmin.notification.PhoneNotifications
 import com.mike.uniadmin.courses.CourseScreen
+import com.mike.uniadmin.moduleResources.DownloadedResources
 import com.mike.uniadmin.profile.ProfileScreen
 import com.mike.uniadmin.settings.Settings
 import com.mike.uniadmin.ui.theme.Appearance
@@ -32,15 +33,23 @@ import com.mike.uniadmin.ui.theme.Appearance
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "splashScreen") {
+    NavHost(navController = navController, startDestination = "uniChat") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
         }
+
+
         composable("attendance", exitTransition = {
             fadeOut(animationSpec = tween(300))
         }) {
             SignAttendance(context)
+        }
+
+        composable("downloads", exitTransition = {
+            fadeOut(animationSpec = tween(300))
+        }) {
+            DownloadedResources(context, navController)
         }
 
         composable("login", exitTransition = {
@@ -142,7 +151,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }, arguments = listOf(navArgument("moduleCode") { type = NavType.StringType })
         ) { backStackEntry ->
             ModuleResources(
-                backStackEntry.arguments?.getString("moduleCode") ?: "", context
+                backStackEntry.arguments?.getString("moduleCode") ?: "", context, navController
             )
         }
 
