@@ -38,6 +38,7 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
 import com.mike.uniadmin.backEnd.modules.ModuleViewModel
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
@@ -63,7 +64,7 @@ fun ModuleBox(
             Text(
                 module.moduleCode,
                 style = CC.descriptionTextStyle(context),
-                modifier = Modifier.padding(start = 10.dp)
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             )
             Text(
                 module.moduleName,
@@ -158,14 +159,14 @@ fun ModuleBoxContent(
             Box(
                 modifier = Modifier
                     .fillMaxHeight(0.4f)
-                    .background(CC.extraColor2(), RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
+                    .background(randomColor.random(), RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
                     .fillMaxWidth(),
                 content = imageContent
             )
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .background(CC.extraColor1(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
+                    .background(CC.secondary(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween,
                 content = bodyContent
