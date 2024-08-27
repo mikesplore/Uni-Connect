@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -104,9 +105,8 @@ fun Appearance(navController: NavController) {
 
 
 @Composable
-fun currentFontFamily(context: Context): FontFamily {
-    val fontPrefs = remember { FontPreferences(context) }
-    val selectedFontName = fontPrefs.getSelectedFont()
+fun currentFontFamily(): FontFamily {
+    val selectedFontName = UniAdminPreferences.fontStyle.value
 
     return when (selectedFontName) {
         "Choco cooky" -> ChocoCooky
@@ -119,9 +119,9 @@ fun currentFontFamily(context: Context): FontFamily {
 
 
 
+
 @Composable
 fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
-    val fontPrefs = remember { FontPreferences(context) }
     var fontUpdated by remember { mutableStateOf(false) }
     var selectedFontFamily by remember { mutableStateOf<FontFamily?>(null) }
     val fontFamilies = mapOf(
@@ -134,9 +134,8 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
 
     // Load saved font preference on launch
     LaunchedEffect(fontUpdated) {
-        val savedFont = fontPrefs.getSelectedFont()
+        val savedFont = UniAdminPreferences.fontStyle.value
         selectedFontFamily = fontFamilies[savedFont]
-
     }
 
     Column(
@@ -191,7 +190,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
                     text = fontName,
                     fontFamily = fontFamily,
                     fontSize = 18.sp,
-                    color = if (isSelected) CC.extraColor2() else CC.textColor()
+                    color = if (isSelected) CC.extraColor1() else CC.textColor()
                 )
             }
         }
@@ -232,7 +231,11 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
 
         Button(
             onClick = {
-                fontPrefs.saveSelectedFont(fontFamilies.entries.find { it.value == selectedFontFamily }?.key)
+                fontFamilies.entries.find { it.value == selectedFontFamily }?.key?.let {
+                    UniAdminPreferences.saveFontStyle(
+                        it
+                    )
+                }
                 selectedFontFamily?.let { onFontSelected(it) }
                 fontUpdated = !fontUpdated
                 Toast.makeText(context, "Font updated", Toast.LENGTH_SHORT).show()
@@ -248,19 +251,6 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
     }
 }
 
-
-class FontPreferences(context: Context) {
-    private val prefs = context.getSharedPreferences("font_preference", Context.MODE_PRIVATE)
-
-    fun saveSelectedFont(fontName: String?) {
-        prefs.edit().putString("font_style", fontName).apply()
-    }
-
-    fun getSelectedFont(): String? {
-        return prefs.getString("font_style", "System") // Default to null (system font)
-    }
-
-}
 
 @Composable
 fun Background() {
