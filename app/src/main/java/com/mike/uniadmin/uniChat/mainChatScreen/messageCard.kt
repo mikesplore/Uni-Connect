@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -110,22 +111,7 @@ fun UserMessageCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    if (messageCounter.toString() != "0") {
-                        Box(
-                            modifier = Modifier.background(
-                                CC.secondary(),
-                                CircleShape
-                            )
-                        ) {
-                            Text(
-                                messageCounter.toString(),
-                                style = CC.descriptionTextStyle(context)
-                                    .copy(fontSize = 10.sp),
-                                modifier = Modifier.padding(2.dp)
-                            )
-                        }
-                    }
+
                 }
 
                 latestMessage?.message?.let {
@@ -135,7 +121,7 @@ fun UserMessageCard(
                         text = "$senderName ${createAnnotatedMessage(createAnnotatedText(it).toString())}",
                         style = CC.descriptionTextStyle(context).copy(
                                 fontSize = 14.sp,
-                                color = CC.extraColor2().copy(alpha = 0.8f)
+                                color = CC.tertiary().copy(alpha = 0.8f)
                             ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -149,38 +135,25 @@ fun UserMessageCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                if (userState == null) {
-                    Text(
-                        text = "Never Online",
-                        style = CC.descriptionTextStyle(context)
-                            .copy(fontSize = 10.sp),
-                        color = Color.Gray // Or any color you prefer for "Never Online"
-                    )
-                } else {
-                    userState.let { status ->
-                        val textColor = if (status.online == "online") Color.Green else Color.Red
+                if(messageCounter != 0){
+                    Box(
+                        modifier = Modifier
+                            .sizeIn(minWidth = 20.dp, minHeight = 20.dp) // Set minimum size
+                            .clip(CircleShape)
+                            .background(
+                                CC.extraColor1(),
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
-                            text = when {
-                                status.online == "online" -> "Online"
-                                else -> "${
-                                    CC.getRelativeDate(
-                                        CC.getDateFromTimeStamp(
-                                            status.lastDate
-                                        )
-                                    )
-                                } at ${
-                                    CC.getFormattedTime(
-                                        status.lastTime
-                                    )
-                                }"
-                            },
+                            messageCounter.toString(),
                             style = CC.descriptionTextStyle(context)
                                 .copy(fontSize = 10.sp),
-                            color = textColor
+                            modifier = Modifier.padding(2.dp)
                         )
                     }
                 }
-
 
                 latestMessage?.timeStamp?.let {
                     Text(
