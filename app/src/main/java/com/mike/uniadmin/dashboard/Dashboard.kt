@@ -66,7 +66,7 @@ fun Dashboard(navController: NavController, context: Context) {
 
 
     LaunchedEffect(Unit) {
-        moduleTimetableViewModel.getTimetableByDay(CC.currentDay())
+        moduleTimetableViewModel.findUpcomingClass()
         Log.d("Timetables ViewModel", "Current day: ${CC.currentDay()} for timetable:$todayTimetable")
         userViewModel.checkAllUserStatuses()
         userViewModel.findUserByEmail(loggedInUserEmail) {}
