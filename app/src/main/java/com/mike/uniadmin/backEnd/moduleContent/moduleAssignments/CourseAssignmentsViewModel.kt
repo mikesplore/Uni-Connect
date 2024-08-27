@@ -19,10 +19,10 @@ class ModuleAssignmentViewModel(private val repository: ModuleAssignmentReposito
 
     // Fetch assignments for a specific module
     fun getModuleAssignments(moduleID: String) {
-        _isLoading.value = true // Set loading to true before fetching
+        _isLoading.postValue(true) // Set loading to true before fetching
         repository.getModuleAssignments(moduleID) { assignments ->
             _assignments.value = assignments
-            _isLoading.value = false // Set loading to false after fetching
+            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
