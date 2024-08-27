@@ -5,12 +5,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
-val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class CourseRepository(
     private val courseDao: CourseDao, private val courseStateDao: CourseStateDao
@@ -34,7 +33,7 @@ class CourseRepository(
                     val courseState = childSnapshot.getValue(CourseState::class.java)
                     courseState?.let { courseStates.add(it) }
                 }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     courseStateDao.insertCourseStates(courseStates)
                 }
             }
@@ -46,7 +45,7 @@ class CourseRepository(
     }
 
     fun fetchCourseStates(onResult: (List<CourseState>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             courseStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val courseStates = mutableListOf<CourseState>()
@@ -54,7 +53,7 @@ class CourseRepository(
                         val courseState = childSnapshot.getValue(CourseState::class.java)
                         courseState?.let { courseStates.add(it) }
                     }
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         courseStateDao.insertCourseStates(courseStates)
                     }
                     onResult(courseStates)
@@ -63,7 +62,7 @@ class CourseRepository(
                 override fun onCancelled(error: DatabaseError) {
                     // Handle the read error (e.g., log the error)
                     println("Error reading courses: ${error.message}")
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         val cachedData = courseStateDao.getCourseStates()
                         onResult(cachedData)
                     }
@@ -73,7 +72,7 @@ class CourseRepository(
     }
 
     fun saveCourseState(courseState: CourseState, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             courseStateDao.insertCourseState(courseState)
             courseStateDatabase.child(courseState.courseID).setValue(courseState)
                 .addOnCompleteListener { task ->
@@ -83,7 +82,7 @@ class CourseRepository(
     }
 
     fun saveCourse(course: CourseEntity, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             courseDao.insertCourse(course)
             database.child(course.courseCode).setValue(course).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -93,7 +92,7 @@ class CourseRepository(
 
 
     fun fetchCourses(onResult: (List<CourseEntity>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = courseDao.getCourses()
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
@@ -105,7 +104,7 @@ class CourseRepository(
                             val course = childSnapshot.getValue(CourseEntity::class.java)
                             course?.let { courses.add(it) }
                         }
-                        viewModelScope.launch {
+                        uniConnectScope.launch {
                             courseDao.insertCourses(courses)
                         }
                         onResult(courses)
@@ -121,7 +120,7 @@ class CourseRepository(
 
 
     fun deleteCourse(courseId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             courseDao.deleteCourse(courseId)
             database.child(courseId).removeValue() // Use the consistent database reference
                 .addOnSuccessListener {
@@ -140,7 +139,7 @@ class CourseRepository(
                     val course = childSnapshot.getValue(CourseEntity::class.java)
                     course?.let { courses.add(it) }
                 }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     courseDao.insertCourses(courses) // Update local cache
                 }
             }
@@ -155,7 +154,7 @@ class CourseRepository(
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val course = snapshot.getValue(CourseEntity::class.java)
                 course?.let {
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         courseDao.insertCourse(it)
                     }
                 }
@@ -164,7 +163,7 @@ class CourseRepository(
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                 val course = snapshot.getValue(CourseEntity::class.java)
                 course?.let {
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         courseDao.insertCourse(it)
                     }
                 }
@@ -173,7 +172,7 @@ class CourseRepository(
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val course = snapshot.getValue(CourseEntity::class.java)
                 course?.let {
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         courseDao.deleteCourse(it.courseCode)
                     }
                 }
@@ -191,7 +190,7 @@ class CourseRepository(
 
     fun getCourseDetailsByCourseID(courseCode: String, onResult: (CourseEntity?) -> Unit) {
         val courseDetailsRef = database.child(courseCode)
-        viewModelScope.launch {
+        uniConnectScope.launch {
             courseDao.getCourse(courseCode)
             courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
