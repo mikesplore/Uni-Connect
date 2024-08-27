@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.mike.uniadmin.dashboard.isDeviceOnline
 import com.mike.uniadmin.getModuleAnnouncementViewModel
 import com.mike.uniadmin.getModuleAssignmentViewModel
 import com.mike.uniadmin.getModuleDetailViewModel
@@ -214,42 +215,60 @@ fun ModuleContent(context: Context, targetModuleID: String) {
 
                 when (selectedTabIndex) {
                     0 -> {
-                        if (announcementsLoading) {
-                            LoadingIndicator()
-                        } else {
-                            AnnouncementsItem(
-                                targetModuleID, moduleAnnouncementViewModel, context, userViewModel
-                            )
-                        }
+                        if (!isDeviceOnline(context)) {
+                            InternetError(context)
+                        } else
+                            if (announcementsLoading) {
+                                LoadingIndicator()
+                            } else {
+                                AnnouncementsItem(
+                                    targetModuleID,
+                                    moduleAnnouncementViewModel,
+                                    context,
+                                    userViewModel
+                                )
+                            }
                     }
 
                     1 -> {
-                        if (assignmentsLoading) {
-                            LoadingIndicator()
-                        } else {
-                            AssignmentsItem(
-                                targetModuleID, moduleAssignmentViewModel, context, userViewModel
+                        if (!isDeviceOnline(context)) {
+                            InternetError(context)
+                        } else
+                            if (assignmentsLoading) {
+                                LoadingIndicator()
+                            } else {
+                                AssignmentsItem(
+                                    targetModuleID,
+                                    moduleAssignmentViewModel,
+                                    context,
+                                    userViewModel
 
-                            )
-                        }
+                                )
+                            }
                     }
 
                     2 -> {
-                        if (timetablesLoading) {
-                            LoadingIndicator()
-                        } else {
-                            TimetableItem(
-                                targetModuleID, moduleTimetableViewModel, context
-                            )
-                        }
+                        if (!isDeviceOnline(context)) {
+                            InternetError(context)
+                        } else
+                            if (timetablesLoading) {
+                                LoadingIndicator()
+                            } else {
+                                TimetableItem(
+                                    targetModuleID, moduleTimetableViewModel, context
+                                )
+                            }
                     }
 
                     3 -> {
-                        if (detailsLoading) {
-                            LoadingIndicator()
-                        } else {
-                            DetailsItem(targetModuleID, moduleDetailViewModel, context)
-                        }
+                        if (!isDeviceOnline(context)) {
+                            InternetError(context)
+                        } else
+                            if (detailsLoading) {
+                                LoadingIndicator()
+                            } else {
+                                DetailsItem(targetModuleID, moduleDetailViewModel, context)
+                            }
                     }
 
                     else -> {}
@@ -273,7 +292,12 @@ fun LoadingIndicator() {
 
 @Composable
 internal fun AddTextField(
-    label: String, value: String, onValueChange: (String) -> Unit, context: Context, singleLine: Boolean = true, maxLines: Int = 1
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    context: Context,
+    singleLine: Boolean = true,
+    maxLines: Int = 1
 ) {
     TextField(
         value = value,
