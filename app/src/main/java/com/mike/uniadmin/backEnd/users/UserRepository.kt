@@ -5,6 +5,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import com.mike.uniadmin.backEnd.localDatabase.DatabaseDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,8 +13,6 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-
-val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 
 class UserRepository(
@@ -31,10 +30,8 @@ class UserRepository(
         startUserStateListener()
     }
 
-
-
     fun deleteAllTables() {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             databaseDao.deleteAllTables()
         }
     }
@@ -49,7 +46,7 @@ class UserRepository(
                     val item = convert(childSnapshot)
                     item?.let { items.add(it) }
                 }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     onResult(items)
                 }
             }
@@ -77,7 +74,7 @@ class UserRepository(
     }
 
     fun fetchUsers(onResult: (List<UserEntity>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // 1. Fetch users from local database first
             val localUsers = userDao.getUsers()
             onResult(localUsers)
@@ -142,7 +139,7 @@ class UserRepository(
 
 
     fun saveUser(user: UserEntity, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             userDao.insertUser(user)
             database.child("Admins").child(user.id).setValue(user).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -151,7 +148,7 @@ class UserRepository(
     }
 
     fun fetchUserDataByEmail(email: String, callback: (UserEntity?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val databaseUser = userDao.getUserByEmail(email)
             if (databaseUser != null) {
                 callback(databaseUser)
@@ -174,7 +171,7 @@ class UserRepository(
     }
 
     fun fetchUserDataByAdmissionNumber(admissionNumber: String, callback: (UserEntity?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val databaseUser = userDao.getUserByID(admissionNumber)
             if (databaseUser != null) {
                 callback(databaseUser)
@@ -215,7 +212,7 @@ class UserRepository(
 
 
     fun deleteUser(userId: String, onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             userDao.deleteUser(userId)
             database.child("Admins").child(userId).removeValue().addOnSuccessListener {
                 onSuccess(true)
@@ -230,7 +227,7 @@ class UserRepository(
     fun writeAccountDeletionData(
         accountDeletion: AccountDeletionEntity, onSuccess: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Insert the account deletion data into the local database first
                 accountDeletionDao.insertAccountDeletion(accountDeletion)
@@ -265,7 +262,7 @@ class UserRepository(
     }
 
     fun checkAccountDeletionData(userId: String, onComplete: (AccountDeletionEntity?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Attempt to retrieve the account deletion data from the local database first
                 val cachedData = accountDeletionDao.getAccountDeletion(userId)
@@ -315,7 +312,7 @@ class UserRepository(
 
     fun writePreferences(preferences: UserPreferencesEntity, onSuccess: (Boolean) -> Unit) {
         preferences.studentID.let {
-            viewModelScope.launch {
+            uniConnectScope.launch {
                 userPreferencesDao.insertUserPreferences(preferences)
                 onSuccess(true)
             }
@@ -323,7 +320,7 @@ class UserRepository(
     }
 
     fun fetchPreferences(userId: String, onPreferencesFetched: (UserPreferencesEntity?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedPreferences = userPreferencesDao.getUserPreferences(userId)
             if (cachedPreferences != null) {
                 onPreferencesFetched(cachedPreferences)
@@ -345,7 +342,7 @@ class UserRepository(
 
             override fun onCancelled(error: DatabaseError) {
                 // Firebase connection failed, fetch from local database
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     val cachedUserStates = userStateDao.getAllUserStates()
                     onUserStatesFetched(cachedUserStates)
                 }
@@ -363,7 +360,7 @@ class UserRepository(
 
                 override fun onCancelled(error: DatabaseError) {
                     // Firebase connection failed, fetch from local database
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         val cachedUserState = userStateDao.getUserState(userId)
                         onUserStateFetched(cachedUserState)
                     }
