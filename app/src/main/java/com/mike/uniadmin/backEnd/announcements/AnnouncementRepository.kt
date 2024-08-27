@@ -8,9 +8,10 @@ import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.UniAdminPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-val announcementViewModelScope = CoroutineScope(Dispatchers.Main)
+val uniConnectScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
     private val courseCode = UniAdminPreferences.courseCode.value
@@ -25,7 +26,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val announcement = snapshot.getValue(AnnouncementEntity::class.java)
                 announcement?.let {
-                    announcementViewModelScope.launch {
+                    uniConnectScope.launch {
                         announcementsDao.insertAnnouncements(listOf(it))
                     }
                 }
@@ -34,7 +35,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                 val announcement = snapshot.getValue(AnnouncementEntity::class.java)
                 announcement?.let {
-                    announcementViewModelScope.launch {
+                    uniConnectScope.launch {
                         announcementsDao.insertAnnouncement(it) // Make sure you have an update method
                     }
                 }
@@ -43,7 +44,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val announcementId = snapshot.key
                 announcementId?.let {
-                    announcementViewModelScope.launch {
+                    uniConnectScope.launch {
                         announcementsDao.deleteAnnouncement(it)
                     }
                 }
@@ -61,7 +62,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
     }
 
     fun fetchAnnouncements(onResult: (List<AnnouncementEntity>) -> Unit) {
-        announcementViewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = announcementsDao.getAnnouncements()
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
@@ -75,7 +76,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
                             announcement?.let { announcements.add(it) }
                         }
 
-                        announcementViewModelScope.launch {
+                        uniConnectScope.launch {
                             announcementsDao.insertAnnouncements(announcements)
                             onResult(announcements)
                         }
@@ -91,7 +92,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
     }
 
     fun saveAnnouncement(announcement: AnnouncementEntity, onComplete: (Boolean) -> Unit) {
-        announcementViewModelScope.launch {
+        uniConnectScope.launch {
             announcementsDao.insertAnnouncements(listOf(announcement))
             database.child(announcement.id).setValue(announcement).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -104,7 +105,7 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
         onSuccess: () -> Unit,
         onFailure: (Exception?) -> Unit
     ) {
-        announcementViewModelScope.launch {
+        uniConnectScope.launch {
             announcementsDao.deleteAnnouncement(announcementId)
             database.child(announcementId).removeValue().addOnSuccessListener {
                 onSuccess()
