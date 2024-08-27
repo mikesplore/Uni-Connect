@@ -1,12 +1,10 @@
 package com.mike.uniadmin.backEnd.moduleContent.moduleTimetable
 
 
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetable
 
 @Dao
 interface ModuleTimetableDao {
@@ -25,6 +23,15 @@ interface ModuleTimetableDao {
     @Query("SELECT * FROM moduleTimetable")
     suspend fun getAllModuleTimetables(): List<ModuleTimetable>
 
-    @Query("SELECT * FROM moduleTimetable WHERE day = :day")
-    suspend fun getModuleTimetablesByDay(day: String): List<ModuleTimetable>
+    @Query(
+        """
+        SELECT mt.*, m.moduleName
+        FROM moduleTimetable mt
+        INNER JOIN modules m ON mt.moduleId = m.moduleCode
+        WHERE mt.day = :day
+    """
+    )
+    suspend fun getTimetableByDay(day: String): List<ModuleTimetable>
+
+
 }
