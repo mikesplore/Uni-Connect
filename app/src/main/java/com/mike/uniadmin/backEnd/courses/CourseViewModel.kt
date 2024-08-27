@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 
 class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
     private val _courses = MutableLiveData<List<CourseEntity>?>()
@@ -25,33 +23,30 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
         fetchCourses()
         fetchCourseStates()
     }
-    
 
     private fun fetchCourseStates() {
         repository.fetchCourseStates { fetchedStates ->
             val statesMap = fetchedStates.associateBy { it.courseID }
-            _courseStates.value = statesMap
+            _courseStates.postValue(statesMap)
 
         }
     }
 
-
     fun fetchCourses() {
-        _isLoading.value = true // Set loading to true before fetching
+        _isLoading.postValue(true) // Set loading to true before fetching
         repository.fetchCourses { courses ->
-            _courses.value = courses
-            _isLoading.value = false // Set loading to false after fetching
+            _courses.postValue(courses)
+            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
     private fun getCourseDetailsByCourseID(courseCode: String) {
         repository.getCourseDetailsByCourseID(courseCode) { course ->
-            _fetchedCourse.value = course
+            _fetchedCourse.postValue(course)
         }
     }
 
     fun saveCourse(course: CourseEntity, onCourseSaved: (Boolean) -> Unit) {
-        viewModelScope.launch {
             repository.saveCourse(course) { success ->
                 onCourseSaved(success)
                 if (success) {
@@ -60,12 +55,11 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
                 } else {
                     // Handle save failure if needed
                 }
-            }
+
         }
     }
 
     fun saveCourseState(courseState: CourseState) {
-        viewModelScope.launch {
             repository.saveCourseState(courseState) { success ->
                 if (success) {
                     fetchCourseStates() // Refresh the course list after saving
@@ -73,7 +67,7 @@ class CourseViewModel(private val repository: CourseRepository) : ViewModel() {
                     // Handle save failure if needed
                 }
             }
-        }
+
     }
 }
 
