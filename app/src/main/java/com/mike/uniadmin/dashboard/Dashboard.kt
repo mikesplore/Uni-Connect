@@ -3,6 +3,7 @@ package com.mike.uniadmin.dashboard
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.getAnnouncementViewModel
+import com.mike.uniadmin.getModuleTimetableViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
@@ -48,18 +50,24 @@ fun Dashboard(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
     val announcementViewModel = getAnnouncementViewModel(context)
     val notificationViewModel = getNotificationViewModel(context)
+    val moduleTimetableViewModel = getModuleTimetableViewModel(context)
 
     val announcements by announcementViewModel.announcements.observeAsState()
+    val todayTimetable by moduleTimetableViewModel.timetablesToday.observeAsState()
+
     val currentUser by userViewModel.user.observeAsState()
     val modules by moduleViewModel.modules.observeAsState(emptyList())
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
     val modulesLoading by moduleViewModel.isLoading.observeAsState()
+
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     val loggedInUserEmail = UniAdminPreferences.userEmail.value
 
 
 
     LaunchedEffect(Unit) {
+        moduleTimetableViewModel.getTimetableByDay(CC.currentDay())
+        Log.d("Timetables ViewModel", "Current day: ${CC.currentDay()} for timetable:$todayTimetable")
         userViewModel.checkAllUserStatuses()
         userViewModel.findUserByEmail(loggedInUserEmail) {}
 
@@ -209,6 +217,27 @@ fun Dashboard(navController: NavController, context: Context) {
                 announcements?.maxByOrNull { it.date }?.let { announcement ->
                     AnnouncementCard(announcement, context)
                 }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    "Upcoming Class",
+                    style = CC.titleTextStyle(context)
+                        .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                    modifier = Modifier.padding(start = 15.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            if (todayTimetable == null) {
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                    ) {
+                    Text("No timetable found", style = CC.descriptionTextStyle(context))
+                }
+            } else {
+                ModuleTimetableCard(todayTimetable!!, context)
             }
         }
     }
