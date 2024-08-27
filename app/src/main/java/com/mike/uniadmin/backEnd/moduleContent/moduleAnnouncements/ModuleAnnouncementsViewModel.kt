@@ -19,10 +19,10 @@ class ModuleAnnouncementViewModel(private val repository: ModuleAnnouncementRepo
 
     // Fetch announcements for a specific module
     fun getModuleAnnouncements(moduleID: String) {
-        _isLoading.value = true // Set loading to true before fetching
+        _isLoading.postValue(true) // Set loading to true before fetching
         repository.getModuleAnnouncements(moduleID) { announcements ->
             _announcements.postValue(announcements)
-            _isLoading.value = false // Set loading to false after fetching
+            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
