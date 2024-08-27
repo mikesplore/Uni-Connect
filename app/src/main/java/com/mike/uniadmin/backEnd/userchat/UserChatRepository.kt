@@ -5,18 +5,18 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import com.mike.uniadmin.notification.showNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class UserChatRepository(private val userChatDAO: UserChatDAO) {
     private val database = FirebaseDatabase.getInstance().reference
 
     fun fetchUserChats(path: String, onResult: (List<UserChatEntity>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // Fetch userChats from the local database first
             val cachedChats = userChatDAO.getUserChats(path)
             Log.d("Cached UserChats","The userChats are not fetched")
@@ -32,12 +32,12 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
                         val message = childSnapshot.getValue(UserChatEntity::class.java)
                         message?.let { userChats.add(it) }
                     }
-                    viewModelScope.launch(Dispatchers.IO) {
+                    uniConnectScope.launch {
                         userChatDAO.insertUserChats(userChats)
                     }
 
                     // Call onResult on the main thread
-                    viewModelScope.launch(Dispatchers.Main) {
+                    uniConnectScope.launch {
                         onResult(userChats)
                     }
                 }
@@ -52,7 +52,7 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
     }
 
     fun saveMessage(message: UserChatEntity, path: String, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // Save the message to the local database first
             userChatDAO.insertUserChats(listOf(message))
             Log.d("Message Saved","The message is saved in path $path")
@@ -69,7 +69,7 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
     }
 
     fun deleteMessage(messageId: String, path: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // Delete the message from the local database
             userChatDAO.deleteMessage(messageId)
             // Then delete the message from Firebase
@@ -105,7 +105,7 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
     }
 
     fun markMessageAsRead(messageId: String, path: String) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // Update delivery status to DELIVERED in Firebase
             database.child(path).child(messageId).child("deliveryStatus")
                 .setValue(DeliveryStatus.READ.name)
