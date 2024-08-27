@@ -5,11 +5,11 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ModuleAssignmentRepository(private val moduleAssignmentDao: ModuleAssignmentDao) {
     private val courseCode = UniAdminPreferences.courseCode.value
@@ -21,7 +21,7 @@ class ModuleAssignmentRepository(private val moduleAssignmentDao: ModuleAssignme
         moduleAssignment: ModuleAssignment,
         onResult: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             moduleAssignmentDao.insertModuleAssignment(moduleAssignment)
             database.child(moduleID).child("Module Assignments").child(moduleAssignment.assignmentID)
                 .setValue(moduleAssignment).addOnSuccessListener {
@@ -35,7 +35,7 @@ class ModuleAssignmentRepository(private val moduleAssignmentDao: ModuleAssignme
 
 
     fun getModuleAssignments(moduleID: String, onResult: (List<ModuleAssignment>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = moduleAssignmentDao.getModuleAssignments(moduleID)
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
