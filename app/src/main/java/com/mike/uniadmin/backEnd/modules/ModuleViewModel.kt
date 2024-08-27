@@ -1,5 +1,6 @@
 package com.mike.uniadmin.backEnd.modules
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,23 +29,23 @@ class ModuleViewModel(private val repository: ModuleRepository) : ViewModel() {
     fun fetchAttendanceStates() {
         repository.fetchAttendanceStates { fetchedStates ->
             val statesMap = fetchedStates.associateBy { it.moduleID }
-            _attendanceStates.value = statesMap
+            _attendanceStates.postValue(statesMap)
 
         }
     }
 
 
     fun fetchModules() {
-        _isLoading.value = true // Set loading to true before fetching
+        _isLoading.postValue(true) // Set loading to true before fetching
         repository.fetchModules { modules ->
-            _modules.value = modules
-            _isLoading.value = false // Set loading to false after fetching
+            _modules.postValue(modules)
+            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
     fun getModuleDetailsByModuleID(moduleCode: String) {
         repository.getModuleDetailsByModuleID(moduleCode) { module ->
-            _fetchedModule.value = module
+            _fetchedModule.postValue(module)
         }
     }
 
@@ -69,6 +70,7 @@ class ModuleViewModel(private val repository: ModuleRepository) : ViewModel() {
                 if (success) {
                     fetchAttendanceStates() // Refresh the module list after saving
                 } else {
+                    Log.e("ModuleViewModel", "Failed to save attendance state")
                     // Handle save failure if needed
                 }
             }
