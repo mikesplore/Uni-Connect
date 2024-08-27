@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.BubbleChart
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -132,8 +132,8 @@ fun ModalNavigationDrawerItem(
                         navController.navigate("profile")
                     })
                 SideBarItem(
-                    icon = Icons.AutoMirrored.Filled.Message,
-                    text = "Campus Chat",
+                    icon = Icons.Default.BubbleChart,
+                    text = "Uni Chat",
                     context,
                     onClicked = {
                         // Check if biometrics is enabled
@@ -186,7 +186,7 @@ fun ModalNavigationDrawerItem(
                         action = Intent.ACTION_SEND
                         putExtra(
                             Intent.EXTRA_TEXT,
-                            "${signedInUser?.firstName} invites you to join Campus Connect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
+                            "${signedInUser?.firstName} invites you to join Uni Connect! Get organized and ace your studies.\n Download now: ${update.updateLink}"
                         ) // Customize the text
                         type = "text/plain"
                     }
