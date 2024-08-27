@@ -36,6 +36,7 @@ fun getDayIndex(day: String): Int {
     }
 }
 
+
 fun getUpcomingClass(timetables: List<ModuleTimetable>): ModuleTimetable? {
     val currentDayIndex = LocalDate.now().dayOfWeek.value // Monday = 1, Sunday = 7
     val currentTime = LocalTime.now()
@@ -64,3 +65,4 @@ fun getUpcomingClass(timetables: List<ModuleTimetable>): ModuleTimetable? {
     // Return the next upcoming class
     return sortedTimetables.firstOrNull()?.first
 }
+
