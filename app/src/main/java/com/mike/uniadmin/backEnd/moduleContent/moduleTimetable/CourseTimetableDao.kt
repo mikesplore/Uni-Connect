@@ -23,15 +23,23 @@ interface ModuleTimetableDao {
     @Query("SELECT * FROM moduleTimetable")
     suspend fun getAllModuleTimetables(): List<ModuleTimetable>
 
-    @Query(
-        """
-        SELECT mt.*, m.moduleName
-        FROM moduleTimetable mt
-        INNER JOIN modules m ON mt.moduleId = m.moduleCode
-        WHERE mt.day = :day
-    """
-    )
-    suspend fun getTimetableByDay(day: String): List<ModuleTimetable>
+    @Query("""
+        SELECT mt.*, m.moduleName 
+        FROM ModuleTimetable mt 
+        INNER JOIN modules m ON mt.moduleID = m.moduleCode 
+        ORDER BY 
+            CASE 
+                WHEN mt.day = 'Monday' THEN 1 
+                WHEN mt.day = 'Tuesday' THEN 2 
+                WHEN mt.day = 'Wednesday' THEN 3 
+                WHEN mt.day = 'Thursday' THEN 4 
+                WHEN mt.day = 'Friday' THEN 5 
+                WHEN mt.day = 'Saturday' THEN 6 
+                WHEN mt.day = 'Sunday' THEN 7 
+            END, 
+            mt.startTime
+    """)
+    fun findNextClass(): List<ModuleTimetable>
 
 
 }
