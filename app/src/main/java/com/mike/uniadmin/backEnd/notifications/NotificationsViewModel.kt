@@ -16,7 +16,7 @@ class NotificationViewModel(private val repository: NotificationRepository): Vie
 
      fun fetchNotifications() {
         repository.getNotifications { notifications ->
-            _notifications.value = notifications
+            _notifications.postValue(notifications)
         }
     }
 
