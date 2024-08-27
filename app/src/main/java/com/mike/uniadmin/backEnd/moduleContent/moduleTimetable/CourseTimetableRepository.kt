@@ -2,14 +2,16 @@ package com.mike.uniadmin.backEnd.moduleContent.moduleTimetable
 
 import android.util.Log
 import com.google.firebase.database.*
+import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val timetableViewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableDao) {
-    private val database = FirebaseDatabase.getInstance().reference.child("ModuleContent")
+    private val courseCode = UniAdminPreferences.courseCode.value
+    private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
 
 
     init {
@@ -23,7 +25,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
         moduleTimetable: ModuleTimetable,
         onResult: (Boolean) -> Unit
     ) {
-        timetableViewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Insert into local database
                 moduleTimetableDao.insertModuleTimetable(moduleTimetable)
@@ -43,7 +45,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
     }
 
     fun getModuleTimetables(moduleID: String, onResult: (List<ModuleTimetable>) -> Unit) {
-        timetableViewModelScope.launch {
+        uniConnectScope.launch {
             Log.d("Timetables", "Searching repository timetable for module: $moduleID")
 
             // Fetch cached data from local database
@@ -68,7 +70,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
                                 timetables.add(it)
                             }
                         }
-                        timetableViewModelScope.launch {
+                        uniConnectScope.launch {
                             // Update local database with fetched timetables
                             if (timetables.isNotEmpty()) {
                                 moduleTimetableDao.insertModuleTimetables(timetables)
@@ -91,7 +93,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
                     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                         val timetable = snapshot.getValue(ModuleTimetable::class.java)
                         timetable?.let {
-                            timetableViewModelScope.launch {
+                            uniConnectScope.launch {
                                 moduleTimetableDao.insertModuleTimetable(it)
                                 val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
                                 onResult(updatedData)
@@ -102,7 +104,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
                     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                         val timetable = snapshot.getValue(ModuleTimetable::class.java)
                         timetable?.let {
-                            timetableViewModelScope.launch {
+                            uniConnectScope.launch {
                                 moduleTimetableDao.insertModuleTimetable(it)
                                 val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
                                 onResult(updatedData)
@@ -113,7 +115,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
                     override fun onChildRemoved(snapshot: DataSnapshot) {
                         val timetable = snapshot.getValue(ModuleTimetable::class.java)
                         timetable?.let {
-                            timetableViewModelScope.launch {
+                            uniConnectScope.launch {
                                 moduleTimetableDao.deleteModuleTimetable(it.timetableID)
                                 val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
                                 onResult(updatedData)
@@ -136,7 +138,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
 
 
     fun getAllModuleTimetables(onResult: (List<ModuleTimetable>) -> Unit) {
-        timetableViewModelScope.launch(Dispatchers.IO) { // Ensure this runs on a background thread
+        uniConnectScope.launch(Dispatchers.IO) { // Ensure this runs on a background thread
             val cachedData = moduleTimetableDao.getAllModuleTimetables()
             onResult(cachedData)
         }
@@ -158,7 +160,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val timetable = snapshot.getValue(ModuleTimetable::class.java)
                 timetable?.let {
-                    timetableViewModelScope.launch {
+                    uniConnectScope.launch {
                         moduleTimetableDao.deleteModuleTimetable(it.timetableID)
                     }
                 }
@@ -175,7 +177,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
                     val timetable = childSnapshot.getValue(ModuleTimetable::class.java)
                     timetable?.let { timetables.add(it) }
                 }
-                timetableViewModelScope.launch {
+                uniConnectScope.launch {
                     moduleTimetableDao.insertModuleTimetables(timetables)
                 }
             }
@@ -183,10 +185,12 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
     }
 
     fun getTimetableByDay(day: String, onResult: (List<ModuleTimetable>?) -> Unit) {
-        timetableViewModelScope.launch {
-            val cachedData = moduleTimetableDao.getModuleTimetablesByDay(day)
+        uniConnectScope.launch {
+            val cachedData = moduleTimetableDao.getTimetableByDay("Tuesday")
+            Log.d("Timetables today", "Searching repository timetable for day: $day")
             if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
+                Log.d("Timetables today", "Found timetable in database: $cachedData")
             } else {
                 Log.e("Empty", "Empty database")
             }
