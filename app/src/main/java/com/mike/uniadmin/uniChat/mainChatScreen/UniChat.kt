@@ -20,7 +20,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -90,9 +94,14 @@ fun UniChat(navController: NavController, context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                   IconButton(onClick = {navController.navigate("homeScreen")}) {
+                       Icon(Icons.Default.ArrowBackIosNew, "Back")
+                   }
+                },
                 title = {
                     Text(
-                        text = "CAMPUS CHAT", style = CC.titleTextStyle(context).copy(
+                        text = "UNI CHAT", style = CC.titleTextStyle(context).copy(
                             fontSize = 30.sp,
                             fontWeight = FontWeight.ExtraBold,
                             brush = Brush.verticalGradient(
