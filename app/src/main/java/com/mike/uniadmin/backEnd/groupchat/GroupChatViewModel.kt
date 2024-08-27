@@ -5,8 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 
 class GroupChatViewModel(private val repository: GroupChatRepository) : ViewModel() {
     private val _chats = MutableLiveData<List<GroupChatEntity>>()
@@ -26,13 +24,13 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
 
     fun fetchGroups() {
         repository.fetchGroups { groups ->
-            _groups.value = groups
+            _groups.postValue(groups)
         }
     }
 
     fun fetchGroupById(groupId: String) {
         repository.fetchGroupByID(groupId) { group ->
-            _group.value = group
+            _group.postValue(group)
         }
     }
 
@@ -43,18 +41,16 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
     }
 
     fun saveGroup(group: GroupEntity, onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
             repository.saveGroup(group, onComplete = { success ->
                 if (success) {
                     onSuccess(true)
                     fetchGroups()
                 }
             })
-        }
+
     }
 
     fun saveGroupChat(chat: GroupChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
             repository.saveGroupChat(chat, path, onComplete = { success ->
                 if (success) {
                     onSuccess(true)
@@ -64,11 +60,10 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
                     Log.e("Chats", "Could not save chat")
                 }
             })
-        }
+
     }
 
     fun deleteGroupChat(chatId: String, path: String) {
-        viewModelScope.launch {
             repository.deleteChat(chatId,
                 onSuccess = {
                     fetchGroupChats(path) // Refresh the chat list after deleting
@@ -78,7 +73,7 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
                     Log.e("Chats", "Could not delete chat", it)
                 }
             )
-        }
+
     }
 
     class GroupChatViewModelFactory(private val repository: GroupChatRepository) : ViewModelProvider.Factory {
