@@ -62,11 +62,11 @@ fun MessageBubble(
     )
 
     val senderBrush = Brush.linearGradient(
-        colors = listOf(CC.extraColor1(), randomColor.random())
+        colors = listOf(CC.extraColor1(), CC.extraColor2())
     )
 
     val receiverBrush = Brush.linearGradient(
-        colors = listOf(randomColor.random(), CC.extraColor1())
+        colors = listOf(CC.extraColor2(), CC.extraColor1())
     )
 
 
