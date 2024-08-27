@@ -5,11 +5,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.UniAdminPreferences
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.launch
 
-private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnnouncementDao) {
     private val courseCode = UniAdminPreferences.courseCode.value
@@ -22,7 +20,7 @@ class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnno
         moduleAnnouncement: ModuleAnnouncement,
         onResult: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // Save to local database first
             moduleAnnouncementDao.insertModuleAnnouncement(moduleAnnouncement)
 
@@ -40,7 +38,7 @@ class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnno
 
     // Get module announcements and keep the local database in sync with Firebase
     fun getModuleAnnouncements(moduleID: String, onResult: (List<ModuleAnnouncement>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             // Step 1: Load Local Data
             val localAnnouncements = moduleAnnouncementDao.getModuleAnnouncements(moduleID)
             if (localAnnouncements.isNotEmpty()) {
@@ -58,7 +56,7 @@ class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnno
                     }
 
                     // Step 3: Update Local Database with Firebase Data
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         moduleAnnouncementDao.clearAnnouncements(moduleID) // Clear old data
                         moduleAnnouncementDao.insertModuleAnnouncements(announcements) // Insert new data
                     }
