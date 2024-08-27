@@ -75,8 +75,8 @@ fun SplashScreen(navController: NavController, context: Context) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        CC.primary(), // Top color
-                        CC.secondary()  // Bottom color
+                        CC.primary(),
+                        CC.secondary()
                     )
                 )
             )
@@ -96,7 +96,7 @@ fun SplashScreen(navController: NavController, context: Context) {
 
             // Improved Text Style with Gradients and Shadows
             Text(
-                text = "Campus Connect",
+                text = "Uni Connect",
                 style = CC.titleTextStyle(context).copy(
                     fontSize = 32.sp, // Larger font for emphasis
                     fontWeight = FontWeight.ExtraBold,
