@@ -43,6 +43,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Locale
 
 
@@ -61,7 +62,7 @@ object CommonComponents {
         context: Context
 
     ) {
-        val currentFont = currentFontFamily(context) // Get initial font
+        val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         var passwordVisibility by remember { mutableStateOf(false) }
 
@@ -117,7 +118,7 @@ object CommonComponents {
         context: Context
 
     ) {
-        val currentFont = currentFontFamily(context) // Get initial font
+        val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         OutlinedTextField(
             value = value,
@@ -173,7 +174,7 @@ object CommonComponents {
     @Composable
     fun descriptionTextStyle(context: Context): TextStyle {
         val color = textColor()
-        val currentFont = currentFontFamily(context) // Get initial font
+        val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
             fontFamily = selectedFontFamily, color = color, fontSize = 15.sp
@@ -197,7 +198,7 @@ object CommonComponents {
     @Composable
     fun titleTextStyle(context: Context): TextStyle {
         val color = textColor()
-        val currentFont = currentFontFamily(context) // Get initial font
+        val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         return TextStyle(
             fontFamily = selectedFontFamily, color = color, fontSize = 25.sp
@@ -261,9 +262,8 @@ object CommonComponents {
     fun getFormattedTime(timestamp: String): String {
         val instant = Instant.ofEpochMilli(timestamp.toLong())
         val dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        val timeFormat =
-            DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()) // Change pattern to "h:mm a"
-        return timeFormat.format(dateTime).uppercase(Locale.getDefault())
+        val timeFormat = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) // Use system format
+        return timeFormat.format(dateTime)
     }
 
     fun getDateFromTimeStamp(timestamp: String): String {
