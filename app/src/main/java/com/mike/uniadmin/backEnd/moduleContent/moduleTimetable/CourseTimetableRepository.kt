@@ -7,6 +7,8 @@ import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
 
 
 class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableDao) {
@@ -141,6 +143,7 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
         uniConnectScope.launch(Dispatchers.IO) { // Ensure this runs on a background thread
             val cachedData = moduleTimetableDao.getAllModuleTimetables()
             onResult(cachedData)
+            Log.d("Timetables fetching", "Found timetable in database: $cachedData")
         }
     }
 
@@ -184,16 +187,54 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
         })
     }
 
-    fun getTimetableByDay(day: String, onResult: (List<ModuleTimetable>?) -> Unit) {
-        uniConnectScope.launch {
-            val cachedData = moduleTimetableDao.getTimetableByDay("Tuesday")
-            Log.d("Timetables today", "Searching repository timetable for day: $day")
-            if (cachedData.isNotEmpty()) {
-                onResult(cachedData)
-                Log.d("Timetables today", "Found timetable in database: $cachedData")
-            } else {
-                Log.e("Empty", "Empty database")
+    fun getUpcomingClass(onResult: (ModuleTimetable?) -> Unit) {
+        uniConnectScope.launch(Dispatchers.IO) {
+            // Fetch all timetables along with their module names
+            val allTimetables = moduleTimetableDao.findNextClass()
+
+            val upcomingTimetable = findUpcomingClass(allTimetables)
+            onResult(upcomingTimetable)
+        }
+    }
+
+    private fun findUpcomingClass(timetables: List<ModuleTimetable>): ModuleTimetable? {
+        val currentTime = LocalTime.now()
+        val currentDayOfWeek = LocalDate.now().dayOfWeek.value // Monday = 1, Sunday = 7
+
+        // Convert day strings to corresponding day of the week numbers
+        val dayMapping = mapOf(
+            "Monday" to 1,
+            "Tuesday" to 2,
+            "Wednesday" to 3,
+            "Thursday" to 4,
+            "Friday" to 5,
+            "Saturday" to 6,
+            "Sunday" to 7
+        )
+
+        // Sort timetables by day and start time
+        val sortedTimetables = timetables.sortedWith(compareBy(
+            { dayMapping[it.day] ?: 8 }, // If the day is invalid, it gets sorted last
+            { LocalTime.parse(it.startTime) }
+        ))
+
+        // Find the first timetable that is after the current time
+        for (timetable in sortedTimetables) {
+            val timetableDayOfWeek = dayMapping[timetable.day] ?: continue
+            val timetableStartTime = LocalTime.parse(timetable.startTime)
+
+            // Check if the timetable is on the same day and after the current time
+            if (timetableDayOfWeek == currentDayOfWeek && timetableStartTime.isAfter(currentTime)) {
+                return timetable
+            }
+
+            // Check if the timetable is on a later day in the week
+            if (timetableDayOfWeek > currentDayOfWeek) {
+                return timetable
             }
         }
+
+        // If no upcoming timetable is found, return the next week's first class
+        return sortedTimetables.firstOrNull()
     }
 }
