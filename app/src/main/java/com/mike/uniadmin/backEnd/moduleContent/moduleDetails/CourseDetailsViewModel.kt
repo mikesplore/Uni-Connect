@@ -21,10 +21,10 @@ class ModuleDetailViewModel(private val repository: ModuleDetailRepository) : Vi
 
     // Fetch details for a specific module
     fun getModuleDetails(moduleID: String) {
-        _isLoading.value = true
+        _isLoading.postValue(true) // Set loading to true before fetching
         repository.getModuleDetails(moduleID) { details ->
             _details.value = details
-            _isLoading.value = false
+            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
@@ -47,7 +47,7 @@ class ModuleDetailViewModel(private val repository: ModuleDetailRepository) : Vi
         viewModelScope.launch {
             repository.getModuleDetailsByModuleID(moduleID) { details ->
                 if (details != null) {
-                    _moduleDetails.value = details
+                    _moduleDetails.postValue(details)
                     onResult(true)
                 } else {
                     onResult(false)
