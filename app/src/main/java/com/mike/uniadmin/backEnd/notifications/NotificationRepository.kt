@@ -6,11 +6,11 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class NotificationRepository(private val notificationDao: NotificationDao) {
     private val courseCode = UniAdminPreferences.courseCode.value
@@ -24,7 +24,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
     }
 
     fun getNotifications(onComplete: (List<NotificationEntity>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = notificationDao.getAllNotifications()
             if (cachedData.isNotEmpty()) {
                 onComplete(cachedData)
@@ -37,7 +37,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
                             val notification = childSnapshot.getValue(NotificationEntity::class.java)
                             notification?.let { notifications.add(it) }
                         }
-                        viewModelScope.launch {
+                        uniConnectScope.launch {
                             notificationDao.insertNotifications(notifications)
                             onComplete(notifications)
                         }
@@ -59,7 +59,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val notification = snapshot.getValue(NotificationEntity::class.java)
                 notification?.let {
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         notificationDao.insertNotification(it)
                     }
                 }
@@ -68,7 +68,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                 val notification = snapshot.getValue(NotificationEntity::class.java)
                 notification?.let {
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         notificationDao.insertNotification(it)
                     }
                 }
@@ -76,7 +76,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val notificationId = snapshot.key
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     notificationId?.let { notificationDao.deleteNotification(it) }
                 }
             }
@@ -94,7 +94,7 @@ class NotificationRepository(private val notificationDao: NotificationDao) {
     }
 
     fun writeNotification(notificationEntity: NotificationEntity, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             notificationDao.insertNotification(notificationEntity)
             database.child(notificationEntity.id).setValue(notificationEntity)
                 .addOnSuccessListener {
