@@ -2,6 +2,7 @@ package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
 
 import com.google.firebase.database.*
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,10 +11,7 @@ import kotlinx.coroutines.launch
 class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
     private val courseCode = UniAdminPreferences.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
-
-    // Scope for running coroutines
-    private val viewModelScope = CoroutineScope(Dispatchers.Main)
-
+    
     init {
         // Start listening for changes in Firebase
         setupRealtimeUpdates()
@@ -33,7 +31,7 @@ class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
                // val moduleID = snapshot.key ?: return
                 val details = snapshot.child("Module Details").children.mapNotNull { it.getValue(
                     ModuleDetail::class.java) }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     details.forEach { moduleDetailDao.deleteModuleDetail(it.detailID) }
                 }
             }
@@ -47,7 +45,7 @@ class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
                // val moduleID = snapshot.key ?: return
                 val details = snapshot.child("Module Details").children.mapNotNull { it.getValue(
                     ModuleDetail::class.java) }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     details.forEach { moduleDetailDao.insertModuleDetail(it) }
                 }
             }
@@ -56,7 +54,7 @@ class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
 
     fun getModuleDetailsByModuleID(moduleCode: String, onResult: (ModuleEntity?) -> Unit) {
         val moduleDetailsRef = FirebaseDatabase.getInstance().reference.child("Modules").child(moduleCode)
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = moduleDetailDao.getModuleDetailsByID(moduleCode)
             if (cachedData != null) {
                 onResult(cachedData)
@@ -77,7 +75,7 @@ class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
     }
 
     fun writeModuleDetail(moduleID: String, moduleDetail: ModuleDetail, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Insert into local database
                 moduleDetailDao.insertModuleDetail(moduleDetail)
@@ -97,7 +95,7 @@ class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
     }
 
     fun getModuleDetails(moduleID: String, onResult: (ModuleDetail?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = moduleDetailDao.getModuleDetail(moduleID)
             if (cachedData != null) {
                 onResult(cachedData)
@@ -108,7 +106,7 @@ class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
                         if (snapshot.hasChildren()) {
                             val detail = snapshot.children.first().getValue(ModuleDetail::class.java)
                             detail?.let {
-                                viewModelScope.launch {
+                                uniConnectScope.launch {
                                     moduleDetailDao.insertModuleDetail(it)
                                 }
                                 onResult(it)
