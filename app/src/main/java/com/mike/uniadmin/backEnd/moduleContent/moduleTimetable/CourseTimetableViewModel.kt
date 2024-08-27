@@ -25,7 +25,7 @@ class ModuleTimetableViewModel(private val repository: ModuleTimetableRepository
 
     // Fetch timetables for a specific module
     fun getModuleTimetables(moduleID: String) {
-        _isLoading.value = true
+        _isLoading.postValue(true)
         repository.getModuleTimetables(moduleID) { timetables ->
             _timetables.postValue(timetables) // Use postValue for background updates
             _isLoading.postValue(false)
@@ -34,7 +34,7 @@ class ModuleTimetableViewModel(private val repository: ModuleTimetableRepository
 
     //Fetch timetables for all modules
     fun getAllModuleTimetables() {
-        _isLoading.value = true
+        _isLoading.postValue(true)
         repository.getAllModuleTimetables { timetables ->
             _moduleTimetables.postValue(timetables) // Use postValue for background updates
             _isLoading.postValue(false)
@@ -58,8 +58,9 @@ class ModuleTimetableViewModel(private val repository: ModuleTimetableRepository
     }
 
     fun getTimetableByDay(day: String) {
-        _isLoading.value = true
+        _isLoading.postValue(true)
         repository.getTimetableByDay(day) { timetable ->
+            Log.d("Timetables ViewModel", "Found timetable in repository: $timetable")
             _timetablesToday.postValue(timetable?.firstOrNull()) // Use postValue for background updates
             _isLoading.postValue(false)
         }
