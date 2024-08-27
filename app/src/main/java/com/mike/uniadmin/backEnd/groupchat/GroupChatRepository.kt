@@ -4,17 +4,17 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val chatViewModelScope = CoroutineScope(Dispatchers.Main)
 
 class GroupChatRepository(private val groupChatDao: GroupChatDao, private val groupDao: GroupDao) {
     private val database = FirebaseDatabase.getInstance().getReference()
 
     fun fetchGroupChats(path: String, onResult: (List<GroupChatEntity>) -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             // Fetch from Room database first
             val cachedChats = groupChatDao.getChats(path)
             if (cachedChats.isNotEmpty()) {
@@ -31,7 +31,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
                     }
 
                     // Update Room database and notify UI with fresh data
-                    chatViewModelScope.launch {
+                    uniConnectScope.launch {
                         groupChatDao.insertChats(chats)
                         onResult(chats)
                     }
@@ -45,7 +45,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
     }
 
     fun saveGroupChat(chat: GroupChatEntity, path: String, onComplete: (Boolean) -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Save to Room database first
                 groupChatDao.insertChats(listOf(chat))
@@ -67,7 +67,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
     }
 
     fun fetchGroups(onResult: (List<GroupEntity>) -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             // Fetch from Room database first
             val cachedGroups = groupDao.getGroups()
             if (cachedGroups.isNotEmpty()) {
@@ -84,7 +84,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
                     }
 
                     // Update Room database and notify UI with fresh data
-                    chatViewModelScope.launch {
+                    uniConnectScope.launch {
                         groupDao.insertGroups(groups)
                         onResult(groups)
                     }
@@ -98,7 +98,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
     }
 
     fun saveGroup(group: GroupEntity, onComplete: (Boolean) -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Save to Room database first
                 groupDao.insertGroups(listOf(group))
@@ -120,7 +120,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
     }
 
     fun fetchGroupByID(groupID: String, onResult: (GroupEntity?) -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             // Fetch from Room database first
             val cachedGroup = groupDao.getGroups().find { it.id == groupID }
             if (cachedGroup != null) {
@@ -130,7 +130,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
             // Fetch from Firebase and update Room database
             database.child("Groups").child(groupID).get().addOnSuccessListener { snapshot ->
                 val group = snapshot.getValue(GroupEntity::class.java)
-                chatViewModelScope.launch {
+                uniConnectScope.launch {
                     if (group != null) {
                         groupDao.insertGroups(listOf(group))
                     }
@@ -144,7 +144,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
     }
 
     fun deleteChat(chatId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Delete from Room database first
                 groupChatDao.deleteChat(chatId)
@@ -165,7 +165,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
     }
 
     fun deleteGroup(groupId: String, onComplete: () -> Unit) {
-        chatViewModelScope.launch {
+        uniConnectScope.launch {
             try {
                 // Delete from Room database first
                 groupDao.deleteGroup(groupId)
