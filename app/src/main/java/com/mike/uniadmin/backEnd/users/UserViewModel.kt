@@ -43,37 +43,35 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         // Clear all necessary data here
-        user.value = null
+        user.postValue(null)
     }
 
     fun checkUserStateByID(userID: String) = viewModelScope.launch {
         repository.fetchUserStateByUserId(userID) { fetchedUserState ->
-            _userState.value = fetchedUserState // Update the value of the LiveData
+            _userState.postValue(fetchedUserState) // Update the value of the LiveData
             Log.d("UserStates", "UserState for user Id: $userID: $fetchedUserState")
         }
     }
 
     fun checkAllUserStatuses() {
         repository.fetchAllUserStatuses { userStates ->
-            _userStates.value = userStates.associateBy { it.userID }
+            _userStates.postValue(userStates.associateBy { it.userID })
         }
     }
-
 
      fun fetchUsers() {
         repository.fetchUsers { users ->
-            _users.value = users
+            _users.postValue(users)
         }
     }
 
 
-
     fun findUserByEmail(email: String, onUserFetched: (UserEntity?) -> Unit) {
-        _isLoading.value = true // Set loading to true before fetching
+        _isLoading.postValue(true) // Set loading to true before fetching
         repository.fetchUserDataByEmail(email) { user ->
             _user.postValue(user)
             onUserFetched(user)
-            _isLoading.value = false // Set loading to false after fetching
+            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
@@ -81,7 +79,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     fun findUserByAdmissionNumber(admissionNumber: String, onUserFetched: (UserEntity?) -> Unit){
         repository.fetchUserDataByAdmissionNumber(admissionNumber){ fetchedUser ->
             onUserFetched(fetchedUser)
-            _user2.value = fetchedUser
+            _user2.postValue(fetchedUser)
         }
     }
 
@@ -119,7 +117,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     fun checkAccountDeletionData(userID: String) {
         viewModelScope.launch {
             repository.checkAccountDeletionData(userID, onComplete = { fetchedAccountStatus ->
-                _accountStatus.value = fetchedAccountStatus
+                _accountStatus.postValue(fetchedAccountStatus)
 
             })
         }
