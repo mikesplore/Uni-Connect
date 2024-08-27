@@ -60,8 +60,8 @@ import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.ui.theme.FontPreferences
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,15 +69,13 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun Settings(navController: NavController, context: Context, mainActivity: MainActivity) {
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
-    val fontPrefs = remember { FontPreferences(context) }
-    var savedFont by remember { mutableStateOf("system") }
+    val savedFont = remember { UniAdminPreferences.fontStyle.value }
 
     val userViewModel = getUserViewModel(context)
     val currentUser by userViewModel.user.observeAsState()
 
 
     LaunchedEffect(savedFont) {
-        savedFont = fontPrefs.getSelectedFont().toString()
         userViewModel.findUserByEmail(user?.email!!) {}
 
     }
@@ -302,7 +300,7 @@ fun MyAbout(context: Context) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Uni Admin", style = CC.descriptionTextStyle(context).copy(
+            "Uni Connect", style = CC.descriptionTextStyle(context).copy(
                 fontWeight = FontWeight.Bold, fontSize = 20.sp
             )
         )
