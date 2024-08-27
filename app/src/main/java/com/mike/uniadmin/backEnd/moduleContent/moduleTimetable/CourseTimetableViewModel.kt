@@ -57,14 +57,15 @@ class ModuleTimetableViewModel(private val repository: ModuleTimetableRepository
         }
     }
 
-    fun getTimetableByDay(day: String) {
+    fun findUpcomingClass() {
         _isLoading.postValue(true)
-        repository.getTimetableByDay(day) { timetable ->
-            Log.d("Timetables ViewModel", "Found timetable in repository: $timetable")
-            _timetablesToday.postValue(timetable?.firstOrNull()) // Use postValue for background updates
+        repository.getUpcomingClass { timetable ->
+            _timetablesToday.postValue(timetable)
             _isLoading.postValue(false)
         }
     }
+
+
 }
 
 
