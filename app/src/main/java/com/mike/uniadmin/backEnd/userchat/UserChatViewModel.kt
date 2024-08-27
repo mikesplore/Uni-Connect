@@ -37,26 +37,25 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
     fun listenForTypingStatus(path: String, userId: String) {
         repository.listenForTypingStatus(path, userId) { isUserTyping ->
-            _isTyping.value = isUserTyping
+            _isTyping.postValue(isUserTyping)
         }
     }
 
 
     init {
-        _userChatsMap.value = emptyMap()
-        _isTyping.value = false
+        _userChatsMap.postValue(emptyMap())
+        _isTyping.postValue(false)
     }
 
     fun fetchCardUserChats(conversationId: String) {
         viewModelScope.launch {
-            repository.fetchUserChats(conversationId) { userChats -> // Use the callback
-                _userChatsMap.value = _userChatsMap.value?.toMutableMap()?.apply {
-                    this[conversationId] = userChats
-                }
+            repository.fetchUserChats(conversationId) { userChats ->
+                _userChatsMap.postValue(_userChatsMap.value?.toMutableMap()?.also {
+                    it[conversationId] = userChats
+                })
             }
         }
     }
-
 
     fun getCardUserChats(conversationId: String): LiveData<List<UserChatEntity>> {
         return userChatsMap.map { it[conversationId] ?: emptyList() }
@@ -65,12 +64,13 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
 
      fun fetchUserChats(path: String) {
-         _isLoading.value = true
+         _isLoading.postValue(true)
         repository.fetchUserChats(path) { userChats ->
-            _userChats.value = userChats
-            _isLoading.value = false
+            _userChats.postValue(userChats)
+            _isLoading.postValue(false)
         }
     }
+
 
     fun saveMessage(message: UserChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
