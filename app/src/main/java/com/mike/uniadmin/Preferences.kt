@@ -16,6 +16,7 @@ object UniAdminPreferences {
     private const val PREF_KEY_BIOMETRIC_ENABLED = "biometric_enabled_key"
     private const val PREF_KEY_MODULE_NAME = "module_name_key"
     private const val PREF_KEY_MODULE_ID = "module_id_key"
+    private const val FONT_STYLE_KEY = "font_style_key"
 
     private lateinit var preferences: SharedPreferences
 
@@ -25,6 +26,7 @@ object UniAdminPreferences {
     val userType: MutableState<String> = mutableStateOf("")
     val moduleName: MutableState<String> = mutableStateOf("")
     val moduleID: MutableState<String> = mutableStateOf("")
+    val fontStyle: MutableState<String> = mutableStateOf("System")
     val darkMode: MutableState<Boolean> = mutableStateOf(false)
     val notificationsEnabled: MutableState<Boolean> = mutableStateOf(false)
     val biometricEnabled: MutableState<Boolean> = mutableStateOf(false)
@@ -38,9 +40,18 @@ object UniAdminPreferences {
         userType.value = preferences.getString(PREF_KEY_USER_TYPE, "") ?: ""
         moduleName.value = preferences.getString(PREF_KEY_MODULE_NAME, "") ?: ""
         moduleID.value = preferences.getString(PREF_KEY_MODULE_ID, "") ?: ""
+        fontStyle.value = preferences.getString(FONT_STYLE_KEY, "System") ?: "System"
         darkMode.value = preferences.getBoolean(PREF_KEY_DARK_MODE, true)
+
         notificationsEnabled.value = preferences.getBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, true)
         biometricEnabled.value = preferences.getBoolean(PREF_KEY_BIOMETRIC_ENABLED, true)
+    }
+
+    // Save font style
+    fun saveFontStyle(newFontStyle: String) {
+        fontStyle.value = newFontStyle
+        preferences.edit().putString(FONT_STYLE_KEY, newFontStyle).apply()
+        Log.d("UniAdminPreferences", "Font style saved: $newFontStyle")
     }
 
     // Save module name
