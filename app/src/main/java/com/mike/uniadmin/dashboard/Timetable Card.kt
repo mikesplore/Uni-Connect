@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dashboard
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -31,8 +32,10 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetable
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
+    val today = CC.currentDay()
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CC.secondary()),
@@ -45,7 +48,6 @@ fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            val maxWidth = maxWidth
             Column(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.Start,
@@ -74,12 +76,21 @@ fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
                         tint = CC.tertiary(),
                         modifier = Modifier.size(18.dp)
                     )
-                    Text(
-                        text = "${timetable.day}, ${timetable.startTime} - ${timetable.endTime}",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = CC.textColor().copy(alpha = 0.7f)
+                    if (timetable.day == today) {
+                        Text(
+                            text = "Today",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = CC.textColor().copy(alpha = 0.7f)
+                            )
                         )
-                    )
+                    } else {
+                        Text(
+                            text = "${timetable.day}, ${timetable.startTime} - ${timetable.endTime}",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = CC.textColor().copy(alpha = 0.7f)
+                            )
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
