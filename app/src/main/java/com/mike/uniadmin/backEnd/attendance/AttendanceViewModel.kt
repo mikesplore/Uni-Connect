@@ -32,6 +32,7 @@ class AttendanceViewModel (private val attendanceRepository: AttendanceRepositor
 
     private fun syncAttendanceUpdates() {
         attendanceRepository.syncAttendanceUpdates()
+
     }
 
     class AttendanceViewModelFactory(private val repository: AttendanceRepository) : ViewModelProvider.Factory {
