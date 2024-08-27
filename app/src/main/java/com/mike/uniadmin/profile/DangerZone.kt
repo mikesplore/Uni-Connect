@@ -272,7 +272,7 @@ fun AccountDeletionRequests(
         ) {
             Text(
                 "Pending Account Deletion Request",
-                style = CC.titleTextStyle(context = context),
+                style = CC.titleTextStyle(context = context).copy(fontSize = 18.sp),
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
