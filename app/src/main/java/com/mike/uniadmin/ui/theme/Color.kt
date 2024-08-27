@@ -20,12 +20,10 @@ val White = Color(0xFF1B4F72)
 
 
 //dark theme
-val DarkNavy = Color(0xFF15202B)
-val DeepBlue = Color(0xFF1B4F72)
-val BrightBlue = Color(0xFF86B6F6)
-val LightGray = Color(0xFFE1E8ED)
-val Turquoise = Color(0xFF1C2833)
-val Black = Color(0xFF2980B9)
-
-
+val DarkNavy = Color(0xFF0D151E)
+val DeepBlue = Color(0xFF14344B)
+val BrightBlue = Color(0xFFA1C6FA)
+val LightGray = Color(0xFFF2F2F2)
+val Turquoise = Color(0xFF3C5B6F)
+val Black = Color(0xFF0A192F)
 
