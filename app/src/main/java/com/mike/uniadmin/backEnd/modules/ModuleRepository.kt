@@ -5,11 +5,11 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-val viewModelScope = CoroutineScope(Dispatchers.Main)
 
 class ModuleRepository(
     private val moduleDao: ModuleDao,
@@ -33,7 +33,7 @@ class ModuleRepository(
                     val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
                     attendanceState?.let { attendanceStates.add(it) }
                 }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     attendanceStateDao.insertAttendanceStates(attendanceStates)
 
                 }
@@ -47,7 +47,7 @@ class ModuleRepository(
     }
 
     fun fetchAttendanceStates(onResult: (List<AttendanceState>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             attendanceStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val attendanceStates = mutableListOf<AttendanceState>()
@@ -55,7 +55,7 @@ class ModuleRepository(
                         val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
                         attendanceState?.let { attendanceStates.add(it) }
                     }
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         attendanceStateDao.insertAttendanceStates(attendanceStates)
                     }
                     onResult(attendanceStates)
@@ -64,7 +64,7 @@ class ModuleRepository(
                 override fun onCancelled(error: DatabaseError) {
                     // Handle the read error (e.g., log the error)
                     println("Error reading modules: ${error.message}")
-                    viewModelScope.launch {
+                    uniConnectScope.launch {
                         val cachedData = attendanceStateDao.getAttendanceStates()
                         onResult(cachedData)
                     }
@@ -74,7 +74,7 @@ class ModuleRepository(
     }
 
     fun saveAttendanceState(attendanceState: AttendanceState, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             attendanceStateDao.insertAttendanceState(attendanceState)
             attendanceStateDatabase.child(attendanceState.moduleID).setValue(attendanceState).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -83,7 +83,7 @@ class ModuleRepository(
     }
 
     fun saveModule(module: ModuleEntity, onComplete: (Boolean) -> Unit = {}) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             moduleDao.insertModule(module)
             database.child(module.moduleCode).setValue(module).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
@@ -93,7 +93,7 @@ class ModuleRepository(
 
 
     fun fetchModules(onResult: (List<ModuleEntity>) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             val cachedData = moduleDao.getModules()
                 if (cachedData.isNotEmpty()) {
                     onResult(cachedData)
@@ -106,7 +106,7 @@ class ModuleRepository(
                             val module = childSnapshot.getValue(ModuleEntity::class.java)
                             module?.let { modules.add(it) }
                         }
-                       viewModelScope.launch {
+                       uniConnectScope.launch {
                             moduleDao.insertModules(modules)
                         }
                         onResult(modules)
@@ -123,7 +123,7 @@ class ModuleRepository(
 
 
     fun deleteModule(moduleId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        viewModelScope.launch {
+        uniConnectScope.launch {
             moduleDao.deleteModule(moduleId)
             database.child(moduleId).removeValue() // Use the consistent database reference
                 .addOnSuccessListener {
@@ -142,7 +142,7 @@ class ModuleRepository(
                     val module = childSnapshot.getValue(ModuleEntity::class.java)
                     module?.let { modules.add(it) }
                 }
-                viewModelScope.launch {
+                uniConnectScope.launch {
                     moduleDao.insertModules(modules)
                 }
             }
@@ -156,7 +156,7 @@ class ModuleRepository(
 
     fun getModuleDetailsByModuleID(moduleCode: String, onResult: (ModuleEntity?) -> Unit) {
         val moduleDetailsRef = database.child(moduleCode)
-        viewModelScope.launch {
+        uniConnectScope.launch {
             moduleDao.getModule(moduleCode)
             moduleDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
