@@ -1,5 +1,6 @@
 package com.mike.uniadmin.uniChat.userChat
 
+import ScatteredCirclesBackground
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -170,6 +171,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 .imePadding()
         ) {
             Background()
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
