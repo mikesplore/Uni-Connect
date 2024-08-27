@@ -58,6 +58,7 @@ import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.dashboard.isDeviceOnline
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -131,6 +132,7 @@ fun AnnouncementsItem(
                     userViewModel
                 )
             }
+
             if (announcements.value.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -142,7 +144,8 @@ fun AnnouncementsItem(
                     style = CC.descriptionTextStyle(context),
                     modifier = Modifier.wrapContentSize(Alignment.Center)
                 )}
-            } else {
+            }
+            else {
                 LazyColumn {
                     items(announcements.value) { announcement ->
                         AnnouncementCard(announcement, context, userViewModel)
@@ -409,3 +412,11 @@ fun AddAnnouncementItem(
     }
 }
 
+@Composable
+fun InternetError(context: Context){
+    Box(modifier = Modifier
+        .padding(horizontal = 8.dp, vertical = 8.dp)
+        .fillMaxWidth(), contentAlignment = Alignment.Center){
+        Text("Oops, No Internet detected", style = CC.descriptionTextStyle(context))
+    }
+}
