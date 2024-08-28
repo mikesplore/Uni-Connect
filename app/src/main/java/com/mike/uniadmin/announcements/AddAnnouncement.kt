@@ -63,7 +63,6 @@ fun AddAnnouncement(
     var loading by remember { mutableStateOf(false) }
 
     //these will be filled automatically (if the data exists that is)
-    val profileLink = user?.profileImageLink ?: ""
     val author = user?.firstName ?: ""
     val senderId = user?.id ?: ""
 
@@ -167,9 +166,7 @@ fun AddAnnouncement(
                             title = title,
                             description = description,
                             date = CC.getTimeStamp(),
-                            authorName = author,
                             authorID = senderId,
-                            imageLink = profileLink
                         )
                         if (title != "" && description != "") {
                             announcementViewModel.saveAnnouncement(newAnnouncement,
