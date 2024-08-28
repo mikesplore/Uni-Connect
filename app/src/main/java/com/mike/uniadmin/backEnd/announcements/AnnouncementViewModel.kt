@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 class AnnouncementViewModel(private val repository: AnnouncementRepository) : ViewModel() {
-    private val _announcements = MutableLiveData<List<AnnouncementEntity>>()
-    val announcements: LiveData<List<AnnouncementEntity>> = _announcements
+    private val _announcements = MutableLiveData<List<AnnouncementsWithAuthor>>()
+    val announcements: LiveData<List<AnnouncementsWithAuthor>> = _announcements
 
     private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
