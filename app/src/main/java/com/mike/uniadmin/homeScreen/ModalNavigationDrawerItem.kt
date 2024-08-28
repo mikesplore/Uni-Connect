@@ -95,7 +95,7 @@ fun ModalNavigationDrawerItem(
         Column(
             modifier = Modifier
                 .background(
-                    CC.extraColor1()
+                    CC.secondary()
                 )
                 .fillMaxHeight()
                 .fillMaxWidth(0.5f),
@@ -342,7 +342,6 @@ fun SignOut(
                                     UniAdminPreferences.clearAllData()
                                     userViewModel.deleteAllTables()
                                     deleteDataFromPreferences(context)
-                                    FirebaseAuth.getInstance().signOut()
                                     navController.navigate("login") {
                                         popUpTo("homeScreen") { inclusive = true }
                                     }
@@ -350,6 +349,7 @@ fun SignOut(
                                         context, "Signed Out Successfully!", Toast.LENGTH_SHORT
                                     ).show()
                                     onVisibleChange(false)
+                                    FirebaseAuth.getInstance().signOut()
                                 } else {
                                     Toast.makeText(
                                         context,
