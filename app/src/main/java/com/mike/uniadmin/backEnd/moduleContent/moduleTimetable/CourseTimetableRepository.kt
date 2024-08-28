@@ -237,4 +237,6 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
         // If no upcoming timetable is found, return the next week's first class
         return sortedTimetables.firstOrNull()
     }
+
+
 }
