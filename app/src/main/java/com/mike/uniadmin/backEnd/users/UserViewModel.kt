@@ -123,36 +123,6 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun deleteAccount(userId: String, onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            repository.deleteUser(userId, onSuccess = { success ->
-                if (success) {
-                    onSuccess(true)
-                } else {
-                    onSuccess(false)
-                }
-            })
-        }
-    }
-
-    fun fetchPreferences(userID: String, onPreferencesFetched: (UserPreferencesEntity?) -> Unit){
-        viewModelScope.launch {
-            repository.fetchPreferences(userID, onPreferencesFetched)
-        }
-    }
-
-    fun writePreferences(preferences: UserPreferencesEntity, onSuccess: (Boolean) -> Unit){
-        viewModelScope.launch {
-            repository.writePreferences(preferences, onSuccess = { success ->
-                if (success) {
-                    onSuccess(true)
-                } else {
-                    onSuccess(false)
-                    Log.e("writePreferences", "Failed to write preferences data")
-                }
-            })
-        }
-    }
 }
 
 
