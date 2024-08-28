@@ -19,7 +19,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,20 +32,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
+import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
+import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun EditAnnouncement(
     context: Context,
     onComplete: () -> Unit,
-    announcement: AnnouncementEntity,
-    announcementViewModel: AnnouncementViewModel
+    announcement: AnnouncementsWithAuthor,
+    announcementViewModel: AnnouncementViewModel,
 ) {
     // State variables to hold the title and description of the announcement being edited
     var title by remember { mutableStateOf(announcement.title) }
     var description by remember { mutableStateOf(announcement.description) }
+
+
 
     Column(
         modifier = Modifier
@@ -81,10 +88,10 @@ fun EditAnnouncement(
                     .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (announcement.imageLink.isNotEmpty()) {
+                if (announcement.profileImageLink.isNotEmpty()) {
                     // Load the profile image if the link is available
                     AsyncImage(
-                        model = announcement.imageLink,
+                        model = announcement.profileImageLink,
                         contentDescription = "Profile Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -128,15 +135,18 @@ fun EditAnnouncement(
             Button(
                 onClick = {
                     // Save the edited announcement through the ViewModel
-                    announcementViewModel.saveAnnouncement(announcement.copy(
-                        title = title,
-                        description = description,
-                        date = CC.getTimeStamp()
-                    ), onComplete = { success ->
-                        if (success) {
-                            onComplete() // Call the onComplete callback if save is successful
-                        }
-                    })
+                    announcementViewModel.saveAnnouncement(
+                        announcement = AnnouncementEntity().copy(
+                            id = announcement.id,
+                            title = title,
+                            description = description,
+                            date = announcement.date,
+                            authorID = announcement.authorID
+                        )
+                    ) {
+                        onComplete()
+                    }
+
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
