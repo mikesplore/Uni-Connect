@@ -61,33 +61,10 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
         })
     }
 
-    fun fetchAnnouncements(onResult: (List<AnnouncementEntity>) -> Unit) {
+    fun fetchAnnouncements(onResult: (List<AnnouncementsWithAuthor>) -> Unit) {
         uniConnectScope.launch {
             val cachedData = announcementsDao.getAnnouncements()
-            if (cachedData.isNotEmpty()) {
                 onResult(cachedData)
-            } else {
-                // Fetch from remote database if local database is empty
-                database.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val announcements = mutableListOf<AnnouncementEntity>()
-                        for (childSnapshot in snapshot.children) {
-                            val announcement = childSnapshot.getValue(AnnouncementEntity::class.java)
-                            announcement?.let { announcements.add(it) }
-                        }
-
-                        uniConnectScope.launch {
-                            announcementsDao.insertAnnouncements(announcements)
-                            onResult(announcements)
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        // Handle the error (e.g., log it)
-                        println("Error reading announcements: ${error.message}")
-                    }
-                })
-            }
         }
     }
 
