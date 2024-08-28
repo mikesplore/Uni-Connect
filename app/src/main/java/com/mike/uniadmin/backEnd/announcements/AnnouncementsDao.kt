@@ -7,9 +7,12 @@ import androidx.room.Query
 
 
 @Dao
-interface AnnouncementsDao{
-    @Query("SELECT * FROM announcements")
-    suspend fun getAnnouncements(): List<AnnouncementEntity>
+interface AnnouncementsDao {
+    @Query(
+        "SELECT announcements.*, admins.firstName AS authorName, admins.profileImageLink AS profileImageLink " +
+                "FROM announcements INNER JOIN admins ON announcements.authorId = admins.id"
+    )
+    suspend fun getAnnouncements(): List<AnnouncementsWithAuthor>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAnnouncements(announcements: List<AnnouncementEntity>)
