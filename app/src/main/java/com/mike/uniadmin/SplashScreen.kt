@@ -89,7 +89,7 @@ fun SplashScreen(navController: NavController, context: Context) {
             Icon(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "App Logo",
-                tint = CC.extraColor2(),
+                tint = CC.tertiary(),
                 modifier = Modifier.size(150.dp) // Slightly bigger logo for better focus
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -104,10 +104,7 @@ fun SplashScreen(navController: NavController, context: Context) {
                         color = Color.Black,
                         blurRadius = 8f,
                         offset = Offset(4f, 4f)
-                    ),
-                    brush = Brush.linearGradient( // Gradient for the title
-                        colors = listOf(CC.secondary(), CC.tertiary(), CC.secondary()))
-                    )
+                    ))
                 )
             Spacer(modifier = Modifier.height(12.dp))
 
