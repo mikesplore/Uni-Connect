@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class UserChatViewModel(private val repository: UserChatRepository) : ViewModel() {
@@ -16,6 +17,9 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _userCardLoading = MutableLiveData(false)
+    val userCardLoading: LiveData<Boolean> = _userCardLoading
 
     private val _userChatsMap = MutableLiveData<Map<String, List<UserChatEntity>>>()
     private val userChatsMap: LiveData<Map<String, List<UserChatEntity>>> get() = _userChatsMap
@@ -48,12 +52,15 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
     }
 
     fun fetchCardUserChats(conversationId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
+            _userCardLoading.postValue(true)
             repository.fetchUserChats(conversationId) { userChats ->
                 _userChatsMap.postValue(_userChatsMap.value?.toMutableMap()?.also {
                     it[conversationId] = userChats
+                    _userCardLoading.postValue(false)
                 })
             }
+
         }
     }
 
