@@ -19,10 +19,11 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
         uniConnectScope.launch {
             // Fetch userChats from the local database first
             val cachedChats = userChatDAO.getUserChats(path)
-            Log.d("Cached UserChats","The userChats are not fetched")
             if (cachedChats.isNotEmpty()) {
+                Log.d("UserChatRepository", "Fetched userChats from the local database")
                 onResult(cachedChats)
             }
+            Log.d("UserChatRepository", "Fetching userChats from Firebase")
 
             // Set up a listener for real-time updates from Firebase
             database.child(path).addValueEventListener(object : ValueEventListener {
