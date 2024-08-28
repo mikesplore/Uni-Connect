@@ -33,17 +33,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
+import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AnnouncementCard(
-    announcement: AnnouncementEntity,
+    announcement: AnnouncementsWithAuthor,
     context: Context
 ) {
     BaseAnnouncementCard {
         // Title Row
         AnnouncementTitleRow(
-            imageLink = announcement.imageLink,
+            imageLink = announcement.profileImageLink,
             authorName = announcement.authorName,
             title = announcement.title,
             context = context
