@@ -28,10 +28,11 @@ import com.mike.uniadmin.uniChat.mainChatScreen.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 
 
+
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "homeScreen") {
+    NavHost(navController = navController, startDestination = "splashScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController, context)
@@ -52,25 +53,18 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             LoginScreen(navController = navController, context)
         }
 
-        composable("profile",
-            
+        composable(
+            "profile",
             exitTransition = {
-                slideOutVertically(
-                    animationSpec = tween(10000),
-                    targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                   fadeOut(animationSpec = tween(300))
             }
         ) {
             ProfileScreen(navController = navController, context)
         }
 
         composable("settings",
-            
             exitTransition = {
-                slideOutVertically(
-                    animationSpec = tween(10000),
-                    targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                 fadeOut(animationSpec = tween(500))
             }
         ) {
             Settings(navController = navController, context, mainActivity)
@@ -79,10 +73,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         composable("uniChat",
             
             exitTransition = {
-                slideOutVertically(
-                    animationSpec = tween(10000),
-                    targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                 fadeOut(animationSpec = tween(500))
             }) {
             UniChat(navController = navController, context)
         }
@@ -109,9 +100,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             
             exitTransition = {
                 slideOutVertically(
-                    animationSpec = tween(10000),
+                    animationSpec = tween(200),
                     targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                ) + fadeOut(animationSpec = tween(200))
             }) {
             MoreDetails(context, navController)
         }
@@ -121,9 +112,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             
             exitTransition = {
                 slideOutVertically(
-                    animationSpec = tween(10000),
+                    animationSpec = tween(200),
                     targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                ) + fadeOut(animationSpec = tween(200))
             }
         ) {
             PhoneNotifications(navController, context)
@@ -133,9 +124,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             
             exitTransition = {
                 slideOutVertically(
-                    animationSpec = tween(10000),
+                    animationSpec = tween(200),
                     targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                ) + fadeOut(animationSpec = tween(200))
             }
         ) {
             PasswordReset(navController = navController, context)
@@ -145,9 +136,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             
             exitTransition = {
                 slideOutVertically(
-                    animationSpec = tween(10000),
+                    animationSpec = tween(200),
                     targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                ) + fadeOut(animationSpec = tween(200))
             }) {
             Appearance(navController = navController)
         }
@@ -158,9 +149,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             },
             exitTransition = {
                 slideOutVertically(
-                    animationSpec = tween(10000),
+                    animationSpec = tween(200),
                     targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                ) + fadeOut(animationSpec = tween(200))
             }
         ) {
             HomeScreen(navController = navController, context, mainActivity)
@@ -170,9 +161,9 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             
             exitTransition = {
                 slideOutVertically(
-                    animationSpec = tween(10000),
+                    animationSpec = tween(200),
                     targetOffsetY = { it }
-                ) + fadeOut(animationSpec = tween(10000))
+                ) + fadeOut(animationSpec = tween(200))
             }) {
             CourseScreen(context, navController)
         }
@@ -194,6 +185,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         composable("moduleContent/{moduleId}",
             
             exitTransition = {
+
                 slideOutVertically(
                     animationSpec = tween(300),
                     targetOffsetY = { it }
