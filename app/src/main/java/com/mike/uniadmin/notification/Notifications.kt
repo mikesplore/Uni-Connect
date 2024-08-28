@@ -66,23 +66,11 @@ fun PhoneNotifications(navController: NavController, context: Context) {
     val messageViewModel = getUserChatViewModel(context)
 
     // Keep track of previous notifications
-    var previousNotifications by remember { mutableStateOf<List<NotificationEntity>>(emptyList()) }
     val notifications by notificationViewModel.notifications.observeAsState(emptyList())
     var refresh by remember { mutableStateOf(false) }
 
     LaunchedEffect(refresh) {
         notificationViewModel.fetchNotifications()
-    }
-
-    // Check for new notifications
-    LaunchedEffect(notifications) {
-        val newNotifications = notifications.filterNot { previousNotifications.contains(it) }
-        if (newNotifications.isNotEmpty()) {
-            newNotifications.forEach { notification ->
-                showNotification(context, notification.title, notification.description)
-            }
-        }
-        previousNotifications = notifications
     }
 
     Scaffold(
