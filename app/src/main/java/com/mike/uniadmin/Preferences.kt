@@ -10,7 +10,8 @@ object UniAdminPreferences {
     // Keys for SharedPreferences
     private const val PREF_KEY_PROGRAM_CODE = "course_code_key"
     private const val PREF_KEY_USER_EMAIL = "user_email_key"
-    private const val PREF_KEY_USER_TYPE = "user_id_key"
+    private const val PREF_KEY_USER_TYPE = "user_type_key"
+    private const val PREF_KEY_USER_ID = "user_id_key"
     private const val PREF_KEY_DARK_MODE = "dark_mode_key"
     private const val PREF_KEY_NOTIFICATIONS_ENABLED = "notifications_enabled_key"
     private const val PREF_KEY_BIOMETRIC_ENABLED = "biometric_enabled_key"
@@ -18,12 +19,14 @@ object UniAdminPreferences {
     private const val PREF_KEY_MODULE_ID = "module_id_key"
     private const val FONT_STYLE_KEY = "font_style_key"
 
+
     private lateinit var preferences: SharedPreferences
 
     // MutableStates to hold preference values
     val courseCode: MutableState<String> = mutableStateOf("")
     val userEmail: MutableState<String> = mutableStateOf("")
     val userType: MutableState<String> = mutableStateOf("")
+    val userID: MutableState<String> = mutableStateOf("")
     val moduleName: MutableState<String> = mutableStateOf("")
     val moduleID: MutableState<String> = mutableStateOf("")
     val fontStyle: MutableState<String> = mutableStateOf("System")
@@ -38,6 +41,7 @@ object UniAdminPreferences {
         courseCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
         userEmail.value = preferences.getString(PREF_KEY_USER_EMAIL, "") ?: ""
         userType.value = preferences.getString(PREF_KEY_USER_TYPE, "") ?: ""
+        userID.value = preferences.getString(PREF_KEY_USER_ID, "") ?: ""
         moduleName.value = preferences.getString(PREF_KEY_MODULE_NAME, "") ?: ""
         moduleID.value = preferences.getString(PREF_KEY_MODULE_ID, "") ?: ""
         fontStyle.value = preferences.getString(FONT_STYLE_KEY, "System") ?: "System"
@@ -45,6 +49,13 @@ object UniAdminPreferences {
 
         notificationsEnabled.value = preferences.getBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, true)
         biometricEnabled.value = preferences.getBoolean(PREF_KEY_BIOMETRIC_ENABLED, true)
+    }
+
+    // Save user ID
+    fun saveUserID(newUserID: String) {
+        userID.value = newUserID
+        preferences.edit().putString(PREF_KEY_USER_ID, newUserID).apply()
+        Log.d("UniAdminPreferences", "User ID saved: $newUserID")
     }
 
     // Save font style
