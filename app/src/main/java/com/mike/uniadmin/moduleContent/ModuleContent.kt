@@ -254,6 +254,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
                             if (timetablesLoading) {
                                 LoadingIndicator()
                             } else {
+
                                 TimetableItem(
                                     targetModuleID, moduleTimetableViewModel, context
                                 )
