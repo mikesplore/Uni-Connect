@@ -27,8 +27,8 @@ interface UserDao {
     @Query("SELECT * FROM admins WHERE id = :userID")
     suspend fun getUserByID(userID: String): UserEntity?
 
-    @Query("SELECT id FROM admins")
-    suspend fun getAllUserIds(): List<String>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserStates(users: UserEntity)
 
 }
 
