@@ -10,8 +10,20 @@ data class AnnouncementEntity(
     val title: String = "",
     val description: String = "",
     val authorID: String = "",
+){
+    constructor(): this("", "", "", "", "")
+}
+
+
+data class AnnouncementsWithAuthor(
+    val id: String,
+    val date: String = "",
+    val title: String = "",
+    val description: String = "",
+    val authorID: String = "",
     val authorName: String = "",
-    val imageLink: String = ""
+    val profileImageLink: String = ""
+
 ){
     constructor(): this("", "", "", "", "", "", "")
 }
