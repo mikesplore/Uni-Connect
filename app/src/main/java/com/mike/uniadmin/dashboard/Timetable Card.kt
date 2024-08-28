@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -78,18 +77,18 @@ fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
                     )
                     if (timetable.day == today) {
                         Text(
-                            text = "Today",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = CC.textColor().copy(alpha = 0.7f)
-                            )
+                            text = "Today, ${timetable.startTime} - ${timetable.endTime}",
+                            style = CC.descriptionTextStyle(context),
+                            color = CC.textColor().copy(alpha = 0.7f)
                         )
+
                     } else {
                         Text(
                             text = "${timetable.day}, ${timetable.startTime} - ${timetable.endTime}",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = CC.textColor().copy(alpha = 0.7f)
-                            )
+                            style = CC.descriptionTextStyle(context),
+                            color = CC.textColor().copy(alpha = 0.7f)
                         )
+
                     }
                 }
 
@@ -108,9 +107,8 @@ fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
                     )
                     Text(
                         text = timetable.venue,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = CC.textColor().copy(alpha = 0.7f)
-                        )
+                        style = CC.descriptionTextStyle(context),
+                        color = CC.textColor().copy(alpha = 0.7f)
                     )
                 }
 
@@ -128,9 +126,8 @@ fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
                     )
                     Text(
                         text = timetable.lecturer,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = CC.textColor().copy(alpha = 0.7f)
-                        )
+                        style = CC.descriptionTextStyle(context),
+                        color = CC.textColor().copy(alpha = 0.7f)
                     )
                 }
             }
