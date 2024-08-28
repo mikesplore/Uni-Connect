@@ -191,6 +191,16 @@ fun ChatsScreen(
         messages.isNotEmpty()
     }
 
+    LaunchedEffect(filteredUsers) {
+        filteredUsers.forEach { user ->
+            val conversationId = "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
+            userChatViewModel.fetchCardUserChats(conversationId)
+        }
+    }
+
+
+
+
     LazyRow(
         modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
     ) {
