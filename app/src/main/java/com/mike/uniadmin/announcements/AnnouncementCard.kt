@@ -50,11 +50,12 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
+import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AnnouncementCard(
-    announcement: AnnouncementEntity,
+    announcement: AnnouncementsWithAuthor,
     onEdit: () -> Unit,
     onDelete: (String) -> Unit,
     context: Context,
@@ -100,10 +101,10 @@ fun AnnouncementCard(
                         .size(40.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (announcement.imageLink.isNotEmpty()) {
+                    if (announcement.profileImageLink.isNotEmpty()) {
                         // Load image asynchronously if the link is available
                         AsyncImage(
-                            model = announcement.imageLink,
+                            model = announcement.profileImageLink,
                             contentDescription = "Profile Image",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -182,7 +183,7 @@ fun AnnouncementCard(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Edit and Delete buttons
-                    if (userTypes == "admin"){
+                    if (userTypes == "admin" && announcement.authorID == UniAdminPreferences.userID.value){
                     Row(
                         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                     ) {
