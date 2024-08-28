@@ -59,7 +59,10 @@ import com.mike.uniadmin.R
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.courses.CourseEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getCourseViewModel
+import com.mike.uniadmin.getModuleTimetableViewModel
+import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.randomColor
@@ -71,6 +74,9 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun CourseScreen(context: Context, navController: NavController) {
     val courseViewModel = getCourseViewModel(context)
     val userViewModel = getUserViewModel(context)
+    val timetableViewModel = getModuleTimetableViewModel(context)
+    val moduleViewModel = getModuleViewModel(context)
+    val announcementViewModel = getAnnouncementViewModel(context)
 
     val currentUser by userViewModel.user.observeAsState()
     val courses by courseViewModel.courses.observeAsState(emptyList())
@@ -176,6 +182,10 @@ fun CourseScreen(context: Context, navController: NavController) {
                                             //get the course code
                                             UniAdminPreferences.saveCourseCode(course.courseCode)
                                             if (UniAdminPreferences.courseCode.value.isNotEmpty()) {
+                                                userViewModel.fetchUsers()
+                                                moduleViewModel.fetchModules()
+                                                timetableViewModel.getAllModuleTimetables()
+                                                announcementViewModel.fetchAnnouncements()
                                                 navController.navigate("homeScreen")
                                             } else {
                                                 Toast.makeText(
@@ -197,6 +207,10 @@ fun CourseScreen(context: Context, navController: NavController) {
                                 //get the course code
                                 UniAdminPreferences.saveCourseCode(course.courseCode)
                                 if (UniAdminPreferences.courseCode.value.isNotEmpty()) {
+                                    userViewModel.fetchUsers()
+                                    moduleViewModel.fetchModules()
+                                    timetableViewModel.getAllModuleTimetables()
+                                    announcementViewModel.fetchAnnouncements()
                                     navController.navigate("homeScreen")
                                 } else {
                                     Toast.makeText(
