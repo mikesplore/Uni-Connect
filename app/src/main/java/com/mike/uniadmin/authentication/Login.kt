@@ -345,6 +345,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
 
             UniAdminPreferences.saveUserEmail(email)
             UniAdminPreferences.saveUserType(user.userType.ifEmpty { "student" })
+            UniAdminPreferences.saveUserID(user.id)
             navController.navigate("courses") {
                 popUpTo("login") { inclusive = true }
             }
@@ -408,6 +409,7 @@ fun handleSignIn(
                         val userType = user.userType.ifEmpty { "student" }
                         UniAdminPreferences.saveUserEmail(email)
                         UniAdminPreferences.saveUserType(userType)
+                        UniAdminPreferences.saveUserID(user.id)
 
                     } else {
                         Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
