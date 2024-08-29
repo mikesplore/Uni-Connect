@@ -26,10 +26,12 @@ data class UserChatsWithDetails(
     @Embedded val userChat: UserChatEntity,
     @Embedded(prefix = "sender_") val sender: UserEntity, // Maps sender details
     @Embedded(prefix = "receiver_") val receiver: UserEntity, // Maps receiver details
-    val senderState: String?, // Sender's state from userState table
-    val receiverState: String?, // Receiver's state from userState table
-    val unreadCount: Int? = 0 // Optional, in case there are no unread counts
-)
+    val senderState: String, // Sender's state from userState table
+    val receiverState: String, // Receiver's state from userState table
+    val unreadCount: Int = 0 // Optional, in case there are no unread counts
+){
+    constructor(): this(UserChatEntity(), UserEntity(), UserEntity(), "", "", 0)
+}
 
 
 
