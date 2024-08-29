@@ -3,7 +3,11 @@ package com.mike.uniadmin.uniChat.mainChatScreen
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,7 +87,9 @@ fun UserMessageCard(
             // Use the appropriate profile image based on sender or receiver
             val profileImageUser =
                 if (chat.userChat.recipientID == currentUserId) chat.sender else chat.receiver
-            ProfileImage(currentUser = profileImageUser, context, navController)
+
+            val userState = if (chat.userChat.recipientID == currentUserId) chat.senderState else chat.receiverState
+            ProfileImage(currentUser = profileImageUser,userState,  context, navController)
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -164,8 +170,15 @@ fun MessageCounterBadge(count: Int, context: Context) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavController) {
+fun ProfileImage(currentUser: UserEntity?, userState: String, context: Context, navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
+
+    val color by animateColorAsState(
+        animationSpec = tween(500, easing = LinearEasing),
+        targetValue = if (userState == "online") Color.Green else if (userState == "offline") CC.extraColor2() else Color.Red,
+        label = ""
+    )
+
     Box(
         modifier = Modifier
             .clip(CircleShape)
@@ -176,6 +189,11 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
                 model = currentUser.profileImageLink,
                 contentDescription = "Profile Image",
                 modifier = Modifier
+                    .border(
+                        1.dp,
+                        color,
+                        CircleShape
+                    )
                     .clip(CircleShape)
                     .fillMaxSize()
                     .clickable { showDialog = true }, // Make the image clickable
