@@ -3,12 +3,17 @@ package com.mike.uniadmin.backEnd.groupchat
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class GroupChatViewModel(private val repository: GroupChatRepository) : ViewModel() {
-    private val _chats = MutableLiveData<List<GroupChatEntity>>()
-    val chats: LiveData<List<GroupChatEntity>> = _chats
+    private val _chats = MutableLiveData<List<GroupChatEntityWithDetails>>()
+    val chats: LiveData<List<GroupChatEntityWithDetails>> = _chats
 
     private val _groups = MutableLiveData<List<GroupEntity>>()
     val groups: LiveData<List<GroupEntity>> = _groups
@@ -17,9 +22,25 @@ class GroupChatViewModel(private val repository: GroupChatRepository) : ViewMode
     val group: MutableLiveData<GroupEntity?> = _group
 
     fun fetchGroupChats(path: String) {
-        repository.fetchGroupChats(path) { chats ->
-            _chats.postValue(chats)
+        repository.fetchGroupChats(path)
+    }
+
+    private val userChatsObserver = Observer<List<GroupChatEntityWithDetails>> { groupChats ->
+        _chats.value = groupChats
+    }
+
+    fun fetchGroupChats() {
+        uniConnectScope.launch(Dispatchers.Main) { // Use a coroutine scope
+            val latestChats = withContext(Dispatchers.IO) { // Fetch on a background thread
+                repository.fetchGroupChatWithDetails()
+            }
+            latestChats.observeForever(userChatsObserver) // Observe the LiveData
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.fetchGroupChatWithDetails().removeObserver(userChatsObserver) // Remove the observer
     }
 
     fun fetchGroups() {
