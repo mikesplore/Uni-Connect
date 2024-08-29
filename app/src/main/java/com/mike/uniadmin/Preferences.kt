@@ -47,8 +47,8 @@ object UniAdminPreferences {
         fontStyle.value = preferences.getString(FONT_STYLE_KEY, "System") ?: "System"
         darkMode.value = preferences.getBoolean(PREF_KEY_DARK_MODE, true)
 
-        notificationsEnabled.value = preferences.getBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, true)
-        biometricEnabled.value = preferences.getBoolean(PREF_KEY_BIOMETRIC_ENABLED, true)
+        notificationsEnabled.value = preferences.getBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, false)
+        biometricEnabled.value = preferences.getBoolean(PREF_KEY_BIOMETRIC_ENABLED, false)
     }
 
     // Save user ID
@@ -120,9 +120,14 @@ object UniAdminPreferences {
     }
 
     fun clearAllData() {
+
         courseCode.value = ""
         userEmail.value = ""
         userType.value = ""
+        userID.value = ""
+        moduleName.value = ""
+        moduleID.value = ""
+        fontStyle.value = "System"
         darkMode.value = true // Or set to your default value
         notificationsEnabled.value = false // Or set to your default value
         biometricEnabled.value = false // Or set to your default value
