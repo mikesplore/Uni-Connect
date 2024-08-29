@@ -45,7 +45,6 @@ class CourseRepository(
     }
 
     fun fetchCourseStates(onResult: (List<CourseState>) -> Unit) {
-        uniConnectScope.launch {
             courseStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val courseStates = mutableListOf<CourseState>()
@@ -68,35 +67,36 @@ class CourseRepository(
                     }
                 }
             })
-        }
+
     }
 
     fun saveCourseState(courseState: CourseState, onComplete: (Boolean) -> Unit) {
         uniConnectScope.launch {
             courseStateDao.insertCourseState(courseState)
+        }
             courseStateDatabase.child(courseState.courseID).setValue(courseState)
                 .addOnCompleteListener { task ->
                     onComplete(task.isSuccessful)
                 }
-        }
+
     }
 
     fun saveCourse(course: CourseEntity, onComplete: (Boolean) -> Unit) {
         uniConnectScope.launch {
             courseDao.insertCourse(course)
+        }
             database.child(course.courseCode).setValue(course).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
-        }
+
     }
 
 
     fun fetchCourses(onResult: (List<CourseEntity>) -> Unit) {
         uniConnectScope.launch {
             val cachedData = courseDao.getCourses()
-            if (cachedData.isNotEmpty()) {
-                onResult(cachedData)
-            } else {
+            onResult(cachedData)
+        }
                 database.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val courses = mutableListOf<CourseEntity>()
@@ -114,8 +114,8 @@ class CourseRepository(
                         println("Error reading courses: ${error.message}")
                     }
                 })
-            }
-        }
+
+
     }
 
 
