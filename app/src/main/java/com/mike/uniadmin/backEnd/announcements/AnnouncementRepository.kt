@@ -71,10 +71,11 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
     fun saveAnnouncement(announcement: AnnouncementEntity, onComplete: (Boolean) -> Unit) {
         uniConnectScope.launch {
             announcementsDao.insertAnnouncements(listOf(announcement))
-            database.child(announcement.id).setValue(announcement).addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
         }
+        database.child(announcement.id).setValue(announcement).addOnCompleteListener { task ->
+            onComplete(task.isSuccessful)
+        }
+
     }
 
     fun deleteAnnouncement(
@@ -84,11 +85,13 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
     ) {
         uniConnectScope.launch {
             announcementsDao.deleteAnnouncement(announcementId)
-            database.child(announcementId).removeValue().addOnSuccessListener {
-                onSuccess()
-            }.addOnFailureListener { exception ->
-                onFailure(exception)
-            }
         }
+
+        database.child(announcementId).removeValue().addOnSuccessListener {
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            onFailure(exception)
+        }
+
     }
 }
