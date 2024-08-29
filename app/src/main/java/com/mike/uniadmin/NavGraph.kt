@@ -27,8 +27,6 @@ import com.mike.uniadmin.uniChat.groupChat.DiscussionScreen
 import com.mike.uniadmin.uniChat.mainChatScreen.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 
-
-
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
@@ -46,14 +44,14 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         ) {
             DownloadedResources(context, navController)
         }
-        
+
         composable("login",
             enterTransition = {
                 fadeIn(animationSpec = tween(200))
             },
             exitTransition = {
-            fadeOut(animationSpec = tween(300))
-        }
+                fadeOut(animationSpec = tween(300))
+            }
         ) {
             LoginScreen(navController = navController, context)
         }
@@ -142,7 +140,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }
 
         composable("passwordReset",
-            
+
             exitTransition = {
                 slideOutVertically(
                     animationSpec = tween(200),
