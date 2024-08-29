@@ -69,11 +69,11 @@ fun Dashboard(navController: NavController, context: Context) {
         modules.forEach {
             moduleTimetableViewModel.getModuleTimetables(it.moduleCode)
         }
-
         moduleTimetableViewModel.getAllModuleTimetables()
         moduleTimetableViewModel.findUpcomingClass()
         userViewModel.checkAllUserStatuses()
         userViewModel.findUserByEmail(loggedInUserEmail) {}
+        moduleViewModel.fetchModules()
 
         while (true) {
             isOnline.value = isDeviceOnline(context)
