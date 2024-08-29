@@ -60,15 +60,14 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
     }
 
     fun fetchCardUserChats() {
-        Log.d("UserChatRepository", "Fetching card user chats")
         _userCardLoading.value = true
-
         uniConnectScope.launch(Dispatchers.Main) { // Use a coroutine scope
             val latestChats = withContext(Dispatchers.IO) { // Fetch on a background thread
                 repository.getLatestUserChats()
             }
             latestChats.observeForever(userChatsObserver) // Observe the LiveData
         }
+        _userCardLoading.value = false
     }
 
     override fun onCleared() {
