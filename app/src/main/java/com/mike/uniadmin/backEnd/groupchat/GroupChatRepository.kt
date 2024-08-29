@@ -1,47 +1,43 @@
 package com.mike.uniadmin.backEnd.groupchat
 
+import androidx.lifecycle.LiveData
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
 class GroupChatRepository(private val groupChatDao: GroupChatDao, private val groupDao: GroupDao) {
     private val database = FirebaseDatabase.getInstance().getReference()
 
-    fun fetchGroupChats(path: String, onResult: (List<GroupChatEntity>) -> Unit) {
-        uniConnectScope.launch {
-            // Fetch from Room database first
-            val cachedChats = groupChatDao.getChats(path)
-            if (cachedChats.isNotEmpty()) {
-                onResult(cachedChats)
+    fun fetchGroupChats(path: String) {
+
+        // Fetch from Firebase and update Room database
+        database.child(path).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val chats = mutableListOf<GroupChatEntity>()
+                for (childSnapshot in snapshot.children) {
+                    val chat = childSnapshot.getValue(GroupChatEntity::class.java)
+                    chat?.let { chats.add(it) }
+                }
+
+                // Update Room database and notify UI with fresh data
+                uniConnectScope.launch {
+                    groupChatDao.insertChats(chats)
+                }
             }
 
-            // Fetch from Firebase and update Room database
-            database.child(path).addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val chats = mutableListOf<GroupChatEntity>()
-                    for (childSnapshot in snapshot.children) {
-                        val chat = childSnapshot.getValue(GroupChatEntity::class.java)
-                        chat?.let { chats.add(it) }
-                    }
+            override fun onCancelled(error: DatabaseError) {
+                println("Error reading chats: ${error.message}")
+            }
+        })
+    }
 
-                    // Update Room database and notify UI with fresh data
-                    uniConnectScope.launch {
-                        groupChatDao.insertChats(chats)
-                        onResult(chats)
-                    }
-                }
+    fun fetchGroupChatWithDetails(): LiveData<List<GroupChatEntityWithDetails>> {
+        return groupChatDao.getChatsWithDetails()
 
-                override fun onCancelled(error: DatabaseError) {
-                    println("Error reading chats: ${error.message}")
-                }
-            })
-        }
     }
 
     fun saveGroupChat(chat: GroupChatEntity, path: String, onComplete: (Boolean) -> Unit) {
@@ -51,7 +47,7 @@ class GroupChatRepository(private val groupChatDao: GroupChatDao, private val gr
                 groupChatDao.insertChats(listOf(chat))
 
                 // Then save to Firebase
-                database.child(path).child(chat.id).setValue(chat)
+                database.child(path).child(chat.chatId).setValue(chat)
                     .addOnCompleteListener { task ->
                         onComplete(task.isSuccessful)
                     }
