@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
+import com.mike.uniadmin.backEnd.groupchat.GroupChatEntityWithDetails
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
@@ -65,7 +66,6 @@ fun DiscussionScreen(
     val user by userViewModel.user.observeAsState(initial = null)
     val group by chatViewModel.group.observeAsState(initial = null)
     val users by userViewModel.users.observeAsState(emptyList())
-
 
     var messageText by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
@@ -139,7 +139,7 @@ fun DiscussionScreen(
                             .weight(1f)
                     ) {
 
-                        val groupedChats = chats.groupBy { CC.getDateFromTimeStamp(it.date) }
+                        val groupedChats = chats.groupBy { CC.getDateFromTimeStamp(it.groupChat.date) }
 
                         groupedChats.forEach { (_, chatsForDate) ->
                             item {
@@ -150,13 +150,13 @@ fun DiscussionScreen(
                             }
 
                             items(chatsForDate.filter {
-                                it.message.contains(
+                                it.groupChat.message.contains(
                                     searchQuery.text, ignoreCase = true
                                 )
                             }) { chat ->
                                 ChatBubble(
                                     chat = chat,
-                                    isUser = chat.senderID == currentUser.id,
+                                    isUser = chat.groupChat.senderID == currentUser.id,
                                     context = context,
                                     navController = navController
                                 )
@@ -170,12 +170,9 @@ fun DiscussionScreen(
                                 MyDatabase.generateChatID { chatID ->
                                     val chat = GroupChatEntity(
                                         message = messageText,
-                                        senderName = currentUser.firstName,
                                         senderID = currentUser.id,
-                                        time = CC.getTimeStamp(),
-                                        date = CC.getTimeStamp(),
-                                        id = chatID,
-                                        profileImageLink = currentUser.profileImageLink
+                                        chatId = chatID,
+                                        date = CC.getTimeStamp()
                                     )
                                     sendMessage(
                                         chat = chat, viewModel = chatViewModel, path = groupPath
