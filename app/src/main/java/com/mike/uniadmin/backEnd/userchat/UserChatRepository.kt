@@ -28,6 +28,7 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
                 }
                 onResult(userChats)
 
+
                 // Insert into database and update UI with Main dispatcher
                 uniConnectScope.launch(Dispatchers.IO) {
                     userChatDAO.insertUserChats(userChats)
@@ -47,6 +48,7 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
 
     fun getLatestUserChats(): LiveData<List<UserChatsWithDetails>> {
         return userChatDAO.getLatestUserChats()
+
     }
 
 
