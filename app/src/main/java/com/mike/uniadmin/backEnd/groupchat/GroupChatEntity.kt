@@ -1,7 +1,9 @@
 package com.mike.uniadmin.backEnd.groupchat
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.mike.uniadmin.backEnd.users.UserEntity
 
 fun generateConversationId(userId1: String, userId2: String): String {
 
@@ -15,15 +17,12 @@ fun generateConversationId(userId1: String, userId2: String): String {
 
 @Entity(tableName = "groupChats")
 data class GroupChatEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey val chatId: String,
     var message: String = "",
-    var senderName: String = "",
     var senderID: String = "",
-    var time: String = "",
     var date: String = "",
-    var profileImageLink: String = ""
 ){
-    constructor(): this("", "", "", "", "", "", "")
+    constructor(): this("", "","", "")
 }
 
 @Entity(tableName = "groups")
@@ -38,5 +37,9 @@ data class GroupEntity(
     constructor(): this("", "", "", "", "", emptyList())
 }
 
-
+data class GroupChatEntityWithDetails(
+    @Embedded val groupChat: GroupChatEntity,
+    val senderName: String = "",
+    val senderProfileImageLink: String = ""
+    )
 
