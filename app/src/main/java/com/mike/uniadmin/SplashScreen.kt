@@ -55,9 +55,10 @@ fun SplashScreen(navController: NavController, context: Context) {
 
     val email = UniAdminPreferences.userEmail.value
     val courseCode = UniAdminPreferences.courseCode.value
+    val userId = UniAdminPreferences.userID.value
 
     val destination = when {
-        email.isEmpty() -> "login"
+        email.isEmpty() && userId.isEmpty() -> "login"
         courseCode.isEmpty() -> "courses"
         else -> "homeScreen"
     }
