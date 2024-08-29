@@ -35,13 +35,14 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
 import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
+import com.mike.uniadmin.backEnd.groupchat.GroupChatEntityWithDetails
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ChatBubble(
-    chat: GroupChatEntity, isUser: Boolean, context: Context, navController: NavController
+    chat: GroupChatEntityWithDetails, isUser: Boolean, context: Context, navController: NavController
 ) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
     val bubbleShape = RoundedCornerShape(
@@ -75,8 +76,8 @@ fun ChatBubble(
 
                 Box(modifier = Modifier
                     .clickable {
-                        navController.navigate("chat/${chat.senderID}") {
-                            popUpTo("chat/${chat.senderID}") {
+                        navController.navigate("chat/${chat.groupChat.senderID}") {
+                            popUpTo("chat/${chat.groupChat.senderID}") {
                                 inclusive = true
                             }
                         }
@@ -85,9 +86,9 @@ fun ChatBubble(
                     .clip(CircleShape)
                     .background(randomColor.random(), CircleShape)
                     .padding(4.dp), contentAlignment = Alignment.Center) {
-                    if (chat.profileImageLink.isNotBlank()) {
+                    if (chat.senderProfileImageLink.isNotBlank()) {
                         AsyncImage(
-                            model = chat.profileImageLink,
+                            model = chat.senderProfileImageLink,
                             contentDescription = "Profile Image",
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -106,7 +107,7 @@ fun ChatBubble(
             }
             if (isUser) {
                 Text(
-                    text = CommonComponents.getFormattedTime(chat.time),
+                    text = CommonComponents.getFormattedTime(chat.groupChat.date),
                     style = CommonComponents.descriptionTextStyle(context),
                     fontSize = 10.sp,
                     textAlign = TextAlign.Start,
@@ -134,7 +135,7 @@ fun ChatBubble(
                     }
                     SelectionContainer {
                         Text(
-                            text = chat.message,
+                            text = chat.groupChat.message,
                             style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 12.sp)
                         )
                     }
@@ -142,7 +143,7 @@ fun ChatBubble(
             }
             if (!isUser) {
                 Text(
-                    text = CommonComponents.getFormattedTime(chat.time),
+                    text = CommonComponents.getFormattedTime(chat.groupChat.date),
                     style = CommonComponents.descriptionTextStyle(context),
                     fontSize = 10.sp,
                     textAlign = TextAlign.End,
