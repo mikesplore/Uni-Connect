@@ -1,11 +1,17 @@
 package com.mike.uniadmin.backEnd.userchat
 
 import android.util.Log
+import androidx.activity.result.launch
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserChatViewModel(private val repository: UserChatRepository) : ViewModel() {
     private val _userChats = MutableLiveData<List<UserChatEntity>>()
@@ -15,19 +21,20 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private var _userChatWithDetails = MutableLiveData<List<UserChatsWithDetails>>()
+    val userChatWithDetails: LiveData<List<UserChatsWithDetails>> = _userChatWithDetails
+
+
     private val _userCardLoading = MutableLiveData(false)
     val userCardLoading: LiveData<Boolean> = _userCardLoading
 
-    private val _userChatsMap = MutableLiveData<Map<String, List<UserChatEntity>>>()
-    private val userChatsMap: LiveData<Map<String, List<UserChatEntity>>> get() = _userChatsMap
 
     private val _isTyping = MutableLiveData<Boolean>()
     val isTyping: LiveData<Boolean> = _isTyping
 
 
-
     fun markMessageAsRead(message: UserChatEntity, path: String) {
-            repository.markMessageAsRead(message.id, path)
+        repository.markMessageAsRead(message.id, path)
 
     }
 
@@ -43,29 +50,34 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
 
     init {
-        _userChatsMap.postValue(emptyMap())
         _isTyping.postValue(false)
+        fetchCardUserChats()
     }
 
-    fun fetchCardUserChats(conversationId: String) {
-            _userCardLoading.value = true
-            repository.fetchUserChats(conversationId) { userChats ->
-                _userChatsMap.value = _userChatsMap.value?.toMutableMap()?.also {
-                    it[conversationId] = userChats
-                    _userCardLoading.value = true
-                }
+    private val userChatsObserver = Observer<List<UserChatsWithDetails>> { userChats ->
+        _userChatWithDetails.value = userChats
+        _userCardLoading.value = false
+    }
+
+    fun fetchCardUserChats() {
+        Log.d("UserChatRepository", "Fetching card user chats")
+        _userCardLoading.value = true
+
+        uniConnectScope.launch(Dispatchers.Main) { // Use a coroutine scope
+            val latestChats = withContext(Dispatchers.IO) { // Fetch on a background thread
+                repository.getLatestUserChats()
             }
-
+            latestChats.observeForever(userChatsObserver) // Observe the LiveData
+        }
     }
 
-    fun getCardUserChats(conversationId: String): LiveData<List<UserChatEntity>> {
-        return userChatsMap.map { it[conversationId] ?: emptyList() }
+    override fun onCleared() {
+        super.onCleared()
+        repository.getLatestUserChats().removeObserver(userChatsObserver) // Remove the observer
     }
 
-
-
-     fun fetchUserChats(path: String) {
-         _isLoading.value = true
+    fun fetchUserChats(path: String) {
+        _isLoading.value = true
         repository.fetchUserChats(path) { userChats ->
             _userChats.value = userChats
             _isLoading.value = false
@@ -74,37 +86,36 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
 
     fun saveMessage(message: UserChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
-            repository.saveMessage(message, path) { success ->
-                if (success) {
-                    onSuccess(true)
-                    fetchUserChats(path) // Refresh the message list after saving
-                } else {
-                    onSuccess(false)
-                    // Handle save failure if needed
-                }
+        repository.saveMessage(message, path) { success ->
+            if (success) {
+                onSuccess(true)
+                fetchUserChats(path) // Refresh the message list after saving
+            } else {
+                onSuccess(false)
+                // Handle save failure if needed
             }
         }
+    }
 
 
     fun deleteMessage(messageId: String, path: String, onSuccess: (Boolean) -> Unit) {
-            repository.deleteMessage(messageId, path,
-                onSuccess = {
-                    onSuccess(true)
-                    Log.d("MessageViewModel", "Message deleted successfully")
-                },
-                onFailure = {
-                    onSuccess(false)
-                    Log.e("MessageViewModel", "Failed to delete message", it)
-                    // Handle delete failure if needed
-                }
-            )
+        repository.deleteMessage(messageId, path,
+            onSuccess = {
+                onSuccess(true)
+                Log.d("MessageViewModel", "Message deleted successfully")
+            },
+            onFailure = {
+                onSuccess(false)
+                Log.e("MessageViewModel", "Failed to delete message", it)
+                // Handle delete failure if needed
+            }
+        )
 
     }
 
 
-
-
-    class UserChatViewModelFactory(private val repository: UserChatRepository) : ViewModelProvider.Factory {
+    class UserChatViewModelFactory(private val repository: UserChatRepository) :
+        ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(UserChatViewModel::class.java)) {
