@@ -1,18 +1,12 @@
 package com.mike.uniadmin.uniChat.mainChatScreen
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +31,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,16 +44,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.groupchat.generateConversationId
-import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
-import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
-import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.uniChat.UsersProfile
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.UniGroups
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -69,19 +60,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun UniChat(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
-    val messageViewModel = getUserChatViewModel(context)
-    val searchQuery by remember { mutableStateOf("") }
-    val currentUser by userViewModel.user.observeAsState()
-
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val users by userViewModel.users.observeAsState()
-
-    val filteredUsers = users?.filter { user ->
-        user.firstName.contains(searchQuery, ignoreCase = true) || user.lastName.contains(
-            searchQuery, ignoreCase = true
-        ) || user.email.contains(searchQuery, ignoreCase = true)
-    } ?: emptyList()
-
 
     val tabs = listOf("Chats", "Groups", "Contacts")
 
@@ -94,9 +73,9 @@ fun UniChat(navController: NavController, context: Context) {
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                   IconButton(onClick = {navController.navigate("homeScreen")}) {
-                       Icon(Icons.Default.ArrowBackIosNew, "Back")
-                   }
+                    IconButton(onClick = { navController.navigate("homeScreen") }) {
+                        Icon(Icons.Default.ArrowBackIosNew, "Back")
+                    }
                 },
                 title = {
                     Text(
@@ -156,13 +135,10 @@ fun UniChat(navController: NavController, context: Context) {
             // Tab content
             when (selectedTabIndex) {
                 0 -> ChatsScreen(
-                    currentUser,
-                    filteredUsers,
                     context,
                     navController,
-                    messageViewModel,
-                    userViewModel
-                )
+
+                    )
 
                 1 -> UniGroups(context, navController)
                 2 -> UsersProfile(context, navController)
@@ -173,92 +149,51 @@ fun UniChat(navController: NavController, context: Context) {
 
 @Composable
 fun ChatsScreen(
-    currentUser: UserEntity?,
-    filteredUsers: List<UserEntity>,
     context: Context,
     navController: NavController,
-    userChatViewModel: UserChatViewModel,
-    userViewModel: UserViewModel
 ) {
-    val usersWithMessages = filteredUsers.filter { user ->
-        val conversationId =
-            "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
-        val messages by userChatViewModel.getCardUserChats(conversationId)
-            .observeAsState(emptyList())
-        messages.isNotEmpty()
-    }
+    val userViewModel = getUserViewModel(context)
+    val userChatViewModel = getUserChatViewModel(context)
 
-    LaunchedEffect(filteredUsers) {
-        filteredUsers.forEach { user ->
-            val conversationId = "Direct Messages/${currentUser?.id?.let { generateConversationId(it, user.id) }}"
-            userChatViewModel.fetchCardUserChats(conversationId)
+    val users by userViewModel.users.observeAsState()
+    val currentUserId = UniAdminPreferences.userID.value
+    val userCardChats by userChatViewModel.userChatWithDetails.observeAsState()
+    val loading by userChatViewModel.userCardLoading.observeAsState()
+
+    LaunchedEffect(users) {
+        userViewModel.fetchUsers()
+        userChatViewModel.fetchCardUserChats()
+        users?.forEach { user ->
+            val conversationID = generateConversationId(currentUserId, user.id)
+            val path = "Direct Messages/$conversationID"
+            userChatViewModel.fetchUserChats(path)
         }
     }
 
-
-
-
-    LazyRow(
-        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
-    ) {
-        items(usersWithMessages) { user ->
-            UserItem(user, context, navController, userViewModel)
-        }
-    }
-    // Chats Section
-    if (usersWithMessages.isEmpty()) {
+    if (userCardChats.isNullOrEmpty()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-
             UsersList(userViewModel, context)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "No Chats", style = CC.descriptionTextStyle(context).copy(fontSize = 20.sp))
-        }
-    }
-    LazyColumn {
-        items(filteredUsers) { user ->
-
-            val conversationId = "Direct Messages/${
-                currentUser?.id?.let { id ->
-                    generateConversationId(id, user.id)
-                }
-            }"
-
-            LaunchedEffect(conversationId) {
-                Log.d("Card Messages", "fetching messages for the path: $conversationId")
-                userChatViewModel.fetchCardUserChats(conversationId)
+            Text(
+                text = "No Chats Found",
+                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+            )
+            if (loading == false) {
+                CircularProgressIndicator(strokeWidth = 2.dp, color = CC.textColor())
             }
+        }
 
-            val messages by userChatViewModel.getCardUserChats(conversationId)
-                .observeAsState(emptyList())
-            Log.d("Card Messages", "fetched messages are: $messages")
-
-            if (messages.isNotEmpty()) {
-                val messageCounter =
-                    messages.count { unreadMessages -> unreadMessages.deliveryStatus == DeliveryStatus.SENT && unreadMessages.senderID == user.id }
-
-                AnimatedVisibility(
-                    visible = true, enter = fadeIn(), exit = fadeOut()
-                ) {
-                    UserMessageCard(
-                        userEntity = user,
-                        latestMessage = messages.lastOrNull(),
-                        context = context,
-                        userViewModel = userViewModel,
-                        navController = navController,
-                        messageCounter = messageCounter
-                    )
-                }
+    } else {
+        LazyColumn {
+            items(userCardChats ?: emptyList()) {
+                UserMessageCard(it, context, navController)
             }
         }
     }
 }
-
-
 
 
 @Composable
