@@ -7,7 +7,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import com.mike.uniadmin.backEnd.localDatabase.DatabaseDao
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
@@ -30,7 +29,7 @@ class UserRepository(
     }
 
     fun deleteAllTables() {
-        uniConnectScope.launch {
+        uniConnectScope.launch(Dispatchers.Main) {
             databaseDao.deleteAllTables()
         }
     }
@@ -45,7 +44,7 @@ class UserRepository(
                     val item = convert(childSnapshot)
                     item?.let { items.add(it) }
                 }
-                uniConnectScope.launch {
+                uniConnectScope.launch(Dispatchers.Main) {
                     onResult(items)
                 }
             }
@@ -73,7 +72,7 @@ class UserRepository(
     }
 
     fun fetchUsers(onResult: (List<UserEntity>) -> Unit) {
-        uniConnectScope.launch {
+        uniConnectScope.launch(Dispatchers.Main) {
             // 1. Fetch users from local database first
             val localUsers = userDao.getUsers()
             onResult(localUsers)
@@ -149,16 +148,76 @@ class UserRepository(
     fun fetchUserDataByEmail(email: String, callback: (UserEntity?) -> Unit) {
         uniConnectScope.launch(Dispatchers.Main) {
             val databaseUser = userDao.getUserByEmail(email)
-            databaseUser != null
-            callback(databaseUser)
+            if (databaseUser != null) {
+                callback(databaseUser)
+            } else {
+                database.child("Admins").orderByChild("email").equalTo(email)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val userSnapshot =
+                                snapshot.children.firstOrNull() // Get the first matching user
+                            val user = userSnapshot?.getValue(UserEntity::class.java)
+                            callback(user) // Return the User object or null if not found
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            callback(null) // Handle or log the error as needed
+                        }
+                    })
+            }
         }
     }
 
     fun fetchUserDataByAdmissionNumber(admissionNumber: String, callback: (UserEntity?) -> Unit) {
         uniConnectScope.launch(Dispatchers.Main) {
             val databaseUser = userDao.getUserByID(admissionNumber)
-            databaseUser != null
-            callback(databaseUser)
+            if (databaseUser != null) {
+                callback(databaseUser)
+            } else {
+                // Check Users node
+                val usersQuery = database.child("Admins").orderByChild("id").equalTo(admissionNumber)
+                usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val userSnapshot = snapshot.children.firstOrNull()
+                        val user = userSnapshot?.getValue(UserEntity::class.java)
+                        if (user != null) {
+                            callback(user) // Found in Users node
+                        } else {
+                            // Check Admins node if not found in Users
+                            val adminsQuery =
+                                database.child("Admins").orderByChild("id").equalTo(admissionNumber)
+                            adminsQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    val adminSnapshot = snapshot.children.firstOrNull()
+                                    val admin = adminSnapshot?.getValue(UserEntity::class.java)
+                                    callback(admin) // Return admin or null
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    callback(null) // Handle or log the error
+                                }
+                            })
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        callback(null) // Handle or log the error
+                    }
+                })
+            }
+        }
+    }
+
+
+    fun deleteUser(userId: String, onSuccess: (Boolean) -> Unit) {
+        uniConnectScope.launch(Dispatchers.Main) {
+            userDao.deleteUser(userId)
+            database.child("Admins").child(userId).removeValue().addOnSuccessListener {
+                onSuccess(true)
+            }.addOnFailureListener { exception ->
+                onSuccess(false)
+                Log.e("Error", "$exception")
+            }
         }
     }
 
@@ -166,13 +225,22 @@ class UserRepository(
     fun writeAccountDeletionData(
         accountDeletion: AccountDeletionEntity, onSuccess: (Boolean) -> Unit
     ) {
-        uniConnectScope.launch {
+        uniConnectScope.launch(Dispatchers.Main) {
             try {
                 // Insert the account deletion data into the local database first
                 accountDeletionDao.insertAccountDeletion(accountDeletion)
+                Log.d(
+                    "AccountDeletionStatus",
+                    "Inserted account deletion data into local database for userId: ${accountDeletion.id}"
+                )
+
                 // Write to Firebase
                 database.child("Account Deletion").child(accountDeletion.admissionNumber)
                     .setValue(accountDeletion).addOnSuccessListener {
+                        Log.d(
+                            "AccountDeletionStatus",
+                            "Account deletion data written to Firebase successfully for userId: ${accountDeletion.id}"
+                        )
                         onSuccess(true)
                     }.addOnFailureListener { exception ->
                         Log.e(
@@ -192,11 +260,15 @@ class UserRepository(
     }
 
     fun checkAccountDeletionData(userId: String, onComplete: (AccountDeletionEntity?) -> Unit) {
-        uniConnectScope.launch {
+        uniConnectScope.launch(Dispatchers.Main) {
             try {
                 // Attempt to retrieve the account deletion data from the local database first
                 val cachedData = accountDeletionDao.getAccountDeletion(userId)
                 if (cachedData != null) {
+                    Log.d(
+                        "AccountDeletionStatus",
+                        "Fetched account deletion data from local database for userId: $userId"
+                    )
                     onComplete(cachedData)
                 } else {
                     // Fetch from Firebase if not found locally
@@ -205,14 +277,22 @@ class UserRepository(
                             val accountDeletion =
                                 snapshot.getValue(AccountDeletionEntity::class.java)
                             if (accountDeletion != null) {
+                                Log.d(
+                                    "AccountDeletionStatus",
+                                    "Fetched account deletion data from Firebase for userId: $userId"
+                                )
                                 onComplete(accountDeletion)
                             } else {
+                                Log.d(
+                                    "AccountDeletionStatus",
+                                    "No account deletion data found in Firebase for userId: $userId"
+                                )
                                 onComplete(null)
                             }
                         }.addOnFailureListener { exception ->
                             Log.e(
                                 "AccountDeletionStatus",
-                                "Failed to fetch account deletion data from Firebase: ${exception.message}"
+                                "Error reading account deletion from Firebase: ${exception.message}"
                             )
                             onComplete(null)
                         }
@@ -229,6 +309,11 @@ class UserRepository(
 
 
     fun fetchAllUserStatuses(onUserStatesFetched: (List<UserStateEntity>) -> Unit) {
+        uniConnectScope.launch {
+           val cachedData =  userStateDao.getAllUserStates()
+            onUserStatesFetched(cachedData)
+        }
+
         database.child("Users Online Status").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val userStates = mutableListOf<UserStateEntity>()
@@ -241,7 +326,7 @@ class UserRepository(
 
             override fun onCancelled(error: DatabaseError) {
                 // Firebase connection failed, fetch from local database
-                uniConnectScope.launch {
+                uniConnectScope.launch(Dispatchers.Main) {
                     val cachedUserStates = userStateDao.getAllUserStates()
                     onUserStatesFetched(cachedUserStates)
                 }
@@ -250,25 +335,16 @@ class UserRepository(
     }
 
     fun fetchUserStateByUserId(userId: String, onUserStateFetched: (UserStateEntity?) -> Unit) {
-        // Check local database first
-        uniConnectScope.launch {
-            val cachedUserState = userStateDao.getUserState(userId)
-            onUserStateFetched(cachedUserState)
-        }
         database.child("Users Online Status").child(userId)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val userState = snapshot.getValue(UserStateEntity::class.java)
-
-                    uniConnectScope.launch {
-                        userState?.let { userStateDao.insertUserState(it) }
-                        onUserStateFetched(userState)
-                    }
+                    onUserStateFetched(userState)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     // Firebase connection failed, fetch from local database
-                    uniConnectScope.launch {
+                    uniConnectScope.launch(Dispatchers.Main) {
                         val cachedUserState = userStateDao.getUserState(userId)
                         onUserStateFetched(cachedUserState)
                     }

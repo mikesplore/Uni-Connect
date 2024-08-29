@@ -93,6 +93,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     )
 
     LaunchedEffect(Unit) {
+        userViewModel.fetchUsers()
         auth.currentUser?.email?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             userViewModel.findUserByEmail(it) {}

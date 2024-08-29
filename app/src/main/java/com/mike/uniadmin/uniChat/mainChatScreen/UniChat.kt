@@ -71,7 +71,6 @@ fun UniChat(navController: NavController, context: Context) {
     val userViewModel = getUserViewModel(context)
     val messageViewModel = getUserChatViewModel(context)
     val searchQuery by remember { mutableStateOf("") }
-    val userStates by userViewModel.userStates.observeAsState(emptyMap())
     val currentUser by userViewModel.user.observeAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -162,7 +161,6 @@ fun UniChat(navController: NavController, context: Context) {
                     context,
                     navController,
                     messageViewModel,
-                    userStates,
                     userViewModel
                 )
 
@@ -180,7 +178,6 @@ fun ChatsScreen(
     context: Context,
     navController: NavController,
     userChatViewModel: UserChatViewModel,
-    userStates: Map<String, UserStateEntity>,
     userViewModel: UserViewModel
 ) {
     val usersWithMessages = filteredUsers.filter { user ->
@@ -250,7 +247,6 @@ fun ChatsScreen(
                     UserMessageCard(
                         userEntity = user,
                         latestMessage = messages.lastOrNull(),
-                        userState = userStates[user.id],
                         context = context,
                         userViewModel = userViewModel,
                         navController = navController,

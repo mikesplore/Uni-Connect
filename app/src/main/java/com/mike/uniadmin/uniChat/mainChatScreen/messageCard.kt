@@ -63,7 +63,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun UserMessageCard(
     userEntity: UserEntity,
     latestMessage: UserChatEntity?,
-    userState: UserStateEntity?,
     context: Context,
     userViewModel: UserViewModel,
     navController: NavController,

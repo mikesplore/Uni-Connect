@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 
 class ModuleAnnouncementViewModel(private val repository: ModuleAnnouncementRepository) : ViewModel() {
 
-    private val _announcements = MutableLiveData<List<ModuleAnnouncement>>()
-    val announcements: LiveData<List<ModuleAnnouncement>> = _announcements
+    private val _announcements = MutableLiveData<List<ModuleAnnouncementsWithAuthor>>()
+    val announcements: LiveData<List<ModuleAnnouncementsWithAuthor>> = _announcements
 
     private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
@@ -39,6 +39,7 @@ class ModuleAnnouncementViewModel(private val repository: ModuleAnnouncementRepo
         }
     }
 }
+
 
 class ModuleAnnouncementViewModelFactory(private val repository: ModuleAnnouncementRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")

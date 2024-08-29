@@ -6,9 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class UserChatViewModel(private val repository: UserChatRepository) : ViewModel() {
     private val _userChats = MutableLiveData<List<UserChatEntity>>()
@@ -30,9 +27,8 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
 
     fun markMessageAsRead(message: UserChatEntity, path: String) {
-        viewModelScope.launch {
             repository.markMessageAsRead(message.id, path)
-        }
+
     }
 
     fun updateTypingStatus(path: String, userId: String, isTyping: Boolean) {
@@ -52,16 +48,14 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
     }
 
     fun fetchCardUserChats(conversationId: String) {
-        viewModelScope.launch(Dispatchers.Main) {
-            _userCardLoading.postValue(true)
+            _userCardLoading.value = true
             repository.fetchUserChats(conversationId) { userChats ->
-                _userChatsMap.postValue(_userChatsMap.value?.toMutableMap()?.also {
+                _userChatsMap.value = _userChatsMap.value?.toMutableMap()?.also {
                     it[conversationId] = userChats
-                    _userCardLoading.postValue(false)
-                })
+                    _userCardLoading.value = true
+                }
             }
 
-        }
     }
 
     fun getCardUserChats(conversationId: String): LiveData<List<UserChatEntity>> {
@@ -71,16 +65,15 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
 
 
      fun fetchUserChats(path: String) {
-         _isLoading.postValue(true)
+         _isLoading.value = true
         repository.fetchUserChats(path) { userChats ->
-            _userChats.postValue(userChats)
-            _isLoading.postValue(false)
+            _userChats.value = userChats
+            _isLoading.value = false
         }
     }
 
 
     fun saveMessage(message: UserChatEntity, path: String, onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
             repository.saveMessage(message, path) { success ->
                 if (success) {
                     onSuccess(true)
@@ -91,10 +84,9 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
                 }
             }
         }
-    }
+
 
     fun deleteMessage(messageId: String, path: String, onSuccess: (Boolean) -> Unit) {
-        viewModelScope.launch {
             repository.deleteMessage(messageId, path,
                 onSuccess = {
                     onSuccess(true)
@@ -106,7 +98,7 @@ class UserChatViewModel(private val repository: UserChatRepository) : ViewModel(
                     // Handle delete failure if needed
                 }
             )
-        }
+
     }
 
 

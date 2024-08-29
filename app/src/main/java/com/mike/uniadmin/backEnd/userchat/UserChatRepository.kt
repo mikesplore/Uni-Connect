@@ -16,14 +16,13 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
     private val database = FirebaseDatabase.getInstance().reference
 
     fun fetchUserChats(path: String, onResult: (List<UserChatEntity>) -> Unit) {
-        uniConnectScope.launch {
+        uniConnectScope.launch(Dispatchers.Main) {
             // Fetch userChats from the local database first
             val cachedChats = userChatDAO.getUserChats(path)
             if (cachedChats.isNotEmpty()) {
                 Log.d("UserChatRepository", "Fetched userChats from the local database")
                 onResult(cachedChats)
             }
-            Log.d("UserChatRepository", "Fetching userChats from Firebase")
 
             // Set up a listener for real-time updates from Firebase
             database.child(path).addValueEventListener(object : ValueEventListener {
@@ -33,12 +32,12 @@ class UserChatRepository(private val userChatDAO: UserChatDAO) {
                         val message = childSnapshot.getValue(UserChatEntity::class.java)
                         message?.let { userChats.add(it) }
                     }
-                    uniConnectScope.launch {
+                    uniConnectScope.launch(Dispatchers.Main) {
                         userChatDAO.insertUserChats(userChats)
                     }
 
                     // Call onResult on the main thread
-                    uniConnectScope.launch {
+                    uniConnectScope.launch(Dispatchers.Main) {
                         onResult(userChats)
                     }
                 }

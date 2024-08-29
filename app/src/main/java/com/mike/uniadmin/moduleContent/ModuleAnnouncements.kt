@@ -57,8 +57,8 @@ import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
+import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementsWithAuthor
 import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.dashboard.isDeviceOnline
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -92,31 +92,37 @@ fun AnnouncementsItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = { moduleAnnouncementViewModel.getModuleAnnouncements(moduleID) },
+            IconButton(
+                onClick = { moduleAnnouncementViewModel.getModuleAnnouncements(moduleID) },
 
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = background,
-                )) {
+                )
+            ) {
                 Icon(
                     Icons.Default.Refresh,
                     contentDescription = "Refresh",
                     tint = CC.textColor()
                 )
             }
-            Text("${announcements.value.size} announcements", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
-                modifier = Modifier.weight(1f))
+            Text(
+                "${announcements.value.size} announcements",
+                style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
+                modifier = Modifier.weight(1f)
+            )
 
-            if (userType == "admin"){
-            FloatingActionButton(
-                onClick = { visible = !visible },
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .size(35.dp),
-                containerColor = background,
-                contentColor = CC.textColor()
-            ) {
-                Icon(Icons.Default.Add, "Add announcement")
-            }}
+            if (userType == "admin") {
+                FloatingActionButton(
+                    onClick = { visible = !visible },
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(35.dp),
+                    containerColor = background,
+                    contentColor = CC.textColor()
+                ) {
+                    Icon(Icons.Default.Add, "Add announcement")
+                }
+            }
         }
         Spacer(modifier = Modifier.height(10.dp))
         Column(
@@ -139,16 +145,17 @@ fun AnnouncementsItem(
                         .height(200.dp)
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center)
-                ){
-                Text("No Announcements",
-                    style = CC.descriptionTextStyle(context),
-                    modifier = Modifier.wrapContentSize(Alignment.Center)
-                )}
-            }
-            else {
+                ) {
+                    Text(
+                        "No Announcements",
+                        style = CC.descriptionTextStyle(context),
+                        modifier = Modifier.wrapContentSize(Alignment.Center)
+                    )
+                }
+            } else {
                 LazyColumn {
                     items(announcements.value) { announcement ->
-                        AnnouncementCard(announcement, context, userViewModel)
+                        AnnouncementCard(announcement, context)
                     }
                 }
             }
@@ -159,20 +166,11 @@ fun AnnouncementsItem(
 
 @Composable
 fun AnnouncementCard(
-    moduleAnnouncement: ModuleAnnouncement,
+    moduleAnnouncement: ModuleAnnouncementsWithAuthor,
     context: Context,
-    userViewModel: UserViewModel
 ) {
-    var profileImageLink by remember { mutableStateOf("") }
-    var authorName by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
-        userViewModel.findUserByAdmissionNumber(moduleAnnouncement.author) { user ->
-            user?.profileImageLink?.let {
-                profileImageLink = it
-                authorName = user.firstName
-            }
-        }
-    }
+
+
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = CC.secondary()),
@@ -190,7 +188,8 @@ fun AnnouncementCard(
             // Announcement Title
             Text(
                 text = moduleAnnouncement.title,
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                style = CC.titleTextStyle(context)
+                    .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
             )
 
             // Announcement Description
@@ -214,7 +213,7 @@ fun AnnouncementCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Profile Image
                     AsyncImage(
-                        model = profileImageLink,
+                        model = moduleAnnouncement.profileImageLink,
                         contentDescription = "Profile Image",
                         modifier = Modifier
                             .size(40.dp)
@@ -228,7 +227,7 @@ fun AnnouncementCard(
                     // Author's Name and Date
                     Column {
                         Text(
-                            text = authorName,
+                            text = moduleAnnouncement.authorName,
                             style = CC.descriptionTextStyle(context).copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
@@ -247,7 +246,6 @@ fun AnnouncementCard(
         }
     }
 }
-
 
 
 @Composable
@@ -384,7 +382,6 @@ fun AddAnnouncementItem(
                             announcementID = iD,
                             title = title,
                             description = description,
-                            author = senderName,
                             date = CC.getDateFromTimeStamp(CC.getTimeStamp())
                         )
                         moduleViewModel.saveModuleAnnouncement(
@@ -413,10 +410,12 @@ fun AddAnnouncementItem(
 }
 
 @Composable
-fun InternetError(context: Context){
-    Box(modifier = Modifier
-        .padding(horizontal = 8.dp, vertical = 8.dp)
-        .fillMaxWidth(), contentAlignment = Alignment.Center){
+fun InternetError(context: Context) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .fillMaxWidth(), contentAlignment = Alignment.Center
+    ) {
         Text("Oops, No Internet detected", style = CC.descriptionTextStyle(context))
     }
 }
