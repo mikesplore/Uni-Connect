@@ -1,6 +1,7 @@
 package com.mike.uniadmin.uniChat.mainChatScreen
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -167,6 +168,7 @@ fun ChatsScreen(
             val conversationID = generateConversationId(currentUserId, user.id)
             val path = "Direct Messages/$conversationID"
             userChatViewModel.fetchUserChats(path)
+            Log.d("UniChatChats", "ChatsScreen: $path")
         }
     }
 
