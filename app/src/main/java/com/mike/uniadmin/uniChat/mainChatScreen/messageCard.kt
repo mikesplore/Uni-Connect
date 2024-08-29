@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,81 +50,74 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.userchat.UserChatEntity
+import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.userchat.UserChatsWithDetails
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserStateEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun UserMessageCard(
-    userEntity: UserEntity,
-    latestMessage: UserChatEntity?,
+    chat: UserChatsWithDetails,
     context: Context,
-    userViewModel: UserViewModel,
     navController: NavController,
-    messageCounter: Int,
-) {
-    val currentUser by userViewModel.user.observeAsState()
 
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .height(85.dp)
-        .clickable { navController.navigate("chat/${userEntity.id}") }
-        .padding(8.dp),
+    ) {
+    val messageCounter = chat.unreadCount
+    val currentUserId = UniAdminPreferences.userID.value
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(85.dp)
+            .clickable { navController.navigate("chat/${chat.userChat.recipientID}") }
+            .padding(8.dp),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent,
-        )) {
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = { },
-                modifier = Modifier
-                    .border(1.dp, CC.secondary(), CircleShape)
-                    .clip(CircleShape)
-                    .size(50.dp)
-            ) {
-                ProfileImage(currentUser = userEntity, context, navController)
-            }
+            // Use the appropriate profile image based on sender or receiver
+            val profileImageUser =
+                if (chat.userChat.recipientID == currentUserId) chat.sender else chat.receiver
+            ProfileImage(currentUser = profileImageUser, context, navController)
 
             Spacer(modifier = Modifier.width(12.dp))
+
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Row {
+                // Display sender or receiver name based on current user
+                val userName =
+                    if (chat.userChat.recipientID == currentUserId) "You" else chat.receiver.firstName
+                Text(
+                    text = userName,
+                    style = CC.descriptionTextStyle(context)
+                        .copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                // Display latest message with sender name if not sent by current user
+                chat.userChat.message.let { message ->
+                    val senderName =
+                        if (chat.userChat.senderID != currentUserId) "${chat.sender.firstName}: " else ""
                     Text(
-                        text = if (userEntity.id == currentUser?.id) "You" else userEntity.firstName,
-                        style = CC.descriptionTextStyle(context)
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                }
-
-                latestMessage?.message?.let {
-                    val senderName = if (latestMessage.recipientID == userEntity.id) "You: " else ""
-
-                    Text(
-                        text = "$senderName ${createAnnotatedMessage(createAnnotatedText(it).toString())}",
+                        text = "$senderName${createAnnotatedMessage(createAnnotatedText(message).toString())}",
                         style = CC.descriptionTextStyle(context).copy(
-                                fontSize = 14.sp,
-                                color = CC.tertiary().copy(alpha = 0.8f)
-                            ),
+                            fontSize = 14.sp,
+                            color = CC.tertiary().copy(alpha = 0.8f)
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-
             }
 
             Column(
@@ -134,31 +125,16 @@ fun UserMessageCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                if(messageCounter != 0){
-                    Box(
-                        modifier = Modifier
-                            .sizeIn(minWidth = 20.dp, minHeight = 20.dp) // Set minimum size
-                            .clip(CircleShape)
-                            .background(
-                                CC.extraColor1(),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            messageCounter.toString(),
-                            style = CC.descriptionTextStyle(context)
-                                .copy(fontSize = 10.sp),
-                            modifier = Modifier.padding(2.dp)
-                        )
-                    }
+                // Display message counter if not zero
+                if (messageCounter != 0) {
+                    MessageCounterBadge(count = messageCounter, context = context)
                 }
 
-                latestMessage?.timeStamp?.let {
+                // Display timestamp
+                chat.userChat.timeStamp.let {
                     Text(
                         text = CC.getRelativeTime(it),
-                        style = CC.descriptionTextStyle(context)
-                            .copy(fontSize = 12.sp),
+                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
                         color = CC.textColor().copy(alpha = 0.6f)
                     )
                 }
@@ -167,7 +143,23 @@ fun UserMessageCard(
     }
 }
 
-
+// Extracted composable for message counter badge
+@Composable
+fun MessageCounterBadge(count: Int, context: Context) {
+    Box(
+        modifier = Modifier
+            .sizeIn(minWidth = 20.dp, minHeight = 20.dp)
+            .clip(CircleShape)
+            .background(CC.extraColor1(), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            count.toString(),
+            style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
+            modifier = Modifier.padding(2.dp)
+        )
+    }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -175,7 +167,9 @@ fun UserMessageCard(
 fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = Modifier
+            .clip(CircleShape)
+            .size(40.dp), contentAlignment = Alignment.Center
     ) {
         if (currentUser?.profileImageLink?.isNotBlank() == true) {
             AsyncImage(
@@ -206,8 +200,10 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
 
     if (showDialog) {
         BasicAlertDialog(modifier = Modifier, onDismissRequest = { showDialog = false }, content = {
-            AlertDialogComponent(currentUser, context, navController) {
-                showDialog = it
+            if (currentUser != null) {
+                AlertDialogComponent(currentUser, context, navController) {
+                    showDialog = it
+                }
             }
         })
     }
@@ -215,7 +211,7 @@ fun ProfileImage(currentUser: UserEntity?, context: Context, navController: NavC
 
 @Composable
 fun AlertDialogComponent(
-    currentUser: UserEntity?,
+    user: UserEntity,
     context: Context,
     navController: NavController,
     onShowDialogChange: (Boolean) -> Unit
@@ -230,9 +226,9 @@ fun AlertDialogComponent(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            if (currentUser?.profileImageLink?.isNotBlank() == true) {
+            if (user.profileImageLink.isNotBlank()) {
                 AsyncImage(
-                    model = currentUser.profileImageLink,
+                    model = user.profileImageLink,
                     contentDescription = "Profile Image",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -263,14 +259,13 @@ fun AlertDialogComponent(
                     .align(Alignment.TopCenter),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                currentUser?.let { user ->
-                    Text(
-                        "${user.firstName} ${user.lastName}",
-                        style = CC.descriptionTextStyle(context)
-                            .copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(start = 10.dp)
-                    )
-                }
+
+                Text(
+                    user.firstName + " " + user.lastName,
+                    style = CC.descriptionTextStyle(context)
+                        .copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(start = 10.dp)
+                )
             }
 
             Row(
@@ -283,17 +278,17 @@ fun AlertDialogComponent(
             ) {
 
                 IconButton(onClick = {
-                    navController.navigate("chat/${currentUser?.id}")
+                    navController.navigate("chat/${user.id}")
                     onShowDialogChange(false)
                 }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Message,
                         contentDescription = "Chat",
-                        tint = CC.textColor() // Use a custom color from your theme
+                        tint = CC.textColor()
                     )
                 }
                 IconButton(onClick = {
-                    val phoneNumber = currentUser?.phoneNumber ?: "" // Handle null phone number
+                    val phoneNumber = user.phoneNumber
                     val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
                     context.startActivity(intent)
                     onShowDialogChange(false)
@@ -301,7 +296,7 @@ fun AlertDialogComponent(
                     Icon(
                         imageVector = Icons.Filled.Call,
                         contentDescription = "Call",
-                        tint = CC.textColor() // Use a custom color from your theme
+                        tint = CC.textColor()
                     )
                 }
             }
