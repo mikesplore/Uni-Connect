@@ -23,6 +23,7 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
             if (localAttendance.isNotEmpty()) {
                 onResult(localAttendance)
             }
+        }
 
             // Fetch data from Firebase
             database.child(courseId).child(studentId).addListenerForSingleValueEvent(object : ValueEventListener {
@@ -48,13 +49,14 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
                     // Handle possible errors
                 }
             })
-        }
+
     }
 
     fun signAttendance(attendance: AttendanceEntity, success: (Boolean) -> Unit) {
         uniConnectScope.launch {
             // Insert into Room database
             attendanceDao.insertAttendance(attendance)
+        }
             // Update Firebase under the specific course and student
             database.child(attendance.moduleId).child(attendance.studentId)
                 .child(attendance.id).setValue(attendance)
@@ -65,7 +67,7 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
                     success(false)
                 }
 
-        }
+
     }
 
 
