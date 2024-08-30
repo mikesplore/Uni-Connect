@@ -151,7 +151,7 @@ fun TopAppBarContent(
                         if (!sortedNotifications.isNullOrEmpty()) {
                             sortedNotifications.take(5).forEach { notification ->
                                 NotificationTitleContent(notification, context)
-                                Divider() // Use Divider for better visual separation
+                                HorizontalDivider() // Use Divider for better visual separation
                             }
 
                             Spacer(modifier = Modifier.height(8.dp)) // Add space before "View All" button
