@@ -219,7 +219,7 @@ fun DisplayImage(
                     .size(size),
             ) {
                 if (currentUser?.profileImageLink?.isNotEmpty() == true) {
-                    AsyncImage(model = currentUser?.profileImageLink,
+                    AsyncImage(model = currentUser.profileImageLink,
                         contentDescription = "Profile Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
