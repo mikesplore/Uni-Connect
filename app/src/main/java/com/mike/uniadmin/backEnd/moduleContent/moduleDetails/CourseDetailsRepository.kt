@@ -1,6 +1,7 @@
 package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
 
 import com.google.firebase.database.*
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
@@ -9,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
-    private val courseCode = UniAdminPreferences.courseCode.value
+    private val courseCode = CourseManager.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
     
     init {
