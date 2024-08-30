@@ -54,7 +54,7 @@ fun SplashScreen(navController: NavController, context: Context) {
     )
 
     val email = UniAdminPreferences.userEmail.value
-    val courseCode = UniAdminPreferences.courseCode.value
+    val courseCode = CourseManager.courseCode.value
     val userId = UniAdminPreferences.userID.value
 
     val destination = when {
