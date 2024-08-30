@@ -65,15 +65,23 @@ fun UserMessageCard(
     chat: UserChatsWithDetails,
     context: Context,
     navController: NavController,
-
-    ) {
-    val messageCounter = chat.unreadCount
+) {
     val currentUserId = UniAdminPreferences.userID.value
+    val isCurrentUserRecipient = chat.userChat.recipientID == currentUserId
+
+    // Determine the destination for navigation based on the current user
+    val destination = if (isCurrentUserRecipient) "chat/${chat.sender.id}" else "chat/${chat.receiver.id}"
+
+    // Determine which user details to display (sender or receiver)
+    val profileImageUser = if (isCurrentUserRecipient) chat.sender else chat.receiver
+    val userState = if (isCurrentUserRecipient) chat.senderState else chat.receiverState
+    val userName = if (isCurrentUserRecipient) chat.sender.firstName else chat.receiver.firstName
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(85.dp)
-            .clickable { navController.navigate("chat/${chat.userChat.recipientID}") }
+            .clickable { navController.navigate(destination) }
             .padding(8.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
@@ -84,12 +92,8 @@ fun UserMessageCard(
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Use the appropriate profile image based on sender or receiver
-            val profileImageUser =
-                if (chat.userChat.recipientID == currentUserId) chat.sender else chat.receiver
-
-            val userState = if (chat.userChat.recipientID == currentUserId) chat.senderState else chat.receiverState
-            ProfileImage(currentUser = profileImageUser,userState,  context, navController)
+            // Display profile image
+            ProfileImage(currentUser = profileImageUser, userState, context, navController)
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -99,9 +103,7 @@ fun UserMessageCard(
                     .padding(end = 8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                // Display sender or receiver name based on current user
-                val userName =
-                    if (chat.userChat.recipientID == currentUserId) "You" else chat.receiver.firstName
+                // Display the name of the other user in the chat
                 Text(
                     text = userName,
                     style = CC.descriptionTextStyle(context)
@@ -110,7 +112,7 @@ fun UserMessageCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Display latest message with sender name if not sent by current user
+                // Display latest message, prepending sender's name if not sent by the current user
                 chat.userChat.message.let { message ->
                     val senderName =
                         if (chat.userChat.senderID != currentUserId) "${chat.sender.firstName}: " else ""
@@ -131,12 +133,12 @@ fun UserMessageCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                // Display message counter if not zero
-                if (messageCounter != 0) {
-                    MessageCounterBadge(count = messageCounter, context = context)
+                // Display unread message counter if there are unread messages
+                if (chat.unreadCount != 0) {
+                    MessageCounterBadge(count = chat.unreadCount, context = context)
                 }
 
-                // Display timestamp
+                // Display the relative timestamp of the latest message
                 chat.userChat.timeStamp.let {
                     Text(
                         text = CC.getRelativeTime(it),
@@ -148,6 +150,7 @@ fun UserMessageCard(
         }
     }
 }
+
 
 // Extracted composable for message counter badge
 @Composable
