@@ -28,7 +28,7 @@ suspend fun downloadPdfFile(context: Context, url: String, fileName: String): Ur
                     val contentValues = ContentValues().apply {
                         put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.pdf")
                         put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/Campus Connect/Module Resources/${UniAdminPreferences.moduleID.value}")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/Uni Connect/Module Resources/${UniAdminPreferences.moduleID.value}")
                     }
 
                     val uri = context.contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
@@ -40,7 +40,7 @@ suspend fun downloadPdfFile(context: Context, url: String, fileName: String): Ur
                         return@withContext uri
                     }
                 } else {
-                    val externalDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Campus Connect/Module Resources/${UniAdminPreferences.moduleID.value}")
+                    val externalDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Uni Connect/Module Resources/${UniAdminPreferences.moduleID.value}")
                     if (!externalDir.exists()) {
                         externalDir.mkdirs()
                     }
