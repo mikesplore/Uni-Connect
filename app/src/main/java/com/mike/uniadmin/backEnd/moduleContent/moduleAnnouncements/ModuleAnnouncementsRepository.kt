@@ -5,14 +5,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnnouncementDao) {
-    private val courseCode = UniAdminPreferences.courseCode.value
+    private val courseCode = CourseManager.courseCode.value
     private val database =
         FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
 
