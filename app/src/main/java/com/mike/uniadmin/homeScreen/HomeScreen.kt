@@ -33,7 +33,9 @@ import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.attendance.AttendanceScreen
 import com.mike.uniadmin.dashboard.Dashboard
 import com.mike.uniadmin.dashboard.Sidebar
+import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getGroupChatViewModel
+import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
 import com.mike.uniadmin.helperFunctions.Screen
@@ -59,6 +61,8 @@ fun HomeScreen(
 
     val userViewModel = getUserViewModel(context)
     val chatViewModel = getGroupChatViewModel(context)
+    val announcementViewModel = getAnnouncementViewModel(context)
+    val notificationViewModel = getNotificationViewModel(context)
 
     // State observation
     val fetchedUserDetails by userViewModel.user.observeAsState()
@@ -96,6 +100,8 @@ fun HomeScreen(
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroups()
         userViewModel.fetchUsers()
+        announcementViewModel.fetchAnnouncements()
+        notificationViewModel.fetchNotifications()
         fetchedUserDetails?.id?.let { userId ->
             userViewModel.checkUserStateByID(userId)
         }
