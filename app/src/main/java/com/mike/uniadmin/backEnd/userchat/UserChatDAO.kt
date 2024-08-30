@@ -30,7 +30,8 @@ interface UserChatDAO {
     sender.phoneNumber AS sender_phoneNumber,
     sender.profileImageLink AS sender_profileImageLink,
     sender.userType AS sender_userType,
-    senderState.online AS senderState,
+    
+    IFNULL (senderState.online, 'offline') AS senderState,
     receiver.id AS receiver_id,
     receiver.firstName AS receiver_firstName,
     receiver.lastName AS receiver_lastName,
@@ -38,7 +39,7 @@ interface UserChatDAO {
     receiver.phoneNumber AS receiver_phoneNumber,
     receiver.profileImageLink AS receiver_profileImageLink,
     receiver.userType AS receiver_userType,
-    receiverState.online AS receiverState,
+    IFNULL (receiverState.online, 'offline') AS receiverState,
     unreadCounts.unreadCount
 FROM 
     userChats uc
