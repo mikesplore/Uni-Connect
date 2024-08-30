@@ -3,10 +3,15 @@ package com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.backEnd.userchat.UserChatsWithDetails
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ModuleAnnouncementViewModel(private val repository: ModuleAnnouncementRepository) : ViewModel() {
@@ -17,13 +22,25 @@ class ModuleAnnouncementViewModel(private val repository: ModuleAnnouncementRepo
     private val _isLoading = MutableLiveData(false) // Add isLoading state
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // Fetch announcements for a specific module
+    private var moduleAnnouncementsLiveData: LiveData<List<ModuleAnnouncementsWithAuthor>>? = null
+
+    private val moduleAnnouncementsObserver = Observer<List<ModuleAnnouncementsWithAuthor>> { moduleAnnouncements ->
+        _announcements.value = moduleAnnouncements
+    }
+
     fun getModuleAnnouncements(moduleID: String) {
-        _isLoading.postValue(true) // Set loading to true before fetching
-        repository.getModuleAnnouncements(moduleID) { announcements ->
-            _announcements.postValue(announcements)
-            _isLoading.postValue(false) // Set loading to false after fetching
+        uniConnectScope.launch(Dispatchers.Main) {
+            moduleAnnouncementsLiveData = withContext(Dispatchers.IO) {
+                repository.getModuleAnnouncements(moduleID)
+            }
+            moduleAnnouncementsLiveData?.observeForever(moduleAnnouncementsObserver)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        moduleAnnouncementsLiveData?.removeObserver(moduleAnnouncementsObserver)
+        moduleAnnouncementsLiveData = null
     }
 
     // Save a new announcement
