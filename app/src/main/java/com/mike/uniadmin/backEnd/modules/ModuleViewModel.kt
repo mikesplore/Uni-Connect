@@ -26,6 +26,12 @@ class ModuleViewModel(private val repository: ModuleRepository) : ViewModel() {
         fetchAttendanceStates()
     }
 
+    fun fetchModulesFromFirebase() {
+        repository.fetchModulesFromFirebase { modules ->
+            _modules.postValue(modules)
+        }
+    }
+
     fun fetchAttendanceStates() {
         repository.fetchAttendanceStates { fetchedStates ->
             val statesMap = fetchedStates.associateBy { it.moduleID }
