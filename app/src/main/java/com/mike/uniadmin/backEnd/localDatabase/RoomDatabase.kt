@@ -67,7 +67,7 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
     exportSchema = false
 )
 @TypeConverters(Converters::class)
-abstract class CampusConnectDatabase : RoomDatabase() {
+abstract class UniConnectDatabase : RoomDatabase() {
     abstract fun groupChatDao(): GroupChatDao
     abstract fun groupDao(): GroupDao
     abstract fun userChatDao(): UserChatDAO
@@ -89,12 +89,12 @@ abstract class CampusConnectDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
-        private var INSTANCE: CampusConnectDatabase? = null
+        private var INSTANCE: UniConnectDatabase? = null
 
-        fun getDatabase(context: Context): CampusConnectDatabase {
+        fun getDatabase(context: Context): UniConnectDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext, CampusConnectDatabase::class.java, "CampusConnect"
+                    context.applicationContext, UniConnectDatabase::class.java, "UniConnect"
                 ).build()
                 INSTANCE = instance
                 instance
