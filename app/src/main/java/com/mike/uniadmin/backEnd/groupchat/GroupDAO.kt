@@ -11,18 +11,23 @@ interface GroupChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChats(chats: List<GroupChatEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateChat(chat: GroupChatEntity)
+
     @Query("DELETE FROM groupChats WHERE chatId = :chatId")
     suspend fun deleteChat(chatId: String)
 
     @Query(
-        "SELECT" +
-                "    gc.*," +
-                "    a.firstName AS senderName," +
-                "    a.profileImageLink AS senderProfileImageLink\n" +
-                "FROM groupChats gc\n" +
-                "INNER JOIN admins a ON gc.senderID = a.id;"
+        """
+    SELECT
+        gc.*,
+        a.firstName AS senderName,
+        a.profileImageLink AS senderProfileImageLink
+    FROM groupChats gc
+    INNER JOIN admins a ON gc.senderID = a.id
+    """
     )
-     fun getChatsWithDetails(): LiveData<List<GroupChatEntityWithDetails>>
+    fun getChatsWithDetails(): LiveData<List<GroupChatEntityWithDetails>>
 }
 
 @Dao
