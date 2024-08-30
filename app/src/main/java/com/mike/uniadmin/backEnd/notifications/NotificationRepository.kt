@@ -5,6 +5,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 
 
 class NotificationRepository(private val notificationDao: NotificationDao) {
-    private val courseCode = UniAdminPreferences.courseCode.value
+    private val courseCode = CourseManager.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Notifications")
     private val valueListeners = mutableMapOf<String, ValueEventListener>()
     private val childListeners = mutableMapOf<String, ChildEventListener>()
