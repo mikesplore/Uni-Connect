@@ -16,27 +16,24 @@ data class UserChatEntity(
     var path: String = "",
     var deliveryStatus: DeliveryStatus = DeliveryStatus.SENT,
 
-){
-    constructor(): this("", "", "", "", "", "", "", DeliveryStatus.SENT)
+    ) {
+    constructor() : this("", "", "", "", "", "", "", DeliveryStatus.SENT)
 }
-
 
 
 data class UserChatsWithDetails(
     @Embedded val userChat: UserChatEntity,
-    @Embedded(prefix = "sender_") val sender: UserEntity, // Maps sender details
-    @Embedded(prefix = "receiver_") val receiver: UserEntity, // Maps receiver details
-    val senderState: String, // Sender's state from userState table
-    val receiverState: String, // Receiver's state from userState table
-    val unreadCount: Int = 0 // Optional, in case there are no unread counts
-){
-    constructor(): this(UserChatEntity(), UserEntity(), UserEntity(), "", "", 0)
+    @Embedded(prefix = "sender_") val sender: UserEntity,
+    @Embedded(prefix = "receiver_") val receiver: UserEntity,
+    val senderState: String = "",
+    val receiverState: String = "",
+    val unreadCount: Int = 0
+) {
+    constructor() : this(UserChatEntity(), UserEntity(), UserEntity(), "", "", 0)
 }
 
 
-
-
-enum class DeliveryStatus{
+enum class DeliveryStatus {
     SENT,
     READ,
 
