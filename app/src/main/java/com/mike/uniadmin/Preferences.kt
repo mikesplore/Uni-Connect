@@ -5,6 +5,9 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object UniAdminPreferences {
     // Keys for SharedPreferences
@@ -22,8 +25,8 @@ object UniAdminPreferences {
 
     private lateinit var preferences: SharedPreferences
 
+
     // MutableStates to hold preference values
-    val courseCode: MutableState<String> = mutableStateOf("")
     val userEmail: MutableState<String> = mutableStateOf("")
     val userType: MutableState<String> = mutableStateOf("")
     val userID: MutableState<String> = mutableStateOf("")
@@ -38,7 +41,6 @@ object UniAdminPreferences {
     fun initialize(context: Context) {
         preferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         // Load values from SharedPreferences
-        courseCode.value = preferences.getString(PREF_KEY_PROGRAM_CODE, "") ?: ""
         userEmail.value = preferences.getString(PREF_KEY_USER_EMAIL, "") ?: ""
         userType.value = preferences.getString(PREF_KEY_USER_TYPE, "") ?: ""
         userID.value = preferences.getString(PREF_KEY_USER_ID, "") ?: ""
@@ -79,13 +81,6 @@ object UniAdminPreferences {
         Log.d("UniAdminPreferences", "Module ID saved: $newModuleID")
     }
 
-    // Save course code
-    fun saveCourseCode(newCourseCode: String) {
-        courseCode.value = newCourseCode
-        preferences.edit().putString(PREF_KEY_PROGRAM_CODE, newCourseCode).apply()
-        Log.d("UniAdminPreferences", "Course code saved: $newCourseCode")
-    }
-
     // Save user email
     fun saveUserEmail(newEmail: String) {
         userEmail.value = newEmail
@@ -121,7 +116,6 @@ object UniAdminPreferences {
 
     fun clearAllData() {
 
-        courseCode.value = ""
         userEmail.value = ""
         userType.value = ""
         userID.value = ""
@@ -134,5 +128,25 @@ object UniAdminPreferences {
 
         preferences.edit().clear().apply()
         Log.d("UniAdminPreferences", "All preferences cleared")
+    }
+}
+
+
+object CourseManager {
+    private const val PREFS_NAME = "course_prefs"
+    private const val KEY_COURSE_CODE = "course_code"
+    private lateinit var sharedPreferences: SharedPreferences
+
+    private val _courseCode = MutableStateFlow("")
+    val courseCode: StateFlow<String> = _courseCode.asStateFlow()
+
+    fun initialize(context: Context) {
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        _courseCode.value = sharedPreferences.getString(KEY_COURSE_CODE, "") ?: ""
+    }
+
+    fun updateCourseCode(newCode: String) {
+        _courseCode.value = newCode
+        sharedPreferences.edit().putString(KEY_COURSE_CODE, newCode).apply()
     }
 }
