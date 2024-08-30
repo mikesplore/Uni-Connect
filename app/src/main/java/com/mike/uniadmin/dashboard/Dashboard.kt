@@ -65,15 +65,15 @@ fun Dashboard(navController: NavController, context: Context) {
 
 
 
-    LaunchedEffect(Unit) {
-        modules.forEach {
-            moduleTimetableViewModel.getModuleTimetables(it.moduleCode)
-        }
+    LaunchedEffect(key1 = 1) {
+        Log.d("ModuleTimetableRepository", "Dashboard launched")
+        Log.d("ModuleTimetableRepository", "${modules.size} found")
+        moduleViewModel.fetchModules()
         moduleTimetableViewModel.getAllModuleTimetables()
-        moduleTimetableViewModel.findUpcomingClass()
         userViewModel.checkAllUserStatuses()
         userViewModel.findUserByEmail(loggedInUserEmail) {}
-        moduleViewModel.fetchModules()
+        announcementViewModel.fetchAnnouncements()
+        notificationViewModel.fetchNotifications()
 
         while (true) {
             isOnline.value = isDeviceOnline(context)
@@ -150,6 +150,12 @@ fun Dashboard(navController: NavController, context: Context) {
                 }
 
             } else {
+                modules.forEach {
+                    Log.d("ModuleTimetableRepository", "Fetching timetables for module: ${it.moduleCode} in dashboard")
+                    moduleTimetableViewModel.listenForFirebaseUpdates(it.moduleCode)
+                    moduleTimetableViewModel.getModuleTimetables(it.moduleCode)
+                    moduleTimetableViewModel.findUpcomingClass()
+                }
                 ModuleItemList(modules, context, navController)
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -224,7 +230,7 @@ fun Dashboard(navController: NavController, context: Context) {
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    "Upcoming Class",
+                    "My Next Class",
                     style = CC.titleTextStyle(context)
                         .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                     modifier = Modifier.padding(start = 15.dp)
