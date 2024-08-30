@@ -72,7 +72,7 @@ fun BottomBar(
                 val isSelected = pagerState.currentPage == index
 
                 val iconColor by animateColorAsState(
-                    targetValue = if (isSelected) CC.textColor() else CC.textColor()
+                    targetValue = if (isSelected) CC.extraColor1() else CC.extraColor2()
                         .copy(0.7f), label = "", animationSpec = tween(500)
                 )
 
@@ -95,7 +95,7 @@ fun BottomBar(
                 }, colors = NavigationBarItemDefaults.colors(
                     indicatorColor = CC.extraColor2(),
                     unselectedIconColor = CC.textColor(),
-                    selectedIconColor = CC.textColor()
+                    selectedIconColor = CC.primary()
                 ), onClick = {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(index)
