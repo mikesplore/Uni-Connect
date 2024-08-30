@@ -74,10 +74,10 @@ fun ModuleContent(context: Context, targetModuleID: String) {
     val moduleDetailViewModel = getModuleDetailViewModel(context)
     val userViewModel = getUserViewModel(context)
 
-    val announcementsLoading by moduleAnnouncementViewModel.isLoading.observeAsState(initial = false)
-    val assignmentsLoading by moduleAssignmentViewModel.isLoading.observeAsState(initial = false)
-    val timetablesLoading by moduleTimetableViewModel.isLoading.observeAsState(initial = false)
-    val detailsLoading by moduleDetailViewModel.isLoading.observeAsState(initial = false)
+    val announcementsLoading by remember { mutableStateOf(false) }
+    val assignmentsLoading by remember { mutableStateOf(false) }
+    val timetablesLoading by remember { mutableStateOf(false) }
+    val detailsLoading by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
     val moduleInfo by moduleViewModel.fetchedModule.observeAsState(initial = null)
