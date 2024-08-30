@@ -1,6 +1,7 @@
 package com.mike.uniadmin.courses
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.R
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.courses.CourseEntity
@@ -78,6 +80,7 @@ fun CourseScreen(context: Context, navController: NavController) {
     val moduleViewModel = getModuleViewModel(context)
     val announcementViewModel = getAnnouncementViewModel(context)
 
+
     val currentUser by userViewModel.user.observeAsState()
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val isLoading by courseViewModel.isLoading.observeAsState(false)
@@ -85,9 +88,17 @@ fun CourseScreen(context: Context, navController: NavController) {
     val userTypes = UniAdminPreferences.userType.value
 
     LaunchedEffect(Unit) {
-        //  uploadCoursesData()
         userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
     }
+
+    fun startListeners() {
+        Toast.makeText(context, "Starting listeners", Toast.LENGTH_SHORT).show()
+        announcementViewModel.startAnnouncementsListener()
+        moduleViewModel.fetchModulesFromFirebase()
+        timetableViewModel.getAllModuleTimetables()
+        Log.d("UniAdminPreferences","Course Code in this screen: ${CourseManager.courseCode.value}")
+    }
+
 
     Scaffold(
         topBar = {
@@ -167,6 +178,7 @@ fun CourseScreen(context: Context, navController: NavController) {
                         CourseItem(
                             currentUser, course, context
                         ) {
+                            startListeners()
                             if (!course.participants.contains(currentUser?.id)) {
                                 currentUser?.id?.let { userId ->
                                     courseViewModel.saveCourse(
@@ -180,13 +192,10 @@ fun CourseScreen(context: Context, navController: NavController) {
                                             ).show()
 
                                             //get the course code
-                                            UniAdminPreferences.saveCourseCode(course.courseCode)
-                                            if (UniAdminPreferences.courseCode.value.isNotEmpty()) {
+                                            CourseManager.updateCourseCode(course.courseCode)
+                                            if (CourseManager.courseCode.value.isNotEmpty()) {
                                                 userViewModel.fetchUsers()
-                                                moduleViewModel.fetchModules()
-                                                timetableViewModel.getAllModuleTimetables()
-                                                announcementViewModel.fetchAnnouncements()
-                                                navController.navigate("homeScreen")
+
                                             } else {
                                                 Toast.makeText(
                                                     context,
@@ -205,13 +214,9 @@ fun CourseScreen(context: Context, navController: NavController) {
                                 }
                             } else {
                                 //get the course code
-                                UniAdminPreferences.saveCourseCode(course.courseCode)
-                                if (UniAdminPreferences.courseCode.value.isNotEmpty()) {
+                                CourseManager.updateCourseCode(course.courseCode)
+                                if (CourseManager.courseCode.value.isNotEmpty()) {
                                     userViewModel.fetchUsers()
-                                    moduleViewModel.fetchModules()
-                                    timetableViewModel.getAllModuleTimetables()
-                                    announcementViewModel.fetchAnnouncements()
-                                    navController.navigate("homeScreen")
                                 } else {
                                     Toast.makeText(
                                         context, "course code is empty", Toast.LENGTH_SHORT
@@ -417,6 +422,7 @@ fun AddCourse(
 
         Button(
             onClick = {
+
                 loading = true
                 if (courseName.isEmpty() || courseImageLink.isEmpty()) {
                     Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
@@ -454,4 +460,5 @@ fun AddCourse(
         }
     }
 }
+
 
