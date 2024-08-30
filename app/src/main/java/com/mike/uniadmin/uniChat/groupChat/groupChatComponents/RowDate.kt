@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
-fun DateHeader(context: Context) {
+fun DateHeader(date: String, context: Context) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -38,9 +38,7 @@ fun DateHeader(context: Context) {
                 .padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = CC.getRelativeDate(
-                    CC.getDateFromTimeStamp(
-                        CC.getTimeStamp())),
+                text = CC.getRelativeDate(date),
                 style = CC.descriptionTextStyle(context),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
