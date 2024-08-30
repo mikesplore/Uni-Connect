@@ -89,6 +89,7 @@ fun DiscussionScreen(
         if (chats.isNotEmpty()) {
             scrollState.animateScrollToItem(chats.size - 1)
         }
+        chatViewModel.fetchGroupChats()
         userViewModel.checkAllUserStatuses()
         chatViewModel.fetchGroupChats(groupPath)
         chatViewModel.fetchGroupById(targetGroupID)
@@ -141,11 +142,11 @@ fun DiscussionScreen(
 
                         val groupedChats = chats.groupBy { CC.getDateFromTimeStamp(it.groupChat.date) }
 
-                        groupedChats.forEach { (_, chatsForDate) ->
+                        groupedChats.forEach { (date, chatsForDate) ->
                             item {
                                 RowText(context = context)
                                 Spacer(modifier = Modifier.height(8.dp))
-                                DateHeader(context = context)
+                                DateHeader(date, context = context)
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
 
