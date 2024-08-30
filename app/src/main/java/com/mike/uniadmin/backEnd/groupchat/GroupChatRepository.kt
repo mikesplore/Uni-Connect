@@ -1,6 +1,8 @@
 package com.mike.uniadmin.backEnd.groupchat
 
+import androidx.compose.ui.input.key.key
 import androidx.lifecycle.LiveData
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -12,21 +14,41 @@ import kotlinx.coroutines.launch
 class GroupChatRepository(private val groupChatDao: GroupChatDao, private val groupDao: GroupDao) {
     private val database = FirebaseDatabase.getInstance().getReference()
 
+    private val chatsCache = HashMap<String, GroupChatEntity>() // Local cache
+
     fun fetchGroupChats(path: String) {
-
-        // Fetch from Firebase and update Room database
-        database.child(path).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val chats = mutableListOf<GroupChatEntity>()
-                for (childSnapshot in snapshot.children) {
-                    val chat = childSnapshot.getValue(GroupChatEntity::class.java)
-                    chat?.let { chats.add(it) }
+        database.child(path).addChildEventListener(object :
+            ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val chat = snapshot.getValue(GroupChatEntity::class.java)
+                chat?.let {
+                    chatsCache[snapshot.key!!] = it
+                    uniConnectScope.launch {
+                        groupChatDao.insertOrUpdateChat(it) // Use insertOrUpdate for updates
+                    }
                 }
+            }
 
-                // Update Room database and notify UI with fresh data
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val chat = snapshot.getValue(GroupChatEntity::class.java)
+                chat?.let {
+                    chatsCache[snapshot.key!!] = it
+                    uniConnectScope.launch {
+                        groupChatDao.insertOrUpdateChat(it)
+                    }
+                }
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val chatId = snapshot.key!!
+                chatsCache.remove(chatId)
                 uniConnectScope.launch {
-                    groupChatDao.insertChats(chats)
+                    groupChatDao.deleteChat(chatId) // Delete from Room
                 }
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                // Handle if needed
             }
 
             override fun onCancelled(error: DatabaseError) {
