@@ -125,21 +125,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            if (modulesLoading == true) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    items(5) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 15.dp)
-                                .height(100.dp)
-                        ) {
-                            LoadingModuleItem()
-                        }
-                    }
-                }
-            } else if (modules.isEmpty()) {
+            if (modules.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .height(100.dp)
