@@ -2,6 +2,7 @@ package com.mike.uniadmin.backEnd.attendance
 
 import android.util.Log
 import com.google.firebase.database.*
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.CoroutineScope
@@ -9,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AttendanceRepository(private val attendanceDao: AttendanceDao) {
-    private val courseCode = UniAdminPreferences.courseCode.value
+    private val courseCode = CourseManager.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Attendance")
 
     // Function to get attendance for a specific student and course
