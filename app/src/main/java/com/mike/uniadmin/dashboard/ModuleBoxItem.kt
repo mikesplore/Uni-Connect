@@ -183,7 +183,6 @@ fun ModuleBoxList(
     moduleViewModel: ModuleViewModel
 ) {
     BoxWithConstraints {
-        val screenWidth = maxWidth
 
         if (modules.isEmpty()) {
             LazyRow(
