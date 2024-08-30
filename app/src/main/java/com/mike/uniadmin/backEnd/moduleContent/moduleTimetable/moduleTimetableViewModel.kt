@@ -23,8 +23,14 @@ class ModuleTimetableViewModel(private val repository: ModuleTimetableRepository
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+
+    fun listenForFirebaseUpdates(moduleID: String) {
+        repository.listenForFirebaseUpdates(moduleID)
+    }
+
     // Fetch timetables for a specific module
     fun getModuleTimetables(moduleID: String) {
+        repository.listenForFirebaseUpdates(moduleID)
         _isLoading.postValue(true)
         repository.getModuleTimetables(moduleID) { timetables ->
             _timetables.postValue(timetables) // Use postValue for background updates
