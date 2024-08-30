@@ -151,7 +151,7 @@ object FileManager {
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         return File(
             downloadsDir,
-            "Campus Connect/Module Resources/${UniAdminPreferences.moduleID.value}"
+            "Uni Connect/Module Resources/${UniAdminPreferences.moduleID.value}"
         )
     }
 
