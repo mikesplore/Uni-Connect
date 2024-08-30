@@ -129,7 +129,7 @@ fun TopAppBarContent(
                         Icon(
                             Icons.Default.Notifications,
                             contentDescription = null,
-                            tint = CC.secondary(),
+                            tint = CC.extraColor2(),
                             modifier = Modifier.size(iconSize) // Dynamic icon size
                         )
                     }
