@@ -16,6 +16,11 @@ class AnnouncementViewModel(private val repository: AnnouncementRepository) : Vi
 
     init {
         fetchAnnouncements()
+        startAnnouncementsListener()
+
+    }
+
+    fun startAnnouncementsListener() {
         repository.startAnnouncementsListener()
     }
 
