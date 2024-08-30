@@ -16,13 +16,12 @@ class AnnouncementViewModel(private val repository: AnnouncementRepository) : Vi
 
     init {
         fetchAnnouncements()
+        repository.startAnnouncementsListener()
     }
 
     fun fetchAnnouncements() {
-        _isLoading.postValue(true) // Set loading to true before fetching
         repository.fetchAnnouncements { announcements ->
             _announcements.postValue(announcements)
-            _isLoading.postValue(false) // Set loading to false after fetching
         }
     }
 
