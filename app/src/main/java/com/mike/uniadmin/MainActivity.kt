@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         UniAdminPreferences.initialize(this)
+        CourseManager.initialize(this)
         setTheme(R.style.Theme_UniAdmin)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
