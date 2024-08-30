@@ -11,33 +11,27 @@ import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,8 +46,8 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.R
 import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
 import com.mike.uniadmin.helperFunctions.Update
-import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.delay
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun CheckUpdate(context: Context) {
@@ -89,9 +83,12 @@ fun CheckUpdate(context: Context) {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun startDownload(context: Context, url: String, onProgress: (Int) -> Unit) {
         val request = DownloadManager.Request(Uri.parse(url))
-            .setTitle("Campus Connect Update")
+            .setTitle("Uni Connect Update")
             .setDescription("Downloading update")
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Campus Connect.apkV${myUpdate.version}")
+            .setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                "Uni Connect.apkV${myUpdate.version}"
+            )
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setAllowedOverMetered(true)
             .setAllowedOverRoaming(true)
@@ -127,8 +124,10 @@ fun CheckUpdate(context: Context) {
 
                 cursor?.use {
                     if (it.moveToFirst()) {
-                        val bytesDownloadedIndex = it.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-                        val bytesTotalIndex = it.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                        val bytesDownloadedIndex =
+                            it.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                        val bytesTotalIndex =
+                            it.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
 
                         if (bytesDownloadedIndex != -1 && bytesTotalIndex != -1) {
                             val bytesDownloaded = it.getLong(bytesDownloadedIndex)
@@ -169,7 +168,6 @@ fun CheckUpdate(context: Context) {
         )
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,7 +214,8 @@ fun UpdateDialog(
             )
             Text(
                 "Version $versionName",
-                style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(alpha = 0.7f)),
+                style = CC.descriptionTextStyle(context)
+                    .copy(color = CC.textColor().copy(alpha = 0.7f)),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
