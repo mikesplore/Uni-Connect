@@ -34,10 +34,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
-import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
 import com.mike.uniadmin.backEnd.groupchat.GroupChatEntityWithDetails
 import com.mike.uniadmin.helperFunctions.randomColor
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -53,10 +52,10 @@ fun ChatBubble(
     )
 
     val senderBrush = Brush.linearGradient(
-        colors = listOf(CommonComponents.extraColor1(), CommonComponents.extraColor2())
+        colors = listOf(CC.extraColor1(), CC.extraColor2())
     )
     val receiverBrush = Brush.linearGradient(
-        colors = listOf(CommonComponents.tertiary(), CommonComponents.extraColor1())
+        colors = listOf(CC.extraColor2(), CC.extraColor1())
     )
     val backgroundColor = if (isUser) senderBrush else receiverBrush
 
@@ -82,10 +81,10 @@ fun ChatBubble(
                             }
                         }
                     }
-                    .size(40.dp)
+                    .size(35.dp)
                     .clip(CircleShape)
                     .background(randomColor.random(), CircleShape)
-                    .padding(4.dp), contentAlignment = Alignment.Center) {
+                    .padding(1.dp), contentAlignment = Alignment.Center) {
                     if (chat.senderProfileImageLink.isNotBlank()) {
                         AsyncImage(
                             model = chat.senderProfileImageLink,
@@ -100,15 +99,15 @@ fun ChatBubble(
                     } else {
                         Text(
                             text = chat.senderName[0].toString(),
-                            style = CommonComponents.titleTextStyle(context).copy(fontSize = 18.sp)
+                            style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
                         )
                     }
                 }
             }
             if (isUser) {
                 Text(
-                    text = CommonComponents.getFormattedTime(chat.groupChat.date),
-                    style = CommonComponents.descriptionTextStyle(context),
+                    text = CC.getFormattedTime(chat.groupChat.date),
+                    style = CC.descriptionTextStyle(context),
                     fontSize = 10.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
@@ -121,30 +120,30 @@ fun ChatBubble(
                 modifier = Modifier
                     .background(backgroundColor, bubbleShape)
                     .widthIn(max = maxBubbleWidth)
-                    .padding(12.dp)
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
             ) {
                 Column {
                     if (!isUser) {
                         Text(
                             text = chat.senderName,
-                            style = CommonComponents.descriptionTextStyle(context),
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
                             fontWeight = FontWeight.Bold,
-                            color = CommonComponents.primary()
+                            color = randomColor.random()
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
                     SelectionContainer {
                         Text(
                             text = chat.groupChat.message,
-                            style = CommonComponents.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
                         )
                     }
                 }
             }
             if (!isUser) {
                 Text(
-                    text = CommonComponents.getFormattedTime(chat.groupChat.date),
-                    style = CommonComponents.descriptionTextStyle(context),
+                    text = CC.getFormattedTime(chat.groupChat.date),
+                    style = CC.descriptionTextStyle(context),
                     fontSize = 10.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
