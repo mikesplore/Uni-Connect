@@ -259,16 +259,17 @@ fun AddAnnouncementItem(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
-    var senderName by remember { mutableStateOf("") }
+    var authorName by remember { mutableStateOf("") }
+    var authorID by remember { mutableStateOf("") }
     var profileImageLink by remember { mutableStateOf("") }
 
 
     LaunchedEffect(Unit) {
         val email = UniAdminPreferences.userEmail.value
-
         userViewModel.findUserByEmail(email) { fetchedUser ->
             fetchedUser?.let {
-                senderName = it.id
+                authorID = it.id
+                authorName = it.firstName
                 profileImageLink = it.profileImageLink
             }
         }
@@ -292,7 +293,7 @@ fun AddAnnouncementItem(
             if (profileImageLink.isNotEmpty()) {
                 AsyncImage(
                     model = profileImageLink,
-                    contentDescription = senderName,
+                    contentDescription = authorName,
                     modifier = Modifier
                         .size(50.dp)
                         .clip(CircleShape)
@@ -308,7 +309,7 @@ fun AddAnnouncementItem(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = senderName.firstOrNull()?.toString() ?: "",
+                        text = authorName.firstOrNull()?.toString() ?: "",
                         style = CC.titleTextStyle(context).copy(
                             fontWeight = FontWeight.Bold,
                             color = CC.textColor()
@@ -319,7 +320,7 @@ fun AddAnnouncementItem(
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = senderName,
+                    text = authorName,
                     style = CC.titleTextStyle(context).copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
@@ -379,6 +380,7 @@ fun AddAnnouncementItem(
                     MyDatabase.generateAnnouncementID { iD ->
                         val newAnnouncement = ModuleAnnouncement(
                             moduleID = moduleID,
+                            authorID = authorID,
                             announcementID = iD,
                             title = title,
                             description = description,
