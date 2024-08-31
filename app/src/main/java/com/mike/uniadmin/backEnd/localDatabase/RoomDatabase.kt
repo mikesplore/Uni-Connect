@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementsDao
 import com.mike.uniadmin.backEnd.attendance.AttendanceDao
@@ -37,7 +39,6 @@ import com.mike.uniadmin.backEnd.users.AccountDeletionDao
 import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
 import com.mike.uniadmin.backEnd.users.UserDao
 import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserPreferencesDao
 import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
 import com.mike.uniadmin.backEnd.users.UserStateDao
 import com.mike.uniadmin.backEnd.users.UserStateEntity
@@ -63,7 +64,7 @@ import com.mike.uniadmin.backEnd.users.UserStateEntity
         CourseState::class,
         AttendanceEntity::class
                ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -94,10 +95,20 @@ abstract class UniConnectDatabase : RoomDatabase() {
         fun getDatabase(context: Context): UniConnectDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext, UniConnectDatabase::class.java, "UniConnect"
-                ).build()
+                    context.applicationContext,
+                    UniConnectDatabase::class.java,
+                    "UniConnect"
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE Admins RENAME TO users")
             }
         }
     }
