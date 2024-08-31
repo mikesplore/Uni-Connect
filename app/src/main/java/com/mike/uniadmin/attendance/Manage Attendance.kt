@@ -138,17 +138,12 @@ fun ManageAttendanceScreen(context: Context) {
                 modules.forEach { module ->
                     val attendanceState = attendanceStates[module.moduleCode]
                     val isChecked = attendanceState?.state ?: false
-                    val backgroundColor by animateColorAsState(
-                        targetValue = if (isChecked) CC.extraColor2() else CC.primary(),
-                        animationSpec = tween(durationMillis = 300),
-                        label = ""
-                    )
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .padding(vertical = 8.dp)
-                            .background(backgroundColor, shape = MaterialTheme.shapes.medium)
+                            .background(CC.extraColor1(), shape = MaterialTheme.shapes.medium)
                             .padding(16.dp)
                             .animateContentSize(),
                         verticalAlignment = Alignment.CenterVertically
@@ -169,6 +164,7 @@ fun ManageAttendanceScreen(context: Context) {
                                     state = newState
                                 )
                                 moduleViewModel.saveAttendanceState(newAttendanceState)
+                                refresh = !refresh
                             }, colors = SwitchDefaults.colors(
                                 checkedThumbColor = CC.primary(),
                                 checkedTrackColor = CC.secondary(),
