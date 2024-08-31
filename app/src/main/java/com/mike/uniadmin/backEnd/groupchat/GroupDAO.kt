@@ -24,7 +24,7 @@ interface GroupChatDao {
         a.firstName AS senderName,
         a.profileImageLink AS senderProfileImageLink
     FROM groupChats gc
-    INNER JOIN admins a ON gc.senderID = a.id
+    INNER JOIN users a ON gc.senderID = a.id
     """
     )
     fun getChatsWithDetails(): LiveData<List<GroupChatEntityWithDetails>>
