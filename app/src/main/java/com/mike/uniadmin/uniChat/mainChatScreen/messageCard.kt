@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatsWithDetails
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.helperFunctions.randomColor
@@ -75,7 +76,11 @@ fun UserMessageCard(
     // Determine which user details to display (sender or receiver)
     val profileImageUser = if (isCurrentUserRecipient) chat.sender else chat.receiver
     val userState = if (isCurrentUserRecipient) chat.senderState else chat.receiverState
-    val userName = if (isCurrentUserRecipient) chat.sender.firstName else chat.receiver.firstName
+    val userName = if (isCurrentUserRecipient) "You" else chat.receiver.firstName
+    val deliveryStatusIcon =
+        if (chat.userChat.deliveryStatus == DeliveryStatus.SENT
+            && chat.userChat.senderID == currentUserId
+            ) "✓" else if (chat.userChat.deliveryStatus == DeliveryStatus.READ) "✓✓" else ""
 
     Card(
         modifier = Modifier
@@ -115,12 +120,12 @@ fun UserMessageCard(
                 // Display latest message, prepending sender's name if not sent by the current user
                 chat.userChat.message.let { message ->
                     val senderName =
-                        if (chat.userChat.senderID != currentUserId) "${chat.sender.firstName}: " else ""
+                        if (chat.userChat.senderID != currentUserId) "" else "You: "
                     Text(
-                        text = "$senderName${createAnnotatedMessage(createAnnotatedText(message).toString())}",
+                        text = "$deliveryStatusIcon $senderName${createAnnotatedMessage(createAnnotatedText(message).toString())}",
                         style = CC.descriptionTextStyle(context).copy(
                             fontSize = 14.sp,
-                            color = CC.tertiary().copy(alpha = 0.8f)
+                            color = CC.extraColor2().copy(alpha = 0.6f)
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
