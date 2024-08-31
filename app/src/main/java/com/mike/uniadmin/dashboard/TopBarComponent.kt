@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -76,7 +75,8 @@ fun TopAppBarContent(
     val unreadCount = notifications?.size ?: 0
 
     TopAppBar(navigationIcon = {
-        IconButton(onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value },
+        IconButton(
+            onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value },
             modifier = Modifier.padding(bottom = 21.dp)
         ) {
             Icon(
@@ -146,7 +146,8 @@ fun TopAppBarContent(
                     Column(
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        val sortedNotifications = notifications?.sortedByDescending { it.date } // Sort by timestamp
+                        val sortedNotifications =
+                            notifications?.sortedByDescending { it.date } // Sort by timestamp
 
                         if (!sortedNotifications.isNullOrEmpty()) {
                             sortedNotifications.take(5).forEach { notification ->
