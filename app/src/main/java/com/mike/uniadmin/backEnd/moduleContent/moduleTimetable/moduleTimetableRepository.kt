@@ -1,12 +1,8 @@
 package com.mike.uniadmin.backEnd.moduleContent.moduleTimetable
 
 import android.util.Log
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,9 +14,10 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
     private val courseCode = CourseManager.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("ModuleContent")
 
+
     init {
-        // Start listening for changes in Firebase when the repository is initialized
-        // You may call `listenForFirebaseUpdates` with the appropriate moduleID in practice
+        // Start listening for changes in Firebase
+        listenForFirebaseUpdates()
     }
 
     // Write a module timetable to both local and remote databases
@@ -33,52 +30,127 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
             try {
                 // Insert into local database
                 moduleTimetableDao.insertModuleTimetable(moduleTimetable)
-                Log.d("ModuleTimetableRepository", "Inserted timetable locally for module: $moduleID")
-
                 // Insert into Firebase
                 val moduleTimetableRef = database.child(moduleID).child("Module Timetable")
                 moduleTimetableRef.child(moduleTimetable.timetableID).setValue(moduleTimetable)
-                    .addOnSuccessListener {
-                        Log.d("ModuleTimetableRepository", "Timetable written to Firebase for module: $moduleID")
-                        onResult(true) // Indicate success
-                    }
+                    .addOnSuccessListener { onResult(true) } // Indicate success
                     .addOnFailureListener { exception ->
-                        Log.e("ModuleTimetableRepository", "Error writing timetable to Firebase: ${exception.message}")
+                        println("Error writing timetable: ${exception.message}")
                         onResult(false) // Indicate failure
                     }
             } catch (e: Exception) {
-                Log.e("ModuleTimetableRepository", "Error writing timetable locally: ${e.message}")
+                println("Error writing timetable: ${e.message}")
                 onResult(false) // Indicate failure
             }
         }
     }
 
-    // Fetch data from local database for a specific module
     fun getModuleTimetables(moduleID: String, onResult: (List<ModuleTimetable>) -> Unit) {
         uniConnectScope.launch {
-            Log.d("ModuleTimetableRepository", "Fetching timetables from local database for module: $moduleID")
+            Log.d("Timetables", "Searching repository timetable for module: $moduleID")
+
+            // Fetch cached data from local database
             val cachedData = moduleTimetableDao.getModuleTimetables(moduleID)
-            Log.d("ModuleTimetableRepository", "Fetched ${cachedData.size} timetables from local database for module: $moduleID")
-            onResult(cachedData)
+
+            if (cachedData.isNotEmpty()) {
+                // Return cached data if available
+                onResult(cachedData)
+                Log.d("Timetables", "Found timetable in database")
+            } else {
+                Log.d("Timetables", "No timetable found in database, fetching from repository")
+                val moduleTimetableRef = database.child(moduleID).child("Module Timetable")
+
+                // Fetch data from the remote database
+                moduleTimetableRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val timetables = mutableListOf<ModuleTimetable>()
+                        for (childSnapshot in snapshot.children) {
+                            val timetable = childSnapshot.getValue(ModuleTimetable::class.java)
+                            timetable?.let {
+                                Log.d("Timetables", "Found timetable in repository")
+                                timetables.add(it)
+                            }
+                        }
+                        uniConnectScope.launch {
+                            // Update local database with fetched timetables
+                            if (timetables.isNotEmpty()) {
+                                moduleTimetableDao.insertModuleTimetables(timetables)
+                                val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
+                                onResult(updatedData)
+                            } else {
+                                onResult(emptyList())
+                            }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Timetables", "Error reading timetables: ${error.message}")
+                        onResult(emptyList())
+                    }
+                })
+
+                // Listen for real-time updates to the remote database
+                moduleTimetableRef.addChildEventListener(object : ChildEventListener {
+                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                        val timetable = snapshot.getValue(ModuleTimetable::class.java)
+                        timetable?.let {
+                            uniConnectScope.launch {
+                                moduleTimetableDao.insertModuleTimetable(it)
+                                val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
+                                onResult(updatedData)
+                            }
+                        }
+                    }
+
+                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                        val timetable = snapshot.getValue(ModuleTimetable::class.java)
+                        timetable?.let {
+                            uniConnectScope.launch {
+                                moduleTimetableDao.insertModuleTimetable(it)
+                                val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
+                                onResult(updatedData)
+                            }
+                        }
+                    }
+
+                    override fun onChildRemoved(snapshot: DataSnapshot) {
+                        val timetable = snapshot.getValue(ModuleTimetable::class.java)
+                        timetable?.let {
+                            uniConnectScope.launch {
+                                moduleTimetableDao.deleteModuleTimetable(it.timetableID)
+                                val updatedData = moduleTimetableDao.getModuleTimetables(moduleID)
+                                onResult(updatedData)
+                            }
+                        }
+                    }
+
+                    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                        // Handle if necessary
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Timetables", "Error handling child event: ${error.message}")
+                        onResult(emptyList())
+                    }
+                })
+            }
         }
     }
 
-    // Fetch all module timetables from the local database
+
     fun getAllModuleTimetables(onResult: (List<ModuleTimetable>) -> Unit) {
-        uniConnectScope.launch {
-            Log.d("ModuleTimetableRepository", "Fetching all timetables from local database")
+        uniConnectScope.launch(Dispatchers.IO) { // Ensure this runs on a background thread
             val cachedData = moduleTimetableDao.getAllModuleTimetables()
-            Log.d("ModuleTimetableRepository", "Fetched ${cachedData.size} timetables from local database")
             onResult(cachedData)
+            Log.d("Timetables fetching", "Found timetable in database: $cachedData")
         }
     }
 
-    // Listen for changes in Firebase for a specific module and update local database accordingly
-    fun listenForFirebaseUpdates(moduleID: String) {
-        val moduleTimetableRef = database.child(moduleID).child("Module Timetable")
-        Log.d("ModuleTimetableRepository", "Listening for Firebase updates on path: $moduleTimetableRef")
 
-        moduleTimetableRef.addChildEventListener(object : ChildEventListener {
+
+    // Listen for changes in Firebase and update local database accordingly
+    private fun listenForFirebaseUpdates() {
+        database.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 updateLocalDatabase(snapshot)
             }
@@ -90,35 +162,29 @@ class ModuleTimetableRepository(private val moduleTimetableDao: ModuleTimetableD
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val timetable = snapshot.getValue(ModuleTimetable::class.java)
                 timetable?.let {
-                    Log.d("ModuleTimetableRepository", "Removing timetable from local database: ${it.timetableID}")
                     uniConnectScope.launch {
                         moduleTimetableDao.deleteModuleTimetable(it.timetableID)
                     }
                 }
             }
 
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                // Handle if necessary
-            }
-
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
             override fun onCancelled(error: DatabaseError) {
-                Log.e("ModuleTimetableRepository", "Error listening for updates: ${error.message}")
+                println("Error listening for updates: ${error.message}")
             }
 
             private fun updateLocalDatabase(snapshot: DataSnapshot) {
-                val timetable = snapshot.getValue(ModuleTimetable::class.java)
-                timetable?.let {
-                    uniConnectScope.launch {
-                        moduleTimetableDao.insertModuleTimetable(it)
-                        Log.d("ModuleTimetableRepository", "Updated local database with timetable: ${it.timetableID}")
-                    }
+                val timetables = mutableListOf<ModuleTimetable>()
+                for (childSnapshot in snapshot.children) {
+                    val timetable = childSnapshot.getValue(ModuleTimetable::class.java)
+                    timetable?.let { timetables.add(it) }
+                }
+                uniConnectScope.launch {
+                    moduleTimetableDao.insertModuleTimetables(timetables)
                 }
             }
         })
     }
-
-
-
 
     fun getUpcomingClass(onResult: (ModuleTimetable?) -> Unit) {
         uniConnectScope.launch(Dispatchers.IO) {
