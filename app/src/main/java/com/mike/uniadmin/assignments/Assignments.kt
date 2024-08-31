@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
 import com.mike.uniadmin.getModuleAssignmentViewModel
@@ -65,7 +66,7 @@ fun AssignmentScreen(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Assignments", style = CC.titleTextStyle(context)) },
+                title = { Text("Assignments", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {},
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CC.primary(),
