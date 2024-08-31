@@ -1,7 +1,6 @@
 package com.mike.uniadmin.courses
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -86,17 +85,19 @@ fun CourseScreen(context: Context, navController: NavController) {
     val isLoading by courseViewModel.isLoading.observeAsState(false)
     var showAddCourse by remember { mutableStateOf(false) }
     val userTypes = UniAdminPreferences.userType.value
-
-    LaunchedEffect(Unit) {
-        userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
-    }
+    var courseClicked by remember { mutableStateOf(false) }
 
     fun startListeners() {
-        Toast.makeText(context, "Starting listeners", Toast.LENGTH_SHORT).show()
         announcementViewModel.startAnnouncementsListener()
         moduleViewModel.fetchModulesFromFirebase()
         timetableViewModel.getAllModuleTimetables()
-        Log.d("UniAdminPreferences","Course Code in this screen: ${CourseManager.courseCode.value}")
+        if (CourseManager.courseCode.value != "") {
+            navController.navigate("homeScreen")
+        }
+    }
+
+    LaunchedEffect(CourseManager.courseCode) {
+        userViewModel.findUserByEmail(FirebaseAuth.getInstance().currentUser?.email ?: "") {}
     }
 
 
@@ -178,7 +179,10 @@ fun CourseScreen(context: Context, navController: NavController) {
                         CourseItem(
                             currentUser, course, context
                         ) {
-                            startListeners()
+                            repeat(2) {
+                                startListeners()
+                            }
+
                             if (!course.participants.contains(currentUser?.id)) {
                                 currentUser?.id?.let { userId ->
                                     courseViewModel.saveCourse(
@@ -225,6 +229,16 @@ fun CourseScreen(context: Context, navController: NavController) {
                             }
                         }
                         Spacer(modifier = Modifier.height(5.dp))
+                        if (courseClicked) {
+                            Text(
+                                "Fetching Course Resources....",
+                                style = CC.descriptionTextStyle(context)
+                            )
+                            Text(
+                                "Click the button again if the course doesnt open",
+                                style = CC.descriptionTextStyle(context)
+                            )
+                        }
                     }
                 }
             }
