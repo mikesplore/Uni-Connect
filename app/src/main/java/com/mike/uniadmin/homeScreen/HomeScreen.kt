@@ -26,6 +26,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.announcements.AnnouncementsScreen
@@ -41,6 +45,7 @@ import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
 import com.mike.uniadmin.helperFunctions.Screen
 import com.mike.uniadmin.helperFunctions.Update
 import kotlinx.coroutines.launch
+import kotlin.io.path.exists
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -183,3 +188,29 @@ fun HomeScreen(
         }
     }
 }
+
+//fun renameAdminsToUsers() {
+//    val oldRef = FirebaseDatabase.getInstance().reference.child("Admins")
+//    val newRef = FirebaseDatabase.getInstance().reference.child("Users")
+//
+//    oldRef.addListenerForSingleValueEvent(object : ValueEventListener {
+//        override fun onDataChange(snapshot: DataSnapshot) {
+//            if (snapshot.exists()) {
+//                newRef.setValue(snapshot.value)
+//                    .addOnSuccessListener {
+//                        oldRef.removeValue()
+//                            .addOnSuccessListener {
+//                            }
+//                            .addOnFailureListener {
+//                            }
+//                    }
+//                    .addOnFailureListener {
+//                    }
+//            } else {
+//            }
+//        }
+//
+//        override fun onCancelled(error: DatabaseError) {
+//        }
+//    })
+//}
