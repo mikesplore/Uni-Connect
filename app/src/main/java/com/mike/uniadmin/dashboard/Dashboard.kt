@@ -3,7 +3,6 @@ package com.mike.uniadmin.dashboard
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,8 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +49,7 @@ import com.mike.uniadmin.getUserViewModel
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun Dashboard(navController: NavController, context: Context) {
     val moduleViewModel = getModuleViewModel(context)
@@ -62,24 +68,36 @@ fun Dashboard(navController: NavController, context: Context) {
 
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     val loggedInUserEmail = UniAdminPreferences.userEmail.value
-
+    var isRefreshing by remember { mutableStateOf(false) }
+    val state = rememberPullRefreshState(refreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            moduleViewModel.fetchModules()
+            moduleTimetableViewModel.getAllModuleTimetables()
+            userViewModel.checkAllUserStatuses()
+            userViewModel.findUserByEmail(loggedInUserEmail) {}
+            announcementViewModel.fetchAnnouncements()
+            notificationViewModel.fetchNotifications()
+            isRefreshing = false
+        })
 
 
     LaunchedEffect(key1 = 1) {
-        Log.d("ModuleTimetableRepository", "Dashboard launched")
-        Log.d("ModuleTimetableRepository", "${modules.size} found")
-        moduleViewModel.fetchModules()
-        moduleTimetableViewModel.getAllModuleTimetables()
-        userViewModel.checkAllUserStatuses()
-        userViewModel.findUserByEmail(loggedInUserEmail) {}
-        announcementViewModel.fetchAnnouncements()
-        notificationViewModel.fetchNotifications()
+//        Log.d("ModuleTimetableRepository", "Dashboard launched")
+//        Log.d("ModuleTimetableRepository", "${modules.size} found")
+//        moduleViewModel.fetchModules()
+//        moduleTimetableViewModel.getAllModuleTimetables()
+//        userViewModel.checkAllUserStatuses()
+//        userViewModel.findUserByEmail(loggedInUserEmail) {}
+//        announcementViewModel.fetchAnnouncements()
+//        notificationViewModel.fetchNotifications()
 
         while (true) {
             isOnline.value = isDeviceOnline(context)
             delay(10000L) // Check every 10 seconds
         }
     }
+
 
     Column(
         modifier = Modifier
@@ -94,147 +112,159 @@ fun Dashboard(navController: NavController, context: Context) {
                 notificationViewModel = notificationViewModel
             )
         }
-        Column(
+        Box(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .weight(1f)
+                .pullRefresh(state)
         ) {
-            AnimatedVisibility(visible = !isOnline.value) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Warning, "Warning", tint = Color.Red)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AnimatedVisibility(visible = !isOnline.value) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Warning, "Warning", tint = Color.Red)
+                        Text(
+                            "You are not connected to the internet",
+                            style = CC.descriptionTextStyle(context)
+                                .copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(start = 15.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        "You are not connected to the internet",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        "Modules",
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
-            }
+                Spacer(modifier = Modifier.height(20.dp))
+                if (modules.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .height(100.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No modules found", style = CC.descriptionTextStyle(context))
+                    }
 
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "Modules",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            if (modules.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .height(100.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No modules found", style = CC.descriptionTextStyle(context))
+                } else {
+                    modules.forEach {
+                        moduleTimetableViewModel.getModuleTimetables(it.moduleCode)
+                        moduleTimetableViewModel.findUpcomingClass()
+                    }
+                    ModuleItemList(modules, context, navController)
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
 
-            } else {
-                modules.forEach {
-                    Log.d("ModuleTimetableRepository", "Fetching timetables for module: ${it.moduleCode} in dashboard")
-                    moduleTimetableViewModel.listenForFirebaseUpdates(it.moduleCode)
-                    moduleTimetableViewModel.getModuleTimetables(it.moduleCode)
-                    moduleTimetableViewModel.findUpcomingClass()
+                    Text(
+                        "Module Resources",
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                        modifier = Modifier.padding(start = 15.dp)
+                    )
                 }
-                ModuleItemList(modules, context, navController)
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-
-                Text(
-                    "Module Resources",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            if (modulesLoading == true) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    items(5) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 15.dp)
-                                .height(200.dp)
-                        ) {
-                            LoadingModuleBox()
+                Spacer(modifier = Modifier.height(10.dp))
+                if (modulesLoading == true) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        items(5) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(start = 15.dp)
+                                    .height(200.dp)
+                            ) {
+                                LoadingModuleBox()
+                            }
                         }
                     }
-                }
-            } else if (modules.isNotEmpty()) {
-                val sortedModules =
-                    modules.sortedByDescending { it.visits } // Sort by moduleVisits in descending order
+                } else if (modules.isNotEmpty()) {
+                    val sortedModules =
+                        modules.sortedByDescending { it.visits } // Sort by moduleVisits in descending order
 
-                ModuleBoxList(sortedModules, context, navController, moduleViewModel)
-            } else {
-                Box(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No modules found", style = CC.descriptionTextStyle(context))
-                }
-            }
-
-
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "Latest Announcement",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            if (announcementsLoading == true) {
-
-                LoadingAnnouncementCard(context)
-
-            } else if (announcements?.isEmpty() == true) {
-                Box(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No announcements found", style = CC.descriptionTextStyle(context))
-                }
-            } else {
-                announcements?.maxByOrNull { it.date }?.let { announcement ->
-                    AnnouncementCard(announcement, context)
-                }
-            }
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "My Next Class",
-                    style = CC.titleTextStyle(context)
-                        .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            if (todayTimetable == null) {
-                Box(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    ModuleBoxList(sortedModules, context, navController, moduleViewModel)
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                    Text("No timetable found", style = CC.descriptionTextStyle(context))
+                        Text("No modules found", style = CC.descriptionTextStyle(context))
+                    }
                 }
-            } else {
-                ModuleTimetableCard(todayTimetable!!, context)
+
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        "Latest Announcement",
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                        modifier = Modifier.padding(start = 15.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                if (announcementsLoading == true) {
+
+                    LoadingAnnouncementCard(context)
+
+                } else if (announcements?.isEmpty() == true) {
+                    Box(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No announcements found", style = CC.descriptionTextStyle(context))
+                    }
+                } else {
+                    announcements?.maxByOrNull { it.date }?.let { announcement ->
+                        AnnouncementCard(announcement, context)
+                    }
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        "My Next Class",
+                        style = CC.titleTextStyle(context)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                        modifier = Modifier.padding(start = 15.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                if (todayTimetable == null) {
+                    Box(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No timetable found", style = CC.descriptionTextStyle(context))
+                    }
+                } else {
+                    ModuleTimetableCard(todayTimetable!!, context)
+                }
             }
+            PullRefreshIndicator(
+                contentColor = CC.secondary(),
+                backgroundColor = CC.extraColor2(),
+                refreshing = isRefreshing,
+                state = state,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }
