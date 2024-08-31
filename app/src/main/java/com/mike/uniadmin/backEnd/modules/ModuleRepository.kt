@@ -54,16 +54,11 @@ class ModuleRepository(
 
 
     private fun startAttendanceStateListener() {
-
-        Log.d("UniAdminPreferences", "attendance state listener started")
+        Log.d("UniAdminPreferences", "Attendance state listener started")
         attendanceStateDatabase?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val attendanceStates = mutableListOf<AttendanceState>()
-                for (childSnapshot in snapshot.children) {
-                    val attendanceState = childSnapshot.getValue(AttendanceState::class.java)
-                    attendanceState?.let { attendanceStates.add(it) }
-                }
-                // Use IO dispatcher for DAO operations
+                val attendanceStates = snapshot.children.mapNotNull { it.getValue(AttendanceState::class.java) }
+                // Update Room database in the background
                 uniConnectScope.launch(Dispatchers.IO) {
                     attendanceStateDao.insertAttendanceStates(attendanceStates)
                 }
@@ -75,47 +70,12 @@ class ModuleRepository(
         })
     }
 
+    // Fetches attendance states from Room database only
     fun fetchAttendanceStates(onResult: (List<AttendanceState>) -> Unit) {
         uniConnectScope.launch(Dispatchers.IO) {
-            try {
-                // Fetch from Firebase and cache to the moduleDatabase
-                attendanceStateDatabase?.addListenerForSingleValueEvent(object :
-                    ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val attendanceStates = mutableListOf<AttendanceState>()
-                        for (childSnapshot in snapshot.children) {
-                            val attendanceState =
-                                childSnapshot.getValue(AttendanceState::class.java)
-                            attendanceState?.let { attendanceStates.add(it) }
-                        }
-                        // Insert into the moduleDatabase and update result on the main thread
-                        launch(Dispatchers.IO) {
-                            attendanceStateDao.insertAttendanceStates(attendanceStates)
-                            withContext(Dispatchers.Main) {
-                                onResult(attendanceStates)
-                            }
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        Log.e(
-                            "ModuleRepository",
-                            "Error reading attendance states: ${error.message}"
-                        )
-                        // Fetch cached data if Firebase call fails
-                        launch(Dispatchers.IO) {
-                            val cachedData = attendanceStateDao.getAttendanceStates()
-                            withContext(Dispatchers.Main) {
-                                onResult(cachedData)
-                            }
-                        }
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e("ModuleRepository", "Exception: ${e.message}")
-                withContext(Dispatchers.Main) {
-                    onResult(emptyList()) // Return empty list if an exception occurs
-                }
+            val cachedData = attendanceStateDao.getAttendanceStates()
+            withContext(Dispatchers.Main) {
+                onResult(cachedData)
             }
         }
     }
@@ -140,21 +100,23 @@ class ModuleRepository(
     }
 
     fun saveModule(module: ModuleEntity, onComplete: (Boolean) -> Unit = {}) {
+        saveModuleToFirebase(module)
         uniConnectScope.launch(Dispatchers.IO) {
             try {
                 moduleDao.insertModule(module)
-                moduleDatabase?.child(module.moduleCode)
-                    ?.setValue(module)?.addOnCompleteListener { task ->
-                        launch(Dispatchers.Main) {
-                            onComplete(task.isSuccessful)
-                        }
-                    }
+                onComplete(true) // Assuming Room insertion is successful
             } catch (e: Exception) {
                 Log.e("ModuleRepository", "Error saving module: ${e.message}")
                 withContext(Dispatchers.Main) {
                     onComplete(false)
                 }
             }
+        }
+    }
+
+    private fun saveModuleToFirebase(module: ModuleEntity, onComplete: (Boolean) -> Unit = {}) {
+        moduleDatabase?.child(module.moduleCode)?.setValue(module)?.addOnCompleteListener { task ->
+            onComplete(task.isSuccessful)
         }
     }
 
@@ -265,31 +227,29 @@ class ModuleRepository(
                     onResult(localData)
                 }
             } else {
-                if (moduleDetailsRef != null) {
-                    moduleDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val moduleInfo = snapshot.getValue(ModuleEntity::class.java)
+                moduleDetailsRef?.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val moduleInfo = snapshot.getValue(ModuleEntity::class.java)
 
-                            uniConnectScope.launch {
-                                withContext(Dispatchers.Main) {
-                                    onResult(moduleInfo)
-                                }
+                        uniConnectScope.launch {
+                            withContext(Dispatchers.Main) {
+                                onResult(moduleInfo)
                             }
                         }
+                    }
 
-                        override fun onCancelled(error: DatabaseError) {
-                            Log.e(
-                                "ModuleRepository",
-                                "Error fetching module details: ${error.message}"
-                            )
-                            uniConnectScope.launch {
-                                withContext(Dispatchers.Main) {
-                                    onResult(null)
-                                }
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e(
+                            "ModuleRepository",
+                            "Error fetching module details: ${error.message}"
+                        )
+                        uniConnectScope.launch {
+                            withContext(Dispatchers.Main) {
+                                onResult(null)
                             }
                         }
-                    })
-                }
+                    }
+                })
             }
         }
     }
