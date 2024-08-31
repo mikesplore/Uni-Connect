@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatsWithDetails
@@ -76,11 +77,19 @@ fun UserMessageCard(
     // Determine which user details to display (sender or receiver)
     val profileImageUser = if (isCurrentUserRecipient) chat.sender else chat.receiver
     val userState = if (isCurrentUserRecipient) chat.senderState else chat.receiverState
-    val userName = if (isCurrentUserRecipient) "You" else chat.receiver.firstName
-    val deliveryStatusIcon =
-        if (chat.userChat.deliveryStatus == DeliveryStatus.SENT
-            && chat.userChat.senderID == currentUserId
-            ) "✓" else if (chat.userChat.deliveryStatus == DeliveryStatus.READ) "✓✓" else ""
+
+    val userName =
+        if (chat.sender.id == chat.receiver.id) "You"
+        else if (chat.sender.id == currentUserId) chat.receiver.firstName
+        else if (chat.receiver.id == currentUserId) chat.sender.firstName
+        else ""
+
+    val deliveryStatusIcon = when {
+        chat.userChat.senderID != currentUserId -> ""
+        chat.userChat.deliveryStatus == DeliveryStatus.READ -> "✓✓"
+        chat.userChat.deliveryStatus == DeliveryStatus.SENT -> "✓"
+        else -> ""
+    }
 
     Card(
         modifier = Modifier
