@@ -4,46 +4,79 @@ import android.util.Log
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.CourseManager.courseCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 val uniConnectScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
-    private val courseCode = CourseManager.courseCode.value
-    private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Announcements")
+    private var database: DatabaseReference? = null
+    private var attendanceStateDatabase: DatabaseReference? = null
+
 
     init {
-        Log.d("AnnouncementRepository", "Initializing and starting announcement listener")
+        observeCourseCode()
         startAnnouncementsListener()
     }
 
-     fun startAnnouncementsListener() {
-        Log.d("AnnouncementRepository", "Starting announcements listener on Firebase path: $courseCode/Announcements")
-        database.addChildEventListener(object : ChildEventListener {
+    private fun observeCourseCode() {
+        // Observe changes in courseCode from CourseManager
+        uniConnectScope.launch(Dispatchers.Main) {
+            courseCode.collectLatest { code ->
+                Log.d("AnnouncementRepository", "Course Code for  Announcements in the scope: $code")
+                if (code.isNotEmpty()) {
+                    initializeDatabases(code)
+                    startAnnouncementsListener()
+
+                } else {
+                    database = null
+                    attendanceStateDatabase = null
+                }
+            }
+        }
+    }
+
+    private fun initializeDatabases(courseCode: String) {
+        database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Announcements")
+        attendanceStateDatabase =
+            FirebaseDatabase.getInstance().reference.child(courseCode).child("AttendanceStates")
+    }
+
+    fun startAnnouncementsListener() {
+        Log.d(
+            "AnnouncementRepository",
+            "Starting announcements listener on Firebase path: ${courseCode.value}/Announcements"
+        )
+        database?.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val announcement = snapshot.getValue(AnnouncementEntity::class.java)
                 Log.d("AnnouncementRepository", "onChildAdded called: ${announcement?.id}")
                 announcement?.let {
                     uniConnectScope.launch {
                         announcementsDao.insertAnnouncements(listOf(it))
-                        Log.d("AnnouncementRepository", "Inserted announcement: ${it.id} into local database")
+                        Log.d(
+                            "AnnouncementRepository",
+                            "Inserted announcement: ${it.id} into local database"
+                        )
                     }
                 }
             }
 
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                 val announcement = snapshot.getValue(AnnouncementEntity::class.java)
-                Log.d("AnnouncementRepository", "onChildChanged called: ${announcement?.id}")
                 announcement?.let {
                     uniConnectScope.launch {
                         announcementsDao.insertAnnouncement(it) // Ensure you have an update method
-                        Log.d("AnnouncementRepository", "Updated announcement: ${it.id} in local database")
+                        Log.d(
+                            "AnnouncementRepository",
+                            "Updated announcement: ${it.id} in local database"
+                        )
                     }
                 }
             }
@@ -54,7 +87,10 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
                 announcementId?.let {
                     uniConnectScope.launch {
                         announcementsDao.deleteAnnouncement(it)
-                        Log.d("AnnouncementRepository", "Deleted announcement: $it from local database")
+                        Log.d(
+                            "AnnouncementRepository",
+                            "Deleted announcement: $it from local database"
+                        )
                     }
                 }
             }
@@ -64,7 +100,10 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("AnnouncementRepository", "Error listening to announcements: ${error.message}")
+                Log.e(
+                    "AnnouncementRepository",
+                    "Error listening to announcements: ${error.message}"
+                )
             }
         })
     }
@@ -73,7 +112,10 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
         Log.d("AnnouncementRepository", "Fetching announcements from local database")
         uniConnectScope.launch {
             val cachedData = announcementsDao.getAnnouncements()
-            Log.d("AnnouncementRepository", "Fetched ${cachedData.size} announcements from local database")
+            Log.d(
+                "AnnouncementRepository",
+                "Fetched ${cachedData.size} announcements from local database"
+            )
             onResult(cachedData)
         }
     }
@@ -83,15 +125,24 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
         // Save to local database
         uniConnectScope.launch {
             announcementsDao.insertAnnouncements(listOf(announcement))
-            Log.d("AnnouncementRepository", "Saved announcement: ${announcement.id} to local database")
+            Log.d(
+                "AnnouncementRepository",
+                "Saved announcement: ${announcement.id} to local database"
+            )
         }
 
         // Save to Firebase (no coroutine needed)
-        database.child(announcement.id).setValue(announcement).addOnCompleteListener { task ->
+        database?.child(announcement.id)?.setValue(announcement)?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Log.d("AnnouncementRepository", "Successfully saved announcement: ${announcement.id} to Firebase")
+                Log.d(
+                    "AnnouncementRepository",
+                    "Successfully saved announcement: ${announcement.id} to Firebase"
+                )
             } else {
-                Log.e("AnnouncementRepository", "Failed to save announcement: ${announcement.id} to Firebase")
+                Log.e(
+                    "AnnouncementRepository",
+                    "Failed to save announcement: ${announcement.id} to Firebase"
+                )
             }
             onComplete(task.isSuccessful)
         }
@@ -106,17 +157,27 @@ class AnnouncementRepository(private val announcementsDao: AnnouncementsDao) {
         // Delete from local database
         uniConnectScope.launch {
             announcementsDao.deleteAnnouncement(announcementId)
-            Log.d("AnnouncementRepository", "Deleted announcement: $announcementId from local database")
+            Log.d(
+                "AnnouncementRepository",
+                "Deleted announcement: $announcementId from local database"
+            )
         }
 
         // Delete from Firebase (no coroutine needed)
-        database.child(announcementId).removeValue()
-            .addOnSuccessListener {
-                Log.d("AnnouncementRepository", "Successfully deleted announcement: $announcementId from Firebase")
+        database?.child(announcementId)?.removeValue()
+            ?.addOnSuccessListener {
+                Log.d(
+                    "AnnouncementRepository",
+                    "Successfully deleted announcement: $announcementId from Firebase"
+                )
                 onSuccess()
             }
-            .addOnFailureListener { exception ->
-                Log.e("AnnouncementRepository", "Failed to delete announcement: $announcementId from Firebase", exception)
+            ?.addOnFailureListener { exception ->
+                Log.e(
+                    "AnnouncementRepository",
+                    "Failed to delete announcement: $announcementId from Firebase",
+                    exception
+                )
                 onFailure(exception)
             }
     }
