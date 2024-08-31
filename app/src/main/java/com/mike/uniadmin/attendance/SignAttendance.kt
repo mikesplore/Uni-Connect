@@ -118,13 +118,13 @@ fun SignAttendance(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sign Attendance", style = CC.titleTextStyle(context)) },
+                title = { Text("Sign Attendance", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)) },
                 actions = {
                     IconButton(onClick = { refresh = !refresh }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.secondary())
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
             )
         },
         containerColor = CC.secondary()
@@ -153,7 +153,7 @@ fun SignAttendance(context: Context) {
                 moduleNames.forEachIndexed { index, name ->
                     if (index == selectedTabIndex) {
                         Box(modifier = Modifier
-                            .background(CC.secondary().copy(alpha = 0.5f))
+                            .background(CC.primary())
                             .fillMaxWidth(), contentAlignment = Alignment.Center){
                             Text(name, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
                         }
@@ -372,7 +372,7 @@ fun Tabs(
 
         ScrollableTabRow(
             selectedTabIndex = selectedTabIndex,
-            containerColor = CC.secondary()
+            containerColor = CC.primary()
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -380,7 +380,7 @@ fun Tabs(
                         .height(boxWidth * 0.3f)
                         .width(boxWidth)
                         .background(
-                            if (selectedTabIndex == index) CC.primary() else CC.secondary(),
+                            if (selectedTabIndex == index) CC.tertiary() else CC.primary(),
                             RoundedCornerShape(10.dp)
                         ),
                     selected = selectedTabIndex == index,
@@ -389,7 +389,7 @@ fun Tabs(
                         Text(
                             text = title,
                             style = CC.descriptionTextStyle(context).copy(
-                                color = if (selectedTabIndex == index) CC.textColor() else CC.primary(),
+                                color = if (selectedTabIndex == index) CC.textColor() else CC.extraColor2(),
                                 fontSize = textSize
                             ),
                             fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
