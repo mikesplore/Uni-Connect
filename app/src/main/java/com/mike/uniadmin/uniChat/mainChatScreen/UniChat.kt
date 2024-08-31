@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -159,7 +158,6 @@ fun ChatsScreen(
     val users by userViewModel.users.observeAsState()
     val currentUserId = UniAdminPreferences.userID.value
     val userCardChats by userChatViewModel.userChatWithDetails.observeAsState()
-    val loading by userChatViewModel.userCardLoading.observeAsState()
 
     LaunchedEffect(users) {
         userViewModel.fetchUsers()
@@ -183,9 +181,7 @@ fun ChatsScreen(
                 text = "No Chats Found",
                 style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
             )
-            if (loading == false) {
-                CircularProgressIndicator(strokeWidth = 2.dp, color = CC.textColor())
-            }
+
         }
 
     } else {

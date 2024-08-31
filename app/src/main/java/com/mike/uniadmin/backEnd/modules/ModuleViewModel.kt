@@ -42,10 +42,10 @@ class ModuleViewModel(private val repository: ModuleRepository) : ViewModel() {
 
 
     fun fetchModules() {
-        _isLoading.postValue(true) // Set loading to true before fetching
+        _isLoading.value = true
         repository.fetchModules { modules ->
             _modules.postValue(modules)
-            _isLoading.postValue(false) // Set loading to false after fetching
+            _isLoading.value = false // Set loading to false after fetching
         }
     }
 
