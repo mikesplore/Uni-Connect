@@ -9,7 +9,7 @@ import androidx.room.Transaction
 
 @Dao
 interface UserDao {
-    @Query("SELECT * FROM admins")
+    @Query("SELECT * FROM users")
     suspend fun getUsers(): List<UserEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -18,13 +18,13 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUsers(users: List<UserEntity>)
 
-    @Query("DELETE FROM admins WHERE id = :userID")
+    @Query("DELETE FROM users WHERE id = :userID")
     suspend fun deleteUser(userID: String)
 
-    @Query("SELECT * FROM admins WHERE email = :userEmail")
+    @Query("SELECT * FROM users WHERE email = :userEmail")
     suspend fun getUserByEmail(userEmail: String): UserEntity?
 
-    @Query("SELECT * FROM admins WHERE id = :userID")
+    @Query("SELECT * FROM users WHERE id = :userID")
     suspend fun getUserByID(userID: String): UserEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
