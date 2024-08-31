@@ -74,10 +74,10 @@ interface DatabaseDao {
     @Query("DELETE FROM userChats")
     suspend fun deleteMessages()
 
-    @Query("SELECT * FROM admins")
+    @Query("SELECT * FROM users")
     suspend fun getUsers(): List<UserEntity>
 
-    @Query("DELETE FROM admins")
+    @Query("DELETE FROM users")
     suspend fun deleteUsers()
 
     @Query("DELETE FROM accountDeletion")
@@ -122,7 +122,7 @@ interface DatabaseDao {
     @Query("DELETE FROM userChats")
     suspend fun deleteAllMessages()
 
-    @Query("DELETE FROM admins")
+    @Query("DELETE FROM users")
     suspend fun deleteAllUsers()
 
     @Query("DELETE FROM accountDeletion")
