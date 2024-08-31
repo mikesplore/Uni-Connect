@@ -56,7 +56,7 @@ class UserRepository(
     }
 
     private fun startUserListener() {
-        startDatabaseListener("Admins",
+        startDatabaseListener("Users",
             convert = { it.getValue(UserEntity::class.java) },
             onResult = { users ->
                 userDao.insertUsers(users)
@@ -95,8 +95,8 @@ class UserRepository(
             val allUsers = mutableListOf<UserEntity>()
             val adminIds = mutableSetOf<String>()
 
-            // Fetch users from "Admins" node first to capture all admin IDs
-            database.child("Admins").addListenerForSingleValueEvent(object : ValueEventListener {
+            // Fetch users from "Users" node first to capture all admin IDs
+            database.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     for (childSnapshot in snapshot.children) {
                         val admin = childSnapshot.getValue(UserEntity::class.java)
@@ -106,8 +106,8 @@ class UserRepository(
                         }
                     }
 
-                    // Fetch users from "Users" node after fetching from "Admins"
-                    database.child("Admins")
+                    // Fetch users from "Users" node after fetching from "Users"
+                    database.child("Users")
                         .addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 for (childSnapshot in snapshot.children) {
@@ -129,7 +129,7 @@ class UserRepository(
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    continuation.resumeWithException(Exception("Error reading admins: ${error.message}"))
+                    continuation.resumeWithException(Exception("Error reading users: ${error.message}"))
                 }
             })
         }
@@ -139,7 +139,7 @@ class UserRepository(
     fun saveUser(user: UserEntity, onComplete: (Boolean) -> Unit) {
         uniConnectScope.launch(Dispatchers.Main) {
             userDao.insertUser(user)
-            database.child("Admins").child(user.id).setValue(user).addOnCompleteListener { task ->
+            database.child("Users").child(user.id).setValue(user).addOnCompleteListener { task ->
                 onComplete(task.isSuccessful)
             }
         }
@@ -151,7 +151,7 @@ class UserRepository(
             if (databaseUser != null) {
                 callback(databaseUser)
             } else {
-                database.child("Admins").orderByChild("email").equalTo(email)
+                database.child("Users").orderByChild("email").equalTo(email)
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val userSnapshot =
@@ -175,7 +175,7 @@ class UserRepository(
                 callback(databaseUser)
             } else {
                 // Check Users node
-                val usersQuery = database.child("Admins").orderByChild("id").equalTo(admissionNumber)
+                val usersQuery = database.child("Users").orderByChild("id").equalTo(admissionNumber)
                 usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val userSnapshot = snapshot.children.firstOrNull()
@@ -183,10 +183,10 @@ class UserRepository(
                         if (user != null) {
                             callback(user) // Found in Users node
                         } else {
-                            // Check Admins node if not found in Users
-                            val adminsQuery =
-                                database.child("Admins").orderByChild("id").equalTo(admissionNumber)
-                            adminsQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                            // Check Users node if not found in Users
+                            val usersQuery =
+                                database.child("Users").orderByChild("id").equalTo(admissionNumber)
+                            usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     val adminSnapshot = snapshot.children.firstOrNull()
                                     val admin = adminSnapshot?.getValue(UserEntity::class.java)
@@ -212,7 +212,7 @@ class UserRepository(
     fun deleteUser(userId: String, onSuccess: (Boolean) -> Unit) {
         uniConnectScope.launch(Dispatchers.Main) {
             userDao.deleteUser(userId)
-            database.child("Admins").child(userId).removeValue().addOnSuccessListener {
+            database.child("Users").child(userId).removeValue().addOnSuccessListener {
                 onSuccess(true)
             }.addOnFailureListener { exception ->
                 onSuccess(false)
