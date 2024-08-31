@@ -171,14 +171,14 @@ fun MoreDetails(context: Context, navController: NavController) {
                                             userId = userId,
                                             id = id,
                                             category = "New User",
-                                            title = "$firstName Joined Uni Admin!",
+                                            title = "$firstName Joined Uni Connect!",
                                             description = "Say hi and get the conversation started!",
                                             date = CC.getTimeStamp(),
                                             time = CC.getTimeStamp()
                                         )
                                     )
                                     notificationViewModel.fetchNotifications()
-                                    showNotification(context, "Welcome", "Welcome to Uni Admin, $firstName!")
+                                    showNotification(context, "Welcome", "Welcome to Uni Connect, $firstName!")
                                 }
                                 navController.navigate("courses") {
                                     popUpTo("moreDetails") {
