@@ -61,6 +61,8 @@ dependencies {
     ksp(libs.androidx.room.compiler.v250) {exclude(group = "com.intellij", module = "annotations")}
     implementation(libs.core)
     implementation(libs.coil.compose)
+   implementation(libs.androidx.material)
+
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.biometric)
     implementation(libs.firebase.database.ktx)
