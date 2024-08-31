@@ -9,8 +9,8 @@ import androidx.room.Query
 @Dao
 interface AnnouncementsDao {
     @Query(
-        "SELECT announcements.*, admins.firstName AS authorName, admins.profileImageLink AS profileImageLink " +
-                "FROM announcements INNER JOIN admins ON announcements.authorId = admins.id"
+        "SELECT announcements.*, users.firstName AS authorName, users.profileImageLink AS profileImageLink " +
+                "FROM announcements INNER JOIN users ON announcements.authorId = users.id"
     )
     suspend fun getAnnouncements(): List<AnnouncementsWithAuthor>
 
