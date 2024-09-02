@@ -49,6 +49,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.notifications.NotificationEntity
@@ -62,7 +63,6 @@ object Sidebar {
 
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarContent(
     signedInUser: UserEntity,
@@ -74,45 +74,52 @@ fun TopAppBarContent(
     var expanded by remember { mutableStateOf(false) }
     val unreadCount = notifications?.size ?: 0
 
-    TopAppBar(navigationIcon = {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+
+            .padding(horizontal = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        // Navigation Icon
         IconButton(
             onClick = { Sidebar.showSideBar.value = !Sidebar.showSideBar.value },
-            modifier = Modifier.padding(bottom = 21.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         ) {
             Icon(
                 Icons.Default.Menu, contentDescription = null, tint = CC.textColor()
             )
         }
-    },
 
-        title = {
-            Row(
-                modifier = Modifier
-                    .padding(bottom = 21.dp)
-                    .fillMaxHeight(),
-                verticalAlignment = Alignment.CenterVertically
+        // Greeting and Name
+        Row(
+            modifier = Modifier
+                .padding(start = 10.dp)
+                .weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center
             ) {
-                // Greeting and Name
-                Column(
-                    modifier = Modifier
-                        .padding(start = 10.dp)
-                        .weight(1f),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = CC.getGreetingMessage(),
-                        style = CC.descriptionTextStyle(context)
-                            .copy(color = CC.textColor().copy(alpha = 0.5f))
-                    )
-                    Text(
-                        text = signedInUser.firstName,
-                        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold)
-                    )
-                }
+                Text(
+                    text = CC.getGreetingMessage(),
+                    style = CC.descriptionTextStyle(context)
+                        .copy(color = CC.textColor().copy(alpha = 0.5f))
+                )
+                Text(
+                    text = signedInUser.firstName,
+                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                )
             }
-        }, actions = {
+        }
+
+        // Notification and Profile
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Notification
             BoxWithConstraints(modifier = Modifier.padding(end = 10.dp, bottom = 21.dp)) {
-                // Calculate dynamic sizes based on available width or height
                 val iconSize = maxWidth * 0.08f
                 val badgeSize = maxWidth * 0.045f
 
@@ -120,7 +127,7 @@ fun TopAppBarContent(
                     BadgedBox(badge = {
                         if (unreadCount > 0) {
                             Badge(
-                                modifier = Modifier.size(badgeSize) // Dynamic badge size
+                                modifier = Modifier.size(badgeSize)
                             ) {
                                 Text(text = unreadCount.toString())
                             }
@@ -130,7 +137,7 @@ fun TopAppBarContent(
                             Icons.Default.Notifications,
                             contentDescription = null,
                             tint = CC.extraColor2(),
-                            modifier = Modifier.size(iconSize) // Dynamic icon size
+                            modifier = Modifier.size(iconSize)
                         )
                     }
                 }
@@ -139,23 +146,23 @@ fun TopAppBarContent(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     modifier = Modifier
-                        .heightIn(max = maxHeight * 0.4f) // Max height is 40% of available height
-                        .width(maxWidth * 0.4f) // Width is 40% of available width
+                        .heightIn(max = maxHeight * 0.4f)
+                        .width(maxWidth * 0.4f)
                         .background(CC.extraColor1())
                 ) {
                     Column(
                         modifier = Modifier.padding(8.dp)
                     ) {
                         val sortedNotifications =
-                            notifications?.sortedByDescending { it.date } // Sort by timestamp
+                            notifications?.sortedByDescending { it.date }
 
                         if (!sortedNotifications.isNullOrEmpty()) {
                             sortedNotifications.take(5).forEach { notification ->
                                 NotificationTitleContent(notification, context)
-                                HorizontalDivider() // Use Divider for better visual separation
+                                HorizontalDivider()
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp)) // Add space before "View All" button
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             TextButton(
                                 onClick = {
@@ -211,10 +218,8 @@ fun TopAppBarContent(
                     }
                 }
             }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = CC.primary()
-        )
-    )
+        }
+    }
 }
 
 
