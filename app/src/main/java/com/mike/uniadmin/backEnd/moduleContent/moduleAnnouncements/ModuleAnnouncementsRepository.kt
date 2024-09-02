@@ -70,10 +70,8 @@ class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnno
         uniConnectScope.launch {
             try {
                 // To handle updates correctly:
-                // 1. Clear old announcements for this module
                 // 2. Insert the updated list of announcements
                 withContext(Dispatchers.IO) {
-                    moduleAnnouncementDao.clearAnnouncementsForModule(moduleID)  // Make sure the DAO has this method
                     moduleAnnouncementDao.insertModuleAnnouncements(announcements)
                 }
             } catch (e: Exception) {
