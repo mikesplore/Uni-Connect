@@ -37,7 +37,7 @@ fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
     val today = CC.currentDay()
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CC.secondary()),
+        colors = CardDefaults.cardColors(containerColor = CC.primary()),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 16.dp)
