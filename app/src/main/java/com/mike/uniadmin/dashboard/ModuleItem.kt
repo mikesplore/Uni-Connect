@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
@@ -81,7 +82,7 @@ fun ModuleItem(module: ModuleEntity, context: Context, navController: NavControl
 
             Text(
                 text = module.moduleName.take(10) + if (module.moduleName.length > 10) "..." else "",
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
                 maxLines = 1
             )
         }
