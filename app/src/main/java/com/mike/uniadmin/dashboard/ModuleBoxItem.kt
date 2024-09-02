@@ -1,5 +1,6 @@
 package com.mike.uniadmin.dashboard
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -68,7 +69,8 @@ fun ModuleBox(
             )
             Text(
                 module.moduleName,
-                style = CC.titleTextStyle(context).copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                style = CC.titleTextStyle(context)
+                    .copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 10.dp)
@@ -131,7 +133,7 @@ fun LoadingModuleBox() {
                 modifier = Modifier
                     .height(25.dp)
                     .fillMaxWidth(0.5f)
-            ) // Adjusted to a fraction of width
+            )
         }
     )
 }
@@ -166,7 +168,7 @@ fun ModuleBoxContent(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .background(CC.secondary(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
+                    .background(CC.primary(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween,
                 content = bodyContent
@@ -175,6 +177,7 @@ fun ModuleBoxContent(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ModuleBoxList(
     modules: List<ModuleEntity>,
@@ -207,7 +210,13 @@ fun ModuleBoxList(
                         context = context,
                         navController = navController,
                         onClicked = { updatedModule ->
-                            moduleViewModel.saveModule(updatedModule.copy(visits = updatedModule.visits.plus(1)))
+                            moduleViewModel.saveModule(
+                                updatedModule.copy(
+                                    visits = updatedModule.visits.plus(
+                                        1
+                                    )
+                                )
+                            )
                         }
                     )
                 }
