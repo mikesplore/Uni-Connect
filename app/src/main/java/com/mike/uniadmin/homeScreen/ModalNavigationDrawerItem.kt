@@ -95,7 +95,7 @@ fun ModalNavigationDrawerItem(
         Column(
             modifier = Modifier
                 .background(
-                    CC.secondary()
+                    CC.primary()
                 )
                 .fillMaxHeight()
                 .fillMaxWidth(0.5f),
@@ -230,7 +230,6 @@ fun ModalNavigationDrawerItem(
             }
             Row(
                 modifier = Modifier
-                    .background(CC.extraColor1())
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
