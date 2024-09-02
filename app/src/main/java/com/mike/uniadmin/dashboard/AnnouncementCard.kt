@@ -103,14 +103,14 @@ fun BaseAnnouncementCard(content: @Composable ColumnScope.() -> Unit) {
             .fillMaxWidth()
             .padding(15.dp),
         colors = CardDefaults.cardColors(
-            containerColor = CC.secondary()
+            containerColor = CC.primary()
         ),
         shape = RoundedCornerShape(10.dp),
         elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
         Column(
             modifier = Modifier
-                .background(CC.secondary())
+                .background(CC.primary())
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
