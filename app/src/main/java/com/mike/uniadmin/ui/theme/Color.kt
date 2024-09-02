@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.Color
 
 
 //light theme
-val LightBlue = Color(0xffAEE2FF)
-val PaleBlue = Color(0xFF86B6F6)
-val Cyan = Color(0xFF2980B9)
+val LightBlue = Color(0xffffffff)
+val PaleBlue = Color(0xFF3FA2F6)
+val Cyan = Color(0xFF41B06E)
 val DarkGray = Color(0xFF0D151E)
 val SkyBlue = Color(0xFFBBDEFB)
 val White = Color(0xFF1B4F72)
@@ -21,9 +21,9 @@ val White = Color(0xFF1B4F72)
 
 //dark theme
 val DarkNavy = Color(0xFF0D151E)
-val DeepBlue = Color(0xFF27374D)
-val BrightBlue = Color(0xFF6096B4)
-val LightGray = Color(0xFFF2F2F2)
-val Turquoise = Color(0xFF3C5B6F)
-val Black = Color(0xFFA7E6FF)
+val DeepBlue = Color(0xFF1B4F72)
+val BrightBlue = Color(0xFFBBDEFB)
+val LightGray = Color(0xFFFFFFFF)
+val Turquoise = Color(0xFF0C356A)
+val Black = Color(0xFF3FA2F6)
 
