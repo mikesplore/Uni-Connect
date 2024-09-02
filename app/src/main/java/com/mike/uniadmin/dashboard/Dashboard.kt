@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,15 +42,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getModuleTimetableViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Dashboard(navController: NavController, context: Context) {
     val moduleViewModel = getModuleViewModel(context)
@@ -64,11 +67,10 @@ fun Dashboard(navController: NavController, context: Context) {
     val currentUser by userViewModel.user.observeAsState()
     val modules by moduleViewModel.modules.observeAsState(emptyList())
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
-    val modulesLoading by moduleViewModel.isLoading.observeAsState()
-
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     val loggedInUserEmail = UniAdminPreferences.userEmail.value
     var isRefreshing by remember { mutableStateOf(false) }
+    var scope = rememberCoroutineScope()
     val state = rememberPullRefreshState(refreshing = isRefreshing,
         onRefresh = {
             isRefreshing = true
@@ -78,20 +80,16 @@ fun Dashboard(navController: NavController, context: Context) {
             userViewModel.findUserByEmail(loggedInUserEmail) {}
             announcementViewModel.fetchAnnouncements()
             notificationViewModel.fetchNotifications()
-            isRefreshing = false
+            scope.launch {
+                delay(3000)
+                if (isRefreshing) {
+                    isRefreshing = false
+                }
+            }
         })
 
 
     LaunchedEffect(key1 = 1) {
-//        Log.d("ModuleTimetableRepository", "Dashboard launched")
-//        Log.d("ModuleTimetableRepository", "${modules.size} found")
-//        moduleViewModel.fetchModules()
-//        moduleTimetableViewModel.getAllModuleTimetables()
-//        userViewModel.checkAllUserStatuses()
-//        userViewModel.findUserByEmail(loggedInUserEmail) {}
-//        announcementViewModel.fetchAnnouncements()
-//        notificationViewModel.fetchNotifications()
-
         while (true) {
             isOnline.value = isDeviceOnline(context)
             delay(10000L) // Check every 10 seconds
@@ -104,14 +102,13 @@ fun Dashboard(navController: NavController, context: Context) {
             .background(CC.primary())
             .fillMaxSize(),
     ) {
-        currentUser?.let {
             TopAppBarContent(
-                signedInUser = it,
+                signedInUser = currentUser?: UserEntity(),
                 context = context,
                 navController = navController,
                 notificationViewModel = notificationViewModel
             )
-        }
+
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -139,7 +136,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         "Modules",
@@ -148,7 +145,7 @@ fun Dashboard(navController: NavController, context: Context) {
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 if (modules.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -177,21 +174,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                if (modulesLoading == true) {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        items(5) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(start = 15.dp)
-                                    .height(200.dp)
-                            ) {
-                                LoadingModuleBox()
-                            }
-                        }
-                    }
-                } else if (modules.isNotEmpty()) {
+                if (modules.isNotEmpty()) {
                     val sortedModules =
                         modules.sortedByDescending { it.visits } // Sort by moduleVisits in descending order
 
