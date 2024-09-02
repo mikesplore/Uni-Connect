@@ -1,6 +1,7 @@
 package com.mike.uniadmin.backEnd.moduleContent.moduleAssignments
 
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -19,6 +20,6 @@ interface ModuleAssignmentDao {
 
 
     @Query("SELECT * FROM moduleAssignments WHERE moduleCode = :moduleID")
-    suspend fun getModuleAssignments(moduleID: String): List<ModuleAssignment>
+    fun getModuleAssignments(moduleID: String): LiveData <List<ModuleAssignment>>
 
 }
