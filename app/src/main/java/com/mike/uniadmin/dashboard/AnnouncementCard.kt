@@ -1,6 +1,5 @@
 package com.mike.uniadmin.dashboard
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,14 +30,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun AnnouncementCard(
     announcement: AnnouncementsWithAuthor,
-    context: Context
 ) {
     BaseAnnouncementCard {
         // Title Row
@@ -47,14 +43,12 @@ fun AnnouncementCard(
             imageLink = announcement.profileImageLink,
             authorName = announcement.authorName,
             title = announcement.title,
-            context = context
         )
 
         Spacer(modifier = Modifier.height(16.dp))
         // Description
         AnnouncementDescription(
             description = announcement.description,
-            context = context
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -62,19 +56,17 @@ fun AnnouncementCard(
         AnnouncementFooter(
             date = announcement.date,
             authorName = announcement.authorName,
-            context = context
         )
     }
 }
 
 
 @Composable
-fun LoadingAnnouncementCard(context: Context) {
+fun LoadingAnnouncementCard() {
     BaseAnnouncementCard {
         // Title Row
         AnnouncementTitleRow(
             isLoading = true,
-            context = context
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -89,35 +81,32 @@ fun LoadingAnnouncementCard(context: Context) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            LoadingPlaceholder(modifier = Modifier.width(100.dp).height(20.dp))
-            LoadingPlaceholder(modifier = Modifier.width(100.dp).height(20.dp))
+            LoadingPlaceholder(modifier = Modifier
+                .width(100.dp)
+                .height(20.dp))
+            LoadingPlaceholder(modifier = Modifier
+                .width(100.dp)
+                .height(20.dp))
         }
     }
 }
 
 @Composable
 fun BaseAnnouncementCard(content: @Composable ColumnScope.() -> Unit) {
-    Card(
+    Column(
         modifier = Modifier
-            .heightIn(min = 200.dp)
-            .fillMaxWidth()
-            .padding(15.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CC.primary()
-        ),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.elevatedCardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .background(CC.primary())
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            content = content
-        )
-    }
+            .heightIn(min = 100.dp)
+            .shadow(
+                elevation = 4.dp, shape = RoundedCornerShape(16.dp),
+                spotColor = CC.extraColor2(),
+            )
+            .background(CC.primary())
+            .fillMaxWidth(0.9f)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        content = content
+    )
 }
 
 @Composable
@@ -125,7 +114,6 @@ fun AnnouncementTitleRow(
     imageLink: String = "",
     authorName: String = "",
     title: String = "",
-    context: Context,
     isLoading: Boolean = false
 ) {
     Row(
@@ -133,16 +121,18 @@ fun AnnouncementTitleRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        ProfileImageBox(imageLink, authorName, isLoading, context)
+        ProfileImageBox(imageLink, authorName, isLoading)
 
         Spacer(modifier = Modifier.width(8.dp))
 
         if (isLoading) {
-            LoadingPlaceholder(modifier = Modifier.width(150.dp).height(30.dp))
+            LoadingPlaceholder(modifier = Modifier
+                .width(150.dp)
+                .height(30.dp))
         } else {
             Text(
                 text = title,
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,
@@ -153,7 +143,7 @@ fun AnnouncementTitleRow(
 }
 
 @Composable
-fun ProfileImageBox(imageLink: String, authorName: String, isLoading: Boolean, context: Context) {
+fun ProfileImageBox(imageLink: String, authorName: String, isLoading: Boolean) {
     Box(
         modifier = Modifier
             .border(1.dp, CC.textColor(), CircleShape)
@@ -174,7 +164,7 @@ fun ProfileImageBox(imageLink: String, authorName: String, isLoading: Boolean, c
         } else {
             Text(
                 text = authorName.firstOrNull()?.toString() ?: "",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
                     .copy(fontWeight = FontWeight.Bold)
             )
         }
@@ -182,19 +172,19 @@ fun ProfileImageBox(imageLink: String, authorName: String, isLoading: Boolean, c
 }
 
 @Composable
-fun AnnouncementFooter(date: String, authorName: String, context: Context) {
+fun AnnouncementFooter(date: String, authorName: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = CC.getRelativeDate(CC.getDateFromTimeStamp(date)),
-            style = CC.descriptionTextStyle(context)
+            style = CC.descriptionTextStyle()
                 .copy(color = CC.textColor().copy(alpha = 0.7f))
         )
         Text(
             text = authorName,
-            style = CC.descriptionTextStyle(context)
+            style = CC.descriptionTextStyle()
                 .copy(color = CC.textColor().copy(alpha = 0.7f))
         )
     }
@@ -202,7 +192,7 @@ fun AnnouncementFooter(date: String, authorName: String, context: Context) {
 
 
 @Composable
-fun AnnouncementDescription(description: String, context: Context) {
+fun AnnouncementDescription(description: String) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -210,7 +200,7 @@ fun AnnouncementDescription(description: String, context: Context) {
     ) {
         Text(
             text = description,
-            style = CC.descriptionTextStyle(context)
+            style = CC.descriptionTextStyle()
                 .copy(color = CC.textColor().copy(alpha = 0.7f))
         )
     }
