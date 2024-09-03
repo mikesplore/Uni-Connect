@@ -1,6 +1,5 @@
 package com.mike.uniadmin.uniChat.groupChat.groupChatComponents
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -29,7 +28,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun MessageInputRow(
-    message: String, onMessageChange: (String) -> Unit, onSendClick: () -> Unit, context: Context
+    message: String, onMessageChange: (String) -> Unit, onSendClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -46,7 +45,7 @@ fun MessageInputRow(
                 .padding(end = 8.dp) // Add padding to the right
                 .background(CC.secondary(), RoundedCornerShape(24.dp)) // Use surface color
                 .heightIn(min = 40.dp), // Minimum height
-            textStyle = CC.descriptionTextStyle(context),
+            textStyle = CC.descriptionTextStyle(),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.padding(16.dp), // Increased padding
@@ -55,7 +54,7 @@ fun MessageInputRow(
                     if (message.isEmpty()) {
                         Text(
                             text = "Message",
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                            style = CC.descriptionTextStyle().copy(fontSize = 12.sp)
                         )
                     }
                     innerTextField()
