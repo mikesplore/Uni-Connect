@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
@@ -70,7 +68,7 @@ fun Dashboard(navController: NavController, context: Context) {
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
     val loggedInUserEmail = UniAdminPreferences.userEmail.value
     var isRefreshing by remember { mutableStateOf(false) }
-    var scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val state = rememberPullRefreshState(refreshing = isRefreshing,
         onRefresh = {
             isRefreshing = true
@@ -102,12 +100,11 @@ fun Dashboard(navController: NavController, context: Context) {
             .background(CC.primary())
             .fillMaxSize(),
     ) {
-            TopAppBarContent(
-                signedInUser = currentUser?: UserEntity(),
-                context = context,
-                navController = navController,
-                notificationViewModel = notificationViewModel
-            )
+        TopAppBarContent(
+            signedInUser = currentUser ?: UserEntity(),
+            navController = navController,
+            notificationViewModel = notificationViewModel
+        )
 
         Box(
             modifier = Modifier
@@ -129,7 +126,7 @@ fun Dashboard(navController: NavController, context: Context) {
                         Icon(Icons.Default.Warning, "Warning", tint = Color.Red)
                         Text(
                             "You are not connected to the internet",
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(start = 15.dp)
                         )
@@ -140,7 +137,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         "Modules",
-                        style = CC.titleTextStyle(context)
+                        style = CC.titleTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
@@ -153,7 +150,7 @@ fun Dashboard(navController: NavController, context: Context) {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No modules found", style = CC.descriptionTextStyle(context))
+                        Text("No modules found", style = CC.descriptionTextStyle())
                     }
 
                 } else {
@@ -161,14 +158,14 @@ fun Dashboard(navController: NavController, context: Context) {
                         moduleTimetableViewModel.getModuleTimetables(it.moduleCode)
                         moduleTimetableViewModel.findUpcomingClass()
                     }
-                    ModuleItemList(modules, context, navController)
+                    ModuleItemList(modules, navController)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
 
                     Text(
                         "Module Resources",
-                        style = CC.titleTextStyle(context)
+                        style = CC.titleTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
@@ -178,7 +175,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     val sortedModules =
                         modules.sortedByDescending { it.visits } // Sort by moduleVisits in descending order
 
-                    ModuleBoxList(sortedModules, context, navController, moduleViewModel)
+                    ModuleBoxList(sortedModules, navController, moduleViewModel)
                 } else {
                     Box(
                         modifier = Modifier
@@ -186,7 +183,7 @@ fun Dashboard(navController: NavController, context: Context) {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No modules found", style = CC.descriptionTextStyle(context))
+                        Text("No modules found", style = CC.descriptionTextStyle())
                     }
                 }
 
@@ -195,7 +192,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         "Latest Announcement",
-                        style = CC.titleTextStyle(context)
+                        style = CC.titleTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
@@ -203,7 +200,7 @@ fun Dashboard(navController: NavController, context: Context) {
                 Spacer(modifier = Modifier.height(10.dp))
                 if (announcementsLoading == true) {
 
-                    LoadingAnnouncementCard(context)
+                    LoadingAnnouncementCard()
 
                 } else if (announcements?.isEmpty() == true) {
                     Box(
@@ -212,17 +209,18 @@ fun Dashboard(navController: NavController, context: Context) {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No announcements found", style = CC.descriptionTextStyle(context))
+                        Text("No announcements found", style = CC.descriptionTextStyle())
                     }
                 } else {
                     announcements?.maxByOrNull { it.date }?.let { announcement ->
-                        AnnouncementCard(announcement, context)
+                        AnnouncementCard(announcement)
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         "My Next Class",
-                        style = CC.titleTextStyle(context)
+                        style = CC.titleTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
@@ -235,10 +233,10 @@ fun Dashboard(navController: NavController, context: Context) {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No timetable found", style = CC.descriptionTextStyle(context))
+                        Text("No timetable found", style = CC.descriptionTextStyle())
                     }
                 } else {
-                    ModuleTimetableCard(todayTimetable!!, context)
+                    ModuleTimetableCard(todayTimetable!!)
                 }
             }
             PullRefreshIndicator(
