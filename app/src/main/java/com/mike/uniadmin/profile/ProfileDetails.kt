@@ -1,6 +1,5 @@
 package com.mike.uniadmin.profile
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +29,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
 fun ProfileDetails(
-    context: Context,
     viewModel: UserViewModel,
     updated: Boolean,
     onUpdateChange: (Boolean) -> Unit
@@ -101,7 +99,6 @@ fun ProfileDetails(
                 title = "First Name",
                 value = firstName,
                 onValueChange = { firstName = it },
-                context = context,
                 isEditing = isEditing
             )
 
@@ -109,7 +106,6 @@ fun ProfileDetails(
                 title = "Last Name",
                 value = lastName,
                 onValueChange = { lastName = it },
-                context = context,
                 isEditing = isEditing
             )
 
@@ -117,7 +113,6 @@ fun ProfileDetails(
                 title = "Email",
                 value = user.email,
                 onValueChange = {},
-                context = context,
                 isEditing = false, // Email is not editable
                 fontSize = 15.sp
             )
@@ -126,7 +121,6 @@ fun ProfileDetails(
                 title = "Admission Number",
                 value = user.id,
                 onValueChange = {},
-                context = context,
                 isEditing = false, // Admission Number is not editable
                 fontSize = 15.sp
             )
@@ -135,7 +129,6 @@ fun ProfileDetails(
                 title = "Phone Number",
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it },
-                context = context,
                 isEditing = isEditing
             )
         }
