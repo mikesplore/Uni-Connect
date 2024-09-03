@@ -1,6 +1,5 @@
 package com.mike.uniadmin
 
-import android.content.Context
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -29,37 +28,34 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
 @Composable
-fun SplashScreen(navController: NavController, context: Context) {
+fun SplashScreen(navController: NavController) {
     var startAnimation by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
         targetValue = if (startAnimation) 0.8f else 0.6f,
-        animationSpec = tween(durationMillis = 800, easing = { OvershootInterpolator(2f).getInterpolation(it) }),
+        animationSpec = tween(
+            durationMillis = 800,
+            easing = { OvershootInterpolator(2f).getInterpolation(it) }),
         label = ""
     )
 
     val email = UniAdminPreferences.userEmail.value
-    val courseCode = CourseManager.courseCode.value
+    val courseCode = CourseManager.courseCode
     val userId = UniAdminPreferences.userID.value
 
     val destination = when {
         email.isEmpty() && userId.isEmpty() -> "login"
-        courseCode.isEmpty() -> "courses"
+        courseCode.equals("") -> "courses"
         else -> "homeScreen"
     }
 
@@ -98,20 +94,21 @@ fun SplashScreen(navController: NavController, context: Context) {
             // Improved Text Style with Gradients and Shadows
             Text(
                 text = "Uni Connect",
-                style = CC.titleTextStyle(context).copy(
+                style = CC.titleTextStyle().copy(
                     fontSize = 32.sp, // Larger font for emphasis
                     fontWeight = FontWeight.ExtraBold,
                     shadow = Shadow( // Add shadow for a slight 3D effect
                         color = Color.Black,
                         blurRadius = 8f,
                         offset = Offset(4f, 4f)
-                    ))
+                    )
                 )
+            )
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = "Your Ultimate Educational Companion",
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     fontSize = 18.sp, // Smaller font for description
                     fontWeight = FontWeight.Normal,
                 )
@@ -129,7 +126,7 @@ fun SplashScreen(navController: NavController, context: Context) {
         ) {
             Text(
                 text = "Developed by Mike",
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     fontSize = 14.sp,
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
@@ -140,9 +137,3 @@ fun SplashScreen(navController: NavController, context: Context) {
     }
 }
 
-
-@Preview
-@Composable
-fun SplashScreenPreview() {
-    SplashScreen(navController = rememberNavController(), context = LocalContext.current)
-}
