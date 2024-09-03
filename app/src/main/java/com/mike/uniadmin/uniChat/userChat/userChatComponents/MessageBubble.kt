@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material3.AlertDialog
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatEntity
 import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
-import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -81,13 +79,14 @@ fun MessageBubble(
         })
     }
 
-    BoxWithConstraints(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 8.dp, vertical = 2.dp)
-        .combinedClickable(onClick = {}, onLongClick = {
-            if (message.senderID != senderID) return@combinedClickable
-            showDeleteDialog = true
-        }), contentAlignment = alignment
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .combinedClickable(onClick = {}, onLongClick = {
+                if (message.senderID != senderID) return@combinedClickable
+                showDeleteDialog = true
+            }), contentAlignment = alignment
     ) {
         val maxBubbleWidth = maxWidth * 0.75f
 
@@ -98,7 +97,7 @@ fun MessageBubble(
             if (isUser) {
                 Text(
                     text = CC.getFormattedTime(message.timeStamp),
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     fontSize = 11.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.padding(end = 4.dp)
@@ -115,7 +114,7 @@ fun MessageBubble(
                 SelectionContainer { // Wrap the Text composable with SelectionContainer
                     Text(
                         text = message.message,
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                        style = CC.descriptionTextStyle().copy(fontSize = 12.sp)
                     )
                 }
             }
@@ -129,7 +128,7 @@ fun MessageBubble(
             if (!isUser) {
                 Text(
                     text = CC.getFormattedTime(message.timeStamp),
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     fontSize = 11.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier.padding(start = 4.dp)
@@ -142,11 +141,11 @@ fun MessageBubble(
     if (showDeleteDialog) {
         AlertDialog(containerColor = CC.primary(),
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text(text = "Delete Message", style = CC.titleTextStyle(context)) },
+            title = { Text(text = "Delete Message", style = CC.titleTextStyle()) },
             text = {
                 Text(
                     text = "Are you sure you want to delete this message?",
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle()
                 )
             },
             confirmButton = {
@@ -154,12 +153,12 @@ fun MessageBubble(
                     deleteMessage()
                     showDeleteDialog = false
                 }) {
-                    Text("Delete", style = CC.descriptionTextStyle(context))
+                    Text("Delete", style = CC.descriptionTextStyle())
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel", style = CC.descriptionTextStyle(context))
+                    Text("Cancel", style = CC.descriptionTextStyle())
                 }
             })
     }
