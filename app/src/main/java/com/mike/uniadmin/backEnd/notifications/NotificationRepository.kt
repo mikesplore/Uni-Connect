@@ -14,8 +14,7 @@ import kotlinx.coroutines.launch
 
 
 class NotificationRepository(private val notificationDao: NotificationDao) {
-    private val courseCode = CourseManager.courseCode.value
-    private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Notifications")
+    private val database = FirebaseDatabase.getInstance().reference.child("Notifications")
     private val valueListeners = mutableMapOf<String, ValueEventListener>()
     private val childListeners = mutableMapOf<String, ChildEventListener>()
 
