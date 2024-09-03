@@ -112,7 +112,7 @@ fun ModalNavigationDrawerItem(
                 if (signedInUserLoading == true) {
                     CircularProgressIndicator(color = CC.textColor())
                 } else if (signedInUser != null) {
-                    SideProfile(signedInUser, context)
+                    SideProfile(signedInUser)
                 } else {
                     Icon(Icons.Default.AccountCircle, "", tint = CC.textColor())
                 }
@@ -124,7 +124,6 @@ fun ModalNavigationDrawerItem(
             ) {
                 SideBarItem(icon = Icons.Default.AccountCircle,
                     text = "Profile",
-                    context,
                     onClicked = {
                         scope.launch {
                             drawerState.close()
@@ -134,7 +133,6 @@ fun ModalNavigationDrawerItem(
                 SideBarItem(
                     icon = Icons.Default.BubbleChart,
                     text = "Uni Chat",
-                    context,
                     onClicked = {
                         // Check if biometrics is enabled
                         if (UniAdminPreferences.biometricEnabled.value) {
@@ -163,7 +161,6 @@ fun ModalNavigationDrawerItem(
 
                 SideBarItem(icon = Icons.Default.Notifications,
                     text = "Notifications",
-                    context,
                     onClicked = {
                         scope.launch {
                             drawerState.close()
@@ -172,13 +169,13 @@ fun ModalNavigationDrawerItem(
                         chatViewModel.fetchGroups()
                         navController.navigate("notifications")
                     })
-                SideBarItem(icon = Icons.Default.Settings, text = "Settings", context, onClicked = {
+                SideBarItem(icon = Icons.Default.Settings, text = "Settings", onClicked = {
                     scope.launch {
                         drawerState.close()
                     }
                     navController.navigate("settings")
                 })
-                SideBarItem(icon = Icons.Default.Share, text = "Share App", context, onClicked = {
+                SideBarItem(icon = Icons.Default.Share, text = "Share App", onClicked = {
                     scope.launch {
                         drawerState.close()
                     }
@@ -195,7 +192,6 @@ fun ModalNavigationDrawerItem(
                 })
                 SideBarItem(icon = Icons.Default.ArrowDownward,
                     text = "More",
-                    context,
                     onClicked = {
                         scope.launch {
                             drawerState.close()
@@ -215,7 +211,7 @@ fun ModalNavigationDrawerItem(
                     ) {
                         Text(
                             if (role == "admin") "Admin" else "Student",
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                         )
                         Switch(
                             checked = role == "admin",
@@ -249,7 +245,7 @@ fun ModalNavigationDrawerItem(
                 ) {
                     Text(
                         "Sign Out",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                     )
                 }
                 if (showSignOutDialog) {
@@ -268,7 +264,7 @@ fun ModalNavigationDrawerItem(
 }
 
 @Composable
-fun SideBarItem(icon: ImageVector, text: String, context: Context, onClicked: () -> Unit) {
+fun SideBarItem(icon: ImageVector, text: String, onClicked: () -> Unit) {
     Spacer(modifier = Modifier.height(10.dp))
     TextButton(onClick = onClicked) {
         Row(
@@ -282,7 +278,7 @@ fun SideBarItem(icon: ImageVector, text: String, context: Context, onClicked: ()
                 icon, "", tint = CC.textColor()
             )
             Spacer(modifier = Modifier.width(10.dp))
-            Text(text, style = CC.descriptionTextStyle(context))
+            Text(text, style = CC.descriptionTextStyle())
 
         }
     }
@@ -311,7 +307,7 @@ fun SignOut(
             ) {
                 Text(
                     text = "Are you sure you want to sign out?",
-                    style = CC.titleTextStyle(context),
+                    style = CC.titleTextStyle(),
                     textAlign = TextAlign.Center // Center-align the text
                 )
             }
@@ -320,7 +316,7 @@ fun SignOut(
 
             Text(
                 text = "Signing out will clear app settings and data.",
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(),
                 modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
             )
 
@@ -364,7 +360,7 @@ fun SignOut(
                         containerColor = CC.extraColor1()
                     )
                 ) {
-                    Text("Sign Out", style = CC.descriptionTextStyle(context))
+                    Text("Sign Out", style = CC.descriptionTextStyle())
                 }
 
                 TextButton(
@@ -374,7 +370,7 @@ fun SignOut(
                         containerColor = CC.secondary()
                     )
                 ) {
-                    Text("Cancel", style = CC.descriptionTextStyle(context))
+                    Text("Cancel", style = CC.descriptionTextStyle())
                 }
             }
         }
@@ -382,7 +378,7 @@ fun SignOut(
 }
 
 @Composable
-fun SideProfile(user: UserEntity, context: Context) {
+fun SideProfile(user: UserEntity) {
     BoxWithConstraints {
         val columnWidth = maxWidth
         val iconSize = columnWidth * 0.45f
@@ -422,7 +418,7 @@ fun SideProfile(user: UserEntity, context: Context) {
                 } else {
                     Text(
                         "${user.firstName[0]}${user.lastName[0]}",
-                        style = CC.titleTextStyle(context)
+                        style = CC.titleTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = textSize),
                     )
                 }
@@ -430,7 +426,7 @@ fun SideProfile(user: UserEntity, context: Context) {
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 user.firstName + " " + user.lastName,
-                style = CC.titleTextStyle(context).copy(
+                style = CC.titleTextStyle().copy(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
@@ -440,7 +436,7 @@ fun SideProfile(user: UserEntity, context: Context) {
             Spacer(modifier = Modifier.height(10.dp))
             val userType = UniAdminPreferences.userType.value.uppercase(Locale.ROOT)
 
-            Text(userType, style = CC.descriptionTextStyle(context))
+            Text(userType, style = CC.descriptionTextStyle())
         }
     }
 }
