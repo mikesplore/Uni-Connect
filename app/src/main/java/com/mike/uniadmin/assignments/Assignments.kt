@@ -66,7 +66,7 @@ fun AssignmentScreen(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Assignments", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)) },
+                title = { Text("Assignments", style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {},
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CC.primary(),
@@ -88,7 +88,7 @@ fun AssignmentScreen(context: Context) {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "No modules available", style = CC.descriptionTextStyle(context))
+                        Text(text = "No modules available", style = CC.descriptionTextStyle())
                     }
                 }
                 isLoading == true -> {
@@ -114,7 +114,7 @@ fun AssignmentScreen(context: Context) {
                                     text = {
                                         Text(
                                             text = module.moduleName.take(10).plus(if (module.moduleName.length > 10) "..." else ""),
-                                            style = CC.descriptionTextStyle(context).copy(
+                                            style = CC.descriptionTextStyle().copy(
                                                 color = if (selectedTabIndex == index) CC.textColor() else CC.textColor()
                                             )
                                         )
@@ -129,13 +129,13 @@ fun AssignmentScreen(context: Context) {
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = "No assignments available", style = CC.descriptionTextStyle(context))
+                                    Text(text = "No assignments available", style = CC.descriptionTextStyle())
                                 }
                             } else {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 LazyColumn {
                                     items(assignmentList) { assignment ->
-                                        AssignmentCard(assignment = assignment, context)
+                                        AssignmentCard(assignment = assignment)
                                     }
                                 }
                             }
@@ -156,7 +156,7 @@ fun AssignmentScreen(context: Context) {
 
 
 @Composable
-fun AssignmentCard(assignment: ModuleAssignment, context: Context) {
+fun AssignmentCard(assignment: ModuleAssignment) {
     Card(
         modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -166,16 +166,16 @@ fun AssignmentCard(assignment: ModuleAssignment, context: Context) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = assignment.title, style = CC.titleTextStyle(context)
+                text = assignment.title, style = CC.titleTextStyle()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = assignment.description, style = CC.descriptionTextStyle(context)
+                text = assignment.description, style = CC.descriptionTextStyle()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Due Date: ${assignment.dueDate}",
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(),
                 color = CC.textColor()
             )
         }
