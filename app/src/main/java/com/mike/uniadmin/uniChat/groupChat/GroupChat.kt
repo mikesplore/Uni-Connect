@@ -35,14 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
-import com.mike.uniadmin.backEnd.groupchat.GroupChatEntityWithDetails
 import com.mike.uniadmin.backEnd.groupchat.GroupEntity
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.helperFunctions.MyDatabase
+import com.mike.uniadmin.homeScreen.UserItem
 import com.mike.uniadmin.ui.theme.Background
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatBubble
 import com.mike.uniadmin.uniChat.groupChat.groupChatComponents.ChatTopAppBar
@@ -98,98 +97,96 @@ fun DiscussionScreen(
 
     Scaffold(
         topBar = {
-        GroupDetails.groupName.value?.let { groupName ->
-            GroupDetails.groupImageLink.value?.let { imageLink ->
-                ChatTopAppBar(
-                    navController = navController,
-                    targetGroupID = targetGroupID,
-                    name = groupName,
-                    link = imageLink,
-                    context = context,
-                    onSearchClick = { isSearchVisible = !isSearchVisible },
-                    onShowUsersClick = { showUsers = !showUsers })
-            }
-        }
-    }, snackbarHost = { SnackbarHost(snackbarHostState) }, content = { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            Background()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(8.dp)
-                    .imePadding()
-            ) {
-                group?.let {
-                    GroupUsersList(
-                        isVisible = showUsers,
-                        users = users,
+            GroupDetails.groupName.value?.let { groupName ->
+                GroupDetails.groupImageLink.value?.let { imageLink ->
+                    ChatTopAppBar(
                         navController = navController,
-                        context = context,
-                        viewModel = userViewModel,
-                        group = it
-                    )
+                        targetGroupID = targetGroupID,
+                        name = groupName,
+                        link = imageLink,
+                        onSearchClick = { isSearchVisible = !isSearchVisible },
+                        onShowUsersClick = { showUsers = !showUsers })
                 }
-                SearchBar(isSearchVisible = isSearchVisible,
-                    searchQuery = searchQuery,
-                    onSearchQueryChange = { searchQuery = it })
-                user?.let { currentUser ->
-                    LazyColumn(
-                        state = scrollState, modifier = Modifier
-                            .animateContentSize()
-                            .weight(1f)
-                    ) {
-
-                        val groupedChats = chats.groupBy { CC.getDateFromTimeStamp(it.groupChat.date) }
-
-                        groupedChats.forEach { (date, chatsForDate) ->
-                            item {
-                                RowText(context = context)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                DateHeader(date, context = context)
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-
-                            items(chatsForDate.filter {
-                                it.groupChat.message.contains(
-                                    searchQuery.text, ignoreCase = true
-                                )
-                            }) { chat ->
-                                ChatBubble(
-                                    chat = chat,
-                                    isUser = chat.groupChat.senderID == currentUser.id,
-                                    context = context,
-                                    navController = navController
-                                )
-                            }
-                        }
+            }
+        }, snackbarHost = { SnackbarHost(snackbarHostState) }, content = { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Background()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(8.dp)
+                        .imePadding()
+                ) {
+                    group?.let {
+                        GroupUsersList(
+                            isVisible = showUsers,
+                            users = users,
+                            navController = navController,
+                            viewModel = userViewModel,
+                            group = it
+                        )
                     }
-                    MessageInputRow(message = messageText,
-                        onMessageChange = { messageText = it },
-                        onSendClick = {
-                            if (messageText.isNotBlank() && currentUser.firstName.isNotBlank()) {
-                                MyDatabase.generateChatID { chatID ->
-                                    val chat = GroupChatEntity(
-                                        message = messageText,
-                                        senderID = currentUser.id,
-                                        chatId = chatID,
-                                        date = CC.getTimeStamp()
+                    SearchBar(isSearchVisible = isSearchVisible,
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { searchQuery = it })
+                    user?.let { currentUser ->
+                        LazyColumn(
+                            state = scrollState, modifier = Modifier
+                                .animateContentSize()
+                                .weight(1f)
+                        ) {
+
+                            val groupedChats =
+                                chats.groupBy { CC.getDateFromTimeStamp(it.groupChat.date) }
+
+                            groupedChats.forEach { (date, chatsForDate) ->
+                                item {
+                                    RowText()
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    DateHeader(date)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+
+                                items(chatsForDate.filter {
+                                    it.groupChat.message.contains(
+                                        searchQuery.text, ignoreCase = true
                                     )
-                                    sendMessage(
-                                        chat = chat, viewModel = chatViewModel, path = groupPath
+                                }) { chat ->
+                                    ChatBubble(
+                                        chat = chat,
+                                        isUser = chat.groupChat.senderID == currentUser.id,
+                                        navController = navController
                                     )
-                                    messageText = ""
                                 }
                             }
-                        },
-                        context = context
-                    )
-                } ?: run {
-                    Text("Loading...", style = CC.descriptionTextStyle(context))
+                        }
+                        MessageInputRow(
+                            message = messageText,
+                            onMessageChange = { messageText = it },
+                            onSendClick = {
+                                if (messageText.isNotBlank() && currentUser.firstName.isNotBlank()) {
+                                    MyDatabase.generateChatID { chatID ->
+                                        val chat = GroupChatEntity(
+                                            message = messageText,
+                                            senderID = currentUser.id,
+                                            chatId = chatID,
+                                            date = CC.getTimeStamp()
+                                        )
+                                        sendMessage(
+                                            chat = chat, viewModel = chatViewModel, path = groupPath
+                                        )
+                                        messageText = ""
+                                    }
+                                }
+                            },
+                        )
+                    } ?: run {
+                        Text("Loading...", style = CC.descriptionTextStyle())
+                    }
                 }
             }
-        }
-    })
+        })
 }
 
 
@@ -198,7 +195,6 @@ fun GroupUsersList(
     isVisible: Boolean,
     users: List<UserEntity>,
     navController: NavController,
-    context: Context,
     viewModel: UserViewModel,
     group: GroupEntity
 ) {
@@ -206,7 +202,8 @@ fun GroupUsersList(
         group.members.contains(user.id)  // Filter users based on membership
     }
 
-    AnimatedVisibility(visible = isVisible,
+    AnimatedVisibility(
+        visible = isVisible,
         enter = slideInHorizontally(initialOffsetX = { it }),
         exit = slideOutHorizontally(targetOffsetX = { it })
     ) {
@@ -214,7 +211,7 @@ fun GroupUsersList(
             modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             items(filteredUsers) { user ->  // Use the filtered list
-                UserItem(user, context, navController, viewModel)
+                UserItem(user, navController, viewModel)
             }
         }
     }
