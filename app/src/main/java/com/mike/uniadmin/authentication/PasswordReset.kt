@@ -78,7 +78,7 @@ fun PasswordReset(navController: NavController, context: Context) {
         ) {
             Text(
                 "Password Reset",
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontSize = 30.sp, fontWeight = FontWeight.Bold)
             )
         }
@@ -98,7 +98,7 @@ fun PasswordReset(navController: NavController, context: Context) {
             CC.SingleLinedTextField(
                 value = email, onValueChange = { eM ->
                     email = eM
-                }, label = "Email", singleLine = true, context = context
+                }, label = "Email", singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -139,7 +139,7 @@ fun PasswordReset(navController: NavController, context: Context) {
                         modifier = Modifier.size(20.dp)
                     )
                 } else {
-                    Text("Send Reset Email", style = CC.descriptionTextStyle(context))
+                    Text("Send Reset Email", style = CC.descriptionTextStyle())
                 }
             }
         }
@@ -162,14 +162,14 @@ fun SendPasswordResetSuccess(context: Context, email: String, onDismiss: (Boolea
                     verticalArrangement = Arrangement.SpaceAround
                 ) {
                     Text(
-                        "Password Reset", style = CC.titleTextStyle(context).copy(
+                        "Password Reset", style = CC.titleTextStyle().copy(
                             fontSize = 20.sp, fontWeight = FontWeight.Bold
                         )
                     )
 
                     val emailText = AnnotatedString.Builder().apply {
                         append("Password reset email will be sent to ")
-                        pushStyle(emailTextStyle(context).toSpanStyle()) // Apply email style
+                        pushStyle(emailTextStyle().toSpanStyle()) // Apply email style
                         append(email)
                         pop() // Remove email style
                         append(" if it exists in our database")
@@ -178,7 +178,7 @@ fun SendPasswordResetSuccess(context: Context, email: String, onDismiss: (Boolea
                     Text(
                         text = emailText,
                         modifier = Modifier.padding(6.dp),
-                        style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+                        style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
@@ -193,7 +193,7 @@ fun SendPasswordResetSuccess(context: Context, email: String, onDismiss: (Boolea
                             containerColor = CC.extraColor1(), contentColor = CC.tertiary()
                         )
                     ) {
-                        Text("Open Gmail App", style = CC.descriptionTextStyle(context))
+                        Text("Open Gmail App", style = CC.descriptionTextStyle())
                     }
 
                 }
@@ -204,9 +204,7 @@ fun SendPasswordResetSuccess(context: Context, email: String, onDismiss: (Boolea
 
 // In your CC class
 @Composable
-fun emailTextStyle(context: Context): TextStyle = CC.descriptionTextStyle(
-    context
-).copy(
+fun emailTextStyle(): TextStyle = CC.descriptionTextStyle().copy(
     textDecoration = TextDecoration.Underline,
     color = CC.tertiary(),
     fontStyle = FontStyle.Italic
