@@ -12,7 +12,6 @@ import android.content.ContentValues
 import android.provider.MediaStore
 import android.os.Build
 import android.net.Uri
-import android.util.Log
 import com.mike.uniadmin.UniAdminPreferences
 
 suspend fun downloadPdfFile(context: Context, url: String, fileName: String): Uri? {
