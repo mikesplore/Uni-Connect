@@ -85,7 +85,6 @@ fun CourseScreen(context: Context, navController: NavController) {
     val isLoading by courseViewModel.isLoading.observeAsState(false)
     var showAddCourse by remember { mutableStateOf(false) }
     val userTypes = UniAdminPreferences.userType.value
-    var courseClicked by remember { mutableStateOf(false) }
 
     fun startListeners() {
         announcementViewModel.startAnnouncementsListener()
@@ -105,7 +104,7 @@ fun CourseScreen(context: Context, navController: NavController) {
         topBar = {
             TopAppBar(title = {
                 Text(
-                    "Courses", style = CC.titleTextStyle(context).copy(
+                    "Courses", style = CC.titleTextStyle().copy(
                         fontWeight = FontWeight.Bold, fontSize = 24.sp
                     )
                 )
@@ -168,7 +167,7 @@ fun CourseScreen(context: Context, navController: NavController) {
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "No courses available", style = CC.titleTextStyle(context).copy(
+                        "No courses available", style = CC.titleTextStyle().copy(
                             fontWeight = FontWeight.Bold, fontSize = 24.sp
                         )
                     )
@@ -177,7 +176,7 @@ fun CourseScreen(context: Context, navController: NavController) {
                 LazyColumn {
                     items(courses ?: emptyList()) { course ->
                         CourseItem(
-                            currentUser, course, context
+                            currentUser, course
                         ) {
                             repeat(2) {
                                 startListeners()
@@ -228,17 +227,6 @@ fun CourseScreen(context: Context, navController: NavController) {
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(5.dp))
-                        if (courseClicked) {
-                            Text(
-                                "Fetching Course Resources....",
-                                style = CC.descriptionTextStyle(context)
-                            )
-                            Text(
-                                "Click the button again if the course doesnt open",
-                                style = CC.descriptionTextStyle(context)
-                            )
-                        }
                     }
                 }
             }
@@ -250,7 +238,6 @@ fun CourseScreen(context: Context, navController: NavController) {
 fun CourseItem(
     currentUser: UserEntity?,
     courseEntity: CourseEntity?,
-    context: Context,
     onCourseClicked: () -> Unit = {}
 ) {
 
@@ -266,13 +253,13 @@ fun CourseItem(
         val density = LocalDensity.current
         val textSize = with(density) { (columnWidth * 0.045f).toSp() }
 
-        val titleStyle = CC.titleTextStyle(context).copy(
+        val titleStyle = CC.titleTextStyle().copy(
             fontWeight = FontWeight.Bold,
             fontSize = textSize,
             textAlign = TextAlign.Center
         )
 
-        val buttonStyle = CC.titleTextStyle(context).copy(
+        val buttonStyle = CC.titleTextStyle().copy(
             fontWeight = FontWeight.Bold,
             fontSize = textSize * 0.8f,
         )
@@ -399,7 +386,7 @@ fun AddCourse(
             .wrapContentHeight()
     ) {
         Text(
-            text = "Add Course", style = CC.titleTextStyle(context).copy(
+            text = "Add Course", style = CC.titleTextStyle().copy(
                 fontWeight = FontWeight.Bold, fontSize = 24.sp, textAlign = TextAlign.Center
             ), modifier = Modifier
                 .fillMaxWidth()
@@ -410,7 +397,6 @@ fun AddCourse(
             value = courseName,
             onValueChange = { newText -> courseName = newText },
             label = "Course Name",
-            context = context,
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
@@ -424,7 +410,6 @@ fun AddCourse(
             value = courseImageLink,
             onValueChange = { newText -> courseImageLink = newText },
             label = "Course Image Link",
-            context = context,
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
@@ -466,7 +451,7 @@ fun AddCourse(
                 CC.ColorProgressIndicator(modifier = Modifier.fillMaxWidth())
             } else {
                 Text(
-                    text = "Add Course", style = CC.titleTextStyle(context).copy(
+                    text = "Add Course", style = CC.titleTextStyle().copy(
                         fontWeight = FontWeight.Bold, fontSize = 16.sp
                     )
                 )
