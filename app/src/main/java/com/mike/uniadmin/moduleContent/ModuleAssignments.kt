@@ -114,7 +114,7 @@ fun AssignmentsItem(
                         tint = CC.textColor()
                     )
                 }
-                Text("${assignment.value.size} assignments", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
+                Text("${assignment.value.size} assignments", style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center),
                     modifier = Modifier.weight(1f))
                 if (userType == "admin") {
                     FloatingActionButton(
@@ -147,13 +147,13 @@ fun AssignmentsItem(
                         .wrapContentSize(Alignment.Center)
                 ){
                     Text("No Assignments",
-                        style = CC.descriptionTextStyle(context),
+                        style = CC.descriptionTextStyle(),
                         modifier = Modifier.wrapContentSize(Alignment.Center)
                     )}
             } else {
                 LazyColumn {
                     items(assignment.value) { assignment ->
-                        AssignmentCard(assignment, context, userViewModel)
+                        AssignmentCard(assignment, userViewModel)
                     }
                 }
             }
@@ -164,7 +164,7 @@ fun AssignmentsItem(
 
 @Composable
 fun AssignmentCard(
-    assignment: ModuleAssignment, context: Context, userViewModel: UserViewModel
+    assignment: ModuleAssignment, userViewModel: UserViewModel
 ) {
     var senderName by remember { mutableStateOf("") }
     var profileImageLink by remember { mutableStateOf("") }
@@ -209,23 +209,23 @@ fun AssignmentCard(
                 Column {
                     Text(
                         text = senderName,
-                        style = CC.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle()
                             .copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
                         text = assignment.publishedDate,
-                        style = CC.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle()
                             .copy(fontSize = 12.sp, color = CC.textColor().copy(0.7f))
                     )
                 }
             }
             Text(
                 text = assignment.title,
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
             )
             Text(
                 text = assignment.description,
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
                     .copy(color = CC.textColor().copy(0.8f))
             )
             Row(
@@ -238,7 +238,7 @@ fun AssignmentCard(
                     else if (assignment.dueDate == formattedDate) "Due Today"
                     else "Due: ${assignment.dueDate}",
                     fontSize = 12.sp,
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     color = if (assignment.dueDate < formattedDate) Color.Red else CC.textColor()
                 )
             }
@@ -303,21 +303,20 @@ fun AddAssignmentItem(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = senderName,
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     fontWeight = FontWeight.Bold, fontSize = 18.sp
                 )
             )
         }
 
         AddTextField(
-            label = "Title", value = title, onValueChange = { title = it }, context = context
+            label = "Title", value = title, onValueChange = { title = it }
         )
         Spacer(modifier = Modifier.height(10.dp))
         AddTextField(
             label = "Description",
             value = description,
             onValueChange = { description = it },
-            context = context,
             singleLine = false,
             maxLines = 20
         )
@@ -343,7 +342,7 @@ fun AddAssignmentItem(
         ) {
             Text(
                 text = if (dueDate.isEmpty()) "Pick Date" else "Date: $dueDate",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
             )
         }
 
@@ -364,7 +363,7 @@ fun AddAssignmentItem(
         ) {
             Text(
                 text = if (dueTime.isEmpty()) "Pick Time" else "Time: $dueTime",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
             )
         }
 
@@ -421,7 +420,7 @@ fun AddAssignmentItem(
                         color = CC.textColor(), modifier = Modifier.size(20.dp)
                     )
                 } else {
-                    Text("Post", style = CC.descriptionTextStyle(context))
+                    Text("Post", style = CC.descriptionTextStyle())
                 }
             }
             Button(
@@ -429,7 +428,7 @@ fun AddAssignmentItem(
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
             ) {
-                Text("Cancel", style = CC.descriptionTextStyle(context))
+                Text("Cancel", style = CC.descriptionTextStyle())
             }
         }
     }
