@@ -1,7 +1,7 @@
 package com.mike.uniadmin.dashboard
 
-import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,12 +34,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.backEnd.modules.ModuleEntity
+import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
-fun ModuleItem(module: ModuleEntity, context: Context, navController: NavController) {
+fun ModuleItem(module: ModuleEntity, navController: NavController) {
     BoxWithConstraints(
-        contentAlignment = Alignment.Center, modifier = Modifier.padding( start = 10.dp)
+        contentAlignment = Alignment.Center, modifier = Modifier.padding(start = 10.dp)
     ) {
         val cardSize = minOf(maxWidth, maxHeight) * 0.6f // Adaptive size based on available space
 
@@ -49,6 +50,9 @@ fun ModuleItem(module: ModuleEntity, context: Context, navController: NavControl
         ) {
             Card(
                 modifier = Modifier
+                    .border(
+                        1.dp, randomColor.random(), CircleShape
+                    )
                     .size(cardSize)
                     .clip(CircleShape)
                     .clickable {
@@ -82,7 +86,7 @@ fun ModuleItem(module: ModuleEntity, context: Context, navController: NavControl
 
             Text(
                 text = module.moduleName.take(10) + if (module.moduleName.length > 10) "..." else "",
-                style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
+                style = CC.descriptionTextStyle().copy(fontSize = 13.sp),
                 maxLines = 1
             )
         }
@@ -127,7 +131,7 @@ fun LoadingModuleItem() {
 
 
 @Composable
-fun ModuleItemList(modules: List<ModuleEntity>, context: Context, navController: NavController) {
+fun ModuleItemList(modules: List<ModuleEntity>, navController: NavController) {
     BoxWithConstraints {
         // Calculate the adaptive item width
         val screenWidth = maxWidth
@@ -143,7 +147,7 @@ fun ModuleItemList(modules: List<ModuleEntity>, context: Context, navController:
                 Box(
                     modifier = Modifier.width(adaptiveItemWidth) // Apply the adaptive width
                 ) {
-                    ModuleItem(module, context, navController)
+                    ModuleItem(module, navController)
                 }
             }
         }
