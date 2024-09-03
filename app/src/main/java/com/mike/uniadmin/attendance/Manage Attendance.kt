@@ -3,9 +3,7 @@ package com.mike.uniadmin.attendance
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -112,13 +110,13 @@ fun ManageAttendanceScreen(context: Context) {
             ) {
                 Text(
                     "Manage Attendance",
-                    style = CC.titleTextStyle(context)
+                    style = CC.titleTextStyle()
                         .copy(fontWeight = FontWeight.Bold, fontSize = 30.sp)
                 )
             }
 
             AnimatedVisibility(visible = showAddModule) {
-                AddModule(moduleViewModel, context) { success ->
+                AddModule(moduleViewModel) { success ->
                     showAddModule = false
                     if (success) {
                         Toast.makeText(context, "Module added successfully", Toast.LENGTH_SHORT)
@@ -132,7 +130,7 @@ fun ManageAttendanceScreen(context: Context) {
                 Row(
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
-                    Text("No modules found", style = CC.descriptionTextStyle(context))
+                    Text("No modules found", style = CC.descriptionTextStyle())
                 }
             } else {
                 modules.forEach { module ->
@@ -151,7 +149,7 @@ fun ManageAttendanceScreen(context: Context) {
                         Text(
                             module.moduleName,
                             modifier = Modifier.weight(1f),
-                            style = CC.descriptionTextStyle(context),
+                            style = CC.descriptionTextStyle(),
                             fontSize = 18.sp,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -183,7 +181,6 @@ fun ManageAttendanceScreen(context: Context) {
 @Composable
 fun AddModule(
     moduleViewModel: ModuleViewModel,
-    context: Context,
     onModuleAdded: (Boolean) -> Unit = {}
 ) {
     val moduleCode = remember { mutableStateOf("") }
@@ -195,12 +192,11 @@ fun AddModule(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Add Module", style = CC.titleTextStyle(context))
+        Text("Add Module", style = CC.titleTextStyle())
         CC.SingleLinedTextField(
             value = moduleCode.value,
             onValueChange = { moduleCode.value = it },
             label = "Module Code",
-            context = context,
             singleLine = true
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -208,7 +204,6 @@ fun AddModule(
             value = moduleName.value,
             onValueChange = { moduleName.value = it },
             label = "Module Name",
-            context = context,
             singleLine = true
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -217,7 +212,6 @@ fun AddModule(
             value = moduleImageLink.value,
             onValueChange = { moduleImageLink.value = it },
             label = "Module Image Link",
-            context = context,
             singleLine = true
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -243,7 +237,7 @@ fun AddModule(
                 containerColor = CC.secondary(), contentColor = CC.primary()
             )
         ) {
-            Text("Add Module", style = CC.descriptionTextStyle(context))
+            Text("Add Module", style = CC.descriptionTextStyle())
         }
     }
 }
