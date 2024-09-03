@@ -24,11 +24,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.BorderColor
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -103,7 +101,6 @@ fun Appearance(navController: NavController) {
 }
 
 
-
 @Composable
 fun currentFontFamily(): FontFamily {
     val selectedFontName = UniAdminPreferences.fontStyle.value
@@ -116,8 +113,6 @@ fun currentFontFamily(): FontFamily {
         else -> FontFamily.Default // Use system font if no preference is saved
     }
 }
-
-
 
 
 @Composable
@@ -153,7 +148,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
         ) {
             Text(
                 text = "Font Style",
-                style = CC.titleTextStyle(context),
+                style = CC.titleTextStyle(),
                 fontSize = 40.sp,
             )
         }
@@ -199,7 +194,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
 
         Text(
             text = "Selected Font Preview:",
-            style = CC.titleTextStyle(context),
+            style = CC.titleTextStyle(),
             fontSize = 18.sp,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -246,7 +241,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
                 .align(Alignment.CenterHorizontally)
                 .padding(vertical = 16.dp)
         ) {
-            Text("Save", style = CC.descriptionTextStyle(context))
+            Text("Save", style = CC.descriptionTextStyle())
         }
     }
 }
