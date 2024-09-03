@@ -33,7 +33,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -113,11 +112,11 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
                 actions = {
                     TextButton(onClick = { showAddSection = null }) {
                         if (showAddSection != null) {
-                            Text("Cancel", style = CC.descriptionTextStyle(context))
+                            Text("Cancel", style = CC.descriptionTextStyle())
                         }
                     }
                     TextButton(onClick = { navController.navigate("downloads") }) {
-                        Text("Downloads", style = CC.descriptionTextStyle(context))
+                        Text("Downloads", style = CC.descriptionTextStyle())
                     }
 
                 },
@@ -137,7 +136,7 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
                 CircularProgressIndicator(color = CC.textColor())
             }
         } else if (!isDeviceOnline(context)) {
-            Offline(context, { refresh = true }, navController)
+            Offline({ refresh = true }, navController)
 
         } else {
             Box(
@@ -195,7 +194,7 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
                             ) {
                                 Text(
                                     UniAdminPreferences.moduleName.value,
-                                    style = CC.titleTextStyle(context)
+                                    style = CC.titleTextStyle()
                                         .copy(
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 30.sp,
@@ -300,7 +299,7 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
 
 
 @Composable
-fun Offline(context: Context, onRefresh: () -> Unit, navController: NavController) {
+fun Offline(onRefresh: () -> Unit, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -318,12 +317,12 @@ fun Offline(context: Context, onRefresh: () -> Unit, navController: NavControlle
 
         Text(
             "Oops! It seems you're offline.",
-            style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+            style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center)
         )
 
         Text(
             "Connect to the internet to view this page or view your downloads.",
-            style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+            style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -339,13 +338,13 @@ fun Offline(context: Context, onRefresh: () -> Unit, navController: NavControlle
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            Text("Refresh", style = CC.descriptionTextStyle(context))
+            Text("Refresh", style = CC.descriptionTextStyle())
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedButton(onClick = { navController.navigate("downloads") }) {
-            Text("View Downloads", style = CC.descriptionTextStyle(context))
+            Text("View Downloads", style = CC.descriptionTextStyle())
         }
     }
 }
