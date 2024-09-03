@@ -40,9 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -118,7 +116,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 ) {
                     Text(
                         "Settings",
-                        style = CC.titleTextStyle(context),
+                        style = CC.titleTextStyle(),
                         fontSize = textSize * 1.2f,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -130,7 +128,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 ) {
                     Text(
                         "Account",
-                        style = CC.titleTextStyle(context).copy(fontSize = textSize * 0.8f)
+                        style = CC.titleTextStyle().copy(fontSize = textSize * 0.8f)
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
@@ -169,7 +167,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                             } else {
                                 Text(
                                     "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
-                                    style = CC.titleTextStyle(context)
+                                    style = CC.titleTextStyle()
                                         .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
                                 )
                             }
@@ -180,13 +178,13 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                         ) {
                             Text(
                                 currentUser?.firstName + " " + currentUser?.lastName,
-                                style = CC.descriptionTextStyle(context),
+                                style = CC.descriptionTextStyle(),
                                 fontSize = 20.sp
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
                                 "Personal Info",
-                                style = CC.descriptionTextStyle(context),
+                                style = CC.descriptionTextStyle(),
                                 color = CC.textColor().copy(0.8f)
                             )
                         }
@@ -200,22 +198,22 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 Row(modifier = Modifier.fillMaxWidth(0.9f)) {
                     Text(
                         "System",
-                        style = CC.titleTextStyle(context).copy(fontSize = textSize * 0.8f)
+                        style = CC.titleTextStyle().copy(fontSize = textSize * 0.8f)
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                DarkMode(context)
+                DarkMode()
                 Spacer(modifier = Modifier.height(20.dp))
                 Notifications(context)
                 Spacer(modifier = Modifier.height(40.dp))
                 Row(modifier = Modifier.fillMaxWidth(0.9f)) {
                     Text(
                         "Security",
-                        style = CC.titleTextStyle(context).copy(fontSize = textSize * 0.8f)
+                        style = CC.titleTextStyle().copy(fontSize = textSize * 0.8f)
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                Biometrics(context, mainActivity)
+                Biometrics(mainActivity)
                 Spacer(modifier = Modifier.height(20.dp))
                 PasswordUpdateSection(context)
                 Spacer(modifier = Modifier.height(20.dp))
@@ -224,7 +222,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("Font Style", style = CC.titleTextStyle(context))
+                    Text("Font Style", style = CC.titleTextStyle())
 
                     Row(
                         modifier = Modifier
@@ -235,7 +233,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                     ) {
                         Text(
                             "Selected Font: $savedFont",
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 20.sp)
+                            style = CC.descriptionTextStyle().copy(fontSize = 20.sp)
                         )
                         IconButton(
                             onClick = { navController.navigate("appearance") },
@@ -255,12 +253,12 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row {
-                    Text("We care about your feedback", style = CC.titleTextStyle(context))
+                    Text("We care about your feedback", style = CC.titleTextStyle())
                 }
                 currentUser?.let { it1 -> RatingAndFeedbackScreen(it1, context) }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(modifier = Modifier.fillMaxWidth(0.9f)) {
-                    Text("About", style = CC.titleTextStyle(context))
+                    Text("About", style = CC.titleTextStyle())
                 }
                 MyAbout(context)
             }
@@ -300,27 +298,29 @@ fun MyAbout(context: Context) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Uni Connect", style = CC.descriptionTextStyle(context).copy(
+            "Uni Connect", style = CC.descriptionTextStyle().copy(
                 fontWeight = FontWeight.Bold, fontSize = 20.sp
             )
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Version $versionName", style = CC.descriptionTextStyle(context))
-        Text("Developed by Mike", style = CC.descriptionTextStyle(context))
+        Text("Version $versionName", style = CC.descriptionTextStyle())
+        Text("Developed by Mike", style = CC.descriptionTextStyle())
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
 
             //Phone Icon
-            IconButton(onClick = {
-                val intent = Intent(
-                    Intent.ACTION_DIAL, Uri.parse("tel:+254799013845")
-                )
-                context.startActivity(intent)
-            }, modifier = Modifier
-                .background(CC.extraColor1(), CircleShape)
-                .size(35.dp)) {
+            IconButton(
+                onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_DIAL, Uri.parse("tel:+254799013845")
+                    )
+                    context.startActivity(intent)
+                }, modifier = Modifier
+                    .background(CC.extraColor1(), CircleShape)
+                    .size(35.dp)
+            ) {
                 Icon(Icons.Default.Call, "Call", tint = CC.textColor())
             }
             Spacer(modifier = Modifier.width(10.dp))
@@ -366,7 +366,7 @@ fun MyAbout(context: Context) {
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text("All rights reserved © 2024", style = CC.descriptionTextStyle(context))
+        Text("All rights reserved © 2024", style = CC.descriptionTextStyle())
     }
 }
 
