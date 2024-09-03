@@ -129,7 +129,7 @@ fun UniGroups(context: Context, navController: NavController) {
             if (userGroups.isEmpty()) {
                 Text(
                     text = "No groups available",
-                    style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp),
+                    style = CC.descriptionTextStyle().copy(fontSize = 18.sp),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else {
@@ -138,14 +138,13 @@ fun UniGroups(context: Context, navController: NavController) {
                 ) {
                     items(userGroups) { group ->
                         if (group.name.isNotEmpty() && group.description.isNotEmpty()) {
-                            fetchedUserDetails?.let { it1 ->
+                            fetchedUserDetails?.let { details ->
                                 GroupItem(
                                     group,
-                                    context,
                                     navController,
                                     chatViewModel,
                                     userViewModel,
-                                    it1
+                                    details
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -180,7 +179,7 @@ fun AddGroupSection(
         // Title for the group creation section
         Text(
             text = "Create New Group",
-            style = CC.titleTextStyle(context).copy(
+            style = CC.titleTextStyle().copy(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = CC.textColor()
@@ -202,7 +201,6 @@ fun AddGroupSection(
             label = "Group Name",
             enabled = true,
             singleLine = true,
-            context = context
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -219,7 +217,6 @@ fun AddGroupSection(
             label = "Description",
             enabled = true,
             singleLine = true,
-            context = context
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -236,7 +233,6 @@ fun AddGroupSection(
             label = "Image Link",
             enabled = true,
             singleLine = true,
-            context = context
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -244,7 +240,7 @@ fun AddGroupSection(
         // Members Selection Title
         Text(
             text = "Choose Your Members",
-            style = CC.descriptionTextStyle(context).copy(
+            style = CC.descriptionTextStyle().copy(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium,
                 color = CC.textColor()
@@ -264,7 +260,6 @@ fun AddGroupSection(
         ) {
             items(users) { user ->
                 UserSelectionItem(
-                    context = context,
                     user = user,
                     isSelected = selectedMembers.contains(user.id),
                     onClick = {
@@ -329,7 +324,7 @@ fun AddGroupSection(
                     color = CC.textColor(), modifier = Modifier.size(24.dp)
                 )
             } else {
-                Text("Create", style = CC.descriptionTextStyle(context))
+                Text("Create", style = CC.descriptionTextStyle())
             }
         }
     }
@@ -339,7 +334,6 @@ fun AddGroupSection(
 
 @Composable
 fun UserSelectionItem(
-    context: Context,
     user: UserEntity,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -379,7 +373,7 @@ fun UserSelectionItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = user.firstName,
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     maxLines = 1
                 )
                 if (isSelected) {
@@ -400,7 +394,6 @@ fun UserSelectionItem(
 @Composable
 fun EditGroupSection(
     group: GroupEntity,
-    context: Context,
     chatViewModel: GroupChatViewModel,
     users: List<UserEntity>,
     onDismiss: () -> Unit
@@ -421,7 +414,6 @@ fun EditGroupSection(
                 label = "Group Name",
                 enabled = true,
                 singleLine = true,
-                context = context
             )
         }
         groupDescription.let {
@@ -433,7 +425,6 @@ fun EditGroupSection(
                 label = "Description",
                 enabled = true,
                 singleLine = true,
-                context = context
             )
         }
         imageLink.let {
@@ -445,7 +436,6 @@ fun EditGroupSection(
                 label = "Image link",
                 enabled = true,
                 singleLine = true,
-                context = context
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -460,7 +450,7 @@ fun EditGroupSection(
             Text(
                 "Select Members",
                 modifier = Modifier.padding(8.dp),
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
             )
         }
 
@@ -471,7 +461,6 @@ fun EditGroupSection(
             ) {
                 items(users) { user ->
                     UserSelectionItem(
-                        context,
                         user = user,
                         isSelected = selectedMembers.contains(user.id),
                         onClick = {
@@ -508,7 +497,7 @@ fun EditGroupSection(
                 containerColor = CC.extraColor1(), contentColor = CC.textColor()
             )
         ) {
-            Text("Save Changes", style = CC.descriptionTextStyle(context))
+            Text("Save Changes", style = CC.descriptionTextStyle())
         }
     }
 }
@@ -517,7 +506,6 @@ fun EditGroupSection(
 @Composable
 fun GroupItem(
     group: GroupEntity,
-    context: Context,
     navController: NavController,
     chatViewModel: GroupChatViewModel,
     userViewModel: UserViewModel,
@@ -576,11 +564,11 @@ fun GroupItem(
                 modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = group.name, style = CC.titleTextStyle(context), maxLines = 1, fontSize = 20.sp,
+                    text = group.name, style = CC.titleTextStyle(), maxLines = 1, fontSize = 20.sp,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = group.description, style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.5f)),
+                    text = group.description, style = CC.descriptionTextStyle().copy(color = CC.textColor().copy(0.5f)),
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
@@ -590,11 +578,10 @@ fun GroupItem(
     if (showEditGroup) {
         AlertDialog(containerColor = CC.primary(),
             onDismissRequest = { showEditGroup = false },
-            title = { Text("Edit Group", style = CC.titleTextStyle(context)) },
+            title = { Text("Edit Group", style = CC.titleTextStyle()) },
             text = {
                 userViewModel.users.value?.let {
                     EditGroupSection(group = group,
-                        context = context,
                         chatViewModel = chatViewModel,
                         users = it,
                         onDismiss = { showEditGroup = false })
@@ -606,7 +593,7 @@ fun GroupItem(
                         containerColor = CC.tertiary(), contentColor = CC.textColor()
                     )
                 ) {
-                    Text("Close", style = CC.descriptionTextStyle(context))
+                    Text("Close", style = CC.descriptionTextStyle())
                 }
             })
     }
