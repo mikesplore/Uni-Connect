@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
 import com.mike.uniadmin.backEnd.userchat.UserChatsWithDetails
@@ -72,7 +71,8 @@ fun UserMessageCard(
     val isCurrentUserRecipient = chat.userChat.recipientID == currentUserId
 
     // Determine the destination for navigation based on the current user
-    val destination = if (isCurrentUserRecipient) "chat/${chat.sender.id}" else "chat/${chat.receiver.id}"
+    val destination =
+        if (isCurrentUserRecipient) "chat/${chat.sender.id}" else "chat/${chat.receiver.id}"
 
     // Determine which user details to display (sender or receiver)
     val profileImageUser = if (isCurrentUserRecipient) chat.sender else chat.receiver
@@ -120,7 +120,7 @@ fun UserMessageCard(
                 // Display the name of the other user in the chat
                 Text(
                     text = userName,
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle()
                         .copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -131,8 +131,12 @@ fun UserMessageCard(
                     val senderName =
                         if (chat.userChat.senderID != currentUserId) "" else "You: "
                     Text(
-                        text = "$deliveryStatusIcon $senderName${createAnnotatedMessage(createAnnotatedText(message).toString())}",
-                        style = CC.descriptionTextStyle(context).copy(
+                        text = "$deliveryStatusIcon $senderName${
+                            createAnnotatedMessage(
+                                createAnnotatedText(message).toString()
+                            )
+                        }",
+                        style = CC.descriptionTextStyle().copy(
                             fontSize = 14.sp,
                             color = CC.extraColor2().copy(alpha = 0.6f)
                         ),
@@ -149,14 +153,14 @@ fun UserMessageCard(
             ) {
                 // Display unread message counter if there are unread messages
                 if (chat.unreadCount != 0) {
-                    MessageCounterBadge(count = chat.unreadCount, context = context)
+                    MessageCounterBadge(count = chat.unreadCount)
                 }
 
                 // Display the relative timestamp of the latest message
                 chat.userChat.timeStamp.let {
                     Text(
                         text = CC.getRelativeTime(it),
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                        style = CC.descriptionTextStyle().copy(fontSize = 12.sp),
                         color = CC.textColor().copy(alpha = 0.6f)
                     )
                 }
@@ -168,7 +172,7 @@ fun UserMessageCard(
 
 // Extracted composable for message counter badge
 @Composable
-fun MessageCounterBadge(count: Int, context: Context) {
+fun MessageCounterBadge(count: Int) {
     Box(
         modifier = Modifier
             .sizeIn(minWidth = 20.dp, minHeight = 20.dp)
@@ -178,7 +182,7 @@ fun MessageCounterBadge(count: Int, context: Context) {
     ) {
         Text(
             count.toString(),
-            style = CC.descriptionTextStyle(context).copy(fontSize = 10.sp),
+            style = CC.descriptionTextStyle().copy(fontSize = 10.sp),
             modifier = Modifier.padding(2.dp)
         )
     }
@@ -187,7 +191,12 @@ fun MessageCounterBadge(count: Int, context: Context) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileImage(currentUser: UserEntity?, userState: String, context: Context, navController: NavController) {
+fun ProfileImage(
+    currentUser: UserEntity?,
+    userState: String,
+    context: Context,
+    navController: NavController
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     val color by animateColorAsState(
@@ -225,7 +234,7 @@ fun ProfileImage(currentUser: UserEntity?, userState: String, context: Context, 
                 if (currentUser != null) {
                     Text(
                         (currentUser.firstName[0].toString()) + currentUser.lastName[0],
-                        style = CC.descriptionTextStyle(context)
+                        style = CC.descriptionTextStyle()
                             .copy(fontWeight = FontWeight.Bold)
                     )
                 }
@@ -297,7 +306,7 @@ fun AlertDialogComponent(
 
                 Text(
                     user.firstName + " " + user.lastName,
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle()
                         .copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(start = 10.dp)
                 )
