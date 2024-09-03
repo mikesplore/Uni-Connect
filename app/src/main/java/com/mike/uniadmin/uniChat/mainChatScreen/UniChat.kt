@@ -79,7 +79,7 @@ fun UniChat(navController: NavController, context: Context) {
                 },
                 title = {
                     Text(
-                        text = "UNI CHAT", style = CC.titleTextStyle(context).copy(
+                        text = "UNI CHAT", style = CC.titleTextStyle().copy(
                             fontSize = 30.sp,
                             fontWeight = FontWeight.ExtraBold,
                             brush = Brush.verticalGradient(
@@ -120,7 +120,7 @@ fun UniChat(navController: NavController, context: Context) {
                             ) {
                                 Text(
                                     text = title,
-                                    style = CC.descriptionTextStyle(context).copy(
+                                    style = CC.descriptionTextStyle().copy(
                                         fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
                                         color = CC.textColor()
                                     ),
@@ -176,10 +176,10 @@ fun ChatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            UsersList(userViewModel, context)
+            UsersList(userViewModel)
             Text(
                 text = "No Chats Found",
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
             )
 
         }
@@ -195,19 +195,19 @@ fun ChatsScreen(
 
 
 @Composable
-private fun UsersList(userViewModel: UserViewModel, context: Context) {
+private fun UsersList(userViewModel: UserViewModel) {
     val users by userViewModel.users.observeAsState()
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy((-8).dp)
     ) {
         items(users ?: emptyList()) { user ->
-            UserCard(user, context)
+            UserCard(user)
         }
     }
 }
 
 @Composable
-private fun UserCard(user: UserEntity, context: Context) {
+private fun UserCard(user: UserEntity) {
     Box(
         modifier = Modifier
             .background(randomColor.random(), CircleShape)
@@ -228,7 +228,7 @@ private fun UserCard(user: UserEntity, context: Context) {
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            Text(text = user.firstName[0].toString(), style = CC.descriptionTextStyle(context))
+            Text(text = user.firstName[0].toString(), style = CC.descriptionTextStyle())
         }
     }
 
