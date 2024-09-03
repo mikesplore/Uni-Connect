@@ -95,7 +95,7 @@ fun TimetableItem(
                     Icons.Default.Refresh, contentDescription = "Refresh", tint = CC.textColor()
                 )
             }
-            Text("${timetables.value.size} timetables", style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
+            Text("${timetables.value.size} timetables", style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center),
                 modifier = Modifier.weight(1f))
 
             if (userType == "admin"){
@@ -130,15 +130,15 @@ fun TimetableItem(
                         .wrapContentSize(Alignment.Center)
                 ){
                     Text("No Timetables",
-                        style = CC.descriptionTextStyle(context),
+                        style = CC.descriptionTextStyle(),
                         modifier = Modifier.wrapContentSize(Alignment.Center)
                     )}
             } else {
                 LazyColumn {
                     items(timetables.value) { timetable ->
-                        Text("${timetable.day}s", style = CC.titleTextStyle(context))
+                        Text("${timetable.day}s", style = CC.titleTextStyle())
                         Spacer(modifier = Modifier.height(20.dp))
-                        TimetableCard(timetable, context)
+                        TimetableCard(timetable)
                     }
                 }
             }
@@ -148,7 +148,7 @@ fun TimetableItem(
 
 @Composable
 fun TimetableCard(
-    timetable: ModuleTimetable, context: Context
+    timetable: ModuleTimetable
 ) {
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -177,7 +177,7 @@ fun TimetableCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "Start: ${timetable.startTime}", style = CC.descriptionTextStyle(context)
+                    text = "Start: ${timetable.startTime}", style = CC.descriptionTextStyle()
                 )
             }
             Row(
@@ -191,7 +191,7 @@ fun TimetableCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "End: ${timetable.endTime}", style = CC.descriptionTextStyle(context)
+                    text = "End: ${timetable.endTime}", style = CC.descriptionTextStyle()
                 )
             }
             Row(
@@ -205,7 +205,7 @@ fun TimetableCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "Venue: ${timetable.venue}", style = CC.descriptionTextStyle(context)
+                    text = "Venue: ${timetable.venue}", style = CC.descriptionTextStyle()
                 )
             }
             Row(
@@ -220,7 +220,7 @@ fun TimetableCard(
                 )
                 Text(
                     text = "Lecturer: ${timetable.lecturer}",
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle()
                 )
             }
         }
@@ -264,34 +264,34 @@ fun AddTimetableItem(
         )
 
         AddTextField(
-            label = "Day", value = day, onValueChange = { day = it }, context = context,
+            label = "Day", value = day, onValueChange = { day = it }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         AddTextField(
-            label = "Start Time", value = startTime, onValueChange = { startTime = it }, context = context,
-
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        AddTextField(
-            label = "End Time", value = endTime, onValueChange = { endTime = it }, context = context,
+            label = "Start Time", value = startTime, onValueChange = { startTime = it }
 
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         AddTextField(
-            label = "Venue", value = venue, onValueChange = { venue = it }, context = context,
+            label = "End Time", value = endTime, onValueChange = { endTime = it }
 
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         AddTextField(
-            label = "Lecturer", value = lecturer, onValueChange = { lecturer = it }, context = context,
+            label = "Venue", value = venue, onValueChange = { venue = it }
+
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AddTextField(
+            label = "Lecturer", value = lecturer, onValueChange = { lecturer = it }
 
         )
 
@@ -349,7 +349,7 @@ fun AddTimetableItem(
                         color = CC.textColor(), modifier = Modifier.size(20.dp)
                     )
                 } else {
-                    Text("Post", style = CC.descriptionTextStyle(context))
+                    Text("Post", style = CC.descriptionTextStyle())
                 }
             }
 
@@ -361,7 +361,7 @@ fun AddTimetableItem(
                 ),
                 modifier = Modifier.width(120.dp)
             ) {
-                Text("Cancel", style = CC.descriptionTextStyle(context))
+                Text("Cancel", style = CC.descriptionTextStyle())
             }
         }
     }
