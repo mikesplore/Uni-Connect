@@ -1,6 +1,5 @@
 package com.mike.uniadmin.uniChat.groupChat.groupChatComponents
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -45,7 +44,6 @@ fun ChatTopAppBar(
     targetGroupID: String,
     name: String,
     link: String,
-    context: Context,
     onSearchClick: () -> Unit,
     onShowUsersClick: () -> Unit
 ) {
@@ -98,7 +96,7 @@ fun ChatTopAppBar(
                         } else {
                             Text(
                                 text = name[0].toString(),
-                                style = CommonComponents.titleTextStyle(context).copy(fontSize = fontSize)
+                                style = CommonComponents.titleTextStyle().copy(fontSize = fontSize)
                             )
                         }
                     }
@@ -111,7 +109,7 @@ fun ChatTopAppBar(
                     ) {
                         Text(
                             text = name,
-                            style = CommonComponents.titleTextStyle(context).copy(fontSize = fontSize),
+                            style = CommonComponents.titleTextStyle().copy(fontSize = fontSize),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -121,13 +119,17 @@ fun ChatTopAppBar(
             actions = {
                 IconButton(onClick = onSearchClick) {
                     Icon(
-                        Icons.Filled.Search, contentDescription = "Search", tint = CommonComponents.textColor(),
+                        Icons.Filled.Search,
+                        contentDescription = "Search",
+                        tint = CommonComponents.textColor(),
                         modifier = Modifier.size(iconSize) // Dynamically adjust icon size
                     )
                 }
                 IconButton(onClick = onShowUsersClick) {
                     Icon(
-                        Icons.Filled.Person, contentDescription = "Participants", tint = CommonComponents.textColor(),
+                        Icons.Filled.Person,
+                        contentDescription = "Participants",
+                        tint = CommonComponents.textColor(),
                         modifier = Modifier.size(iconSize) // Dynamically adjust icon size
                     )
                 }
