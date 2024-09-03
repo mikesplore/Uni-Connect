@@ -40,7 +40,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun InputDialogTextField(
-    value: String, onValueChange: (String) -> Unit, label: String, context: Context
+    value: String, onValueChange: (String) -> Unit, label: String
 
 ) {
     TextField(
@@ -49,7 +49,7 @@ fun InputDialogTextField(
         placeholder = {
             Text(
                 label,
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
                     .copy(color = CC.textColor().copy(0.5f))
             )
         },
@@ -107,7 +107,7 @@ fun AddItemSection(
         ) {
             Text(
                 "Add New Item",
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
                 )
@@ -119,7 +119,6 @@ fun AddItemSection(
                 value = title,
                 onValueChange = { title = it },
                 label = "Title",
-                context = context
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -128,7 +127,6 @@ fun AddItemSection(
                 value = fileUrl,
                 onValueChange = { fileUrl = it },
                 label = "File URL",
-                context = context
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -137,7 +135,6 @@ fun AddItemSection(
                 value = imageUrl,
                 onValueChange = { imageUrl = it },
                 label = "Image URL",
-                context = context
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -174,7 +171,7 @@ fun AddItemSection(
                 ) {
                     Text(
                         "Add",
-                        style = CC.descriptionTextStyle(context).copy(
+                        style = CC.descriptionTextStyle().copy(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -197,7 +194,7 @@ fun Section(
     val userType = UniAdminPreferences.userType.value
     Text(
         text = title,
-        style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold,fontSize = 20.sp),
+        style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
         modifier = Modifier.padding(start = 15.dp)
     )
 
@@ -206,7 +203,7 @@ fun Section(
     if (items.isEmpty()) {
         Text(
             text = "No items available",
-            style = CC.descriptionTextStyle(context),
+            style = CC.descriptionTextStyle(),
             modifier = Modifier.padding(start = 15.dp)
         )
     } else {
@@ -224,7 +221,7 @@ fun Section(
                 containerColor = CC.extraColor2(), contentColor = Color.White
             ), shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(start = 15.dp)
         ) {
-            Text("Add Item", style = CC.descriptionTextStyle(context = context))
+            Text("Add Item", style = CC.descriptionTextStyle())
         }
     }
 
