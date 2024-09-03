@@ -112,7 +112,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
             ) {
                 Text(
                     "Notifications",
-                    style = CC.titleTextStyle(context)
+                    style = CC.titleTextStyle()
                         .copy(fontSize = 30.sp, fontWeight = FontWeight.Bold)
                 )
             }
@@ -139,7 +139,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
                                 "Announcements" -> "Announcements"
                                 else -> "New Users"
                             },
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.Bold, fontSize = 25.sp),
                             textAlign = TextAlign.Center,
                             maxLines = 2,
@@ -149,7 +149,7 @@ fun PhoneNotifications(navController: NavController, context: Context) {
 
                     items(sortedNotifications) { notification ->
                         when (notification.category) {
-                            "Announcements" -> AnnouncementNotification(notification, context)
+                            "Announcements" -> AnnouncementNotification(notification)
                             else -> NotificationItem(
                                 notification = notification,
                                 context = context,
@@ -190,14 +190,14 @@ fun NotificationItem(
     ) {
         Text(
             text = notification.title,
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+            style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = 8.dp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Text(
             text = notification.description,
-            style = CC.descriptionTextStyle(context).copy(color = CC.textColor().copy(0.7f)),
+            style = CC.descriptionTextStyle().copy(color = CC.textColor().copy(0.7f)),
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -212,7 +212,7 @@ fun NotificationItem(
                         notification.time
                     )
                 }",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
                     .copy(color = CC.textColor().copy(0.5f), fontSize = 12.sp)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -225,7 +225,7 @@ fun NotificationItem(
                     Text(
                         "Hi, ${notification.name} 👋",
                         modifier = Modifier.padding(start = 10.dp),
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                     )
                 }
                 IconButton(onClick = {
@@ -287,7 +287,7 @@ fun NotificationItem(
 
 
 @Composable
-fun AnnouncementNotification(notification: NotificationEntity, context: Context) {
+fun AnnouncementNotification(notification: NotificationEntity) {
     Column(
         modifier = Modifier
             .border(1.dp, CC.extraColor2(), RoundedCornerShape(12.dp))
@@ -297,7 +297,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
     ) {
         Text(
             text = notification.title,
-            style = CC.descriptionTextStyle(context).copy(
+            style = CC.descriptionTextStyle().copy(
                 fontWeight = FontWeight.Bold, fontSize = 16.sp
             ),
             maxLines = 1,
@@ -309,7 +309,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
 
         Text(
             text = notification.description,
-            style = CC.descriptionTextStyle(context).copy(
+            style = CC.descriptionTextStyle().copy(
                 color = CC.textColor().copy(0.7f), fontSize = 14.sp
             ),
             maxLines = 1,
@@ -321,7 +321,7 @@ fun AnnouncementNotification(notification: NotificationEntity, context: Context)
 
         Text(
             text = CC.getRelativeDate(CC.getDateFromTimeStamp(notification.date)),
-            style = CC.descriptionTextStyle(context).copy(
+            style = CC.descriptionTextStyle().copy(
                 color = CC.textColor().copy(0.7f), fontSize = 12.sp
             ),
             modifier = Modifier.align(Alignment.End)

@@ -47,7 +47,7 @@ import com.mike.uniadmin.helperFunctions.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
-fun Biometrics(context: Context, mainActivity: MainActivity) {
+fun Biometrics(mainActivity: MainActivity) {
     // Properly track the state of the biometrics preference with remember and mutableStateOf
     val isBiometricsEnabled = remember { mutableStateOf(UniAdminPreferences.biometricEnabled.value) }
     val icon = if (isBiometricsEnabled.value) Icons.Filled.Security else Icons.Filled.Security
@@ -79,7 +79,7 @@ fun Biometrics(context: Context, mainActivity: MainActivity) {
             }
             Text(
                 "Biometrics (${if (isBiometricsEnabled.value) "Enabled" else "Disabled"})",
-                style = CommonComponents.descriptionTextStyle(context),
+                style = CommonComponents.descriptionTextStyle(),
                 fontSize = 20.sp
             )
             Switch(
@@ -122,7 +122,7 @@ fun PasswordUpdateSection(context: Context) {
     Row(modifier = Modifier.fillMaxWidth(0.8f)) {
         Text(
             "Change your Password",
-            style = CommonComponents.titleTextStyle(context),
+            style = CommonComponents.titleTextStyle(),
             fontSize = 18.sp
         )
     }
@@ -160,7 +160,7 @@ fun PasswordUpdateSection(context: Context) {
         ) {
             Text(
                 "This section only applies to users who signed in using Email and Password",
-                style = CommonComponents.descriptionTextStyle(context),
+                style = CommonComponents.descriptionTextStyle(),
                 color = CommonComponents.textColor().copy(0.5f),
                 textAlign = TextAlign.Center
             )
@@ -180,21 +180,18 @@ fun PasswordUpdateSection(context: Context) {
                 value = currentPassword,
                 isEditing = true,
                 onValueChange = { currentPassword = it },
-                context = context
             )
             PasswordTextField(
                 label = "New Password",
                 value = newPassword,
                 isEditing = true,
                 onValueChange = { newPassword = it },
-                context = context
             )
             PasswordTextField(
                 label = "Confirm Password",
                 value = confirmPassword,
                 isEditing = true,
                 onValueChange = { confirmPassword = it },
-                context = context
             )
 
             Button(
@@ -244,7 +241,7 @@ fun PasswordUpdateSection(context: Context) {
                         Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
                     }
                 }, modifier = Modifier.padding(top = 16.dp), colors = ButtonDefaults.buttonColors(
-                    containerColor = CommonComponents.tertiary(), contentColor = Color.White
+                    containerColor = CommonComponents.secondary(), contentColor = Color.White
                 ), shape = RoundedCornerShape(10.dp)
             ) {
                 Row(
@@ -259,7 +256,7 @@ fun PasswordUpdateSection(context: Context) {
                     } else {
                         Text(
                             "Change Password",
-                            style = CommonComponents.descriptionTextStyle(context)
+                            style = CommonComponents.descriptionTextStyle()
                         )
                     }
                 }
@@ -275,14 +272,13 @@ fun PasswordTextField(
     value: String,
     isEditing: Boolean,
     onValueChange: (String) -> Unit,
-    context: Context
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, style = CommonComponents.descriptionTextStyle(context)) },
+        label = { Text(label, style = CommonComponents.descriptionTextStyle()) },
         enabled = isEditing,
-        textStyle = CommonComponents.descriptionTextStyle(context),
+        textStyle = CommonComponents.descriptionTextStyle(),
         colors = TextFieldDefaults.colors(
             focusedTextColor = CommonComponents.textColor(),
             disabledContainerColor = CommonComponents.secondary(),
