@@ -1,6 +1,5 @@
 package com.mike.uniadmin.uniChat.groupChat.groupChatComponents
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -25,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
-fun DateHeader(date: String, context: Context) {
+fun DateHeader(date: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -39,7 +38,7 @@ fun DateHeader(date: String, context: Context) {
         ) {
             Text(
                 text = CC.getRelativeDate(date),
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
             )
@@ -48,7 +47,7 @@ fun DateHeader(date: String, context: Context) {
 }
 
 @Composable
- fun RowText(context: Context) {
+fun RowText() {
     Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
     ) {
@@ -62,7 +61,7 @@ fun DateHeader(date: String, context: Context) {
             Text(
                 text = "Group chats are moderated by admin.",
                 modifier = Modifier.padding(5.dp),
-                style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
+                style = CC.descriptionTextStyle().copy(fontSize = 13.sp),
                 textAlign = TextAlign.Center,
                 color = CC.textColor()
             )
@@ -76,7 +75,8 @@ fun SearchBar(
     searchQuery: TextFieldValue,
     onSearchQueryChange: (TextFieldValue) -> Unit
 ) {
-    AnimatedVisibility(visible = isSearchVisible,
+    AnimatedVisibility(
+        visible = isSearchVisible,
         enter = slideInVertically(initialOffsetY = { it }),
         exit = slideOutVertically(targetOffsetY = { -it })
     ) {
