@@ -140,7 +140,13 @@ class UserRepository(
         uniConnectScope.launch(Dispatchers.Main) {
             userDao.insertUser(user)
             database.child("Users").child(user.id).setValue(user).addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
+                if (task.isSuccessful) {
+                    onComplete(true)
+                    Log.d("UserRepository", "User saved successfully")
+                } else {
+                    onComplete(false)
+                    Log.e("UserRepository", "Error saving user: ${task.exception}")
+                }
             }
         }
     }
@@ -184,9 +190,8 @@ class UserRepository(
                             callback(user) // Found in Users node
                         } else {
                             // Check Users node if not found in Users
-                            val usersQuery =
-                                database.child("Users").orderByChild("id").equalTo(admissionNumber)
-                            usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                            val userQuery = database.child("Users").orderByChild("id").equalTo(admissionNumber)
+                            userQuery.addListenerForSingleValueEvent(object : ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     val adminSnapshot = snapshot.children.firstOrNull()
                                     val admin = adminSnapshot?.getValue(UserEntity::class.java)
