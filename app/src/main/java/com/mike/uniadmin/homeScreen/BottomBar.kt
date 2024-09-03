@@ -1,6 +1,5 @@
 package com.mike.uniadmin.homeScreen
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -34,14 +33,13 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.Screen
-import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BottomBar(
-    context: Context,
     screens: List<Screen>,
     pagerState: PagerState,
     coroutineScope: CoroutineScope,
@@ -49,8 +47,8 @@ fun BottomBar(
     userViewModel: UserViewModel,
     chatViewModel: GroupChatViewModel,
     scope: CoroutineScope,
-    showBottomSheet:(Boolean) -> Unit
-){
+    showBottomSheet: (Boolean) -> Unit
+) {
     NavigationBar(
         modifier = Modifier
             .height(85.dp)
@@ -87,7 +85,7 @@ fun BottomBar(
                         ) { initialState -> initialState }) {
                         Text(
                             text = screen.name,
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontSize = 13.sp),
                             color = CC.textColor()
                         )
