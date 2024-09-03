@@ -125,7 +125,7 @@ fun TopAppBarComponent(
                             )
                         } else {
                             Text("${user.firstName[0]}${user.lastName[0]}",
-                                style = CC.descriptionTextStyle(context).copy(fontSize = textFontSize, fontWeight = FontWeight.Bold))
+                                style = CC.descriptionTextStyle().copy(fontSize = textFontSize, fontWeight = FontWeight.Bold))
                         }
                     }
 
@@ -136,18 +136,18 @@ fun TopAppBarComponent(
                     ) {
                         Text(
                             name,
-                            style = CC.titleTextStyle(context).copy(fontSize = textFontSize)
+                            style = CC.titleTextStyle().copy(fontSize = textFontSize)
                         )
                         Spacer(modifier = Modifier.height(5.dp))
                         if (isTyping) {
                             Text(
                                 "Typing...",
-                                style = CC.descriptionTextStyle(context).copy(fontSize = subtitleFontSize)
+                                style = CC.descriptionTextStyle().copy(fontSize = subtitleFontSize)
                             )
                         } else {
                             Text(
                                 userState,
-                                style = CC.descriptionTextStyle(context).copy(fontSize = subtitleFontSize)
+                                style = CC.descriptionTextStyle().copy(fontSize = subtitleFontSize)
                             )
                         }
                     }
