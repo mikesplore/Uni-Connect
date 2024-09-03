@@ -118,7 +118,7 @@ fun SignAttendance(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sign Attendance", style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)) },
+                title = { Text("Sign Attendance", style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold)) },
                 actions = {
                     IconButton(onClick = { refresh = !refresh }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -141,7 +141,6 @@ fun SignAttendance(context: Context) {
             } else {
                 // Show Tabs and attendance records
                 Tabs(
-                    context = context,
                     tabs = tabNames,
                     selectedTabIndex = selectedTabIndex,
                     onTabSelected = { index ->
@@ -155,7 +154,7 @@ fun SignAttendance(context: Context) {
                         Box(modifier = Modifier
                             .background(CC.primary())
                             .fillMaxWidth(), contentAlignment = Alignment.Center){
-                            Text(name, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold))
+                            Text(name, style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold))
                         }
                     }
                 }
@@ -169,7 +168,6 @@ fun SignAttendance(context: Context) {
                     SignAttendanceCard(
                         user = signedInUser,
                         attendanceViewModel = attendanceViewModel,
-                        context = context,
                         moduleCode = tabNames.getOrNull(selectedTabIndex),
                         onSignAttendance = {success ->
                             if (success){
@@ -186,7 +184,7 @@ fun SignAttendance(context: Context) {
                     ) {
                         Text(
                             "Attendance is not open for this module.",
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                         )
                     }
                 }
@@ -201,7 +199,7 @@ fun SignAttendance(context: Context) {
                     .fillMaxSize()
                     .padding(16.dp)) {
                     items(filteredAttendanceRecords) { attendanceRecord ->
-                        AttendanceRecordCard(attendanceRecord, context)
+                        AttendanceRecordCard(attendanceRecord)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -229,7 +227,6 @@ fun saveDataToPreferences(
 @Composable
 fun SignAttendanceCard(
     user: UserEntity?,
-    context: Context,
     moduleCode: String?,
     attendanceViewModel: AttendanceViewModel,
     onSignAttendance: (Boolean) -> Unit
@@ -258,14 +255,14 @@ fun SignAttendanceCard(
             if (hasSignedToday) {
                 Text(
                     text = "Good job! You have already signed today",
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold, color = CC.textColor().copy(alpha = 0.8f)),
+                    style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold, color = CC.textColor().copy(alpha = 0.8f)),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
             }else{
             Text(
                 text = "Sign attendance for today",
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
             )}
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -303,10 +300,10 @@ fun SignAttendanceCard(
                     )
                 } else {
                     if (hasSignedToday) {
-                        Text("👍", style = CC.descriptionTextStyle(context))
+                        Text("👍", style = CC.descriptionTextStyle())
                         return@Button
                     }
-                    Text("Sign Attendance", style = CC.descriptionTextStyle(context))
+                    Text("Sign Attendance", style = CC.descriptionTextStyle())
                 }
             }
         }
@@ -315,7 +312,7 @@ fun SignAttendanceCard(
 
 
 @Composable
-fun AttendanceRecordCard(attendance: AttendanceEntity, context: Context) {
+fun AttendanceRecordCard(attendance: AttendanceEntity) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,7 +339,7 @@ fun AttendanceRecordCard(attendance: AttendanceEntity, context: Context) {
             Column {
                 Text(
                     text = CC.getDateFromTimeStamp(attendance.date),
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
                     text = attendance.record.replaceFirstChar {
@@ -350,7 +347,7 @@ fun AttendanceRecordCard(attendance: AttendanceEntity, context: Context) {
                             Locale.getDefault()
                         ) else it.toString()
                     },
-                    style = CC.descriptionTextStyle(context).copy(color = Color.Gray)
+                    style = CC.descriptionTextStyle().copy(color = Color.Gray)
                 )
             }
         }
@@ -359,7 +356,6 @@ fun AttendanceRecordCard(attendance: AttendanceEntity, context: Context) {
 
 @Composable
 fun Tabs(
-    context: Context,
     tabs: List<String>,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
@@ -388,7 +384,7 @@ fun Tabs(
                     text = {
                         Text(
                             text = title,
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 color = if (selectedTabIndex == index) CC.textColor() else CC.extraColor2(),
                                 fontSize = textSize
                             ),
