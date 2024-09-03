@@ -157,7 +157,7 @@ fun GridItemCard(
                 Text(
                     text = item.title,
                     color = CC.textColor(),
-                    style = CommonComponents.titleTextStyle(context)
+                    style = CommonComponents.titleTextStyle()
                         .copy(fontWeight = FontWeight.Bold),
                     fontSize = 13.sp,
                     maxLines = 2,
