@@ -1,6 +1,5 @@
 package com.mike.uniadmin.moduleContent
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,7 +65,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun AnnouncementsItem(
     moduleID: String,
     moduleAnnouncementViewModel: ModuleAnnouncementViewModel,
-    context: Context,
     userViewModel: UserViewModel
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -107,7 +105,7 @@ fun AnnouncementsItem(
             }
             Text(
                 "${announcements.value.size} announcements",
-                style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center),
+                style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center),
                 modifier = Modifier.weight(1f)
             )
 
@@ -132,7 +130,6 @@ fun AnnouncementsItem(
             AnimatedVisibility(visible) {
                 AddAnnouncementItem(
                     moduleID,
-                    context,
                     onExpandedChange = { visible = !visible },
                     moduleAnnouncementViewModel,
                     userViewModel
@@ -148,14 +145,14 @@ fun AnnouncementsItem(
                 ) {
                     Text(
                         "No Announcements",
-                        style = CC.descriptionTextStyle(context),
+                        style = CC.descriptionTextStyle(),
                         modifier = Modifier.wrapContentSize(Alignment.Center)
                     )
                 }
             } else {
                 LazyColumn {
                     items(announcements.value) { announcement ->
-                        AnnouncementCard(announcement, context)
+                        AnnouncementCard(announcement)
                     }
                 }
             }
@@ -167,7 +164,6 @@ fun AnnouncementsItem(
 @Composable
 fun AnnouncementCard(
     moduleAnnouncement: ModuleAnnouncementsWithAuthor,
-    context: Context,
 ) {
 
 
@@ -188,14 +184,14 @@ fun AnnouncementCard(
             // Announcement Title
             Text(
                 text = moduleAnnouncement.title,
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
             )
 
             // Announcement Description
             Text(
                 text = moduleAnnouncement.description,
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     color = CC.textColor().copy(0.7f),
                     textAlign = TextAlign.Start
                 )
@@ -228,14 +224,14 @@ fun AnnouncementCard(
                     Column {
                         Text(
                             text = moduleAnnouncement.authorName,
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
                         )
                         Text(
                             text = moduleAnnouncement.date,
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 fontSize = 12.sp,
                                 color = CC.textColor().copy(0.6f)
                             )
@@ -251,7 +247,6 @@ fun AnnouncementCard(
 @Composable
 fun AddAnnouncementItem(
     moduleID: String,
-    context: Context,
     onExpandedChange: (Boolean) -> Unit,
     moduleViewModel: ModuleAnnouncementViewModel,
     userViewModel: UserViewModel
@@ -310,7 +305,7 @@ fun AddAnnouncementItem(
                 ) {
                     Text(
                         text = authorName.firstOrNull()?.toString() ?: "",
-                        style = CC.titleTextStyle(context).copy(
+                        style = CC.titleTextStyle().copy(
                             fontWeight = FontWeight.Bold,
                             color = CC.textColor()
                         )
@@ -321,14 +316,14 @@ fun AddAnnouncementItem(
             Column {
                 Text(
                     text = authorName,
-                    style = CC.titleTextStyle(context).copy(
+                    style = CC.titleTextStyle().copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
                 )
                 Text(
                     text = "New announcement for date: ${CC.getDateFromTimeStamp(CC.getTimeStamp())}",
-                    style = CC.descriptionTextStyle(context).copy(
+                    style = CC.descriptionTextStyle().copy(
                         color = CC.textColor().copy(alpha = 0.6f)
                     )
                 )
@@ -339,14 +334,13 @@ fun AddAnnouncementItem(
 
         // Form Fields
         AddTextField(
-            label = "Title", value = title, onValueChange = { title = it }, context
+            label = "Title", value = title, onValueChange = { title = it }
         )
         Spacer(modifier = Modifier.height(16.dp))
         AddTextField(
             label = "Description",
             value = description,
             onValueChange = { description = it },
-            context,
             singleLine = false,
             maxLines = 4
         )
@@ -368,7 +362,7 @@ fun AddAnnouncementItem(
                 ),
                 modifier = Modifier.padding(end = 8.dp)
             ) {
-                Text("Cancel", style = CC.descriptionTextStyle(context))
+                Text("Cancel", style = CC.descriptionTextStyle())
             }
 
             Button(
@@ -404,7 +398,7 @@ fun AddAnnouncementItem(
                         modifier = Modifier.size(20.dp)
                     )
                 } else {
-                    Text("Post", style = CC.descriptionTextStyle(context))
+                    Text("Post", style = CC.descriptionTextStyle())
                 }
             }
         }
@@ -412,12 +406,12 @@ fun AddAnnouncementItem(
 }
 
 @Composable
-fun InternetError(context: Context) {
+fun InternetError() {
     Box(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .fillMaxWidth(), contentAlignment = Alignment.Center
     ) {
-        Text("Oops, No Internet detected", style = CC.descriptionTextStyle(context))
+        Text("Oops, No Internet detected", style = CC.descriptionTextStyle())
     }
 }
