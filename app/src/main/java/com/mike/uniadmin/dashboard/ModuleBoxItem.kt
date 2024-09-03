@@ -1,7 +1,6 @@
 package com.mike.uniadmin.dashboard
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +44,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun ModuleBox(
     module: ModuleEntity,
-    context: Context,
     navController: NavController,
     onClicked: (ModuleEntity) -> Unit
 ) {
@@ -64,12 +62,12 @@ fun ModuleBox(
         bodyContent = {
             Text(
                 module.moduleCode,
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(),
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             )
             Text(
                 module.moduleName,
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -88,7 +86,7 @@ fun ModuleBox(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    visits, style = CC.descriptionTextStyle(context).copy(color = CC.tertiary())
+                    visits, style = CC.descriptionTextStyle().copy(color = CC.tertiary())
                 )
                 IconButton(onClick = {
                     onClicked(module)
@@ -152,7 +150,8 @@ fun ModuleBoxContent(
             modifier = Modifier
                 .padding(end = 10.dp)
                 .shadow(
-                    elevation = 4.dp, shape = RoundedCornerShape(16.dp)
+                    elevation = 4.dp, shape = RoundedCornerShape(16.dp),
+                    spotColor = CC.extraColor2(),
                 )
                 .width(adaptiveWidth)
                 .height(boxHeight),
@@ -181,7 +180,6 @@ fun ModuleBoxContent(
 @Composable
 fun ModuleBoxList(
     modules: List<ModuleEntity>,
-    context: Context,
     navController: NavController,
     moduleViewModel: ModuleViewModel
 ) {
@@ -207,7 +205,6 @@ fun ModuleBoxList(
                 items(modules) { module ->
                     ModuleBox(
                         module = module,
-                        context = context,
                         navController = navController,
                         onClicked = { updatedModule ->
                             moduleViewModel.saveModule(
