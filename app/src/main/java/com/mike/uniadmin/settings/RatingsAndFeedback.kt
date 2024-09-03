@@ -133,7 +133,7 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
     ) {
         Text(
             text = if (averageRatings.isEmpty()) "No ratings yet" else "Average Rating: $averageRatings",
-            style = CommonComponents.descriptionTextStyle(context),
+            style = CommonComponents.descriptionTextStyle(),
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -159,13 +159,13 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
                     label = {
                         Text(
                             "Enter your feedback (optional)",
-                            style = CommonComponents.descriptionTextStyle(context)
+                            style = CommonComponents.descriptionTextStyle()
                         )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp),
-                    textStyle = CommonComponents.descriptionTextStyle(context),
+                    textStyle = CommonComponents.descriptionTextStyle(),
                     maxLines = 5,
                     colors = CommonComponents.appTextFieldColors()
                 )
@@ -223,7 +223,7 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
                                 modifier = Modifier.size(20.dp)
                             )
                         } else {
-                            Text("Submit Feedback", style = CommonComponents.descriptionTextStyle(context))
+                            Text("Submit Feedback", style = CommonComponents.descriptionTextStyle())
                         }
                     }
                 }
