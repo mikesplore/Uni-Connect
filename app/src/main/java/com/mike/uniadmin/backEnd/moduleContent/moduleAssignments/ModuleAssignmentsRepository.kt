@@ -57,7 +57,7 @@ class ModuleAssignmentRepository(private val moduleAssignmentDao: ModuleAssignme
                     assignment?.let { assignments.add(it) }
                 }
                 // Call the update function with the correct module ID
-                updateLocalDatabase(assignments, moduleID)
+                updateLocalDatabase(assignments)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -66,7 +66,7 @@ class ModuleAssignmentRepository(private val moduleAssignmentDao: ModuleAssignme
         })
     }
 
-    private fun updateLocalDatabase(assignments: List<ModuleAssignment>, moduleID: String) {
+    private fun updateLocalDatabase(assignments: List<ModuleAssignment>) {
         uniConnectScope.launch {
             try {
                 // To handle updates correctly:
