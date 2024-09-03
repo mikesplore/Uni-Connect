@@ -69,7 +69,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     fun findUserByEmail(email: String, onUserFetched: (UserEntity?) -> Unit) {
         _isLoading.postValue(true) // Set loading to true before fetching
         repository.fetchUserDataByEmail(email) { user ->
-            _user.postValue(user)
+            _user.value = user
             onUserFetched(user)
             _isLoading.postValue(false) // Set loading to false after fetching
         }
