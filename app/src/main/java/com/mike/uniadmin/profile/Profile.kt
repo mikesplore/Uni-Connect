@@ -1,7 +1,6 @@
 package com.mike.uniadmin.profile
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -75,7 +74,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
     val email = UniAdminPreferences.userEmail.value
 
     LaunchedEffect(updated) {
-        userViewModel.findUserByEmail(email){ user ->
+        userViewModel.findUserByEmail(email) { user ->
             if (user != null) {
                 isLoading = false
             }
@@ -130,7 +129,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
                     ) {
                         Text(
                             "Profile",
-                            style = CC.titleTextStyle(context),
+                            style = CC.titleTextStyle(),
                             fontSize = textSize * 1.2f,
                             fontWeight = FontWeight.ExtraBold
                         )
@@ -142,17 +141,19 @@ fun ProfileScreen(navController: NavController, context: Context) {
                         userViewModel,
                         updated,
                         onUpdateChange = { update ->
-                        if (update) {
-                            userViewModel.fetchUsers()
-                            Toast.makeText(
-                                context, "Updated!, please relaunch the screen", Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                            if (update) {
+                                userViewModel.fetchUsers()
+                                Toast.makeText(
+                                    context,
+                                    "Updated!, please relaunch the screen",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
 
-                        updated = !updated
-                    })
+                            updated = !updated
+                        })
                     Spacer(modifier = Modifier.height(20.dp))
-                    ProfileDetails(context,
+                    ProfileDetails(
                         userViewModel,
                         updated,
                         onUpdateChange = { updated = !updated })
@@ -230,7 +231,7 @@ fun DisplayImage(
                 } else {
                     Text(
                         "${currentUser?.firstName?.get(0)}${currentUser?.lastName?.get(0)}",
-                        style = CC.titleTextStyle(context)
+                        style = CC.titleTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = 40.sp),
                     )
                 }
@@ -250,7 +251,6 @@ fun DisplayImage(
             onValueChange = { link = it },
             label = "Image Link",
             modifier = Modifier.weight(1f),
-            context = context,
             singleLine = true
         )
         Spacer(modifier = Modifier.width(5.dp))
@@ -270,7 +270,7 @@ fun DisplayImage(
             ), enabled = link.isNotEmpty()
 
         ) {
-            Text("Save", style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp))
+            Text("Save", style = CC.descriptionTextStyle().copy(fontSize = 13.sp))
         }
     }
 }
@@ -281,7 +281,6 @@ fun MyDetails(
     title: String,
     value: String,
     onValueChange: (String) -> Unit,
-    context: Context,
     fontSize: TextUnit = 18.sp,
     isEditing: Boolean
 ) {
@@ -292,13 +291,13 @@ fun MyDetails(
     ) {
         Text(
             text = title,
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+            style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = 4.dp)  // Padding to separate the title from the text field
         )
 
         TextField(
             value = value,
-            textStyle = CC.titleTextStyle(context).copy(
+            textStyle = CC.titleTextStyle().copy(
                 fontSize = fontSize,
                 color = if (isEditing) CC.textColor() else CC.textColor().copy(0.5f)
             ),
