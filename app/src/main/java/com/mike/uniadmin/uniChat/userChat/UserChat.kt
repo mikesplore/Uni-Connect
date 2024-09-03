@@ -1,6 +1,5 @@
 package com.mike.uniadmin.uniChat.userChat
 
-import ScatteredCirclesBackground
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -205,7 +204,7 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
 
                         item {
                             RowDate(
-                                originalTimestamp, context
+                                originalTimestamp
                             ) // Pass the original timestamp to RowDate
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -230,7 +229,6 @@ fun UserChatScreen(navController: NavController, context: Context, targetUserId:
                 ChatInput(modifier = Modifier.fillMaxWidth(),
                     onMessageChange = { message = it },
                     sendMessage = { sendMessage(message) },
-                    context = context,
                     isTypingChange = { isTyping ->
                         user?.id?.let {
                             userGroupChatViewModel.updateTypingStatus(typingStatusID, it, isTyping)
