@@ -9,11 +9,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,7 +63,7 @@ fun DownloadedResources(context: Context, navController: NavController) {
                 title = {
                     Text(
                         "Downloaded Resources",
-                        style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
+                        style = CC.titleTextStyle().copy(fontSize = 18.sp)
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -83,7 +81,7 @@ fun DownloadedResources(context: Context, navController: NavController) {
             if (files.value.isEmpty()) {
                 Text(
                     text = "No files downloaded.",
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else {
@@ -91,7 +89,7 @@ fun DownloadedResources(context: Context, navController: NavController) {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(files.value) { file ->
-                        FileItemCard(file, context,
+                        FileItemCard(file,
                             onFileClick = {
                                 FileManager.openFile(context, file)
                             },
@@ -110,7 +108,7 @@ fun DownloadedResources(context: Context, navController: NavController) {
 
 
 @Composable
-fun FileItemCard(file: File, context: Context, onFileClick: () -> Unit, onDeleteClick: () -> Unit) {
+fun FileItemCard(file: File, onFileClick: () -> Unit, onDeleteClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -126,12 +124,16 @@ fun FileItemCard(file: File, context: Context, onFileClick: () -> Unit, onDelete
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onFileClick) {
-                Icon(Icons.Default.Description, contentDescription = "PDF File", tint = CC.textColor())
+                Icon(
+                    Icons.Default.Description,
+                    contentDescription = "PDF File",
+                    tint = CC.textColor()
+                )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = file.nameWithoutExtension,
-                    style = CC.titleTextStyle(context).copy(fontSize = 18.sp),
+                    style = CC.titleTextStyle().copy(fontSize = 18.sp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
