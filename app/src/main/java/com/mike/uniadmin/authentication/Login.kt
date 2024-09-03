@@ -56,10 +56,12 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.Details
 import com.mike.uniadmin.helperFunctions.Fcm
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.generateFCMID
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeFcmToken
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -79,8 +81,8 @@ fun LoginScreen(navController: NavController, context: Context) {
 
     var visible by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
-    var loginfailed by remember { mutableStateOf(false) }
-    var registerfailed by remember { mutableStateOf(false) }
+    var loginFailed by remember { mutableStateOf(false) }
+    var registerFailed by remember { mutableStateOf(false) }
 
     val firebaseAuth = FirebaseAuth.getInstance()
     val userViewModel = getUserViewModel(context)
@@ -101,12 +103,12 @@ fun LoginScreen(navController: NavController, context: Context) {
         visible = true
     }
 
-    if(loginfailed){
-        AuthFailed(onDismissRequest = {value -> loginfailed = value }, context)
+    if(loginFailed){
+        AuthFailed(onDismissRequest = {value -> loginFailed = value })
     }
 
-    if(registerfailed){
-        RegistrationFailed(onDismissRequest = {value -> registerfailed = value }, context)
+    if(registerFailed){
+        RegistrationFailed(onDismissRequest = {value -> registerFailed = value })
     }
 
     Scaffold(
@@ -130,7 +132,7 @@ fun LoginScreen(navController: NavController, context: Context) {
         ) {
             Text(
                 text = if (isSigningUp) "Sign Up" else "Sign In",
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontSize = 40.sp, fontWeight = FontWeight.Bold)
             )
 
@@ -143,7 +145,7 @@ fun LoginScreen(navController: NavController, context: Context) {
             ) {
                 Text(
                     text = "Continue with one of the following options",
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                 )
 
                 Row(
@@ -172,12 +174,12 @@ fun LoginScreen(navController: NavController, context: Context) {
 
                 Text(
                     text = "Or",
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                 )
 
                 Text(
                     if (isSigningUp) "Sign up with your email and password" else "Sign in with your email and password",
-                    style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                    style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                 )
 
                 AnimatedContent(targetState = isSigningUp, label = "") { targetState ->
@@ -192,13 +194,13 @@ fun LoginScreen(navController: NavController, context: Context) {
                             CC.SingleLinedTextField(
                                 value = firstName, onValueChange = { newValue ->
                                     firstName = newValue
-                                }, label = "First Name", singleLine = true, context = context
+                                }, label = "First Name", singleLine = true
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             CC.SingleLinedTextField(
                                 value = lastName, onValueChange = { newValue ->
                                     lastName = newValue
-                                }, label = "Last Name", singleLine = true, context = context
+                                }, label = "Last Name", singleLine = true
                             )
                         }
 
@@ -206,14 +208,14 @@ fun LoginScreen(navController: NavController, context: Context) {
                         CC.SingleLinedTextField(
                             value = email, onValueChange = { newValue ->
                                 email = newValue
-                            }, label = "Email", singleLine = true, context = context
+                            }, label = "Email", singleLine = true
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
                         CC.PasswordTextField(
                             value = password, onValueChange = { newValue ->
                                 password = newValue
-                            }, label = "Password", context = context
+                            }, label = "Password"
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -237,22 +239,37 @@ fun LoginScreen(navController: NavController, context: Context) {
                     onClick = {
                         loading = true
                         if (isSigningUp) handleSignUp(
-                            context,
-                            firebaseAuth,
-                            firstName,
-                            lastName,
+                            context = context,
+                            firebaseAuth = firebaseAuth,
+                            email = email,
+                            password = password
                         ) { success ->
                             if (success){
-                                isSigningUp = false
+                                MyDatabase.generateIndexNumber { id ->
+                                    val newUser = UserEntity(
+                                        id = id,
+                                        firstName = firstName,
+                                        lastName = lastName,
+                                        email = email,
+                                        userType = "student",
+                                        phoneNumber = "",
+                                        profileImageLink = "",
+                                    )
+                                    userViewModel.writeUser(newUser){success ->
+                                        if (success){
+                                            isSigningUp = false
+                                        }
+                                    }
+                                }
                             }else{
-                                registerfailed = true
+                                registerFailed = true
                             }
                             loading = false
                         } else handleSignIn(
                             context, firebaseAuth, email, password, navController, userViewModel
                         ) { success ->
                             if (!success){
-                                loginfailed = true
+                                loginFailed = true
                             }
                             loading = false
                         }
@@ -269,7 +286,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     } else {
                         Text(
                             if (isSigningUp) "Sign Up" else "Sign In",
-                            style = CC.descriptionTextStyle(context = context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.Bold)
                         )
                     }
@@ -282,7 +299,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                 TextButton(onClick = { navController.navigate("passwordReset") }) {
                     Text(
                         text = "Forgot Password? Reset",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
@@ -306,7 +323,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     if (targetIsSigningUp) {
                         Text(
                             text = "Already have an account? Sign In",
-                            style = CC.descriptionTextStyle(context),
+                            style = CC.descriptionTextStyle(),
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(5.dp)
                         )
@@ -314,7 +331,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                     } else {
                         Text(
                             text = "Don't have an account? Sign Up ",
-                            style = CC.descriptionTextStyle(context),
+                            style = CC.descriptionTextStyle(),
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(5.dp)
                         )
@@ -374,6 +391,9 @@ fun handleSignUp(
                 onComplete(true)
 
             } else {
+                Log.d("The provided credentials are: ", "$email, $password")
+                Log.e("Registration", "Registration failed, The issue is: ${task.exception}")
+
                 onComplete(false)
             }
         }
@@ -441,36 +461,34 @@ fun handleSignIn(
 }
 
 @Composable
-fun RegistrationFailed(onDismissRequest: (Boolean) -> Unit, context: Context){
+fun RegistrationFailed(onDismissRequest: (Boolean) -> Unit){
     ErrorDialog(
         title = "Registration Failed",
         message = "Check your email and password and try again",
         onDismissRequest = onDismissRequest,
-        context = context
     )
 }
 
 @Composable
-fun AuthFailed(onDismissRequest: (Boolean) -> Unit, context: Context) {
+fun AuthFailed(onDismissRequest: (Boolean) -> Unit) {
     ErrorDialog(
         title = "Login Failed🥲",
         message = "Check your email and password and try again",
         onDismissRequest = onDismissRequest,
-        context = context
     )
 }
 
 
 @Composable
-fun ErrorDialog(title: String, message: String, onDismissRequest: (Boolean) -> Unit, context: Context) {
+fun ErrorDialog(title: String, message: String, onDismissRequest: (Boolean) -> Unit) {
     AlertDialog(
         containerColor = CC.primary(),
         onDismissRequest = {onDismissRequest(false)},
-        title = { Text(text = title, style = CC.titleTextStyle(context)) },
+        title = { Text(text = title, style = CC.titleTextStyle()) },
         text = {
             Text(
                 text = message,
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
             )
         },
         confirmButton = {
@@ -482,7 +500,7 @@ fun ErrorDialog(title: String, message: String, onDismissRequest: (Boolean) -> U
                 )
 
             ) {
-                Text(text = "OK", style = CC.descriptionTextStyle(context))
+                Text(text = "OK", style = CC.descriptionTextStyle())
             }
         }
     )
