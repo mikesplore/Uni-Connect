@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -41,11 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -85,7 +81,7 @@ fun UsersProfile(context: Context, navController: NavController) {
             label = {
                 Text(
                     text = "Search by name or ID",
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle()
                 )
             },
             modifier = Modifier
@@ -110,7 +106,7 @@ fun UsersProfile(context: Context, navController: NavController) {
         if (filteredUsers.isEmpty()) {
             Text(
                 text = "No users found",
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     fontSize = 18.sp, color = CC.textColor().copy(alpha = 0.7f)
                 ),
                 textAlign = TextAlign.Center,
@@ -175,7 +171,7 @@ fun UserProfileCard(user: UserEntity, context: Context, navController: NavContro
                         Text(
                             text = user.firstName[0].toString()
                                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() },
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = textSize * 0.05f
                             )
@@ -191,14 +187,14 @@ fun UserProfileCard(user: UserEntity, context: Context, navController: NavContro
                 ) {
                     Text(
                         text = "${user.firstName} ${user.lastName}",
-                        style = CC.titleTextStyle(context).copy(
+                        style = CC.titleTextStyle().copy(
                             fontSize = textSize * 0.04f, // Adjusted font size based on available width
                             color = CC.textColor()
                         )
                     )
                     Text(
                         text = "Admission No: ${user.id}",
-                        style = CC.descriptionTextStyle(context).copy(
+                        style = CC.descriptionTextStyle().copy(
                             fontSize = textSize * 0.030f,
                             color = CC.textColor().copy(alpha = 0.6f)
                         )
@@ -222,7 +218,7 @@ fun UserProfileCard(user: UserEntity, context: Context, navController: NavContro
                     }
                     IconButton(
                         onClick = {
-                            if (user.phoneNumber.isBlank()){
+                            if (user.phoneNumber.isBlank()) {
                                 return@IconButton
                             }
                             val intent = Intent(Intent.ACTION_DIAL)
@@ -233,7 +229,8 @@ fun UserProfileCard(user: UserEntity, context: Context, navController: NavContro
                         Icon(
                             imageVector = Icons.Default.Call,
                             contentDescription = "Call Icon",
-                            tint = if (user.phoneNumber.isBlank()) CC.textColor().copy(alpha = 0.3f) else CC.tertiary(),
+                            tint = if (user.phoneNumber.isBlank()) CC.textColor()
+                                .copy(alpha = 0.3f) else CC.tertiary(),
                             modifier = Modifier.size(iconSize)
                         )
                     }
