@@ -131,12 +131,12 @@ fun DetailsItem(
                         .wrapContentSize(Alignment.Center)
                 ){
                     Text("No Details",
-                        style = CC.descriptionTextStyle(context),
+                        style = CC.descriptionTextStyle(),
                         modifier = Modifier.wrapContentSize(Alignment.Center)
                     )}
             } else {
                 details.value?.let {
-                    DetailsItemCard(it, context)
+                    DetailsItemCard(it)
                 }
             }
 
@@ -147,7 +147,7 @@ fun DetailsItem(
 
 
 @Composable
-fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
+fun DetailsItemCard(moduleDetails: ModuleDetail) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = CC.extraColor1()),
@@ -173,7 +173,7 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
             // Module Title
             Text(
                 text = moduleDetails.moduleName,
-                style = CC.titleTextStyle(context).copy(
+                style = CC.titleTextStyle().copy(
                     textAlign = TextAlign.Center,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -191,25 +191,21 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
                 icon = Icons.Default.Info,
                 label = "Module Code:",
                 value = moduleDetails.moduleCode,
-                context = context
             )
             ModuleInfoRow(
                 icon = Icons.Default.Person,
                 label = "Lecturer:",
                 value = moduleDetails.lecturer,
-                context = context
             )
             ModuleInfoRow(
                 icon = Icons.AutoMirrored.Filled.DirectionsWalk,
                 label = "Visits:",
                 value = moduleDetails.numberOfVisits,
-                context = context
             )
             ModuleInfoRow(
                 icon = Icons.Default.School,
                 label = "Department:",
                 value = moduleDetails.moduleDepartment,
-                context = context
             )
 
             HorizontalDivider(
@@ -217,9 +213,9 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
             )
 
             // Overview Section
-            SectionTitle("Overview", context)
+            SectionTitle("Overview")
             Text(
-                text = moduleDetails.overview, style = CC.descriptionTextStyle(context).copy(
+                text = moduleDetails.overview, style = CC.descriptionTextStyle().copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
@@ -227,10 +223,10 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
             )
 
             // Learning Outcomes Section
-            SectionTitle("Learning Outcomes", context)
+            SectionTitle("Learning Outcomes")
             moduleDetails.learningOutcomes.forEach { outcome ->
                 Text(
-                    text = "- $outcome", style = CC.descriptionTextStyle(context).copy(
+                    text = "- $outcome", style = CC.descriptionTextStyle().copy(
                         fontSize = 16.sp,
                         color = CC.textColor().copy(alpha = 0.8f),
                         fontWeight = FontWeight.Medium
@@ -239,9 +235,9 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
             }
 
             // Schedule Section
-            SectionTitle("Schedule", context)
+            SectionTitle("Schedule")
             Text(
-                text = moduleDetails.schedule, style = CC.descriptionTextStyle(context).copy(
+                text = moduleDetails.schedule, style = CC.descriptionTextStyle().copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
@@ -249,10 +245,10 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
             )
 
             // Required Materials Section
-            SectionTitle("Required Materials", context)
+            SectionTitle("Required Materials")
             Text(
                 text = moduleDetails.requiredMaterials,
-                style = CC.descriptionTextStyle(context).copy(
+                style = CC.descriptionTextStyle().copy(
                     fontSize = 16.sp,
                     color = CC.textColor().copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
@@ -263,7 +259,7 @@ fun DetailsItemCard(moduleDetails: ModuleDetail, context: Context) {
 }
 
 @Composable
-fun ModuleInfoRow(icon: ImageVector, label: String, value: String, context: Context) {
+fun ModuleInfoRow(icon: ImageVector, label: String, value: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -274,15 +270,15 @@ fun ModuleInfoRow(icon: ImageVector, label: String, value: String, context: Cont
         )
         Text(
             text = "$label $value",
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Medium)
+            style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Medium)
         )
     }
 }
 
 @Composable
-fun SectionTitle(title: String, context: Context) {
+fun SectionTitle(title: String) {
     Text(
-        text = title, style = CC.descriptionTextStyle(context).copy(
+        text = title, style = CC.descriptionTextStyle().copy(
             fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = CC.extraColor2()
         ), modifier = Modifier.padding(vertical = 4.dp)
     )
@@ -352,7 +348,6 @@ fun AddDetailsItem(
                 label = "Lecturer",
                 value = lecturer,
                 onValueChange = { lecturer = it },
-                context = context,
 
                 )
 
@@ -360,7 +355,6 @@ fun AddDetailsItem(
                 label = "Module Department",
                 value = moduleDepartment,
                 onValueChange = { moduleDepartment = it },
-                context = context,
 
                 )
 
@@ -368,7 +362,6 @@ fun AddDetailsItem(
                 label = "Module Outcome",
                 value = moduleOutcome,
                 onValueChange = { moduleOutcome = it },
-                context = context,
                 singleLine = false,
                 maxLines = 10,
 
@@ -378,7 +371,6 @@ fun AddDetailsItem(
                 label = "Overview",
                 value = overview,
                 onValueChange = { overview = it },
-                context = context,
                 singleLine = false,
                 maxLines = 10,
 
@@ -388,7 +380,6 @@ fun AddDetailsItem(
                 label = "Learning Outcomes",
                 value = learningOutcomes,
                 onValueChange = { learningOutcomes = it },
-                context = context,
                 singleLine = false,
                 maxLines = 10,
 
@@ -398,7 +389,6 @@ fun AddDetailsItem(
                 label = "Schedule",
                 value = schedule,
                 onValueChange = { schedule = it },
-                context = context,
                 singleLine = false,
                 maxLines = 10,
 
@@ -408,7 +398,6 @@ fun AddDetailsItem(
                 label = "Required Materials",
                 value = requiredMaterials,
                 onValueChange = { requiredMaterials = it },
-                context = context,
                 singleLine = false,
                 maxLines = 10,
 
