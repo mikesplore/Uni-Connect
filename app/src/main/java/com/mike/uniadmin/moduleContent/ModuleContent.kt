@@ -134,7 +134,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
                             modifier = Modifier
                                 .padding(10.dp)
                                 .padding(16.dp), // Added padding
-                            style = CC.titleTextStyle(context).copy(
+                            style = CC.titleTextStyle().copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 textAlign = TextAlign.Center,
                                 brush = Brush.linearGradient(
@@ -205,7 +205,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
                             ) {
                                 Text(
                                     text = title,
-                                    style = CC.descriptionTextStyle(context),
+                                    style = CC.descriptionTextStyle(),
                                     color = if (selectedTabIndex == index) CC.textColor() else CC.secondary()
                                 )
                             }
@@ -216,7 +216,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
                 when (selectedTabIndex) {
                     0 -> {
                         if (!isDeviceOnline(context)) {
-                            InternetError(context)
+                            InternetError()
                         } else
                             if (announcementsLoading) {
                                 LoadingIndicator()
@@ -224,7 +224,6 @@ fun ModuleContent(context: Context, targetModuleID: String) {
                                 AnnouncementsItem(
                                     targetModuleID,
                                     moduleAnnouncementViewModel,
-                                    context,
                                     userViewModel
                                 )
                             }
@@ -232,7 +231,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
 
                     1 -> {
                         if (!isDeviceOnline(context)) {
-                            InternetError(context)
+                            InternetError()
                         } else
                             if (assignmentsLoading) {
                                 LoadingIndicator()
@@ -249,7 +248,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
 
                     2 -> {
                         if (!isDeviceOnline(context)) {
-                            InternetError(context)
+                            InternetError()
                         } else
                             if (timetablesLoading) {
                                 LoadingIndicator()
@@ -263,7 +262,7 @@ fun ModuleContent(context: Context, targetModuleID: String) {
 
                     3 -> {
                         if (!isDeviceOnline(context)) {
-                            InternetError(context)
+                            InternetError()
                         } else
                             if (detailsLoading) {
                                 LoadingIndicator()
@@ -296,15 +295,14 @@ internal fun AddTextField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    context: Context,
     singleLine: Boolean = true,
     maxLines: Int = 1
 ) {
     TextField(
         value = value,
-        textStyle = CC.descriptionTextStyle(context),
+        textStyle = CC.descriptionTextStyle(),
         onValueChange = onValueChange,
-        placeholder = { Text(label, style = CC.descriptionTextStyle(context)) },
+        placeholder = { Text(label, style = CC.descriptionTextStyle()) },
         modifier = Modifier
             .heightIn(min = 20.dp, max = 100.dp)
             .fillMaxWidth(),
