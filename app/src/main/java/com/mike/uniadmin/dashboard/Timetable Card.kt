@@ -1,7 +1,7 @@
 package com.mike.uniadmin.dashboard
 
 import android.annotation.SuppressLint
-import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -16,8 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,104 +31,110 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun ModuleTimetableCard(timetable: ModuleTimetable, context: Context) {
+fun ModuleTimetableCard(timetable: ModuleTimetable) {
     val today = CC.currentDay()
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CC.primary()),
+    BoxWithConstraints(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .shadow(8.dp, RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
-        BoxWithConstraints(
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start,
-            ) {
-                // Module Name
-                Text(
-                    text = timetable.moduleName,
-                    style = CC.titleTextStyle(context).copy(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    spotColor = CC.secondary()
                 )
+                .background(CC.primary())
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(8.dp))
+            // Module Name
+            Text(
+                text = timetable.moduleName,
+                style = CC.titleTextStyle().copy(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(start = 10.dp)
+            )
 
-                // Day and Time
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Event,
-                        contentDescription = "Day",
-                        tint = CC.tertiary(),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    if (timetable.day == today) {
-                        Text(
-                            text = "Today, ${timetable.startTime} - ${timetable.endTime}",
-                            style = CC.descriptionTextStyle(context),
-                            color = CC.textColor().copy(alpha = 0.7f)
-                        )
+            Spacer(modifier = Modifier.height(8.dp))
 
-                    } else {
-                        Text(
-                            text = "${timetable.day}, ${timetable.startTime} - ${timetable.endTime}",
-                            style = CC.descriptionTextStyle(context),
-                            color = CC.textColor().copy(alpha = 0.7f)
-                        )
-
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Venue and Lecturer
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Venue",
-                        tint = CC.tertiary(),
-                        modifier = Modifier.size(18.dp)
-                    )
+            // Day and Time
+            Row(
+                modifier = Modifier.padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Event,
+                    contentDescription = "Day",
+                    tint = CC.tertiary(),
+                    modifier = Modifier.size(18.dp)
+                )
+                if (timetable.day == today) {
                     Text(
-                        text = timetable.venue,
-                        style = CC.descriptionTextStyle(context),
+                        text = "Today, ${timetable.startTime} - ${timetable.endTime}",
+                        style = CC.descriptionTextStyle(),
                         color = CC.textColor().copy(alpha = 0.7f)
                     )
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Lecturer",
-                        tint = CC.tertiary(),
-                        modifier = Modifier.size(18.dp)
-                    )
+                } else {
                     Text(
-                        text = timetable.lecturer,
-                        style = CC.descriptionTextStyle(context),
+                        text = "${timetable.day}, ${timetable.startTime} - ${timetable.endTime}",
+                        style = CC.descriptionTextStyle(),
                         color = CC.textColor().copy(alpha = 0.7f)
                     )
+
                 }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Venue and Lecturer
+            Row(
+                modifier = Modifier.padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Venue",
+                    tint = CC.tertiary(),
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = timetable.venue,
+                    style = CC.descriptionTextStyle(),
+                    color = CC.textColor().copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Lecturer",
+                    tint = CC.tertiary(),
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = timetable.lecturer,
+                    style = CC.descriptionTextStyle(),
+                    color = CC.textColor().copy(alpha = 0.7f)
+                )
             }
         }
     }
+
 }
