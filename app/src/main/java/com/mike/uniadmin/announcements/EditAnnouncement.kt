@@ -1,6 +1,5 @@
 package com.mike.uniadmin.announcements
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,16 +29,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
 import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
-import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun EditAnnouncement(
-    context: Context,
     onComplete: () -> Unit,
     announcement: AnnouncementsWithAuthor,
     announcementViewModel: AnnouncementViewModel,
@@ -66,7 +60,7 @@ fun EditAnnouncement(
         ) {
             Text(
                 "Edit Announcement",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold)
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -100,33 +94,33 @@ fun EditAnnouncement(
                     // Show the initial of the author's name if no image is available
                     Text(
                         "${announcement.authorName[0]}",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
 
             // Display the current date
-            Text(CC.getDateFromTimeStamp(CC.getTimeStamp()), style = CC.descriptionTextStyle(context))
+            Text(CC.getDateFromTimeStamp(CC.getTimeStamp()), style = CC.descriptionTextStyle())
         }
 
         // Title input section
-        Text("Enter announcement title", style = CC.descriptionTextStyle(context))
+        Text("Enter announcement title", style = CC.descriptionTextStyle())
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
             value = title, onValueChange = { newTitle ->
                 title = newTitle
-            }, singleLine = true, placeholder = "Title", context = context
+            }, singleLine = true, placeholder = "Title"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         // Description input section
-        Text("Enter announcement description", style = CC.descriptionTextStyle(context))
+        Text("Enter announcement description", style = CC.descriptionTextStyle())
         Spacer(modifier = Modifier.height(10.dp))
         AnnouncementTextField(
             value = description, onValueChange = { newDescription ->
                 description = newDescription
-            }, singleLine = false, placeholder = "Description", context = context
+            }, singleLine = false, placeholder = "Description"
         )
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -151,7 +145,7 @@ fun EditAnnouncement(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
             ) {
-                Text("Edit", style = CC.descriptionTextStyle(context))
+                Text("Edit", style = CC.descriptionTextStyle())
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
