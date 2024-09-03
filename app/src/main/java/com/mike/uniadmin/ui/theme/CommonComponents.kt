@@ -1,6 +1,5 @@
 package com.mike.uniadmin.ui.theme
 
-import android.content.Context
 import android.icu.util.Calendar
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -59,9 +58,8 @@ object CommonComponents {
         label: String,
         enabled: Boolean = true,
         isError: Boolean = false,
-        context: Context
 
-    ) {
+        ) {
         val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         var passwordVisibility by remember { mutableStateOf(false) }
@@ -115,9 +113,8 @@ object CommonComponents {
         enabled: Boolean = true,
         isError: Boolean = false,
         singleLine: Boolean,
-        context: Context
 
-    ) {
+        ) {
         val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
         OutlinedTextField(
@@ -172,7 +169,7 @@ object CommonComponents {
     }
 
     @Composable
-    fun descriptionTextStyle(context: Context): TextStyle {
+    fun descriptionTextStyle(): TextStyle {
         val color = textColor()
         val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
@@ -196,7 +193,7 @@ object CommonComponents {
 
 
     @Composable
-    fun titleTextStyle(context: Context): TextStyle {
+    fun titleTextStyle(): TextStyle {
         val color = textColor()
         val currentFont = currentFontFamily() // Get initial font
         val selectedFontFamily by remember { mutableStateOf(currentFont) }
