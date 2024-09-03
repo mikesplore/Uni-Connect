@@ -101,14 +101,14 @@ fun AnnouncementsScreen(context: Context) {
             ) {
                 Text(
                     "Announcements",
-                    style = CC.titleTextStyle(context)
+                    style = CC.titleTextStyle()
                         .copy(fontSize = 30.sp, fontWeight = FontWeight.Bold)
                 )
             }
 
             Text(
                 "Tap to expand the announcement",
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(start = 20.dp)
             )
 
@@ -137,7 +137,7 @@ fun AnnouncementsScreen(context: Context) {
                 announcements.isNullOrEmpty() -> {
                     // No announcements message
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No announcements available", style = CC.descriptionTextStyle(context))
+                        Text("No announcements available", style = CC.descriptionTextStyle())
                     }
                 }
 
@@ -168,7 +168,6 @@ fun AnnouncementsScreen(context: Context) {
                                             }
                                         }
                                     },
-                                    context = context,
                                     isEditing = isEditing,
                                     onEditComplete = { editingAnnouncementId = null },
                                     announcementViewModel = announcementViewModel
