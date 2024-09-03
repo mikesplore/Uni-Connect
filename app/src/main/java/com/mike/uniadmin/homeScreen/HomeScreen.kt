@@ -26,10 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.announcements.AnnouncementsScreen
@@ -45,7 +41,6 @@ import com.mike.uniadmin.helperFunctions.MyDatabase.getUpdate
 import com.mike.uniadmin.helperFunctions.Screen
 import com.mike.uniadmin.helperFunctions.Update
 import kotlinx.coroutines.launch
-import kotlin.io.path.exists
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -85,11 +80,10 @@ fun HomeScreen(
     val email = UniAdminPreferences.userEmail.value
 
 
-
     // Side effects
     LaunchedEffect(fetchedUserDetails) {
         //MyDatabase.setUpdate(update = Update(version = "1.0.0", updateLink = ""))
-            userViewModel.findUserByEmail(email) {}
+        userViewModel.findUserByEmail(email) {}
 
 
         launch {
@@ -130,7 +124,6 @@ fun HomeScreen(
             }
         }, containerColor = CC.primary(), sheetState = sheetState, content = {
             ModalDrawerItem(
-                context = context,
                 navController = navController,
                 userViewModel = userViewModel,
                 chatViewModel = chatViewModel,
@@ -148,7 +141,7 @@ fun HomeScreen(
             navController = navController,
             userViewModel = userViewModel,
             chatViewModel = chatViewModel,
-            signedInUser = fetchedUserDetails ,
+            signedInUser = fetchedUserDetails,
             signedInUserLoading = signedInUserLoading,
             showBottomSheet = { value -> showBottomSheet = value },
             userStatus = userStatus,
@@ -159,7 +152,7 @@ fun HomeScreen(
     }) {
         Scaffold(
             bottomBar = {
-                BottomBar(context,
+                BottomBar(
                     screens,
                     pagerState,
                     coroutineScope,
