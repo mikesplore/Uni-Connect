@@ -113,7 +113,7 @@ fun MoreDetails(context: Context, navController: NavController) {
             ) {
                 Text(
                     "Details",
-                    style = CC.titleTextStyle(context)
+                    style = CC.titleTextStyle()
                         .copy(fontWeight = FontWeight.ExtraBold, fontSize = 30.sp)
                 )
             }
@@ -129,7 +129,6 @@ fun MoreDetails(context: Context, navController: NavController) {
                         firstName = first
                     },
                     label = "First name",
-                    context = context,
                     singleLine = true,
                 )
 
@@ -141,7 +140,6 @@ fun MoreDetails(context: Context, navController: NavController) {
 
                     },
                     label = "Last name",
-                    context = context,
                     singleLine = true,
                 )
 
@@ -200,7 +198,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                         if (addLoading) {
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), color = CC.textColor())
                         } else {
-                            Text("Save details", style = CC.descriptionTextStyle(context))
+                            Text("Save details", style = CC.descriptionTextStyle())
                         }
                     }
                 }
