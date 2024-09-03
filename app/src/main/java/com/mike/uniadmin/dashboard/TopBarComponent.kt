@@ -1,7 +1,6 @@
 package com.mike.uniadmin.dashboard
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,14 +25,11 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -66,7 +61,6 @@ object Sidebar {
 @Composable
 fun TopAppBarContent(
     signedInUser: UserEntity,
-    context: Context,
     navController: NavController,
     notificationViewModel: NotificationViewModel,
 ) {
@@ -104,12 +98,13 @@ fun TopAppBarContent(
             ) {
                 Text(
                     text = CC.getGreetingMessage(),
-                    style = CC.descriptionTextStyle(context)
+                    style = CC.descriptionTextStyle()
                         .copy(color = CC.textColor().copy(alpha = 0.5f))
                 )
                 Text(
                     text = signedInUser.firstName,
-                    style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                    style = CC.titleTextStyle()
+                        .copy(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 )
             }
         }
@@ -158,7 +153,7 @@ fun TopAppBarContent(
 
                         if (!sortedNotifications.isNullOrEmpty()) {
                             sortedNotifications.take(5).forEach { notification ->
-                                NotificationTitleContent(notification, context)
+                                NotificationTitleContent(notification)
                                 HorizontalDivider()
                             }
 
@@ -171,10 +166,10 @@ fun TopAppBarContent(
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("View All", style = CC.descriptionTextStyle(context))
+                                Text("View All", style = CC.descriptionTextStyle())
                             }
                         } else {
-                            Text("No notifications", style = CC.descriptionTextStyle(context))
+                            Text("No notifications", style = CC.descriptionTextStyle())
                         }
                     }
                 }
@@ -211,7 +206,7 @@ fun TopAppBarContent(
                         } else {
                             Text(
                                 "${signedInUser.firstName[0]}${signedInUser.lastName[0]}",
-                                style = CC.titleTextStyle(context)
+                                style = CC.descriptionTextStyle()
                                     .copy(fontWeight = FontWeight.Bold)
                             )
                         }
@@ -225,7 +220,7 @@ fun TopAppBarContent(
 
 @Composable
 fun NotificationTitleContent(
-    notification: NotificationEntity, context: Context
+    notification: NotificationEntity
 ) {
     Row(
         modifier = Modifier
@@ -236,7 +231,7 @@ fun NotificationTitleContent(
     ) {
         Text(
             text = notification.title,
-            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+            style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
