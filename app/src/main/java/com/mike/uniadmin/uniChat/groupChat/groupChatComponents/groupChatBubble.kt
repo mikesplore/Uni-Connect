@@ -1,7 +1,6 @@
 package com.mike.uniadmin.uniChat.groupChat.groupChatComponents
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +40,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ChatBubble(
-    chat: GroupChatEntityWithDetails, isUser: Boolean, context: Context, navController: NavController
+    chat: GroupChatEntityWithDetails, isUser: Boolean, navController: NavController
 ) {
     val alignment = if (isUser) Alignment.TopEnd else Alignment.TopStart
     val bubbleShape = RoundedCornerShape(
@@ -99,7 +98,7 @@ fun ChatBubble(
                     } else {
                         Text(
                             text = chat.senderName[0].toString(),
-                            style = CC.titleTextStyle(context).copy(fontSize = 18.sp)
+                            style = CC.titleTextStyle().copy(fontSize = 18.sp)
                         )
                     }
                 }
@@ -107,7 +106,7 @@ fun ChatBubble(
             if (isUser) {
                 Text(
                     text = CC.getFormattedTime(chat.groupChat.date),
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     fontSize = 10.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
@@ -126,7 +125,7 @@ fun ChatBubble(
                     if (!isUser) {
                         Text(
                             text = chat.senderName,
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 13.sp),
+                            style = CC.descriptionTextStyle().copy(fontSize = 13.sp),
                             fontWeight = FontWeight.Bold,
                             color = randomColor.random()
                         )
@@ -135,7 +134,7 @@ fun ChatBubble(
                     SelectionContainer {
                         Text(
                             text = chat.groupChat.message,
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                            style = CC.descriptionTextStyle().copy(fontSize = 12.sp)
                         )
                     }
                 }
@@ -143,7 +142,7 @@ fun ChatBubble(
             if (!isUser) {
                 Text(
                     text = CC.getFormattedTime(chat.groupChat.date),
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     fontSize = 10.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
