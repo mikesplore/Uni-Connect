@@ -1,6 +1,5 @@
 package com.mike.uniadmin.uniChat.userChat.userChatComponents
 
-import android.content.Context
 import android.os.CountDownTimer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,6 @@ fun ChatInput(
     modifier: Modifier = Modifier,
     onMessageChange: (String) -> Unit,
     sendMessage: (String) -> Unit,
-    context: Context,
     isTypingChange: (Boolean) -> Unit
 ) {
     var input by remember { mutableStateOf(TextFieldValue("")) }
@@ -73,7 +71,7 @@ fun ChatInput(
                 .padding(end = 8.dp)
                 .background(CC.secondary(), RoundedCornerShape(24.dp))
                 .heightIn(min = 40.dp),
-            textStyle = CC.descriptionTextStyle(context),
+            textStyle = CC.descriptionTextStyle(),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.padding(16.dp),
@@ -82,7 +80,7 @@ fun ChatInput(
                     if (input.text.isEmpty()) {
                         Text(
                             text = "Message",
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp)
+                            style = CC.descriptionTextStyle().copy(fontSize = 12.sp)
                         )
                     }
                     innerTextField()
