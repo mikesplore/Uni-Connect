@@ -52,7 +52,7 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
     }
 
     if (accountStatus?.status == "pending") {
-        AccountDeletionRequests(context, accountStatus!!)
+        AccountDeletionRequests(accountStatus!!)
     } else {
         var showPuzzle by remember { mutableStateOf(false) }
         var puzzleWords by remember { mutableStateOf(generateRandomNonsenseWord()) }
@@ -72,12 +72,12 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
             Row {
                 Text(
                     "Danger Zone",
-                    style = CC.titleTextStyle(context).copy(color = Color.Red.copy(0.7f))
+                    style = CC.titleTextStyle().copy(color = Color.Red.copy(0.7f))
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row {
-                Text("Delete Account", style = CC.descriptionTextStyle(context))
+                Text("Delete Account", style = CC.descriptionTextStyle())
             }
             Spacer(modifier = Modifier.height(10.dp))
             Button(
@@ -87,22 +87,22 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Solve a Puzzle before proceeding", style = CC.descriptionTextStyle(context))
+                Text("Solve a Puzzle before proceeding", style = CC.descriptionTextStyle())
             }
 
             if (showPuzzle) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     "Please enter the following code:",
-                    style = CC.descriptionTextStyle(context).copy(textAlign = TextAlign.Center)
+                    style = CC.descriptionTextStyle().copy(textAlign = TextAlign.Center)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    puzzleWords, style = CC.titleTextStyle(context), color = CC.tertiary()
+                    puzzleWords, style = CC.titleTextStyle(), color = CC.tertiary()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 TextField(
-                    value = userInput, textStyle = CC.titleTextStyle(context).copy(
+                    value = userInput, textStyle = CC.titleTextStyle().copy(
                         fontSize = 18.sp, color = if (isError) Color.Red else CC.textColor()
                     ), onValueChange = {
                         isError = false
@@ -140,14 +140,14 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                         colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Proceed", style = CC.descriptionTextStyle(context))
+                        Text("Proceed", style = CC.descriptionTextStyle())
                     }
                     Button(
                         onClick = { showPuzzle = false },
                         colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Abort", style = CC.descriptionTextStyle(context))
+                        Text("Abort", style = CC.descriptionTextStyle())
                     }
                 }
 
@@ -158,43 +158,43 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                     ) {
                         Text(
                             text = "Important Notice: Account Deletion",
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 fontWeight = FontWeight.Bold, color = Color.Red
                             )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Deletion Timeline",
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.SemiBold)
                         )
                         Text(
                             text = "Your account will be permanently deleted within 30 days. You will have full access until then.",
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 textAlign = TextAlign.Center, color = Color.Red.copy(0.5f)
                             )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Data Deletion",
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.SemiBold)
                         )
                         Text(
                             text = "Upon deletion, all associated data will be permanently erased, including profile information, user content, and settings.",
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 textAlign = TextAlign.Center
                             )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Account Reversal",
-                            style = CC.descriptionTextStyle(context)
+                            style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.SemiBold)
                         )
                         Text(
                             text = "If you wish to reverse the deletion process, please contact our support team before the 30-day period expires.",
-                            style = CC.descriptionTextStyle(context).copy(
+                            style = CC.descriptionTextStyle().copy(
                                 textAlign = TextAlign.Center
                             )
                         )
@@ -245,7 +245,7 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
                         } else {
                             Text(
                                 "Send Account Deletion Request",
-                                style = CC.descriptionTextStyle(context)
+                                style = CC.descriptionTextStyle()
                             )
                         }
                     }
@@ -258,7 +258,6 @@ fun DangerZone(context: Context, viewModel: UserViewModel) {
 
 @Composable
 fun AccountDeletionRequests(
-    context: Context,
     accountStatus: AccountDeletionEntity,
 ) {
     Card(
@@ -272,7 +271,7 @@ fun AccountDeletionRequests(
         ) {
             Text(
                 "Pending Account Deletion Request",
-                style = CC.titleTextStyle(context = context).copy(fontSize = 18.sp),
+                style = CC.titleTextStyle().copy(fontSize = 18.sp),
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -282,7 +281,7 @@ fun AccountDeletionRequests(
                         accountStatus.date
                     )
                 }. Your account will be permanently deleted after 30 days from this date.",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
             )
         }
     }
