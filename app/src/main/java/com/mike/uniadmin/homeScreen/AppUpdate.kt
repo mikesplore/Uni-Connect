@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,7 +54,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun CheckUpdate(context: Context) {
     var update by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableStateOf(0) }
+    var downloadProgress by remember { mutableIntStateOf(0) }
     val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
     val versionName = packageInfo.versionName
     var myUpdate by remember { mutableStateOf(Update()) }
@@ -206,7 +207,7 @@ fun UpdateDialog(
             // Title and Version
             Text(
                 "New Update Available!",
-                style = CC.titleTextStyle(context).copy(
+                style = CC.titleTextStyle().copy(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 ),
@@ -214,7 +215,7 @@ fun UpdateDialog(
             )
             Text(
                 "Version $versionName",
-                style = CC.descriptionTextStyle(context)
+                style = CC.descriptionTextStyle()
                     .copy(color = CC.textColor().copy(alpha = 0.7f)),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -222,7 +223,7 @@ fun UpdateDialog(
             // Description
             Text(
                 "A new version will be downloaded in the background. An install prompt will appear shortly. If dismissed, find the update in your Downloads folder and install it manually",
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(),
                 modifier = Modifier.padding(bottom = 16.dp),
                 textAlign = TextAlign.Center
             )
@@ -248,7 +249,7 @@ fun UpdateDialog(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
                 ) {
-                    Text("Update", style = CC.descriptionTextStyle(context))
+                    Text("Update", style = CC.descriptionTextStyle())
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
