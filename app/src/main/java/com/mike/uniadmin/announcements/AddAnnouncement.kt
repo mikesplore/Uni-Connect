@@ -90,7 +90,7 @@ fun AddAnnouncement(
         ) {
             Text(
                 "Add new Announcement",
-                style = CC.titleTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold)
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -123,15 +123,15 @@ fun AddAnnouncement(
                 } else {
                     Text(
                         "${user?.firstName?.get(0)}",
-                        style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
                     )
                 }
             }
 
-            Text(CC.getDateFromTimeStamp(CC.getTimeStamp()), style = CC.descriptionTextStyle(context))
+            Text(CC.getDateFromTimeStamp(CC.getTimeStamp()), style = CC.descriptionTextStyle())
         }
 
-        Text("Enter announcement title", style = CC.descriptionTextStyle(context))
+        Text("Enter announcement title", style = CC.descriptionTextStyle())
         Spacer(modifier = Modifier.height(10.dp))
 
         AnnouncementTextField(
@@ -139,11 +139,10 @@ fun AddAnnouncement(
             onValueChange = { title = it },
             singleLine = true,
             placeholder = "Title",
-            context = context
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-        Text("Enter announcement description", style = CC.descriptionTextStyle(context))
+        Text("Enter announcement description", style = CC.descriptionTextStyle())
         Spacer(modifier = Modifier.height(10.dp))
 
         AnnouncementTextField(
@@ -151,7 +150,6 @@ fun AddAnnouncement(
             onValueChange = { description = it },
             singleLine = false,
             placeholder = "Description",
-            context = context
         )
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.fillMaxWidth(0.9f)) {
@@ -209,7 +207,7 @@ fun AddAnnouncement(
                 if (loading) {
                     CircularProgressIndicator(color = CC.textColor(), strokeWidth = 1.dp, modifier = Modifier.size(20.dp))
                 }else{
-                    Text("Post", style = CC.descriptionTextStyle(context))
+                    Text("Post", style = CC.descriptionTextStyle())
                 }
             }
         }
@@ -224,13 +222,12 @@ fun AnnouncementTextField(
     onValueChange: (String) -> Unit,
     singleLine: Boolean,
     placeholder: String,
-    context: Context
 ) {
     TextField(
         value = value,
-        textStyle = CC.descriptionTextStyle(context),
+        textStyle = CC.descriptionTextStyle(),
         onValueChange = onValueChange,
-        placeholder = { Text(placeholder, style = CC.descriptionTextStyle(context)) },
+        placeholder = { Text(placeholder, style = CC.descriptionTextStyle()) },
         singleLine = singleLine,
         colors = TextFieldDefaults.colors(
             focusedTextColor = CC.textColor(),
