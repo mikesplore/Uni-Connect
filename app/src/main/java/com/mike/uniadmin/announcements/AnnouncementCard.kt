@@ -1,6 +1,5 @@
 package com.mike.uniadmin.announcements
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -48,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
 import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
 import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -58,7 +56,6 @@ fun AnnouncementCard(
     announcement: AnnouncementsWithAuthor,
     onEdit: () -> Unit,
     onDelete: (String) -> Unit,
-    context: Context,
     isEditing: Boolean,
     onEditComplete: () -> Unit,
     announcementViewModel: AnnouncementViewModel
@@ -67,7 +64,8 @@ fun AnnouncementCard(
     var expanded by remember { mutableStateOf(false) }
     val iconRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "")
     val cardElevation by animateDpAsState(targetValue = if (expanded) 8.dp else 2.dp, label = "")
-    val descriptionAlpha by animateFloatAsState(targetValue = if (expanded) 1f else 0.8f,
+    val descriptionAlpha by animateFloatAsState(
+        targetValue = if (expanded) 1f else 0.8f,
         label = ""
     )
     val userTypes = UniAdminPreferences.userType.value
@@ -113,7 +111,7 @@ fun AnnouncementCard(
                         // Display author's initial if no image is available
                         Text(
                             "${announcement.authorName[0]}",
-                            style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold),
+                            style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
                         )
                     }
                 }
@@ -123,7 +121,7 @@ fun AnnouncementCard(
                 // Announcement title
                 Text(
                     text = announcement.title,
-                    style = CC.descriptionTextStyle(context),
+                    style = CC.descriptionTextStyle(),
                     fontWeight = FontWeight.Bold,
                     color = CC.textColor(),
                     maxLines = 2,
@@ -154,7 +152,7 @@ fun AnnouncementCard(
                     // Announcement description
                     Text(
                         text = announcement.description,
-                        style = CC.descriptionTextStyle(context).copy(fontSize = 14.sp),
+                        style = CC.descriptionTextStyle().copy(fontSize = 14.sp),
                         color = CC.textColor().copy(alpha = descriptionAlpha),
                         overflow = TextOverflow.Ellipsis
                     )
@@ -169,13 +167,13 @@ fun AnnouncementCard(
                     ) {
                         Text(
                             text = announcement.authorName,
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                            style = CC.descriptionTextStyle().copy(fontSize = 12.sp),
                             color = CC.textColor().copy(alpha = 0.6f),
                         )
 
                         Text(
                             text = CC.getRelativeDate(CC.getDateFromTimeStamp(announcement.date)),
-                            style = CC.descriptionTextStyle(context).copy(fontSize = 12.sp),
+                            style = CC.descriptionTextStyle().copy(fontSize = 12.sp),
                             color = CC.textColor().copy(alpha = 0.6f),
                         )
                     }
@@ -183,24 +181,26 @@ fun AnnouncementCard(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Edit and Delete buttons
-                    if (userTypes == "admin" && announcement.authorID == UniAdminPreferences.userID.value){
-                    Row(
-                        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            onClick = { onEdit() },
-                            colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
+                    if (userTypes == "admin" && announcement.authorID == UniAdminPreferences.userID.value) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
                         ) {
-                            Text("Edit", style = CC.descriptionTextStyle(context))
+                            Button(
+                                onClick = { onEdit() },
+                                colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
+                            ) {
+                                Text("Edit", style = CC.descriptionTextStyle())
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = { onDelete(announcement.id) },
+                                colors = ButtonDefaults.buttonColors(containerColor = CC.tertiary())
+                            ) {
+                                Text("Delete", style = CC.descriptionTextStyle())
+                            }
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = { onDelete(announcement.id) },
-                            colors = ButtonDefaults.buttonColors(containerColor = CC.tertiary())
-                        ) {
-                            Text("Delete", style = CC.descriptionTextStyle(context))
-                        }
-                    }}
+                    }
                 }
             }
 
@@ -212,7 +212,7 @@ fun AnnouncementCard(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     EditAnnouncement(
-                        announcement = announcement, context = context, onComplete = {
+                        announcement = announcement, onComplete = {
                             onEditComplete()
                         }, announcementViewModel = announcementViewModel
                     )
