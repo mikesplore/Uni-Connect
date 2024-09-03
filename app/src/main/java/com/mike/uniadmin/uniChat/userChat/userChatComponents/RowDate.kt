@@ -1,6 +1,5 @@
 package com.mike.uniadmin.uniChat.userChat.userChatComponents
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
-fun RowDate(date: String, context: Context) {
+fun RowDate(date: String) {
     Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
     ) {
@@ -33,7 +32,7 @@ fun RowDate(date: String, context: Context) {
             Text(
                 text = CC.getRelativeDate(CC.getDateFromTimeStamp(date)),
                 modifier = Modifier.padding(5.dp),
-                style = CC.descriptionTextStyle(context),
+                style = CC.descriptionTextStyle(),
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )
