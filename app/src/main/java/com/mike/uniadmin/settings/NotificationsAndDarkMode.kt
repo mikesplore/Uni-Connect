@@ -1,7 +1,6 @@
 package com.mike.uniadmin.settings
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,14 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.users.UserPreferencesEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
-import com.mike.uniadmin.helperFunctions.MyDatabase.generateSharedPreferencesID
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
-fun DarkMode(context: Context) {
-    val icon = if (UniAdminPreferences.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
+fun DarkMode() {
+    val icon =
+        if (UniAdminPreferences.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
     val iconDescription =
         if (UniAdminPreferences.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
     BoxWithConstraints {
@@ -64,7 +59,7 @@ fun DarkMode(context: Context) {
                     tint = CommonComponents.extraColor2()
                 )
             }
-            Text("Dark Mode", style = CommonComponents.descriptionTextStyle(context), fontSize = 20.sp)
+            Text("Dark Mode", style = CommonComponents.descriptionTextStyle(), fontSize = 20.sp)
             Switch(
                 onCheckedChange = {
                     UniAdminPreferences.darkMode.value = it
@@ -112,7 +107,7 @@ fun Notifications(context: Context) {
                     tint = CommonComponents.extraColor2()
                 )
             }
-            Text("Notifications", style = CommonComponents.descriptionTextStyle(context), fontSize = 20.sp)
+            Text("Notifications", style = CommonComponents.descriptionTextStyle(), fontSize = 20.sp)
             Switch(
                 onCheckedChange = { notifications ->
                     if (!notifications) {
