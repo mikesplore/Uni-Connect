@@ -56,8 +56,8 @@ class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnno
                     val announcement = childSnapshot.getValue(ModuleAnnouncement::class.java)
                     announcement?.let { announcements.add(it) }
                 }
-                // Call the update function with the correct module ID
-                updateLocalDatabase(announcements, moduleID)
+                // Call the update function
+                updateLocalDatabase(announcements)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -66,7 +66,7 @@ class ModuleAnnouncementRepository(private val moduleAnnouncementDao: ModuleAnno
         })
     }
 
-    private fun updateLocalDatabase(announcements: List<ModuleAnnouncement>, moduleID: String) {
+    private fun updateLocalDatabase(announcements: List<ModuleAnnouncement>) {
         uniConnectScope.launch {
             try {
                 // To handle updates correctly:
