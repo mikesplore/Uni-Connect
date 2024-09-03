@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 
 object UniAdminPreferences {
     // Keys for SharedPreferences
-    private const val PREF_KEY_PROGRAM_CODE = "course_code_key"
     private const val PREF_KEY_USER_EMAIL = "user_email_key"
     private const val PREF_KEY_USER_TYPE = "user_type_key"
     private const val PREF_KEY_USER_ID = "user_id_key"
@@ -101,12 +100,14 @@ object UniAdminPreferences {
         preferences.edit().putBoolean(PREF_KEY_DARK_MODE, isDarkMode).apply()
         Log.d("UniAdminPreferences", "Dark mode saved: $isDarkMode")
     }
+
     //save notifications preference
     fun saveNotificationsPreference(isEnabled: Boolean) {
         notificationsEnabled.value = isEnabled
         preferences.edit().putBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, isEnabled).apply()
         Log.d("UniAdminPreferences", "Notifications enabled saved: $isEnabled")
     }
+
     //save biometric preference
     fun saveBiometricPreference(isEnabled: Boolean) {
         biometricEnabled.value = isEnabled
