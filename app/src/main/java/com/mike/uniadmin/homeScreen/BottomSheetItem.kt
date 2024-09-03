@@ -1,6 +1,5 @@
 package com.mike.uniadmin.homeScreen
 
-import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,9 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +58,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun ModalDrawerItem(
-    context: Context,
     navController: NavController,
     userViewModel: UserViewModel,
     chatViewModel: GroupChatViewModel,
@@ -130,7 +125,7 @@ fun ModalDrawerItem(
                                         0
                                     )
                                 }",
-                                style = CC.titleTextStyle(context)
+                                style = CC.titleTextStyle()
                                     .copy(fontWeight = FontWeight.Bold, fontSize = textSize)
                             )
                         }
@@ -144,16 +139,16 @@ fun ModalDrawerItem(
                     ) {
                         Text(
                             text = "${signedInUser?.firstName} ${signedInUser?.lastName}",
-                            style = CC.titleTextStyle(context)
+                            style = CC.titleTextStyle()
                                 .copy(fontWeight = FontWeight.Bold, fontSize = textSize),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
                         signedInUser?.email?.let {
-                            Text(it, style = CC.descriptionTextStyle(context))
+                            Text(it, style = CC.descriptionTextStyle())
                         }
                         signedInUser?.id?.let {
-                            Text(it, style = CC.descriptionTextStyle(context))
+                            Text(it, style = CC.descriptionTextStyle())
                         }
                     }
                 }
@@ -161,42 +156,42 @@ fun ModalDrawerItem(
 
             Spacer(modifier = Modifier.height(20.dp))
             Text("Chat",
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 "Select a user to open chat",
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(20.dp))
             LazyRow(
                 modifier = Modifier.animateContentSize()
             ) {
                 items(users, key = { it.id }) { user ->
-                    UserItem(user, context, navController, userViewModel)
+                    UserItem(user, navController, userViewModel)
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider()
+            HorizontalDivider(color = CC.textColor())
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Group Discussions",
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 "Select a group to open",
-                style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold)
+                style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(20.dp))
 
             if (groups.isEmpty()) {
                 Text(
                     text = "No groups available",
-                    style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp),
+                    style = CC.descriptionTextStyle().copy(fontSize = 18.sp),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else {
@@ -208,7 +203,6 @@ fun ModalDrawerItem(
                             signedInUser?.let {
                                 GroupItem(
                                     group,
-                                    context,
                                     navController,
                                     chatViewModel,
                                     userViewModel,
@@ -221,22 +215,22 @@ fun ModalDrawerItem(
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider()
+            HorizontalDivider(color = CC.textColor())
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Quick Settings",
-                style = CC.titleTextStyle(context)
+                style = CC.titleTextStyle()
                     .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
             )
             Spacer(modifier = Modifier.height(10.dp))
-            QuickSettings(context, activity)
+            QuickSettings(activity)
 
         }
     }
 }
 
 @Composable
-fun QuickSettings(context: Context, activity: MainActivity) {
+fun QuickSettings(activity: MainActivity) {
     BoxWithConstraints {
         val columnWidth = maxWidth
         val iconSize = columnWidth * 0.10f
@@ -266,7 +260,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                     )
                 }
 
-                Text("Dark theme ", style = CC.descriptionTextStyle(context).copy(fontSize = 18.sp))
+                Text("Dark theme ", style = CC.descriptionTextStyle().copy(fontSize = 18.sp))
                 Switch(
                     onCheckedChange = {
                         UniAdminPreferences.darkMode.value = it
@@ -277,7 +271,7 @@ fun QuickSettings(context: Context, activity: MainActivity) {
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Biometrics(context, activity)
+            Biometrics(activity)
 
         }
     }
