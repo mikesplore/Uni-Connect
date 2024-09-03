@@ -1,7 +1,6 @@
 package com.mike.uniadmin.homeScreen
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -50,7 +49,6 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun UserItem(
     user: UserEntity,
-    context: Context,
     navController: NavController,
     viewModel: UserViewModel
 ) {
@@ -68,18 +66,19 @@ fun UserItem(
             modifier = Modifier.padding(end = 10.dp)
         ) {
             val size = 50.dp
-            Box(modifier = Modifier
-                .border(
-                    1.dp, CC.textColor(), CircleShape
-                )
-                .background(randomColor.random(), CircleShape)
-                .clip(CircleShape)
-                .combinedClickable(onClick = {
-                    navController.navigate("chat/${user.id}")
-                }, onLongClick = {
-                    visible = !visible
-                })
-                .size(size), contentAlignment = Alignment.Center
+            Box(
+                modifier = Modifier
+                    .border(
+                        1.dp, CC.textColor(), CircleShape
+                    )
+                    .background(randomColor.random(), CircleShape)
+                    .clip(CircleShape)
+                    .combinedClickable(onClick = {
+                        navController.navigate("chat/${user.id}")
+                    }, onLongClick = {
+                        visible = !visible
+                    })
+                    .size(size), contentAlignment = Alignment.Center
             ) {
                 if (user.profileImageLink.isNotEmpty()) {
                     AsyncImage(
@@ -95,7 +94,9 @@ fun UserItem(
                         user.lastName[0]
                     }"
                     Text(
-                        name, style = CC.descriptionTextStyle(context).copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        name,
+                        style = CC.descriptionTextStyle()
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     )
                 }
             }
@@ -120,20 +121,28 @@ fun UserItem(
         }
         Spacer(modifier = Modifier.height(5.dp))
         val email = UniAdminPreferences.userEmail.value
-        val displayName = if(email == user.email) "You" else user.firstName
+        val displayName = if (email == user.email) "You" else user.firstName
         Text(
             text = displayName.let {
                 if (it.length > 10) it.substring(0, 10) + "..." else it
             },
-            style = CC.descriptionTextStyle(context),
+            style = CC.descriptionTextStyle(),
             maxLines = 1
         )
-        val date = if (userState?.lastDate?.let { CC.getDateFromTimeStamp(it) } == CC.getDateFromTimeStamp(
-                CC.getTimeStamp())) {
-            "Today at ${userState.lastTime.let { CC.getFormattedTime(it) }}"
-        } else {
-            "${userState?.lastDate?.let { CC.getDateFromTimeStamp(it) } ?: ""} at ${userState?.lastTime?.let { CC.getFormattedTime(it) } ?: ""}"
-        }
+        val date =
+            if (userState?.lastDate?.let { CC.getDateFromTimeStamp(it) } == CC.getDateFromTimeStamp(
+                    CC.getTimeStamp()
+                )) {
+                "Today at ${userState.lastTime.let { CC.getFormattedTime(it) }}"
+            } else {
+                "${userState?.lastDate?.let { CC.getDateFromTimeStamp(it) } ?: ""} at ${
+                    userState?.lastTime?.let {
+                        CC.getFormattedTime(
+                            it
+                        )
+                    } ?: ""
+                }"
+            }
 
         val state = when (userState?.online) {
             "online" -> "Online"
@@ -142,15 +151,14 @@ fun UserItem(
         }
         Spacer(modifier = Modifier.height(10.dp))
         AnimatedVisibility(visible = visible) {
-            UserInfo(user = user, state, context)
+            UserInfo(user = user, state)
         }
     }
 }
 
 
-
 @Composable
-fun UserInfo(user: UserEntity, userState: String, context: Context) {
+fun UserInfo(user: UserEntity, userState: String) {
     Column(
         modifier = Modifier.fillMaxWidth(0.9f),
         verticalArrangement = Arrangement.Center,
@@ -158,10 +166,10 @@ fun UserInfo(user: UserEntity, userState: String, context: Context) {
     ) {
         Text(
             user.firstName + " " + user.lastName,
-            style = CC.titleTextStyle(context).copy(fontSize = 15.sp)
+            style = CC.titleTextStyle().copy(fontSize = 15.sp)
         )
-        Text(user.id, style = CC.descriptionTextStyle(context).copy(fontSize = 15.sp))
-        Text(userState, style = CC.descriptionTextStyle(context).copy(fontSize = 15.sp))
+        Text(user.id, style = CC.descriptionTextStyle().copy(fontSize = 15.sp))
+        Text(userState, style = CC.descriptionTextStyle().copy(fontSize = 15.sp))
 
     }
 }
