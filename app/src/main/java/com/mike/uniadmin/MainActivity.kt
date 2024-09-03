@@ -28,6 +28,7 @@ import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserStateEntity
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeUserActivity
+import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
 import com.mike.uniadmin.ui.theme.UniAdminTheme
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -81,6 +82,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         UniAdminPreferences.initialize(this)
         CourseManager.initialize(this)
+        createNotificationChannel(this)
+
         setTheme(R.style.Theme_UniAdmin)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
