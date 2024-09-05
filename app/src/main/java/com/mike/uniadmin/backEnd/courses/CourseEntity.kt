@@ -9,7 +9,7 @@ data class CourseEntity(
     @PrimaryKey val courseCode: String,
     val courseName: String = "",
     var participants: List<String> = emptyList(),
-    var courseImageLink: String = ""
+    var courseImageLink: String = "",
 
 ){
     constructor(): this("", "", emptyList(), "")
