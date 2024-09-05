@@ -114,3 +114,4 @@ abstract class UniConnectDatabase : RoomDatabase() {
     }
 }
 
+//alter courses table to add department
