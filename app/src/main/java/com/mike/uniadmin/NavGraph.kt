@@ -30,8 +30,6 @@ import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-
-
     NavHost(navController = navController, startDestination = "splashScreen") {
 
         composable("splashScreen") {
