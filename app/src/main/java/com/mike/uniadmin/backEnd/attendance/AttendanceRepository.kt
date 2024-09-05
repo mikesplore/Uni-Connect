@@ -1,21 +1,23 @@
 package com.mike.uniadmin.backEnd.attendance
 
 import android.util.Log
-import com.google.firebase.database.*
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.announcements.uniConnectScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AttendanceRepository(private val attendanceDao: AttendanceDao) {
     private val courseCode = CourseManager.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Attendance")
+    private val studentId = UniAdminPreferences.userID.value
 
     // Function to get attendance for a specific student and course
     fun getAttendanceForStudent(
-        studentId: String,
         courseId: String,
         onResult: (List<AttendanceEntity>) -> Unit
     ) {
@@ -26,8 +28,9 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
             }
         }
 
-            // Fetch data from Firebase
-            database.child(courseId).child(studentId).addListenerForSingleValueEvent(object : ValueEventListener {
+        // Fetch data from Firebase
+        database.child(courseId).child(studentId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val attendanceList = mutableListOf<AttendanceEntity>()
                     for (attendanceSnapshot in snapshot.children) {
@@ -50,31 +53,28 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
                     // Handle possible errors
                 }
             })
-
     }
 
+    // Function to sign attendance
     fun signAttendance(attendance: AttendanceEntity, success: (Boolean) -> Unit) {
         uniConnectScope.launch {
             // Insert into Room database
             attendanceDao.insertAttendance(attendance)
         }
-            // Update Firebase under the specific course and student
-            database.child(attendance.moduleId).child(attendance.studentId)
-                .child(attendance.id).setValue(attendance)
-                .addOnSuccessListener {
-                    success(true)
-                }
-                .addOnFailureListener {
-                    success(false)
-                }
-
-
+        // Update Firebase under the specific course and student
+        database.child(attendance.moduleId).child(attendance.studentId)
+            .child(attendance.id).setValue(attendance)
+            .addOnSuccessListener {
+                success(true)
+            }
+            .addOnFailureListener {
+                success(false)
+            }
     }
-
 
     // Function to continuously listen for attendance updates from Firebase
     fun syncAttendanceUpdates() {
-        database.addChildEventListener(object : ChildEventListener {
+        database.child(studentId).addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 processAttendanceUpdate(snapshot)
             }
@@ -106,6 +106,36 @@ class AttendanceRepository(private val attendanceDao: AttendanceDao) {
                         attendanceDao.insertAllAttendance(attendanceList)
                     }
                 }
+            }
+        })
+    }
+
+    // Function to get all attendances for the current course
+    fun getAllAttendances(onResult: (List<AttendanceEntity>) -> Unit) {
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val allAttendanceList = mutableListOf<AttendanceEntity>()
+                for (studentSnapshot in snapshot.children) {
+                    for (attendanceSnapshot in studentSnapshot.children) {
+                        val attendance = attendanceSnapshot.getValue(AttendanceEntity::class.java)
+                        attendance?.let {
+                            allAttendanceList.add(it)
+                        }
+                    }
+                }
+
+                if (allAttendanceList.isNotEmpty()) {
+                    uniConnectScope.launch {
+                        attendanceDao.insertAllAttendance(allAttendanceList)
+                    }
+                }
+                onResult(allAttendanceList)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle possible errors
+                Log.e("AttendanceRepository", "Failed to fetch all attendances: ${error.message}")
+                onResult(emptyList()) // Return empty list on error
             }
         })
     }
