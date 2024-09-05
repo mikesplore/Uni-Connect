@@ -17,8 +17,8 @@ class AttendanceViewModel (private val attendanceRepository: AttendanceRepositor
         syncAttendanceUpdates()
     }
 
-    fun getAttendanceForStudent(studentId: String, courseId: String, callback: (List<AttendanceEntity>) -> Unit) {
-        attendanceRepository.getAttendanceForStudent(studentId, courseId) { attendanceList ->
+    fun getAttendanceForStudent(courseId: String, callback: (List<AttendanceEntity>) -> Unit) {
+        attendanceRepository.getAttendanceForStudent(courseId) { attendanceList ->
             callback(attendanceList)
             _attendance.postValue(attendanceList)
         }
