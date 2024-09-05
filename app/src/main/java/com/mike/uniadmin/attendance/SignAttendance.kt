@@ -104,7 +104,6 @@ fun SignAttendance(context: Context) {
             val currentModuleCode = tabNames.getOrNull(selectedTabIndex) ?: ""
             if (currentModuleCode.isNotEmpty()) {
                 attendanceViewModel.getAttendanceForStudent(
-                    signedInUser!!.id,
                     currentModuleCode
                 ) { freshAttendanceRecords ->
                     attendanceRecords = freshAttendanceRecords // Update the attendance records
