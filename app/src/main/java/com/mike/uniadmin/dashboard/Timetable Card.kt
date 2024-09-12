@@ -42,9 +42,8 @@ fun ModuleTimetableCard(timetable: ModuleTimetable) {
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(8.dp),
-                    spotColor = CC.secondary()
                 )
-                .background(CC.primary())
+                .background(CC.surfaceContainer())
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.Start,
