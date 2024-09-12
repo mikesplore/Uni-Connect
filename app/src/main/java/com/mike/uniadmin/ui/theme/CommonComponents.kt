@@ -169,6 +169,12 @@ object CommonComponents {
     }
 
     @Composable
+    fun surfaceContainer(): Color {
+        return MaterialTheme.colorScheme.surfaceContainer
+    }
+
+
+    @Composable
     fun descriptionTextStyle(): TextStyle {
         val color = textColor()
         val currentFont = currentFontFamily() // Get initial font
