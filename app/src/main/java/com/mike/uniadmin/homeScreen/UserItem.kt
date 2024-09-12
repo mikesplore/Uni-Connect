@@ -55,6 +55,7 @@ fun UserItem(
     var visible by remember { mutableStateOf(false) }
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
+    var name = ""
 
 
     Column(
@@ -89,12 +90,17 @@ fun UserItem(
                             .fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                } else {
-                    val name = "${user.firstName[0]}${
-                        user.lastName[0]
-                    }"
+                } else if (user.firstName.isEmpty() || user.lastName.isEmpty()) {
+                     name = "N/A" // Or any other placeholder you prefer
                     Text(
-                        name,
+                        text = name,
+                        style = CC.descriptionTextStyle()
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    )
+                } else {
+                     name = "${user.firstName[0]}${user.lastName[0]}"
+                    Text(
+                        text = name,
                         style = CC.descriptionTextStyle()
                             .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     )
