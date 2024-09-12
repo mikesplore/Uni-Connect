@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +43,7 @@ import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.backEnd.users.UserEntity
 import com.mike.uniadmin.backEnd.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
+import java.util.Locale
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -55,7 +57,7 @@ fun UserItem(
     var visible by remember { mutableStateOf(false) }
     val userStates by viewModel.userStates.observeAsState(emptyMap())
     val userState = userStates[user.id]
-    var name = ""
+    var name: String
 
 
     Column(
@@ -98,11 +100,11 @@ fun UserItem(
                             .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     )
                 } else {
-                     name = "${user.firstName[0]}${user.lastName[0]}"
+                     name = "${user.firstName[0]}"
                     Text(
-                        text = name,
+                        text = name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
                         style = CC.descriptionTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 25.sp)
                     )
                 }
             }
@@ -130,7 +132,7 @@ fun UserItem(
         val displayName = if (email == user.email) "You" else user.firstName
         Text(
             text = displayName.let {
-                if (it.length > 10) it.substring(0, 10) + "..." else it
+                if (it.length > 10) it.substring(0, 10).capitalize(Locale.ROOT) + "..." else it.capitalize(Locale.ROOT)
             },
             style = CC.descriptionTextStyle(),
             maxLines = 1
@@ -171,7 +173,7 @@ fun UserInfo(user: UserEntity, userState: String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            user.firstName + " " + user.lastName,
+            user.firstName.capitalize(Locale.ROOT) + " " + user.lastName.capitalize(Locale.ROOT),
             style = CC.titleTextStyle().copy(fontSize = 15.sp)
         )
         Text(user.id, style = CC.descriptionTextStyle().copy(fontSize = 15.sp))
