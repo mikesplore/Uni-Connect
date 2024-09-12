@@ -21,7 +21,8 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = BrightBlue,
     surface = LightGray,
     onPrimary = Turquoise,
-    onSecondary = Black
+    onSecondary = Black,
+    surfaceContainer = containerDark
 
 
 )
@@ -32,7 +33,8 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Cyan,
     surface = DarkGray,
     onPrimary = SkyBlue,
-    onSecondary = White
+    onSecondary = White,
+    surfaceContainer = containerLight
 )
 
 
