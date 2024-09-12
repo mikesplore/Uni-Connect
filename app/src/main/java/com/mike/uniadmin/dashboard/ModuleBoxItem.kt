@@ -151,7 +151,6 @@ fun ModuleBoxContent(
                 .padding(end = 10.dp)
                 .shadow(
                     elevation = 4.dp, shape = RoundedCornerShape(16.dp),
-                    spotColor = CC.extraColor2(),
                 )
                 .width(adaptiveWidth)
                 .height(boxHeight),
@@ -167,7 +166,7 @@ fun ModuleBoxContent(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .background(CC.primary(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
+                    .background(CC.surfaceContainer(), RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween,
                 content = bodyContent
