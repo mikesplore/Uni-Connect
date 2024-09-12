@@ -146,7 +146,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        if (firstName.isEmpty() && lastName.isEmpty()) {
+                        if (firstName.isEmpty() || lastName.isEmpty()) {
                             Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                             return@Button
                         }
