@@ -98,9 +98,8 @@ fun BaseAnnouncementCard(content: @Composable ColumnScope.() -> Unit) {
             .heightIn(min = 100.dp)
             .shadow(
                 elevation = 4.dp, shape = RoundedCornerShape(16.dp),
-                spotColor = CC.extraColor2(),
             )
-            .background(CC.primary())
+            .background(CC.surfaceContainer())
             .fillMaxWidth(0.9f)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
