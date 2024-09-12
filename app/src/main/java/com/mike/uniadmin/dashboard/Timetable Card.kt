@@ -35,7 +35,7 @@ fun ModuleTimetableCard(timetable: ModuleTimetable) {
     val today = CC.currentDay()
     BoxWithConstraints(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Column(
             modifier = Modifier

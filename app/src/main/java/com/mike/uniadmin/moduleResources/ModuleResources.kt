@@ -253,15 +253,17 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
                     )
                     AnimatedVisibility(showAddSection == Section.PAST_PAPERS) {
                         AddItemSection(context) { title, fileUrl, imageUrl ->
+                            MyDatabase.generateGridItemID { id ->
                             val newItem = GridItem(
                                 title = title,
-
+                                id = id,
                                 fileLink = fileUrl,
                                 imageLink = imageUrl
                             )
                             pastPapers.add(newItem)
                             writeItem(moduleCode, Section.PAST_PAPERS, newItem)
                             showAddSection = null
+                            }
                         }
                     }
 
@@ -280,15 +282,17 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
                     )
                     AnimatedVisibility(showAddSection == Section.RESOURCES) {
                         AddItemSection(context) { title, imageUrl, fileUrl ->
+                            MyDatabase.generateGridItemID { id ->
                             val newItem = GridItem(
                                 title = title,
-
+                                id = id,
                                 fileLink = fileUrl,
                                 imageLink = imageUrl
                             )
                             resources.add(newItem)
                             writeItem(moduleCode, Section.RESOURCES, newItem)
                             showAddSection = null
+                            }
                         }
                     }
                 }
