@@ -125,7 +125,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     ) {
                         Icon(Icons.Default.Warning, "Warning", tint = Color.Red)
                         Text(
-                            "You are not connected to the internet",
+                            "No internet detected",
                             style = CC.descriptionTextStyle()
                                 .copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(start = 15.dp)
@@ -138,7 +138,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "Modules",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
@@ -193,7 +193,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "Latest Announcement",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
@@ -221,7 +221,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "My Next Class",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
