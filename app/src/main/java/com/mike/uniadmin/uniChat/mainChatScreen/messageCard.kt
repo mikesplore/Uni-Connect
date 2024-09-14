@@ -128,10 +128,8 @@ fun UserMessageCard(
 
                 // Display latest message, prepending sender's name if not sent by the current user
                 chat.userChat.message.let { message ->
-                    val senderName =
-                        if (chat.userChat.senderID != currentUserId) "" else "You: "
                     Text(
-                        text = "$deliveryStatusIcon $senderName${
+                        text = "$deliveryStatusIcon${
                             createAnnotatedMessage(
                                 createAnnotatedText(message).toString()
                             )
