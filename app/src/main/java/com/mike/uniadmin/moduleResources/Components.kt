@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.helperFunctions.GridItem
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -191,7 +191,7 @@ fun Section(
     onDelete: (GridItem) -> Unit,
     context: Context
 ) {
-    val userType = UniAdminPreferences.userType.value
+    val userType = UniConnectPreferences.userType.value
     Text(
         text = title,
         style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
