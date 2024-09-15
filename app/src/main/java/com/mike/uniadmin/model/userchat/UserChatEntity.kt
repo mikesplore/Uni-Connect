@@ -1,9 +1,9 @@
-package com.mike.uniadmin.backEnd.userchat
+package com.mike.uniadmin.model.userchat
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.users.UserEntity
 
 @Entity(tableName = "userChats")
 data class UserChatEntity(
