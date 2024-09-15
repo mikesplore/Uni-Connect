@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.userchat
+package com.mike.uniadmin.model.userchat
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
