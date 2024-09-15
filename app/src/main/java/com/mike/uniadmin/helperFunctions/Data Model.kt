@@ -62,10 +62,6 @@ sealed class Screen(
         Icons.Filled.Home, Icons.Outlined.Home, "Home"
     )
 
-    data object Assignments : Screen(
-        Icons.AutoMirrored.Filled.Assignment, Icons.AutoMirrored.Outlined.Assignment, "Work"
-    )
-
     data object Announcements : Screen(
         Icons.Filled.AddAlert, Icons.Outlined.AddAlert, "Alerts"
     )
