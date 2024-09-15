@@ -7,14 +7,14 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.launch
 
 class AttendanceRepository(private val attendanceDao: AttendanceDao) {
     private val courseCode = CourseManager.courseCode.value
     private val database = FirebaseDatabase.getInstance().reference.child(courseCode).child("Attendance")
-    private val studentId = UniAdminPreferences.userID.value
+    private val studentId = UniConnectPreferences.userID.value
 
     // Function to get attendance for a specific student and course
     fun getAttendanceForStudent(
