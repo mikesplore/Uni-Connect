@@ -54,7 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -103,7 +103,7 @@ fun Appearance(navController: NavController) {
 
 @Composable
 fun currentFontFamily(): FontFamily {
-    val selectedFontName = UniAdminPreferences.fontStyle.value
+    val selectedFontName = UniConnectPreferences.fontStyle.value
 
     return when (selectedFontName) {
         "Choco cooky" -> ChocoCooky
@@ -129,7 +129,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
 
     // Load saved font preference on launch
     LaunchedEffect(fontUpdated) {
-        val savedFont = UniAdminPreferences.fontStyle.value
+        val savedFont = UniConnectPreferences.fontStyle.value
         selectedFontFamily = fontFamilies[savedFont]
     }
 
@@ -227,7 +227,7 @@ fun CustomTextStyle(context: Context, onFontSelected: (FontFamily) -> Unit) {
         Button(
             onClick = {
                 fontFamilies.entries.find { it.value == selectedFontFamily }?.key?.let {
-                    UniAdminPreferences.saveFontStyle(
+                    UniConnectPreferences.saveFontStyle(
                         it
                     )
                 }
