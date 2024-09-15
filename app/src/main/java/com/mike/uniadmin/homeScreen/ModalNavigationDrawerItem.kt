@@ -58,10 +58,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniAdminPreferences
 import com.mike.uniadmin.attendance.deleteDataFromPreferences
-import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
-import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserStateEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.groupchat.GroupChatViewModel
+import com.mike.uniadmin.model.users.UserEntity
+import com.mike.uniadmin.model.users.UserStateEntity
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.settings.switchColors
