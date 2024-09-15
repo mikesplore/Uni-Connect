@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
-import com.mike.uniadmin.backEnd.groupchat.GroupChatEntityWithDetails
+import com.mike.uniadmin.model.groupchat.GroupChatEntityWithDetails
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
