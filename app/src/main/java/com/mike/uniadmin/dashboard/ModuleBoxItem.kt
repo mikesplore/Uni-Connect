@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.modules.ModuleEntity
 import com.mike.uniadmin.model.modules.ModuleViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
@@ -62,7 +62,7 @@ fun ModuleBox(
         bodyContent = {
             Text(
                 module.moduleCode,
-                style = CC.descriptionTextStyle(),
+                style = CC.descriptionTextStyle().copy(color = CC.secondary()),
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             )
             Text(
@@ -90,8 +90,8 @@ fun ModuleBox(
                 )
                 IconButton(onClick = {
                     onClicked(module)
-                    UniAdminPreferences.saveModuleName(module.moduleName)
-                    UniAdminPreferences.saveModuleID(module.moduleCode)
+                    UniConnectPreferences.saveModuleName(module.moduleName)
+                    UniConnectPreferences.saveModuleID(module.moduleCode)
                     navController.navigate("moduleResource/${module.moduleCode}")
                 }) {
                     Icon(
