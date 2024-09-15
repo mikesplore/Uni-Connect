@@ -5,7 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 
 @Dao
 interface UserChatDAO {
@@ -74,6 +74,6 @@ ORDER BY
 
     """
     )
-    fun getLatestUserChats(currentUserId: String = UniAdminPreferences.userID.value): LiveData<List<UserChatsWithDetails>>
+    fun getLatestUserChats(currentUserId: String = UniConnectPreferences.userID.value): LiveData<List<UserChatsWithDetails>>
 
 }
