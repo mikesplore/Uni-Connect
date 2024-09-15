@@ -53,7 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
 import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncementsWithAuthor
@@ -68,7 +68,7 @@ fun AnnouncementsItem(
     userViewModel: UserViewModel
 ) {
     var visible by remember { mutableStateOf(false) }
-    val userType = UniAdminPreferences.userType.value
+    val userType = UniConnectPreferences.userType.value
     val announcements =
         moduleAnnouncementViewModel.announcements.observeAsState(initial = emptyList())
 
@@ -260,7 +260,7 @@ fun AddAnnouncementItem(
 
 
     LaunchedEffect(Unit) {
-        val email = UniAdminPreferences.userEmail.value
+        val email = UniConnectPreferences.userEmail.value
         userViewModel.findUserByEmail(email) { fetchedUser ->
             fetchedUser?.let {
                 authorID = it.id
