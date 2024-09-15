@@ -47,9 +47,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.notifications.NotificationEntity
+import com.mike.uniadmin.model.notifications.NotificationViewModel
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 object Sidebar {
