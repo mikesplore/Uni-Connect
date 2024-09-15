@@ -58,8 +58,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.R
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.courses.CourseEntity
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.courses.CourseEntity
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.getModuleTimetableViewModel
