@@ -1,19 +1,17 @@
-package com.mike.uniadmin.backEnd.localDatabase
+package com.mike.uniadmin.model.localDatabase
 
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
-import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
-import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
-import com.mike.uniadmin.backEnd.groupchat.GroupEntity
-import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
-import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
-import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetable
-import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetableRepository
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.userchat.UserChatEntity
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.announcements.AnnouncementEntity
+import com.mike.uniadmin.model.groupchat.GroupChatEntity
+import com.mike.uniadmin.model.groupchat.GroupEntity
+import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignment
+import com.mike.uniadmin.model.moduleContent.moduleTimetable.ModuleTimetable
+import com.mike.uniadmin.model.modules.ModuleEntity
+import com.mike.uniadmin.model.notifications.NotificationEntity
+import com.mike.uniadmin.model.userchat.UserChatEntity
+import com.mike.uniadmin.model.users.UserEntity
 
 
 @Dao
