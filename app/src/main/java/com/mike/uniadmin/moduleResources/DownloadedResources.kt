@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import java.io.File
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -153,7 +153,7 @@ object FileManager {
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         return File(
             downloadsDir,
-            "Uni Connect/Module Resources/${UniAdminPreferences.moduleID.value}"
+            "Uni Connect/Module Resources/${UniConnectPreferences.moduleID.value}"
         )
     }
 
