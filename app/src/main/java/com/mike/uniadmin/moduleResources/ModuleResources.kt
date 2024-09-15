@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.dashboard.isDeviceOnline
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.helperFunctions.GridItem
@@ -193,7 +193,7 @@ fun ModuleResources(moduleCode: String, context: Context, navController: NavCont
                                     )
                             ) {
                                 Text(
-                                    UniAdminPreferences.moduleName.value,
+                                    UniConnectPreferences.moduleName.value,
                                     style = CC.titleTextStyle()
                                         .copy(
                                             fontWeight = FontWeight.ExtraBold,
