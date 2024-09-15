@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetable
+import com.mike.uniadmin.model.moduleContent.moduleTimetable.ModuleTimetable
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
