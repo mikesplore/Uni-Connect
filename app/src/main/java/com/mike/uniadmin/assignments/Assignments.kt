@@ -34,7 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
+import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignment
 import com.mike.uniadmin.getModuleAssignmentViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
