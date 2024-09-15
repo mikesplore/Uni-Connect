@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.groupchat.GroupChatViewModel
 import com.mike.uniadmin.model.groupchat.GroupEntity
 import com.mike.uniadmin.model.users.UserEntity
@@ -87,7 +87,7 @@ fun UniGroups(context: Context, navController: NavController) {
     val users by userViewModel.users.observeAsState(emptyList())
     val fetchedUserDetails by userViewModel.user.observeAsState()
     var showAddGroup by remember { mutableStateOf(false) }
-    val email = UniAdminPreferences.userEmail.value
+    val email = UniConnectPreferences.userEmail.value
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(email) {}
