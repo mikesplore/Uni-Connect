@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
+import com.mike.uniadmin.model.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
