@@ -1,12 +1,12 @@
-package com.mike.uniadmin.backEnd.users
+package com.mike.uniadmin.model.users
 
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
-import com.mike.uniadmin.backEnd.localDatabase.DatabaseDao
+import com.mike.uniadmin.model.announcements.uniConnectScope
+import com.mike.uniadmin.model.localDatabase.DatabaseDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
