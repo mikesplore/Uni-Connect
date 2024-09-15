@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.helperFunctions.Feedback
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents
