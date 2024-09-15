@@ -1,14 +1,12 @@
-package com.mike.uniadmin.backEnd.userchat
+package com.mike.uniadmin.model.userchat
 
 import android.util.Log
-import androidx.activity.result.launch
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
