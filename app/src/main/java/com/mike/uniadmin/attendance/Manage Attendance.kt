@@ -44,9 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.backEnd.modules.AttendanceState
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import com.mike.uniadmin.backEnd.modules.ModuleViewModel
+import com.mike.uniadmin.model.modules.AttendanceState
+import com.mike.uniadmin.model.modules.ModuleEntity
+import com.mike.uniadmin.model.modules.ModuleViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
