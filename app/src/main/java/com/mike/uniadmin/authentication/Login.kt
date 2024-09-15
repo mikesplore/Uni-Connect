@@ -55,7 +55,7 @@ import androidx.navigation.NavController
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.getUserViewModel
@@ -360,9 +360,9 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
                 }
             })
 
-            UniAdminPreferences.saveUserEmail(email)
-            UniAdminPreferences.saveUserType(user.userType.ifEmpty { "student" })
-            UniAdminPreferences.saveUserID(user.id)
+            UniConnectPreferences.saveUserEmail(email)
+            UniConnectPreferences.saveUserType(user.userType.ifEmpty { "student" })
+            UniConnectPreferences.saveUserID(user.id)
             navController.navigate("courses") {
                 popUpTo("login") { inclusive = true }
             }
@@ -427,9 +427,9 @@ fun handleSignIn(
 
                         //save user email and UserType to shared preferences
                         val userType = user.userType.ifEmpty { "student" }
-                        UniAdminPreferences.saveUserEmail(email)
-                        UniAdminPreferences.saveUserType(userType)
-                        UniAdminPreferences.saveUserID(user.id)
+                        UniConnectPreferences.saveUserEmail(email)
+                        UniConnectPreferences.saveUserType(userType)
+                        UniConnectPreferences.saveUserID(user.id)
 
                     } else {
                         Toast.makeText(context, "No user found", Toast.LENGTH_SHORT).show()
