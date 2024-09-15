@@ -24,8 +24,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserStateEntity
+import com.mike.uniadmin.model.users.UserEntity
+import com.mike.uniadmin.model.users.UserStateEntity
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
