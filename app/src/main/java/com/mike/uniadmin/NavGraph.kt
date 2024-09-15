@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
@@ -30,10 +31,14 @@ import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "splashScreen") {
+    NavHost(navController = navController, startDestination = "homeScreen") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController)
+        }
+
+        composable("assignments") {
+            AssignmentScreen(context)
         }
 
         composable(
