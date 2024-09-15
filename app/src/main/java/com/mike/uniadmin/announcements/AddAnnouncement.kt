@@ -38,7 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.announcements.AnnouncementEntity
 import com.mike.uniadmin.model.announcements.AnnouncementViewModel
 import com.mike.uniadmin.model.notifications.NotificationEntity
@@ -68,7 +68,7 @@ fun AddAnnouncement(
 
     //get the data of the signed in user
     LaunchedEffect(Unit) {
-        val email = UniAdminPreferences.userEmail.value
+        val email = UniConnectPreferences.userEmail.value
         userViewModel.findUserByEmail(email){}
 
     }
