@@ -50,7 +50,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.attendance.AttendanceEntity
 import com.mike.uniadmin.model.attendance.AttendanceViewModel
 import com.mike.uniadmin.model.modules.ModuleEntity
@@ -78,7 +78,7 @@ fun SignAttendance(context: Context) {
 
     var attendanceRecords by remember { mutableStateOf(emptyList<AttendanceEntity>()) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val email = UniAdminPreferences.userEmail.value
+    val email = UniConnectPreferences.userEmail.value
     val tabNames = modules.map { it.moduleCode }
     val moduleNames = modules.map { it.moduleName }
     var refresh by remember { mutableStateOf(false) }
