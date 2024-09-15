@@ -27,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.backEnd.groupchat.generateConversationId
-import com.mike.uniadmin.backEnd.userchat.DeliveryStatus
-import com.mike.uniadmin.backEnd.userchat.UserChatEntity
+import com.mike.uniadmin.model.groupchat.generateConversationId
+import com.mike.uniadmin.model.userchat.DeliveryStatus
+import com.mike.uniadmin.model.userchat.UserChatEntity
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
