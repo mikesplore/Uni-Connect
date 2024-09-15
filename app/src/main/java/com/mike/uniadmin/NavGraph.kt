@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.mike.uniadmin.assignments.AssignmentScreen
+import com.mike.uniadmin.assignments.ModuleAssignments
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
@@ -38,7 +39,7 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         }
 
         composable("assignments") {
-            AssignmentScreen(context)
+            AssignmentScreen(context, navController)
         }
 
         composable(
@@ -214,6 +215,20 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
         ) { backStackEntry ->
             ModuleContent(
                 context, backStackEntry.arguments?.getString("moduleId") ?: ""
+            )
+        }
+
+        composable("moduleAssignments/{moduleCode}",
+
+            enterTransition = {
+                fadeIn(animationSpec = tween(200))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(600))
+            }, arguments = listOf(navArgument("moduleCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            ModuleAssignments(
+                context, navController, backStackEntry.arguments?.getString("moduleCode") ?: ""
             )
         }
     }
