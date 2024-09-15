@@ -46,11 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.backEnd.groupchat.generateConversationId
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.userchat.UserChatEntity
-import com.mike.uniadmin.backEnd.userchat.UserChatViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.groupchat.generateConversationId
+import com.mike.uniadmin.model.notifications.NotificationEntity
+import com.mike.uniadmin.model.userchat.UserChatEntity
+import com.mike.uniadmin.model.userchat.UserChatViewModel
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserChatViewModel
 import com.mike.uniadmin.getUserViewModel
