@@ -1,12 +1,9 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
+package com.mike.uniadmin.model.moduleContent.moduleDetails
 
 import com.google.firebase.database.*
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.mike.uniadmin.model.announcements.uniConnectScope
+import com.mike.uniadmin.model.modules.ModuleEntity
 import kotlinx.coroutines.launch
 
 class ModuleDetailRepository(private val moduleDetailDao: ModuleDetailDao) {
