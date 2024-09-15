@@ -18,7 +18,7 @@
 
 
     <application
-        android:name=".backEnd.localDatabase.UniAdmin"
+        android:name=".model.localDatabase.UniAdmin"
         android:allowBackup="true"
         android:appCategory="productivity"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -42,7 +42,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
         
-        <receiver android:name=".backEnd.moduleContent.moduleTimetable.NotificationReceiver"/>
+        <receiver android:name=".model.moduleContent.moduleTimetable.NotificationReceiver"/>
 
         <activity
             android:name=".MainActivity"
