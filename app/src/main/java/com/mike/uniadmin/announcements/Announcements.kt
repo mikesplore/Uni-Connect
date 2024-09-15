@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
@@ -58,7 +58,7 @@ fun AnnouncementsScreen(context: Context) {
     var refresh by remember { mutableStateOf(true) }
     var editingAnnouncementId by remember { mutableStateOf<String?>(null) }
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
-    val userTypes = UniAdminPreferences.userType.value
+    val userTypes = UniConnectPreferences.userType.value
 
     // Fetch announcements on refresh
     LaunchedEffect(refresh) {
