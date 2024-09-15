@@ -29,10 +29,13 @@ class ModuleAssignmentViewModel(private val repository: ModuleAssignmentReposito
 
     fun getModuleAssignments(moduleID: String) {
         uniConnectScope.launch(Dispatchers.Main) {
+            _isLoading.value = true // Set loading state to true
             moduleAssignmentsLiveData = withContext(Dispatchers.IO) {
                 repository.getModuleAssignments(moduleID)
+
             }
             moduleAssignmentsLiveData?.observeForever(moduleAssignmentsObserver)
+            _isLoading.value = false // Set loading state to false
         }
     }
 
