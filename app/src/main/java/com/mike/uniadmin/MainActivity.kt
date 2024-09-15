@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
-        UniAdminPreferences.initialize(this)
+        UniConnectPreferences.initialize(this)
         CourseManager.initialize(this)
         createNotificationChannel(this)
 
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             val systemUiController = rememberSystemUiController()
-            if (UniAdminPreferences.darkMode.value) {
+            if (UniConnectPreferences.darkMode.value) {
                 systemUiController.setSystemBarsColor(
                     color = Color.Transparent ,
                     darkIcons = false
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
                     darkIcons = true
                 )
             }
-            UniAdminTheme(dynamicColor = false, darkTheme = UniAdminPreferences.darkMode.value) {
+            UniAdminTheme(dynamicColor = false, darkTheme = UniConnectPreferences.darkMode.value) {
                 NavigationGraph(this, this)
             }
         }
@@ -127,9 +127,9 @@ class MainActivity : AppCompatActivity() {
 
             if (!isPermissionGranted) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                UniAdminPreferences.saveNotificationsPreference(false)
+                UniConnectPreferences.saveNotificationsPreference(false)
             } else {
-                UniAdminPreferences.saveNotificationsPreference(true)
+                UniConnectPreferences.saveNotificationsPreference(true)
             }
         }
     }
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
     // Permission launcher for notification permission
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            UniAdminPreferences.saveNotificationsPreference(isGranted)
+            UniConnectPreferences.saveNotificationsPreference(isGranted)
         }
 
     // Lifecycle observer setup
