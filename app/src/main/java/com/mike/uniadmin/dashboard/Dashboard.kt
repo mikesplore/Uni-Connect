@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getModuleTimetableViewModel
 import com.mike.uniadmin.getModuleViewModel
