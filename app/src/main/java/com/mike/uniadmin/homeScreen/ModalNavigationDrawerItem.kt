@@ -21,8 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.BubbleChart
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
@@ -130,6 +132,13 @@ fun ModalNavigationDrawerItem(
                         }
                         navController.navigate("profile")
                     })
+                SideBarItem(icon = Icons.AutoMirrored.Filled.Assignment,
+                    text = "Assignments") {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    navController.navigate("assignments")
+                }
                 SideBarItem(
                     icon = Icons.Default.BubbleChart,
                     text = "Uni Chat",
