@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getAnnouncementViewModel
 import com.mike.uniadmin.getModuleTimetableViewModel
@@ -66,7 +66,7 @@ fun Dashboard(navController: NavController, context: Context) {
     val modules by moduleViewModel.modules.observeAsState(emptyList())
     val announcementsLoading by announcementViewModel.isLoading.observeAsState()
     val isOnline = remember { mutableStateOf(isDeviceOnline(context)) }
-    val loggedInUserEmail = UniAdminPreferences.userEmail.value
+    val loggedInUserEmail = UniConnectPreferences.userEmail.value
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val state = rememberPullRefreshState(refreshing = isRefreshing,
