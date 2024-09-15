@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.notifications.NotificationEntity
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getNotificationViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
