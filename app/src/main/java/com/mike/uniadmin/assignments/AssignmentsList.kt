@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,39 +42,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.mike.uniadmin.getModuleAssignmentViewModel
 import com.mike.uniadmin.getModuleViewModel
-import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignment
 import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignmentViewModel
 import com.mike.uniadmin.model.modules.ModuleEntity
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssignmentScreen(context: Context) {
+fun AssignmentScreen(context: Context, navController: NavController) {
 
     val moduleViewModel = getModuleViewModel(context)
     val assignmentViewModel = getModuleAssignmentViewModel(context)
-    val assignments by assignmentViewModel.assignments.observeAsState()
     val modules by moduleViewModel.modules.observeAsState()
-    val isLoading by assignmentViewModel.isLoading.observeAsState()
-    var toggleLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         moduleViewModel.fetchModules()
     }
-    LaunchedEffect(toggleLoading) {
+    LaunchedEffect(isLoading) {
         modules?.forEach { module ->
             assignmentViewModel.getModuleAssignments(module.moduleCode)
         }
+        isLoading = false
     }
-
-    val dateToday = CC.getDateFromTimeStamp(CC.getTimeStamp())
-    val assignmentsDueToday = assignments?.filter { assignment ->
-        assignment.dueDate.contains(dateToday)
-    }
-    val assignmentsCount = assignmentsDueToday?.size ?: 0
-
 
     Scaffold(
         topBar = {
@@ -87,9 +78,11 @@ fun AssignmentScreen(context: Context) {
                     )
                 },
                 actions = {
-                    IconButton(onClick = {toggleLoading = !toggleLoading }) {
-                        Icon(Icons.Default.Refresh,null,
-                            tint = CC.extraColor2())
+                    IconButton(onClick = { isLoading = !isLoading }) {
+                        Icon(
+                            Icons.Default.Refresh, null,
+                            tint = CC.extraColor2()
+                        )
                     }
 
                 },
@@ -105,51 +98,24 @@ fun AssignmentScreen(context: Context) {
             modifier = Modifier.padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "$assignmentsCount assignment(s) due today ($dateToday)",
-                style = CC.descriptionTextStyle().copy(fontSize = 12.sp, color = CC.secondary())
-            )
-
-            modules?.let { modules -> isLoading?.let { it1 ->
-                ModuleList(modules, assignmentViewModel,
-                    it1
+            modules?.let { modules ->
+                ModuleList(
+                    modules, assignmentViewModel,
+                    isLoading, navController
                 )
-            } }
+            }
         }
     }
 }
 
 
 @Composable
-fun AssignmentCard(assignment: ModuleAssignment) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .padding(8.dp), colors = CardDefaults.cardColors(
-            containerColor = CC.secondary()
-        ), elevation = CardDefaults.elevatedCardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = assignment.title, style = CC.titleTextStyle()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = assignment.description, style = CC.descriptionTextStyle()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Due Date: ${assignment.dueDate}",
-                style = CC.descriptionTextStyle(),
-                color = CC.textColor()
-            )
-        }
-    }
-}
-
-
-@Composable
-fun ModuleCard(module: ModuleEntity, moduleAssignmentViewModel: ModuleAssignmentViewModel, loading: Boolean) {
+fun ModuleCard(
+    module: ModuleEntity,
+    moduleAssignmentViewModel: ModuleAssignmentViewModel,
+    loading: Boolean,
+    navController: NavController
+) {
     val moduleAssignment = moduleAssignmentViewModel.assignments.observeAsState()
     var assignmentsCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(module) {
@@ -163,7 +129,7 @@ fun ModuleCard(module: ModuleEntity, moduleAssignmentViewModel: ModuleAssignment
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = CC.primary()
+            containerColor = CC.surfaceContainer()
         )
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.Center) {
@@ -183,21 +149,22 @@ fun ModuleCard(module: ModuleEntity, moduleAssignmentViewModel: ModuleAssignment
                         style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
-                        text = "$assignmentsCount Assignments Posted",
+                        text = "Code: ${module.moduleCode}",
                         style = CC.descriptionTextStyle()
                             .copy(color = CC.textColor().copy(alpha = 0.5f))
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp)) // Add space before the button
                 OutlinedButton(
-                    onClick = { /* TODO: Handle button click */ },
+                    onClick = { navController.navigate("moduleAssignments/${module.moduleCode}") },
                     elevation = ButtonDefaults.buttonElevation(4.dp),
                     border = null,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (loading) CC.primary() else CC.secondary())
+                        containerColor = if (loading) CC.primary() else CC.secondary()
+                    )
                 ) {
                     Text(
-                        "Open",
+                        "View",
                         style = CC.descriptionTextStyle()
                             .copy(fontSize = 11.sp, color = CC.primary())
                     )
@@ -208,14 +175,19 @@ fun ModuleCard(module: ModuleEntity, moduleAssignmentViewModel: ModuleAssignment
 }
 
 @Composable
-fun ModuleList(modules: List<ModuleEntity>, assignmentViewModel: ModuleAssignmentViewModel, loading: Boolean) {
+fun ModuleList(
+    modules: List<ModuleEntity>,
+    assignmentViewModel: ModuleAssignmentViewModel,
+    loading: Boolean,
+    navController: NavController
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         items(modules) { module ->
-            ModuleCard(module, assignmentViewModel, loading)
+            ModuleCard(module, assignmentViewModel, loading, navController)
         }
     }
 }
