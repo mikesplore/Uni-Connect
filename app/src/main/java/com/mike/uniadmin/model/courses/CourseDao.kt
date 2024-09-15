@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.courses
+package com.mike.uniadmin.model.courses
 
 import androidx.room.Dao
 import androidx.room.Insert
