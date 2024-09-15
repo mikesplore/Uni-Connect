@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -77,6 +78,14 @@ fun AssignmentScreen(context: Context, navController: NavController) {
                         style = CC.titleTextStyle().copy(fontWeight = FontWeight.ExtraBold)
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = {navController.navigate("homeScreen")}) {
+                        Icon(
+                            Icons.Default.ArrowBackIosNew, null,
+                            tint = CC.textColor()
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = { isLoading = !isLoading }) {
                         Icon(
@@ -125,7 +134,7 @@ fun ModuleCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
@@ -184,7 +193,7 @@ fun ModuleList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(modules) { module ->
             ModuleCard(module, assignmentViewModel, loading, navController)
