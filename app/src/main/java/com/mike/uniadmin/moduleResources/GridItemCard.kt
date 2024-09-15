@@ -41,7 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.helperFunctions.GridItem
 import com.mike.uniadmin.ui.theme.CommonComponents
 import kotlinx.coroutines.launch
@@ -126,7 +126,7 @@ fun GridItemCard(
                 }
 
                 //Delete Button
-                if (UniAdminPreferences.userType.value == "admin") {
+                if (UniConnectPreferences.userType.value == "admin") {
                     IconButton(
                         onClick = { onDelete(item) },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = CC.extraColor2()),
