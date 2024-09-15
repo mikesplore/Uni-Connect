@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "UniAdmin"
+rootProject.name = "UniConnect"
 include(":app")
  
