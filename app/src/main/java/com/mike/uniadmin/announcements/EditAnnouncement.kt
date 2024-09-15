@@ -29,9 +29,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
-import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
-import com.mike.uniadmin.backEnd.announcements.AnnouncementsWithAuthor
+import com.mike.uniadmin.model.announcements.AnnouncementEntity
+import com.mike.uniadmin.model.announcements.AnnouncementViewModel
+import com.mike.uniadmin.model.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
