@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.groupchat.generateConversationId
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.model.users.UserViewModel
@@ -156,7 +156,7 @@ fun ChatsScreen(
     val userChatViewModel = getUserChatViewModel(context)
 
     val users by userViewModel.users.observeAsState()
-    val currentUserId = UniAdminPreferences.userID.value
+    val currentUserId = UniConnectPreferences.userID.value
     val userCardChats by userChatViewModel.userChatWithDetails.observeAsState()
 
     LaunchedEffect(users) {
