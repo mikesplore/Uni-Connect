@@ -55,7 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.moduleContent.moduleDetails.ModuleDetail
 import com.mike.uniadmin.model.moduleContent.moduleDetails.ModuleDetailViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -66,7 +66,7 @@ fun DetailsItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val details = detailsViewModel.details.observeAsState()
-    val userType = UniAdminPreferences.userType.value
+    val userType = UniConnectPreferences.userType.value
     Column(
         modifier = Modifier
             .fillMaxHeight()
