@@ -51,10 +51,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.attendance.AttendanceEntity
-import com.mike.uniadmin.backEnd.attendance.AttendanceViewModel
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.attendance.AttendanceEntity
+import com.mike.uniadmin.model.attendance.AttendanceViewModel
+import com.mike.uniadmin.model.modules.ModuleEntity
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getAttendanceViewModel
 import com.mike.uniadmin.getModuleViewModel
 import com.mike.uniadmin.getUserViewModel
