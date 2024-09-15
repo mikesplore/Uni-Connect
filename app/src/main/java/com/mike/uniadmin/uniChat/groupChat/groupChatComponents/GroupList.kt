@@ -62,10 +62,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.groupchat.GroupChatViewModel
-import com.mike.uniadmin.backEnd.groupchat.GroupEntity
-import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.groupchat.GroupChatViewModel
+import com.mike.uniadmin.model.groupchat.GroupEntity
+import com.mike.uniadmin.model.users.UserEntity
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
