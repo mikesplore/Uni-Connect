@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements
+package com.mike.uniadmin.model.moduleContent.moduleAnnouncements
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
