@@ -57,7 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignment
 import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignmentViewModel
 import com.mike.uniadmin.model.users.UserViewModel
@@ -78,7 +78,7 @@ fun AssignmentsItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val assignment = assignmentViewModel.assignments.observeAsState(initial = emptyList())
-    val userType = UniAdminPreferences.userType.value
+    val userType = UniConnectPreferences.userType.value
 
 
     Column(
@@ -268,7 +268,7 @@ fun AddAssignmentItem(
     var currentUser by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        val email = UniAdminPreferences.userEmail.value
+        val email = UniConnectPreferences.userEmail.value
         userViewModel.findUserByEmail(email) { fetchedUser ->
             senderName = fetchedUser!!.firstName
             profileImageLink = fetchedUser.profileImageLink
