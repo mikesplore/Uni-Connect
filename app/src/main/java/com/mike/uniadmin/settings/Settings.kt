@@ -58,7 +58,7 @@ import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
@@ -67,7 +67,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 fun Settings(navController: NavController, context: Context, mainActivity: MainActivity) {
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
-    val savedFont = remember { UniAdminPreferences.fontStyle.value }
+    val savedFont = remember { UniConnectPreferences.fontStyle.value }
 
     val userViewModel = getUserViewModel(context)
     val currentUser by userViewModel.user.observeAsState()
