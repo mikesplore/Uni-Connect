@@ -187,7 +187,7 @@ fun ModuleBoxList(
         if (modules.isEmpty()) {
             LazyRow(
                 modifier = Modifier
-                    .padding(horizontal = 10.dp)
+                    .padding(start = 10.dp)
                     .fillMaxWidth(),
             ) {
                 // Display loading placeholders when the list is empty

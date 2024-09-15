@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +47,7 @@ fun AssignmentScreen(context: Context) {
     val moduleViewModel = getModuleViewModel(context)
     val assignmentViewModel = getModuleAssignmentViewModel(context)
 
+
     val assignments by assignmentViewModel.assignments.observeAsState()
     val modules by moduleViewModel.modules.observeAsState()
 
@@ -66,8 +68,12 @@ fun AssignmentScreen(context: Context) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Assignments", style = CC.titleTextStyle().copy(fontWeight = FontWeight.Bold)) },
-                navigationIcon = {},
+                title = {
+                    Text("Assignments", style = CC.titleTextStyle().copy(fontWeight = FontWeight.ExtraBold))
+                },
+                actions = {
+
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CC.primary(),
                     titleContentColor = CC.textColor()
@@ -77,79 +83,9 @@ fun AssignmentScreen(context: Context) {
         containerColor = CC.primary()
     ) {
         Column(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(it)
         ) {
-            when {
-                modules.isNullOrEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "No modules available", style = CC.descriptionTextStyle())
-                    }
-                }
-                isLoading == true -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = CC.textColor())
-                    }
-                }
-                else -> {
-                    modules?.let { moduleList ->
-                        ScrollableTabRow(
-                            containerColor = CC.primary(), selectedTabIndex = selectedTabIndex
-                        ) {
-                            moduleList.forEachIndexed { index, module ->
-                                Tab(
-                                    modifier = Modifier
-                                        .height(40.dp)
-                                        .background(if (selectedTabIndex == index) CC.secondary() else CC.primary(), RoundedCornerShape(8.dp)),
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = {
-                                        Text(
-                                            text = module.moduleName.take(10).plus(if (module.moduleName.length > 10) "..." else ""),
-                                            style = CC.descriptionTextStyle().copy(
-                                                color = if (selectedTabIndex == index) CC.textColor() else CC.textColor()
-                                            )
-                                        )
-                                    }
-                                )
-                            }
-                        }
 
-                        assignments?.let { assignmentList ->
-                            if (assignmentList.isEmpty()) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "No assignments available", style = CC.descriptionTextStyle())
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                LazyColumn {
-                                    items(assignmentList) { assignment ->
-                                        AssignmentCard(assignment = assignment)
-                                    }
-                                }
-                            }
-                        } ?: run {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = CC.textColor())
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
