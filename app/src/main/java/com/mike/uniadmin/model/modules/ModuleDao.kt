@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.modules
+package com.mike.uniadmin.model.modules
 
 import androidx.room.Dao
 import androidx.room.Insert
