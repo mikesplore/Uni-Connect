@@ -33,7 +33,7 @@ class ModuleRepository(
         // Observe changes in courseCode from CourseManager
         uniConnectScope.launch(Dispatchers.Main) {
             courseCode.collectLatest { code ->
-                Log.d("UniAdminPreferences", "Course Code in the scope: $code")
+                Log.d("UniConnectPreferences", "Course Code in the scope: $code")
                 if (code.isNotEmpty()) {
                     initializeDatabases(code)
                     startModuleListener()
@@ -54,7 +54,7 @@ class ModuleRepository(
 
 
     private fun startAttendanceStateListener() {
-        Log.d("UniAdminPreferences", "Attendance state listener started")
+        Log.d("UniConnectPreferences", "Attendance state listener started")
         attendanceStateDatabase?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val attendanceStates = snapshot.children.mapNotNull { it.getValue(AttendanceState::class.java) }
@@ -136,11 +136,11 @@ class ModuleRepository(
     }
 
     fun fetchModulesFromFirebase(onResult: (List<ModuleEntity>) -> Unit) {
-        Log.d("UniAdminPreferences", "Course Code in module screen: ${courseCode.value}")
+        Log.d("UniConnectPreferences", "Course Code in module screen: ${courseCode.value}")
         moduleDatabase?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 Log.d(
-                    "UniAdminPreferences",
+                    "UniConnectPreferences",
                     "module fetching from firebase in path: $moduleDatabase"
                 )
                 Log.d("ModuleRepository", "module fetching from path: $moduleDatabase")
@@ -149,7 +149,7 @@ class ModuleRepository(
                     val module = childSnapshot.getValue(ModuleEntity::class.java)
                     module?.let {
                         modules.add(it)
-                        Log.d("UniAdminPreferences", "Module fetched from Firebase: $it")
+                        Log.d("UniConnectPreferences", "Module fetched from Firebase: $it")
                     }
                 }
                 Log.d("ModuleRepository", "Fetched from firebase: $modules")
