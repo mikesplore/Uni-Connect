@@ -1,11 +1,10 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
+package com.mike.uniadmin.model.moduleContent.moduleDetails
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetail
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
+import com.mike.uniadmin.model.modules.ModuleEntity
 
 @Dao
 interface ModuleDetailDao {
