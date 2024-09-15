@@ -35,8 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.backEnd.users.AccountDeletionEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.users.AccountDeletionEntity
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 import kotlin.random.Random
 
