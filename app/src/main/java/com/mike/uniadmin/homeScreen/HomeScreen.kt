@@ -55,7 +55,7 @@ fun HomeScreen(
 ) {
 
     val screens = listOf(
-        Screen.Home, Screen.Announcements, Screen.Assignments, Screen.Attendance
+        Screen.Home, Screen.Announcements, Screen.Attendance
     )
     val coroutineScope = rememberCoroutineScope()
 
@@ -172,7 +172,6 @@ fun HomeScreen(
                 ) { page ->
                     when (screens[page]) {
                         Screen.Home -> Dashboard(navController, context)
-                        Screen.Assignments -> AssignmentScreen(context)
                         Screen.Announcements -> AnnouncementsScreen(context)
                         Screen.Attendance -> AttendanceScreen(context)
                     }
