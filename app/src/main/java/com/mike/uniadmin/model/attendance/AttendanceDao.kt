@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.attendance
+package com.mike.uniadmin.model.attendance
 
 import androidx.room.Dao
 import androidx.room.Insert
