@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.userchat.DeliveryStatus
 import com.mike.uniadmin.model.userchat.UserChatsWithDetails
 import com.mike.uniadmin.model.users.UserEntity
@@ -67,7 +67,7 @@ fun UserMessageCard(
     context: Context,
     navController: NavController,
 ) {
-    val currentUserId = UniAdminPreferences.userID.value
+    val currentUserId = UniConnectPreferences.userID.value
     val isCurrentUserRecipient = chat.userChat.recipientID == currentUserId
 
     // Determine the destination for navigation based on the current user
