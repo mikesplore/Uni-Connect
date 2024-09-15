@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.notifications
+package com.mike.uniadmin.model.notifications
 
 import android.util.Log
 import androidx.lifecycle.LiveData
