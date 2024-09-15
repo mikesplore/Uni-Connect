@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.announcements.AnnouncementViewModel
 import com.mike.uniadmin.model.announcements.AnnouncementsWithAuthor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
@@ -68,7 +68,7 @@ fun AnnouncementCard(
         targetValue = if (expanded) 1f else 0.8f,
         label = ""
     )
-    val userTypes = UniAdminPreferences.userType.value
+    val userTypes = UniConnectPreferences.userType.value
 
     Card(
         elevation = CardDefaults.elevatedCardElevation(cardElevation),
@@ -181,7 +181,7 @@ fun AnnouncementCard(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Edit and Delete buttons
-                    if (userTypes == "admin" && announcement.authorID == UniAdminPreferences.userID.value) {
+                    if (userTypes == "admin" && announcement.authorID == UniConnectPreferences.userID.value) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End

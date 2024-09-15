@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.groupchat.GroupChatViewModel
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.settings.Biometrics
@@ -66,7 +66,7 @@ fun ModalDrawerItem(
     val signedInUser by userViewModel.user.observeAsState()
     val users by userViewModel.users.observeAsState(emptyList())
     val groups by chatViewModel.groups.observeAsState(emptyList())
-    val email = UniAdminPreferences.userEmail.value
+    val email = UniConnectPreferences.userEmail.value
 
     LaunchedEffect(Unit) {
         userViewModel.findUserByEmail(email) {}
@@ -254,7 +254,7 @@ fun QuickSettings(activity: MainActivity) {
                         .size(iconSize)
                 ) {
                     Icon(
-                        if (UniAdminPreferences.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
+                        if (UniConnectPreferences.darkMode.value) Icons.Default.Nightlight else Icons.Default.LightMode,
                         "theme",
                         tint = CC.textColor()
                     )
@@ -263,9 +263,9 @@ fun QuickSettings(activity: MainActivity) {
                 Text("Dark theme ", style = CC.descriptionTextStyle().copy(fontSize = 18.sp))
                 Switch(
                     onCheckedChange = {
-                        UniAdminPreferences.darkMode.value = it
-                        UniAdminPreferences.saveDarkModePreference(it)
-                    }, checked = UniAdminPreferences.darkMode.value,
+                        UniConnectPreferences.darkMode.value = it
+                        UniConnectPreferences.saveDarkModePreference(it)
+                    }, checked = UniConnectPreferences.darkMode.value,
                     colors = switchColors(),
                     modifier = Modifier.size(iconSize)
                 )
