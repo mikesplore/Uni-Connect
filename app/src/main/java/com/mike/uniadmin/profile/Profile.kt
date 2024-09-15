@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.R
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.getUserViewModel
@@ -71,7 +71,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
     val currentUser by userViewModel.user.observeAsState()
     var updated by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    val email = UniAdminPreferences.userEmail.value
+    val email = UniConnectPreferences.userEmail.value
 
     LaunchedEffect(updated) {
         userViewModel.findUserByEmail(email) { user ->
