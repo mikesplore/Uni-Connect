@@ -1,9 +1,9 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleTimetable
+package com.mike.uniadmin.model.moduleContent.moduleTimetable
 
 import android.util.Log
 import com.google.firebase.database.*
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
