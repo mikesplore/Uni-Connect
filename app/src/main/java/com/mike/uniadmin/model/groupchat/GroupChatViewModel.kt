@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.groupchat
+package com.mike.uniadmin.model.groupchat
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
