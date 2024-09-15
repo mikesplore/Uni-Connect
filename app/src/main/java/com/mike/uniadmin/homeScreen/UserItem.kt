@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
@@ -127,7 +127,7 @@ fun UserItem(
             )
         }
         Spacer(modifier = Modifier.height(5.dp))
-        val email = UniAdminPreferences.userEmail.value
+        val email = UniConnectPreferences.userEmail.value
         val displayName = if (email == user.email) "You" else user.firstName
         Text(
             text = displayName.let {
