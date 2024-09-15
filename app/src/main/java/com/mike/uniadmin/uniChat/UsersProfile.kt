@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.mike.uniadmin.backEnd.users.UserEntity
+import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
 import java.util.Locale
