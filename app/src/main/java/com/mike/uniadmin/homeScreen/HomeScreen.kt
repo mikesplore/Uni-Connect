@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.announcements.AnnouncementsScreen
 import com.mike.uniadmin.assignments.AssignmentScreen
 import com.mike.uniadmin.attendance.AttendanceScreen
@@ -77,7 +77,7 @@ fun HomeScreen(
 
     val signedInUserLoading by userViewModel.isLoading.observeAsState()
     val pagerState = rememberPagerState(pageCount = { screens.size })
-    val email = UniAdminPreferences.userEmail.value
+    val email = UniConnectPreferences.userEmail.value
 
 
     // Side effects
