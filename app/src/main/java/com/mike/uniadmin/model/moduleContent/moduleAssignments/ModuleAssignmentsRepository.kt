@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleAssignments
+package com.mike.uniadmin.model.moduleContent.moduleAssignments
 
 import androidx.lifecycle.LiveData
 import com.google.firebase.database.DataSnapshot
@@ -6,7 +6,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
