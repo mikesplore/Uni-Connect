@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.userchat
+package com.mike.uniadmin.model.userchat
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -6,7 +6,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
