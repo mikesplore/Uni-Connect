@@ -1,9 +1,8 @@
-package com.mike.uniadmin.backEnd.groupchat
+package com.mike.uniadmin.model.groupchat
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.mike.uniadmin.backEnd.users.UserEntity
 
 fun generateConversationId(userId1: String, userId2: String): String {
 
