@@ -34,10 +34,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mike.uniadmin.backEnd.groupchat.GroupChatEntity
-import com.mike.uniadmin.backEnd.groupchat.GroupEntity
-import com.mike.uniadmin.backEnd.users.UserEntity
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.groupchat.GroupChatEntity
+import com.mike.uniadmin.model.groupchat.GroupEntity
+import com.mike.uniadmin.model.users.UserEntity
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.getGroupChatViewModel
 import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
