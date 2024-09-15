@@ -27,15 +27,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
 fun DarkMode() {
     val icon =
-        if (UniAdminPreferences.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
+        if (UniConnectPreferences.darkMode.value) Icons.Filled.ModeNight else Icons.Filled.WbSunny
     val iconDescription =
-        if (UniAdminPreferences.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
+        if (UniConnectPreferences.darkMode.value) "Switch to Dark Mode" else "Switch to Light Mode"
     BoxWithConstraints {
         val columnWidth = maxWidth
         val iconSize = columnWidth * 0.10f
@@ -62,11 +62,11 @@ fun DarkMode() {
             Text("Dark Mode", style = CommonComponents.descriptionTextStyle(), fontSize = 20.sp)
             Switch(
                 onCheckedChange = {
-                    UniAdminPreferences.darkMode.value = it
-                    UniAdminPreferences.saveDarkModePreference(it)
+                    UniConnectPreferences.darkMode.value = it
+                    UniConnectPreferences.saveDarkModePreference(it)
 
                 },
-                checked = UniAdminPreferences.darkMode.value,
+                checked = UniConnectPreferences.darkMode.value,
                 colors = switchColors(),
                 modifier = Modifier.size(iconSize)
             )
@@ -76,7 +76,7 @@ fun DarkMode() {
 
 @Composable
 fun Notifications(context: Context) {
-    var isNotificationEnabled by remember { mutableStateOf(UniAdminPreferences.notificationsEnabled.value) }
+    var isNotificationEnabled by remember { mutableStateOf(UniConnectPreferences.notificationsEnabled.value) }
     val icon =
         if (isNotificationEnabled) Icons.Filled.Notifications else Icons.Filled.NotificationsOff
     val iconDescription =
