@@ -26,9 +26,11 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.BubbleChart
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.ChatBubble
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -58,7 +60,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.attendance.deleteDataFromPreferences
 import com.mike.uniadmin.model.groupchat.GroupChatViewModel
 import com.mike.uniadmin.model.users.UserEntity
@@ -140,11 +142,11 @@ fun ModalNavigationDrawerItem(
                     navController.navigate("assignments")
                 }
                 SideBarItem(
-                    icon = Icons.Default.BubbleChart,
+                    icon = Icons.Outlined.ChatBubble,
                     text = "Uni Chat",
                     onClicked = {
                         // Check if biometrics is enabled
-                        if (UniAdminPreferences.biometricEnabled.value) {
+                        if (UniConnectPreferences.biometricEnabled.value) {
                             // Show biometric prompt
                             activity.promptManager.showBiometricPrompt(
                                 title = "Authenticate",
@@ -210,7 +212,7 @@ fun ModalNavigationDrawerItem(
                         showBottomSheet(true)
                     })
 
-                var role by remember { mutableStateOf(UniAdminPreferences.userType.value) }
+                var role by remember { mutableStateOf(UniConnectPreferences.userType.value) }
 
                 if (signedInUser?.userType == "admin") {
                     Row(
@@ -226,7 +228,7 @@ fun ModalNavigationDrawerItem(
                             checked = role == "admin",
                             onCheckedChange = { isAdmin ->
                                 role = if (isAdmin) "admin" else "student"
-                                UniAdminPreferences.saveUserType(role)
+                                UniConnectPreferences.saveUserType(role)
                             },
                             colors = switchColors()
                         )
@@ -343,7 +345,7 @@ fun SignOut(
                         )?.let { updatedUserStatus ->
                             MyDatabase.writeUserActivity(updatedUserStatus, onSuccess = { success ->
                                 if (success) {
-                                    UniAdminPreferences.clearAllData()
+                                    UniConnectPreferences.clearAllData()
                                     userViewModel.deleteAllTables()
                                     deleteDataFromPreferences(context)
                                     navController.navigate("login") {
@@ -443,7 +445,7 @@ fun SideProfile(user: UserEntity) {
                 maxLines = 2
             )
             Spacer(modifier = Modifier.height(10.dp))
-            val userType = UniAdminPreferences.userType.value.uppercase(Locale.ROOT)
+            val userType = UniConnectPreferences.userType.value.uppercase(Locale.ROOT)
 
             Text(userType, style = CC.descriptionTextStyle())
         }
