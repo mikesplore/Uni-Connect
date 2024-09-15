@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-object UniAdminPreferences {
+object UniConnectPreferences {
     // Keys for SharedPreferences
     private const val PREF_KEY_USER_EMAIL = "user_email_key"
     private const val PREF_KEY_USER_TYPE = "user_type_key"
@@ -56,63 +56,63 @@ object UniAdminPreferences {
     fun saveUserID(newUserID: String) {
         userID.value = newUserID
         preferences.edit().putString(PREF_KEY_USER_ID, newUserID).apply()
-        Log.d("UniAdminPreferences", "User ID saved: $newUserID")
+        Log.d("UniConnectPreferences", "User ID saved: $newUserID")
     }
 
     // Save font style
     fun saveFontStyle(newFontStyle: String) {
         fontStyle.value = newFontStyle
         preferences.edit().putString(FONT_STYLE_KEY, newFontStyle).apply()
-        Log.d("UniAdminPreferences", "Font style saved: $newFontStyle")
+        Log.d("UniConnectPreferences", "Font style saved: $newFontStyle")
     }
 
     // Save module name
     fun saveModuleName(newModuleName: String) {
         moduleName.value = newModuleName
         preferences.edit().putString(PREF_KEY_MODULE_NAME, newModuleName).apply()
-        Log.d("UniAdminPreferences", "Module name saved: $newModuleName")
+        Log.d("UniConnectPreferences", "Module name saved: $newModuleName")
     }
 
     // Save module
     fun saveModuleID(newModuleID: String) {
         moduleID.value = newModuleID
         preferences.edit().putString(PREF_KEY_MODULE_ID, newModuleID).apply()
-        Log.d("UniAdminPreferences", "Module ID saved: $newModuleID")
+        Log.d("UniConnectPreferences", "Module ID saved: $newModuleID")
     }
 
     // Save user email
     fun saveUserEmail(newEmail: String) {
         userEmail.value = newEmail
         preferences.edit().putString(PREF_KEY_USER_EMAIL, newEmail).apply()
-        Log.d("UniAdminPreferences", "User email saved: $newEmail")
+        Log.d("UniConnectPreferences", "User email saved: $newEmail")
     }
 
     // Save user type
     fun saveUserType(newType: String) {
         userType.value = newType
         preferences.edit().putString(PREF_KEY_USER_TYPE, newType).apply()
-        Log.d("UniAdminPreferences", "User type saved: $newType")
+        Log.d("UniConnectPreferences", "User type saved: $newType")
     }
 
     // Save dark mode preference
     fun saveDarkModePreference(isDarkMode: Boolean) {
         darkMode.value = isDarkMode
         preferences.edit().putBoolean(PREF_KEY_DARK_MODE, isDarkMode).apply()
-        Log.d("UniAdminPreferences", "Dark mode saved: $isDarkMode")
+        Log.d("UniConnectPreferences", "Dark mode saved: $isDarkMode")
     }
 
     //save notifications preference
     fun saveNotificationsPreference(isEnabled: Boolean) {
         notificationsEnabled.value = isEnabled
         preferences.edit().putBoolean(PREF_KEY_NOTIFICATIONS_ENABLED, isEnabled).apply()
-        Log.d("UniAdminPreferences", "Notifications enabled saved: $isEnabled")
+        Log.d("UniConnectPreferences", "Notifications enabled saved: $isEnabled")
     }
 
     //save biometric preference
     fun saveBiometricPreference(isEnabled: Boolean) {
         biometricEnabled.value = isEnabled
         preferences.edit().putBoolean(PREF_KEY_BIOMETRIC_ENABLED, isEnabled).apply()
-        Log.d("UniAdminPreferences", "Biometric enabled saved: $isEnabled")
+        Log.d("UniConnectPreferences", "Biometric enabled saved: $isEnabled")
     }
 
     fun clearAllData() {
@@ -128,7 +128,7 @@ object UniAdminPreferences {
         biometricEnabled.value = false // Or set to your default value
 
         preferences.edit().clear().apply()
-        Log.d("UniAdminPreferences", "All preferences cleared")
+        Log.d("UniConnectPreferences", "All preferences cleared")
     }
 }
 
