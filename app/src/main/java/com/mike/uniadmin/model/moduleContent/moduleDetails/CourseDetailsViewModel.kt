@@ -1,11 +1,11 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleDetails
+package com.mike.uniadmin.model.moduleContent.moduleDetails
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
+import com.mike.uniadmin.model.modules.ModuleEntity
 import kotlinx.coroutines.launch
 
 class ModuleDetailViewModel(private val repository: ModuleDetailRepository) : ViewModel() {
