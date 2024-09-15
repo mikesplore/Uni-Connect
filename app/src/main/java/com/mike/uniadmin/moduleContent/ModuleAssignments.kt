@@ -58,9 +58,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignment
-import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignment
+import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignmentViewModel
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import java.text.DateFormat
 import java.text.SimpleDateFormat
