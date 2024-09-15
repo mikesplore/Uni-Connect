@@ -42,14 +42,14 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.helperFunctions.MyDatabase.updatePassword
 import com.mike.uniadmin.ui.theme.CommonComponents
 
 @Composable
 fun Biometrics(mainActivity: MainActivity) {
     // Properly track the state of the biometrics preference with remember and mutableStateOf
-    val isBiometricsEnabled = remember { mutableStateOf(UniAdminPreferences.biometricEnabled.value) }
+    val isBiometricsEnabled = remember { mutableStateOf(UniConnectPreferences.biometricEnabled.value) }
     val icon = if (isBiometricsEnabled.value) Icons.Filled.Security else Icons.Filled.Security
     val iconDescription = if (isBiometricsEnabled.value) "Biometrics enabled" else "Biometrics disabled"
     val promptManager = mainActivity.promptManager
@@ -90,12 +90,12 @@ fun Biometrics(mainActivity: MainActivity) {
                         ) { success ->
                             if (success) {
                                 isBiometricsEnabled.value = true // Update state
-                                UniAdminPreferences.saveBiometricPreference(true) // Save preference
+                                UniConnectPreferences.saveBiometricPreference(true) // Save preference
                             }
                         }
                     } else {
                         isBiometricsEnabled.value = false // Update state
-                        UniAdminPreferences.saveBiometricPreference(false) // Save preference
+                        UniConnectPreferences.saveBiometricPreference(false) // Save preference
                     }
                 },
                 checked = isBiometricsEnabled.value, // Reflect the current state of the switch
