@@ -39,11 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.announcements.AnnouncementEntity
-import com.mike.uniadmin.backEnd.announcements.AnnouncementViewModel
-import com.mike.uniadmin.backEnd.notifications.NotificationEntity
-import com.mike.uniadmin.backEnd.notifications.NotificationViewModel
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.announcements.AnnouncementEntity
+import com.mike.uniadmin.model.announcements.AnnouncementViewModel
+import com.mike.uniadmin.model.notifications.NotificationEntity
+import com.mike.uniadmin.model.notifications.NotificationViewModel
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.notification.showNotification
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
