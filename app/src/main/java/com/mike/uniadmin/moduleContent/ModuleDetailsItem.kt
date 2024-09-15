@@ -56,8 +56,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetail
-import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetailViewModel
+import com.mike.uniadmin.model.moduleContent.moduleDetails.ModuleDetail
+import com.mike.uniadmin.model.moduleContent.moduleDetails.ModuleDetailViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
