@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.attendance
+package com.mike.uniadmin.model.attendance
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
