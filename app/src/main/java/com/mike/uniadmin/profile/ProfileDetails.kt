@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents
 
@@ -37,7 +37,7 @@ fun ProfileDetails(
     var lastName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
-    val email = UniAdminPreferences.userEmail.value
+    val email = UniConnectPreferences.userEmail.value
     val currentUser by viewModel.user.observeAsState()
 
     LaunchedEffect(Unit) {
