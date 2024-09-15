@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.modules.ModuleEntity
-import com.mike.uniadmin.backEnd.modules.ModuleViewModel
+import com.mike.uniadmin.model.modules.ModuleEntity
+import com.mike.uniadmin.model.modules.ModuleViewModel
 import com.mike.uniadmin.helperFunctions.randomColor
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
