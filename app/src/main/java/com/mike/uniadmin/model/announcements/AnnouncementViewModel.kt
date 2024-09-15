@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.announcements
+package com.mike.uniadmin.model.announcements
 
 import android.util.Log
 import androidx.lifecycle.LiveData
