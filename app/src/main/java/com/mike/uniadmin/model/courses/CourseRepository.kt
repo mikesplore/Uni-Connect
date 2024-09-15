@@ -1,13 +1,11 @@
-package com.mike.uniadmin.backEnd.courses
+package com.mike.uniadmin.model.courses
 
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.launch
 
 
