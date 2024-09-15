@@ -52,7 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.moduleContent.moduleTimetable.ModuleTimetable
 import com.mike.uniadmin.model.moduleContent.moduleTimetable.ModuleTimetableViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
@@ -64,7 +64,7 @@ fun TimetableItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val timetables = timetableViewModel.timetables.observeAsState(initial = emptyList())
-    val userType = UniAdminPreferences.userType.value
+    val userType = UniConnectPreferences.userType.value
 
     Column(
         modifier = Modifier
