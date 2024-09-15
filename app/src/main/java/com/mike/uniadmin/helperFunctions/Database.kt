@@ -8,8 +8,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.users.UserStateEntity
+import com.mike.uniadmin.model.users.UserStateEntity
 import java.util.Calendar
 import java.util.Locale
 
