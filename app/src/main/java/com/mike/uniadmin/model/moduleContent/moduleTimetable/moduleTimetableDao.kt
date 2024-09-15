@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.moduleContent.moduleTimetable
+package com.mike.uniadmin.model.moduleContent.moduleTimetable
 
 
 import androidx.room.Dao
