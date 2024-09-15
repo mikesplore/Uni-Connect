@@ -1,4 +1,4 @@
-package com.mike.uniadmin.backEnd.modules
+package com.mike.uniadmin.model.modules
 
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
@@ -7,7 +7,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.mike.uniadmin.CourseManager.courseCode
-import com.mike.uniadmin.backEnd.announcements.uniConnectScope
+import com.mike.uniadmin.model.announcements.uniConnectScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
