@@ -57,7 +57,7 @@ import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.R
-import com.mike.uniadmin.UniAdminPreferences
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.model.courses.CourseEntity
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.getAnnouncementViewModel
@@ -84,7 +84,7 @@ fun CourseScreen(context: Context, navController: NavController) {
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val isLoading by courseViewModel.isLoading.observeAsState(false)
     var showAddCourse by remember { mutableStateOf(false) }
-    val userTypes = UniAdminPreferences.userType.value
+    val userTypes = UniConnectPreferences.userType.value
 
     fun startListeners() {
         announcementViewModel.startAnnouncementsListener()
