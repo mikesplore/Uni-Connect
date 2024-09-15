@@ -54,10 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mike.uniadmin.UniAdminPreferences
-import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncement
-import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
-import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementsWithAuthor
-import com.mike.uniadmin.backEnd.users.UserViewModel
+import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncement
+import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncementViewModel
+import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncementsWithAuthor
+import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
