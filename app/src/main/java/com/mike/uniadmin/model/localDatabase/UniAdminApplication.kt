@@ -1,18 +1,18 @@
-package com.mike.uniadmin.backEnd.localDatabase
+package com.mike.uniadmin.model.localDatabase
 
 import android.app.Application
-import com.mike.uniadmin.backEnd.announcements.AnnouncementRepository
-import com.mike.uniadmin.backEnd.attendance.AttendanceRepository
-import com.mike.uniadmin.backEnd.moduleContent.moduleAnnouncements.ModuleAnnouncementRepository
-import com.mike.uniadmin.backEnd.moduleContent.moduleAssignments.ModuleAssignmentRepository
-import com.mike.uniadmin.backEnd.moduleContent.moduleDetails.ModuleDetailRepository
-import com.mike.uniadmin.backEnd.moduleContent.moduleTimetable.ModuleTimetableRepository
-import com.mike.uniadmin.backEnd.modules.ModuleRepository
-import com.mike.uniadmin.backEnd.groupchat.GroupChatRepository
-import com.mike.uniadmin.backEnd.notifications.NotificationRepository
-import com.mike.uniadmin.backEnd.courses.CourseRepository
-import com.mike.uniadmin.backEnd.userchat.UserChatRepository
-import com.mike.uniadmin.backEnd.users.UserRepository
+import com.mike.uniadmin.model.announcements.AnnouncementRepository
+import com.mike.uniadmin.model.attendance.AttendanceRepository
+import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncementRepository
+import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignmentRepository
+import com.mike.uniadmin.model.moduleContent.moduleDetails.ModuleDetailRepository
+import com.mike.uniadmin.model.moduleContent.moduleTimetable.ModuleTimetableRepository
+import com.mike.uniadmin.model.modules.ModuleRepository
+import com.mike.uniadmin.model.groupchat.GroupChatRepository
+import com.mike.uniadmin.model.notifications.NotificationRepository
+import com.mike.uniadmin.model.courses.CourseRepository
+import com.mike.uniadmin.model.userchat.UserChatRepository
+import com.mike.uniadmin.model.users.UserRepository
 
 
 class UniAdmin : Application() {
