@@ -11,6 +11,9 @@ import com.mike.uniadmin.model.announcements.AnnouncementEntity
 import com.mike.uniadmin.model.announcements.AnnouncementsDao
 import com.mike.uniadmin.model.attendance.AttendanceDao
 import com.mike.uniadmin.model.attendance.AttendanceEntity
+import com.mike.uniadmin.model.courses.AcademicYear
+import com.mike.uniadmin.model.courses.AcademicYearDao
+import com.mike.uniadmin.model.courses.Course
 import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncement
 import com.mike.uniadmin.model.moduleContent.moduleAnnouncements.ModuleAnnouncementDao
 import com.mike.uniadmin.model.moduleContent.moduleAssignments.ModuleAssignment
@@ -30,9 +33,8 @@ import com.mike.uniadmin.model.groupchat.GroupEntity
 import com.mike.uniadmin.model.notifications.NotificationDao
 import com.mike.uniadmin.model.notifications.NotificationEntity
 import com.mike.uniadmin.model.courses.CourseDao
-import com.mike.uniadmin.model.courses.CourseEntity
-import com.mike.uniadmin.model.courses.CourseState
-import com.mike.uniadmin.model.courses.CourseStateDao
+import com.mike.uniadmin.model.courses.Enrollment
+import com.mike.uniadmin.model.courses.EnrollmentDao
 import com.mike.uniadmin.model.userchat.UserChatDAO
 import com.mike.uniadmin.model.userchat.UserChatEntity
 import com.mike.uniadmin.model.users.AccountDeletionDao
@@ -60,9 +62,10 @@ import com.mike.uniadmin.model.users.UserStateEntity
         ModuleDetail::class,
         ModuleTimetable::class,
         AttendanceState::class,
-        CourseEntity::class,
-        CourseState::class,
-        AttendanceEntity::class
+        Course::class,
+        AttendanceEntity::class,
+        Enrollment::class,
+        AcademicYear::class,
                ],
     version = 2,
     exportSchema = false
@@ -85,8 +88,9 @@ abstract class UniConnectDatabase : RoomDatabase() {
     abstract fun attendanceStateDao(): AttendanceStateDao
     abstract fun databaseDao(): DatabaseDao
     abstract fun courseDao(): CourseDao
-    abstract fun courseStateDao(): CourseStateDao
     abstract fun attendanceDao(): AttendanceDao
+    abstract fun enrollmentDao(): EnrollmentDao
+    abstract fun academicYearDao(): AcademicYearDao
 
     companion object {
         @Volatile
@@ -97,7 +101,7 @@ abstract class UniConnectDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     UniConnectDatabase::class.java,
-                    "UniConnect"
+                    "UniConnectDatabase"
                 )
                     .addMigrations(MIGRATION_1_2)
                     .build()
@@ -111,6 +115,12 @@ abstract class UniConnectDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE Admins RENAME TO users")
             }
         }
+
+
+
+
+
+
     }
 }
 
