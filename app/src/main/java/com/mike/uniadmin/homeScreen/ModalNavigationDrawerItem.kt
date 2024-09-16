@@ -24,9 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.BubbleChart
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -62,12 +59,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.attendance.deleteDataFromPreferences
+import com.mike.uniadmin.helperFunctions.MyDatabase
+import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.model.groupchat.GroupChatViewModel
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.model.users.UserStateEntity
 import com.mike.uniadmin.model.users.UserViewModel
-import com.mike.uniadmin.helperFunctions.MyDatabase
-import com.mike.uniadmin.helperFunctions.Update
 import com.mike.uniadmin.settings.switchColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -134,8 +131,10 @@ fun ModalNavigationDrawerItem(
                         }
                         navController.navigate("profile")
                     })
-                SideBarItem(icon = Icons.AutoMirrored.Filled.Assignment,
-                    text = "Assignments") {
+                SideBarItem(
+                    icon = Icons.AutoMirrored.Filled.Assignment,
+                    text = "Assignments"
+                ) {
                     scope.launch {
                         drawerState.close()
                     }
@@ -451,3 +450,6 @@ fun SideProfile(user: UserEntity) {
         }
     }
 }
+
+
+
