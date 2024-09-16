@@ -1,8 +1,11 @@
 package com.mike.uniadmin.settings
 
+import android.app.usage.StorageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.storage.StorageManager
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +30,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -40,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +75,11 @@ import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.R
 import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.getUserViewModel
+import java.io.IOException
+import java.util.UUID
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -232,8 +252,8 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "Selected Font: $savedFont",
-                            style = CC.descriptionTextStyle().copy(fontSize = 20.sp)
+                            "Current Font: $savedFont",
+                            style = CC.descriptionTextStyle().copy(fontSize = 17.sp)
                         )
                         IconButton(
                             onClick = { navController.navigate("appearance") },
@@ -251,6 +271,8 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                AppSize(context)
                 Spacer(modifier = Modifier.height(20.dp))
                 Row {
                     Text("We care about your feedback", style = CC.titleTextStyle())
@@ -382,5 +404,161 @@ fun switchColors(): SwitchColors {
         uncheckedIconColor = CC.textColor()
     )
 }
+
+@Composable
+fun AppSize(context: Context) {
+    var appSize by remember { mutableStateOf(getAppStorageSize(context)) }
+    val userViewModel = getUserViewModel(context)
+
+    var showDialog by remember { mutableStateOf(false) }
+    var deleteDatabase by remember { mutableStateOf(false) }
+    var deletePreferencesOption by remember { mutableStateOf(false) }
+    var deleteCacheOption by remember { mutableStateOf(false) }
+
+    // Function to clear data based on selected options
+    fun clearSelectedData() {
+        if (deleteDatabase) userViewModel.deleteAllTables()
+        if (deletePreferencesOption) UniConnectPreferences.clearAllData()
+        if (deleteCacheOption) clearCache(context)
+        Toast.makeText(context, "Selected Data Cleared", Toast.LENGTH_SHORT).show()
+        appSize = getAppStorageSize(context) // Refresh app size after clearing
+    }
+
+    // Convert app size to a human-readable format (MB)
+    val appSizeInMb = appSize / (1024 * 1024 * 1024)/2
+
+    // Layout
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = CC.primary())
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // App size display
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Storage,
+                    contentDescription = "App Size",
+                    tint = CC.textColor(),
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Total App Size: $appSizeInMb MB",
+                    style = CC.descriptionTextStyle(),
+                    color = CC.textColor()
+                )
+            }
+
+            // Divider
+            HorizontalDivider(thickness = 1.dp, color = CC.secondary().copy(alpha = 0.2f))
+
+            // Clear tables button with icon
+            Button(
+                onClick = { showDialog = true },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CleaningServices,
+                    contentDescription = "Clear Database",
+                    tint = CC.extraColor1()
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Clear App Cache and Database", style = CC.descriptionTextStyle())
+            }
+        }
+    }
+
+    // Confirmation Dialog
+    if (showDialog) {
+        AlertDialog(
+            containerColor = CC.surfaceContainer(),
+            onDismissRequest = { showDialog = false },
+            title = { Text("Clear Data Confirmation", style = CC.titleTextStyle().copy(fontSize = 17.sp, fontWeight = FontWeight.Bold)) },
+            text = {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = deleteDatabase,
+                            onCheckedChange = { deleteDatabase = it },
+                            colors = CheckboxDefaults.colors(CC.secondary())
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Clear Database", style = CC.descriptionTextStyle())
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = deletePreferencesOption,
+                            onCheckedChange = { deletePreferencesOption = it },
+                            colors = CheckboxDefaults.colors(CC.secondary())
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Clear User Preferences", style = CC.descriptionTextStyle())
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = deleteCacheOption,
+                            onCheckedChange = { deleteCacheOption = it },
+                            colors = CheckboxDefaults.colors(CC.secondary())
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Clear App Cache", style = CC.descriptionTextStyle())
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        clearSelectedData()
+                        showDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(CC.secondary())
+                ) {
+                    Text("Confirm", style = CC.descriptionTextStyle())
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false },
+                    colors = ButtonDefaults.buttonColors(CC.extraColor1())
+                ) {
+                    Text("Cancel", style = CC.descriptionTextStyle())
+                }
+            }
+        )
+    }
+}
+
+
+// Function to get app storage size
+fun getAppStorageSize(context: Context): Long {
+    val storageStatsManager = context.getSystemService(StorageStatsManager::class.java)
+    val appSpecificInternalDirUuid: UUID = StorageManager.UUID_DEFAULT
+    return try {
+        storageStatsManager.getTotalBytes(appSpecificInternalDirUuid)
+    } catch (e: IOException) {
+        0L // Return 0 if an error occurs
+    }
+}
+
+fun clearCache(context: Context) {
+    val cacheDir = context.cacheDir
+    if (cacheDir?.exists() == true) {
+        cacheDir.deleteRecursively()
+    }
+}
+
+
 
 
