@@ -129,6 +129,7 @@ fun HomeScreen(
         }, containerColor = CC.primary(), sheetState = sheetState, content = {
             ModalDrawerItem(
                 navController = navController,
+                context = context,
                 userViewModel = userViewModel,
                 chatViewModel = chatViewModel,
                 activity = activity
