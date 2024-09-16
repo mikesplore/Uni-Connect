@@ -415,7 +415,7 @@ fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded:() -> Unit) {
                 )
 
                 // Course Name
-                CC.SingleLinedTextField(
+                CC.CustomTextField(
                     value = courseName,
                     onValueChange = { newValue -> courseName = newValue },
                     label = "Course Name",
@@ -425,7 +425,7 @@ fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded:() -> Unit) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Course Code
-                CC.SingleLinedTextField(
+                CC.CustomTextField(
                     value = courseCode,
                     onValueChange = { newValue -> courseCode = newValue },
                     label = "Course Code",
@@ -435,7 +435,7 @@ fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded:() -> Unit) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Academic Year
-                CC.SingleLinedTextField(
+                CC.CustomTextField(
                     value = academicYear,
                     onValueChange = { newValue -> academicYear = newValue },
                     label = "Academic Year (e.g. 2023-2024)",
@@ -445,7 +445,7 @@ fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded:() -> Unit) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Semester Input
-                CC.SingleLinedTextField(
+                CC.CustomTextField(
                     value = semesterInput,
                     onValueChange = { newValue -> semesterInput = newValue },
                     label = "Add Semester (e.g. Sem1)",
