@@ -123,7 +123,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CC.SingleLinedTextField(
+                CC.CustomTextField(
                     value = firstName,
                     onValueChange = { first ->
                         firstName = first
@@ -133,7 +133,7 @@ fun MoreDetails(context: Context, navController: NavController) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                CC.SingleLinedTextField(
+                CC.CustomTextField(
                     value = lastName,
                     onValueChange = { last ->
                         lastName = last
