@@ -363,7 +363,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
             UniConnectPreferences.saveUserEmail(email)
             UniConnectPreferences.saveUserType(user.userType.ifEmpty { "student" })
             UniConnectPreferences.saveUserID(user.id)
-            navController.navigate("courses") {
+            navController.navigate("courcourseSelection") {
                 popUpTo("login") { inclusive = true }
             }
 
@@ -418,7 +418,7 @@ fun handleSignIn(
                 Details.email.value = email
                 userViewModel.findUserByEmail(email) { user ->
                     if (user != null) {
-                        navController.navigate("courses")
+                        navController.navigate("courseSelection")
                         Toast.makeText(
                             context,
                             "Welcome back, ${user.firstName}!",
