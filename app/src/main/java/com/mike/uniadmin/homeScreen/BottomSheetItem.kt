@@ -1,5 +1,6 @@
 package com.mike.uniadmin.homeScreen
 
+import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +26,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -34,6 +37,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -43,12 +47,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniConnectPreferences
+import com.mike.uniadmin.getUserViewModel
 import com.mike.uniadmin.model.groupchat.GroupChatViewModel
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.settings.Biometrics
@@ -59,6 +66,7 @@ import com.mike.uniadmin.ui.theme.CommonComponents as CC
 @Composable
 fun ModalDrawerItem(
     navController: NavController,
+    context: Context,
     userViewModel: UserViewModel,
     chatViewModel: GroupChatViewModel,
     activity: MainActivity
@@ -155,7 +163,8 @@ fun ModalDrawerItem(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            Text("Chat",
+            Text(
+                "Chat",
                 style = CC.titleTextStyle()
                     .copy(fontWeight = FontWeight.Bold, fontSize = textSize * 0.8f)
             )
@@ -199,7 +208,10 @@ fun ModalDrawerItem(
                     modifier = Modifier.animateContentSize()
                 ) {
                     items(groups, key = { it.id }) { group ->
-                        if (group.name.isNotEmpty() && group.description.isNotEmpty() && group.members.contains(signedInUser?.id.toString())) {
+                        if (group.name.isNotEmpty() && group.description.isNotEmpty() && group.members.contains(
+                                signedInUser?.id.toString()
+                            )
+                        ) {
                             signedInUser?.let {
                                 GroupItem(
                                     group,
@@ -224,6 +236,9 @@ fun ModalDrawerItem(
             )
             Spacer(modifier = Modifier.height(10.dp))
             QuickSettings(activity)
+            Spacer(modifier = Modifier.height(20.dp))
+            HorizontalDivider(color = CC.textColor())
+            CurrentlySelectedCourse(navController, context)
 
         }
     }
@@ -260,7 +275,7 @@ fun QuickSettings(activity: MainActivity) {
                     )
                 }
 
-                Text("Dark theme ", style = CC.descriptionTextStyle().copy(fontSize = 18.sp))
+                Text(if (UniConnectPreferences.darkMode.value) "Dark Mode" else "Light Mode", style = CC.descriptionTextStyle().copy(fontSize = 18.sp))
                 Switch(
                     onCheckedChange = {
                         UniConnectPreferences.darkMode.value = it
@@ -274,5 +289,91 @@ fun QuickSettings(activity: MainActivity) {
             Biometrics(activity)
 
         }
+    }
+}
+
+@Composable
+fun CurrentlySelectedCourse(navController: NavController, context: Context) {
+    val courseCode by CourseManager.courseCode.collectAsState()
+    val courseName by CourseManager.courseName.collectAsState()
+    val academicYear by CourseManager.academicYear.collectAsState()
+    val semester by CourseManager.semester.collectAsState()
+
+    val userViewModel = getUserViewModel(context)
+
+    BoxWithConstraints {
+        val columnWidth = maxWidth
+        val density = LocalDensity.current
+        val textSize = with(density) { (columnWidth * 0.05f).toSp() }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(containerColor = CC.surfaceContainer()),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Currently Selected Course",
+                    style = CC.titleTextStyle(),
+                    fontSize = textSize * 1.2f,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                HorizontalDivider(color = CC.secondary(), thickness = 1.dp)
+                CourseInfoItem("Course Code", courseCode, textSize)
+                CourseInfoItem("Course Name", courseName, textSize)
+                CourseInfoItem("Academic Year", academicYear, textSize)
+                CourseInfoItem("Semester", semester, textSize)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        CourseManager.clearCourseManagerData()
+                        userViewModel.deleteAllTables()
+                        navController.navigate("courseSelection")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = CC.secondary()),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        "Change Course",
+                        style = CC.descriptionTextStyle(),
+                        color = CC.primary(),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CourseInfoItem(title: String, content: String, textSize: TextUnit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$title:",
+            style = CC.descriptionTextStyle(),
+            color = CC.tertiary(),
+            fontWeight = FontWeight.Bold,
+            fontSize = textSize * 0.8f
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = content,
+            style = CC.descriptionTextStyle(),
+            color = CC.textColor(),
+            fontSize = textSize * 0.8f
+        )
     }
 }
