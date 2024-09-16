@@ -29,13 +29,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -75,19 +75,21 @@ fun SelectYourCourse(context: Context, navController: NavController) {
     var showConfirmDialog by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val courseViewModel = getCourseViewModel(context)
+
+    // Observe courses and academic years from ViewModel
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val academicYears by courseViewModel.academicYears.observeAsState(emptyList())
-    var loading by remember { mutableStateOf(true) }
+
     var showAddCourse by remember { mutableStateOf(false) }
 
-    // Effect to load data
-    LaunchedEffect(Unit, loading) {
-        if (loading) {
-            courseViewModel.loadCourses()
-            courseViewModel.getAllAcademicYears()
-            // Set loading to false after data is loaded
-            loading = false
-        }
+    fun fetchData() {
+        courseViewModel.loadCourses()
+        courseViewModel.getAllAcademicYears()
+    }
+
+    // Trigger data loading on launch
+    LaunchedEffect(Unit) {
+        fetchData()
     }
 
     // Filter courses based on search query
@@ -105,7 +107,8 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 title = { Text("Select Your Course", style = CC.titleTextStyle()) },
                 actions = {
                     IconButton(onClick = {
-                        loading = true // Trigger reload
+                        // Trigger data reload if necessary
+                        fetchData()
                     }) {
                         Icon(
                             Icons.Default.Refresh,
@@ -153,23 +156,27 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 colors = CC.appTextFieldColors(),
                 shape = RoundedCornerShape(10.dp)
             )
+
             AnimatedVisibility(showAddCourse) {
                 AddCourse(courseViewModel) {
                     showAddCourse = false
                 }
             }
 
-            // Show loading indicator while data is being loaded
-            if (loading) {
+            if (courses.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .wrapContentSize(Alignment.Center)
                 ) {
-                    CircularProgressIndicator(color = CC.textColor())
+                    OutlinedButton(onClick = {
+                        fetchData()
+                    }) {
+                        Text("Load Courses", style = CC.descriptionTextStyle())
+                    }
                 }
             } else {
-                // Display course list or message
+                // Display filtered courses
                 if (filteredCourses.isEmpty()) {
                     Text("No courses found", color = CC.secondary())
                 } else {
