@@ -1,208 +1,156 @@
 package com.mike.uniadmin.model.courses
 
-import com.google.firebase.database.ChildEventListener
+import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.mike.uniadmin.model.announcements.uniConnectScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.tasks.await
 
 class CourseRepository(
-    private val courseDao: CourseDao, private val courseStateDao: CourseStateDao
+    private val courseDao: CourseDao,
+    private val enrollmentDao: EnrollmentDao,
+    private val academicYearDao: AcademicYearDao
 ) {
-    private val database =
-        FirebaseDatabase.getInstance().reference.child("Courses")
-    private val courseStateDatabase =
-        FirebaseDatabase.getInstance().reference.child("CourseStates")
+    private val firebaseDatabase = FirebaseDatabase.getInstance().reference
+    private val viewModelScope = CoroutineScope(Dispatchers.IO)
 
     init {
-        startCourseListener()
-        startCourseStateListener()
+        // Initialize Firebase listeners
+        initializeFirebaseListeners()
+        initFirebaseListeners()
+        viewModelScope.launch {
+            restoreAcademicYearsFromFirebase()
+        }
+    }
+
+    // Insert course into both Room and Firebase
+    suspend fun insertCourse(course: Course) {
+        courseDao.insertCourse(course)
+        firebaseDatabase.child("Courses").child(course.courseCode).setValue(course)
     }
 
 
-    private fun startCourseStateListener() {
-        courseStateDatabase.addValueEventListener(object : ValueEventListener {
+    // Enroll user into a course (Room and Firebase)
+    suspend fun enrollUser(enrollment: Enrollment) {
+        enrollmentDao.insertEnrollment(enrollment)
+        firebaseDatabase.child("Enrollments").child(enrollment.userId).setValue(enrollment)
+    }
+
+    // Retrieve all courses from Room
+    suspend fun getAllCourses(): List<Course> {
+        return courseDao.getAllCourses()
+    }
+
+    // Retrieve all enrollments from Room
+    suspend fun getAllEnrollments(): List<Enrollment> {
+        return enrollmentDao.getAllEnrollments()
+    }
+
+    // Retrieve user's enrolled course (JOIN between courses and enrollments)
+    suspend fun getUserEnrolledCourse(userId: String): CourseWithEnrollment? {
+        return enrollmentDao.getUserEnrolledCourse(userId)
+    }
+
+    // Restore enrollments from Firebase to Room
+    suspend fun restoreEnrollmentsFromFirebase() {
+        val enrollmentsData = firebaseDatabase.child("Enrollments").get().await()
+        for (snapshot in enrollmentsData.children) {
+            val enrollment = snapshot.getValue(Enrollment::class.java)
+            enrollment?.let { enrollmentDao.insertEnrollment(it) }
+        }
+    }
+
+    // Initialize Firebase listeners to update Room database
+    private fun initializeFirebaseListeners() {
+        // Listener for courses
+        firebaseDatabase.child("Courses").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val courseStates = mutableListOf<CourseState>()
-                for (childSnapshot in snapshot.children) {
-                    val courseState = childSnapshot.getValue(CourseState::class.java)
-                    courseState?.let { courseStates.add(it) }
+                val courseList = mutableListOf<Course>()
+                for (courseSnapshot in snapshot.children) {
+                    val course = courseSnapshot.getValue(Course::class.java)
+                    course?.let { courseList.add(it) }
                 }
-                uniConnectScope.launch {
-                    courseStateDao.insertCourseStates(courseStates)
+                // Insert or update all courses in Room
+                courseList.forEach { course ->
+                    viewModelScope.launch {
+                        courseDao.insertCourse(course)
+                    }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Error reading course states: ${error.message}")
+                Log.e("FirebaseListener", "Failed to listen to courses: ${error.message}")
             }
         })
-    }
 
-    fun fetchCourseStates(onResult: (List<CourseState>) -> Unit) {
-            courseStateDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val courseStates = mutableListOf<CourseState>()
-                    for (childSnapshot in snapshot.children) {
-                        val courseState = childSnapshot.getValue(CourseState::class.java)
-                        courseState?.let { courseStates.add(it) }
-                    }
-                    uniConnectScope.launch {
-                        courseStateDao.insertCourseStates(courseStates)
-                    }
-                    onResult(courseStates)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle the read error (e.g., log the error)
-                    println("Error reading courses: ${error.message}")
-                    uniConnectScope.launch {
-                        val cachedData = courseStateDao.getCourseStates()
-                        onResult(cachedData)
-                    }
-                }
-            })
-
-    }
-
-    fun saveCourseState(courseState: CourseState, onComplete: (Boolean) -> Unit) {
-        uniConnectScope.launch {
-            courseStateDao.insertCourseState(courseState)
-        }
-            courseStateDatabase.child(courseState.courseID).setValue(courseState)
-                .addOnCompleteListener { task ->
-                    onComplete(task.isSuccessful)
-                }
-
-    }
-
-    fun saveCourse(course: CourseEntity, onComplete: (Boolean) -> Unit) {
-        uniConnectScope.launch {
-            courseDao.insertCourse(course)
-        }
-            database.child(course.courseCode).setValue(course).addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-
-    }
-
-
-    fun fetchCourses(onResult: (List<CourseEntity>) -> Unit) {
-        uniConnectScope.launch {
-            val cachedData = courseDao.getCourses()
-            onResult(cachedData)
-        }
-                database.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val courses = mutableListOf<CourseEntity>()
-                        for (childSnapshot in snapshot.children) {
-                            val course = childSnapshot.getValue(CourseEntity::class.java)
-                            course?.let { courses.add(it) }
-                        }
-                        uniConnectScope.launch {
-                            courseDao.insertCourses(courses)
-                        }
-                        onResult(courses)
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        println("Error reading courses: ${error.message}")
-                    }
-                })
-
-
-    }
-
-
-    fun deleteCourse(courseId: String, onSuccess: () -> Unit, onFailure: (Exception?) -> Unit) {
-        uniConnectScope.launch {
-            courseDao.deleteCourse(courseId)
-            database.child(courseId).removeValue() // Use the consistent database reference
-                .addOnSuccessListener {
-                    onSuccess()
-                }.addOnFailureListener { exception ->
-                    onFailure(exception)
-                }
-        }
-    }
-
-    private fun startCourseListener() {
-        database.addValueEventListener(object : ValueEventListener {
+        // Listener for enrollments
+        firebaseDatabase.child("Enrollments").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val courses = mutableListOf<CourseEntity>()
-                for (childSnapshot in snapshot.children) {
-                    val course = childSnapshot.getValue(CourseEntity::class.java)
-                    course?.let { courses.add(it) }
+                val enrollmentList = mutableListOf<Enrollment>()
+                for (enrollmentSnapshot in snapshot.children) {
+                    val enrollment = enrollmentSnapshot.getValue(Enrollment::class.java)
+                    enrollment?.let { enrollmentList.add(it) }
                 }
-                uniConnectScope.launch {
-                    courseDao.insertCourses(courses) // Update local cache
+                // Insert or update all enrollments in Room
+                enrollmentList.forEach { enrollment ->
+                    viewModelScope.launch {
+                        enrollmentDao.insertEnrollment(enrollment)
+                    }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Error reading courses: ${error.message}")
-            }
-        })
-
-        // Use ChildEventListener for more detailed events, especially handling deletions
-        database.addChildEventListener(object : ChildEventListener {
-            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                val course = snapshot.getValue(CourseEntity::class.java)
-                course?.let {
-                    uniConnectScope.launch {
-                        courseDao.insertCourse(it)
-                    }
-                }
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                val course = snapshot.getValue(CourseEntity::class.java)
-                course?.let {
-                    uniConnectScope.launch {
-                        courseDao.insertCourse(it)
-                    }
-                }
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-                val course = snapshot.getValue(CourseEntity::class.java)
-                course?.let {
-                    uniConnectScope.launch {
-                        courseDao.deleteCourse(it.courseCode)
-                    }
-                }
-            }
-
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                // Handle if needed
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                println("Error handling child events: ${error.message}")
+                Log.e("FirebaseListener", "Failed to listen to enrollments: ${error.message}")
             }
         })
     }
 
-    fun getCourseDetailsByCourseID(courseCode: String, onResult: (CourseEntity?) -> Unit) {
-        val courseDetailsRef = database.child(courseCode)
-        uniConnectScope.launch {
-            courseDao.getCourse(courseCode)
-            courseDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val courseInfo = snapshot.getValue(CourseEntity::class.java)
-                    onResult(courseInfo)
-                }
+    // Insert academic year into both Room and Firebase
+    suspend fun addAcademicYear(academicYear: AcademicYear) {
+        academicYearDao.insertAcademicYear(academicYear)
+        firebaseDatabase.child("AcademicYears").child(academicYear.year).setValue(academicYear)
+    }
 
-                override fun onCancelled(error: DatabaseError) {
-                    println("Error fetching course details: ${error.message}")
-                    onResult(null) // Indicate failure by returning null
-                }
-            })
+
+    // Retrieve all academic years from Room
+    suspend fun getAllAcademicYears(): List<AcademicYear> {
+        return academicYearDao.getAllAcademicYears()
+    }
+
+
+    // Restore academic years from Firebase to Room
+    private suspend fun restoreAcademicYearsFromFirebase() {
+        val academicYearsData = firebaseDatabase.child("AcademicYears").get().await()
+        for (snapshot in academicYearsData.children) {
+            val academicYear = snapshot.getValue(AcademicYear::class.java)
+            academicYear?.let { academicYearDao.insertAcademicYear(it) }
         }
     }
 
+
+    // Initialize Firebase listeners
+    private fun initFirebaseListeners() {
+        firebaseDatabase.child("AcademicYears").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (childSnapshot in snapshot.children) {
+                    val academicYear = childSnapshot.getValue(AcademicYear::class.java)
+                    academicYear?.let {
+                        viewModelScope.launch {
+                            academicYearDao.insertAcademicYear(it)
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+            }
+        })
+
+    }
 }
 
