@@ -187,6 +187,8 @@ object CourseManager {
         _academicYear.value = ""
         _semester.value = ""
         sharedPreferences.edit().clear().apply()
+        Log.d("UniConnectPreferences", "All preferences in CourseManager cleared")
+
     }
 
 
