@@ -363,7 +363,7 @@ fun handleAuthSuccess(navController: NavController, userViewModel: UserViewModel
             UniConnectPreferences.saveUserEmail(email)
             UniConnectPreferences.saveUserType(user.userType.ifEmpty { "student" })
             UniConnectPreferences.saveUserID(user.id)
-            navController.navigate("courcourseSelection") {
+            navController.navigate("courseSelection") {
                 popUpTo("login") { inclusive = true }
             }
 
