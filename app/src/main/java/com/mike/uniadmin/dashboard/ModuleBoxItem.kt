@@ -68,7 +68,7 @@ fun ModuleBox(
             Text(
                 module.moduleName,
                 style = CC.titleTextStyle()
-                    .copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                    .copy(fontSize = 15.sp, fontWeight = FontWeight.Bold, color = CC.textColor().copy(0.8f)),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 10.dp)
