@@ -203,7 +203,7 @@ The `MoreDetails` composable function displays a form for users to enter additio
 ### Functionality
 
 - **Initialization:**
-    - Retrieves the `UserRepository` and `NotificationRepository` from the `UniAdmin` application context.
+    - Retrieves the `UserRepository` and `NotificationRepository` from the `UniConnect` application context.
     - Initializes the `UserViewModel` and `NotificationViewModel` using the repositories.
 - **State Management:**
     - Uses `remember` and `mutableStateOf` to manage state variables for loading status (`addloading`), first name, and last name.
@@ -492,7 +492,7 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 `AssignmentScreen` is a Composable function that displays a list of assignments for modules. It allows users to navigate between modules using tabs and view assignments specific to the selected module.
 
 ## Dependencies
-- `UniAdmin`: A custom application class that provides repositories for modules and assignments.
+- `UniConnect`: A custom application class that provides repositories for modules and assignments.
 - `ModuleViewModel`: ViewModel for managing module-related data and operations.
 - `ModuleAssignmentViewModel`: ViewModel for managing module assignment-related data and operations.
 
@@ -543,7 +543,7 @@ By leveraging these components and logic, the `AnnouncementsScreen` provides a r
 `ManageAttendanceScreen` is a Composable function that allows users to manage attendance for modules. Users can view a list of modules and toggle attendance states using switches.
 
 ## Dependencies
-- `UniAdmin`: A custom application class that provides a module repository.
+- `UniConnect`: A custom application class that provides a module repository.
 - `ModuleViewModel`: ViewModel for managing module-related data and operations.
 
 ## Parameters
@@ -584,7 +584,7 @@ The `ModuleContent` composable is responsible for displaying detailed informatio
 ### 1. Repositories and ViewModels Initialization
 - **Purpose**: To fetch and manage data related to the module from different sources.
 - **Functionality**:
-  - Initializes various repositories (module, announcements, assignments, timetables, etc.) using a custom application context (`UniAdmin`).
+  - Initializes various repositories (module, announcements, assignments, timetables, etc.) using a custom application context (`UniConnect`).
   - Creates ViewModel instances for each repository using their respective factories. This ensures that data is managed and accessed in a consistent manner across the composable.
 
 ### 2. State Observers
