@@ -16,7 +16,7 @@ import com.mike.uniadmin.assignments.ModuleAssignments
 import com.mike.uniadmin.authentication.LoginScreen
 import com.mike.uniadmin.authentication.MoreDetails
 import com.mike.uniadmin.authentication.PasswordReset
-import com.mike.uniadmin.courses.CourseScreen
+import com.mike.uniadmin.courses.SelectYourCourse
 import com.mike.uniadmin.homeScreen.HomeScreen
 import com.mike.uniadmin.moduleContent.ModuleContent
 import com.mike.uniadmin.moduleResources.DownloadedResources
@@ -29,10 +29,11 @@ import com.mike.uniadmin.uniChat.groupChat.DiscussionScreen
 import com.mike.uniadmin.uniChat.mainChatScreen.UniChat
 import com.mike.uniadmin.uniChat.userChat.UserChatScreen
 
+
 @Composable
 fun NavigationGraph(context: Context, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "homeScreen") {
+    NavHost(navController = navController, startDestination = "login") {
 
         composable("splashScreen") {
             SplashScreen(navController = navController)
@@ -40,6 +41,10 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
 
         composable("assignments") {
             AssignmentScreen(context, navController)
+        }
+
+        composable("courseSelection"){
+            SelectYourCourse(context, navController)
         }
 
         composable(
@@ -177,17 +182,6 @@ fun NavigationGraph(context: Context, mainActivity: MainActivity) {
             }
         ) {
             HomeScreen(navController = navController, context, mainActivity)
-        }
-
-        composable("courses",
-
-            enterTransition = {
-                fadeIn(animationSpec = tween(200))
-            },
-            exitTransition = {
-                fadeOut(animationSpec = tween(600))
-            }) {
-            CourseScreen(context, navController)
         }
 
         composable("moduleResource/{moduleCode}",
