@@ -1,8 +1,6 @@
 package com.mike.uniadmin.courses
 
 import android.content.Context
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,24 +72,27 @@ fun SelectYourCourse(context: Context, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     val courseViewModel = getCourseViewModel(context)
     val courses by courseViewModel.courses.observeAsState(emptyList())
-    var loadCourses by remember { mutableStateOf(false) }
     val academicYears by courseViewModel.academicYears.observeAsState(emptyList())
 
-    val filteredCourses = remember(searchQuery) {
+    var loading by remember { mutableStateOf(true) }
+
+    // Effect to load data
+    LaunchedEffect(Unit, loading) {
+        if (loading) {
+            courseViewModel.loadCourses()
+            courseViewModel.getAllAcademicYears()
+            // Set loading to false after data is loaded
+            loading = false
+        }
+    }
+
+    // Filter courses based on search query
+    val filteredCourses = remember(searchQuery, courses) {
         if (searchQuery.isEmpty()) {
             courses
         } else {
             courses.filter { it.courseName.contains(searchQuery, ignoreCase = true) }
         }
-    }
-
-    LaunchedEffect(loadCourses) {
-        courseViewModel.loadCourses()
-        courseViewModel.getAllAcademicYears()
-        loadCourses = false
-        Toast.makeText(context, "Courses loaded: ${courses.size}", Toast.LENGTH_SHORT).show()
-        Toast.makeText(context, "Academic Years loaded: ${academicYears.size}", Toast.LENGTH_SHORT).show()
-        Log.d("Course Screen","Academic Years loaded: $academicYears")
     }
 
     Scaffold(
@@ -97,14 +101,12 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 title = { Text("Select Your Course", color = CC.tertiary()) },
                 actions = {
                     IconButton(onClick = {
-                        loadCourses = true
+                        loading = true // Trigger reload
                     }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = CC.tertiary())
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CC.primary()
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
             )
         },
         containerColor = CC.primary()
@@ -120,47 +122,58 @@ fun SelectYourCourse(context: Context, navController: NavController) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Search Courses") },
+                label = { Text("Search Course") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = CC.appTextFieldColors()
+                colors = CC.appTextFieldColors(),
+                shape = RoundedCornerShape(10.dp)
             )
 
-            // Course list
-            if (filteredCourses.isEmpty()) {
-                Text("No courses found", color = CC.secondary())
-            }
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                items(filteredCourses) { course ->
-                    CourseItem(
-                        course = course,
-                        isSelected = course == selectedCourse,
-                        onSelect = {
-                            selectedCourse = course
-                            selectedYear = null
-                            selectedSemester = null
+            // Show loading indicator while data is being loaded
+            if (loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    CircularProgressIndicator(color = CC.textColor())
+                }
+            } else {
+                // Display course list or message
+                if (filteredCourses.isEmpty()) {
+                    Text("No courses found", color = CC.secondary())
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        items(filteredCourses) { course ->
+                            CourseItem(
+                                course = course,
+                                isSelected = course == selectedCourse,
+                                onSelect = {
+                                    selectedCourse = course
+                                    selectedYear = null
+                                    selectedSemester = null
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             }
-
 
             // Year selection
             if (selectedCourse != null) {
                 CourseSelectionCard(
                     title = "Academic Year",
                     selectedItem = selectedYear?.year,
-                    items = academicYears.map { it.year }, // Display all academic years
+                    items = academicYears.map { it.year },
                     onItemSelected = { year ->
                         selectedYear = academicYears.find { it.year == year }
                         selectedSemester = null
                     }
                 )
             }
-
 
             // Semester selection
             if (selectedYear != null) {
@@ -179,17 +192,11 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 onClick = { showConfirmDialog = true },
                 enabled = selectedCourse != null && selectedYear != null && selectedSemester != null,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = CC.primary())
+                colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = CC.surfaceContainer(),
+                    containerColor = CC.secondary())
             ) {
                 Text("Confirm Selection", style = CC.descriptionTextStyle())
-            }
-
-            // Add new course button
-            TextButton(
-                onClick = { navController.navigate("AddCourseScreen") },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("Add New Course", style = CC.descriptionTextStyle().copy(color = CC.secondary()))
             }
         }
 
@@ -209,7 +216,11 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                         val selectedCourseCode =
                             "${selectedCourse!!.courseCode}-${selectedYear!!.year}-$selectedSemester"
                         CourseManager.updateCourseCode(selectedCourseCode)
-                        navController.navigate("homeScreen")
+                        navController.navigate("homeScreen"){
+                            popUpTo("courseSelection"){
+                                inclusive = true
+                            }
+                        }
                     },
                         colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
                     ) {
@@ -225,6 +236,7 @@ fun SelectYourCourse(context: Context, navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun CourseItem(
