@@ -190,7 +190,7 @@ fun AddGroupSection(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Group Name Input
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp))
@@ -206,7 +206,7 @@ fun AddGroupSection(
         Spacer(modifier = Modifier.height(12.dp))
 
         // Group Description Input
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp))
@@ -222,7 +222,7 @@ fun AddGroupSection(
         Spacer(modifier = Modifier.height(12.dp))
 
         // Group Image Link Input
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(10.dp))
@@ -406,7 +406,7 @@ fun EditGroupSection(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         groupName.let {
-            CC.SingleLinedTextField(
+            CC.CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
                 onValueChange = { newValue ->
@@ -417,7 +417,7 @@ fun EditGroupSection(
             )
         }
         groupDescription.let {
-            CC.SingleLinedTextField(
+            CC.CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
                 onValueChange = {
@@ -428,7 +428,7 @@ fun EditGroupSection(
             )
         }
         imageLink.let {
-            CC.SingleLinedTextField(
+            CC.CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = it,
                 onValueChange = {
