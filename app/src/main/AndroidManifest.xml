@@ -18,7 +18,7 @@
 
 
     <application
-        android:name=".model.localDatabase.UniAdmin"
+        android:name=".model.localDatabase.UniConnect"
         android:allowBackup="true"
         android:appCategory="productivity"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -28,7 +28,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.UniAdmin"
+        android:theme="@style/Theme.UniConnect"
         
         tools:targetApi="tiramisu">
 
