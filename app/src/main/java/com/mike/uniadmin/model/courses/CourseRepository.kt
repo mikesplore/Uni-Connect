@@ -1,6 +1,7 @@
 package com.mike.uniadmin.model.courses
 
 import android.util.Log
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -12,7 +13,6 @@ import kotlinx.coroutines.tasks.await
 
 class CourseRepository(
     private val courseDao: CourseDao,
-    private val enrollmentDao: EnrollmentDao,
     private val academicYearDao: AcademicYearDao
 ) {
     private val firebaseDatabase = FirebaseDatabase.getInstance().reference
@@ -34,52 +34,44 @@ class CourseRepository(
     }
 
 
-    // Enroll user into a course (Room and Firebase)
-    suspend fun enrollUser(enrollment: Enrollment) {
-        enrollmentDao.insertEnrollment(enrollment)
-        firebaseDatabase.child("Enrollments").child(enrollment.userId).setValue(enrollment)
-    }
-
     // Retrieve all courses from Room
     suspend fun getAllCourses(): List<Course> {
         return courseDao.getAllCourses()
     }
 
-    // Retrieve all enrollments from Room
-    suspend fun getAllEnrollments(): List<Enrollment> {
-        return enrollmentDao.getAllEnrollments()
-    }
-
-    // Retrieve user's enrolled course (JOIN between courses and enrollments)
-    suspend fun getUserEnrolledCourse(userId: String): CourseWithEnrollment? {
-        return enrollmentDao.getUserEnrolledCourse(userId)
-    }
-
-    // Restore enrollments from Firebase to Room
-    suspend fun restoreEnrollmentsFromFirebase() {
-        val enrollmentsData = firebaseDatabase.child("Enrollments").get().await()
-        for (snapshot in enrollmentsData.children) {
-            val enrollment = snapshot.getValue(Enrollment::class.java)
-            enrollment?.let { enrollmentDao.insertEnrollment(it) }
-        }
-    }
-
-    // Initialize Firebase listeners to update Room database
+    // Initialize Firebase listeners to update Room database, including deletions
     private fun initializeFirebaseListeners() {
         // Listener for courses
-        firebaseDatabase.child("Courses").addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val courseList = mutableListOf<Course>()
-                for (courseSnapshot in snapshot.children) {
-                    val course = courseSnapshot.getValue(Course::class.java)
-                    course?.let { courseList.add(it) }
-                }
-                // Insert or update all courses in Room
-                courseList.forEach { course ->
+        firebaseDatabase.child("Courses").addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val course = snapshot.getValue(Course::class.java)
+                course?.let {
                     viewModelScope.launch {
-                        courseDao.insertCourse(course)
+                        courseDao.insertCourse(it)
                     }
                 }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val course = snapshot.getValue(Course::class.java)
+                course?.let {
+                    viewModelScope.launch {
+                        courseDao.insertCourse(it)
+                    }
+                }
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val course = snapshot.getValue(Course::class.java)
+                course?.let {
+                    viewModelScope.launch {
+                        courseDao.deleteCourse(it.courseCode)
+                    }
+                }
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                // Not needed for most cases
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -87,27 +79,8 @@ class CourseRepository(
             }
         })
 
-        // Listener for enrollments
-        firebaseDatabase.child("Enrollments").addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val enrollmentList = mutableListOf<Enrollment>()
-                for (enrollmentSnapshot in snapshot.children) {
-                    val enrollment = enrollmentSnapshot.getValue(Enrollment::class.java)
-                    enrollment?.let { enrollmentList.add(it) }
-                }
-                // Insert or update all enrollments in Room
-                enrollmentList.forEach { enrollment ->
-                    viewModelScope.launch {
-                        enrollmentDao.insertEnrollment(enrollment)
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("FirebaseListener", "Failed to listen to enrollments: ${error.message}")
-            }
-        })
     }
+
 
     // Insert academic year into both Room and Firebase
     suspend fun addAcademicYear(academicYear: AcademicYear) {
