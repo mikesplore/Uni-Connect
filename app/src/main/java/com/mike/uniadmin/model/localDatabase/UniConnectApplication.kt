@@ -15,7 +15,7 @@ import com.mike.uniadmin.model.userchat.UserChatRepository
 import com.mike.uniadmin.model.users.UserRepository
 
 
-class UniAdmin : Application() {
+class UniConnect : Application() {
     val database by lazy { UniConnectDatabase.getDatabase(this) }
     val groupChatRepository by lazy { GroupChatRepository(database.groupChatDao(), database.groupDao()) }
     val userChatRepository by lazy { UserChatRepository(database.userChatDao()) }
@@ -27,7 +27,7 @@ class UniAdmin : Application() {
     val moduleAssignmentRepository by lazy { ModuleAssignmentRepository(database.moduleAssignmentDao()) }
     val moduleDetailRepository by lazy { ModuleDetailRepository(database.moduleDetailsDao()) }
     val moduleTimetableRepository by lazy { ModuleTimetableRepository(database.moduleTimetableDao()) }
-    val courseRepository by lazy { CourseRepository(database.courseDao(), database.courseStateDao()) }
+    val courseRepository by lazy { CourseRepository(database.courseDao(), database.enrollmentDao(), database.academicYearDao()) }
     val attendanceRepository by lazy { AttendanceRepository(database.attendanceDao()) }
 
 
