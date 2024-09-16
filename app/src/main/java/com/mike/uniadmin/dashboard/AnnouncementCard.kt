@@ -195,7 +195,7 @@ fun AnnouncementDescription(description: String) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
             text = description,
