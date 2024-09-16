@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             fetchUserDataByEmail(userEmail) { fetchedUser ->
                 if (fetchedUser == null) {
                     Log.e("UniConnectMainActivity", "User not found for email: $userEmail")
-                    Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
+                  //  Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
                     return@fetchUserDataByEmail
                 } else {
                     Log.d("UniConnectMainActivity", "User found: ${fetchedUser.id}")
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             lifecycle.removeObserver(lifecycleObserver)
             Log.d("UniConnectMainActivity", "No user logged in")
-            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show()
+          //  Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show()
         }
     }
 
