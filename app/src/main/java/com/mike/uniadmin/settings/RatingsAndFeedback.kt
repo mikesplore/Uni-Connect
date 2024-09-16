@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.mike.uniadmin.model.users.UserEntity
 import com.mike.uniadmin.helperFunctions.Feedback
 import com.mike.uniadmin.helperFunctions.MyDatabase
-import com.mike.uniadmin.ui.theme.CommonComponents
+import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @Composable
 fun StarRating(
@@ -56,11 +56,11 @@ fun StarRating(
             val color = when {
                 i <= currentRating -> when (i) {
                     in 1..2 -> Color.Red
-                    3 -> CommonComponents.extraColor2()
+                    3 -> CC.extraColor2()
                     else -> Color.Green
                 }
 
-                else -> CommonComponents.secondary()
+                else -> CC.secondary()
             }
             val animatedScale by animateFloatAsState(
                 targetValue = if (i <= currentRating) 1.2f else 1.0f,
@@ -133,7 +133,7 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
     ) {
         Text(
             text = if (averageRatings.isEmpty()) "No ratings yet" else "Average Rating: $averageRatings",
-            style = CommonComponents.descriptionTextStyle(),
+            style = CC.descriptionTextStyle(),
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -159,15 +159,15 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
                     label = {
                         Text(
                             "Enter your feedback (optional)",
-                            style = CommonComponents.descriptionTextStyle()
+                            style = CC.descriptionTextStyle()
                         )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp),
-                    textStyle = CommonComponents.descriptionTextStyle(),
+                    textStyle = CC.descriptionTextStyle(),
                     maxLines = 5,
-                    colors = CommonComponents.appTextFieldColors()
+                    colors = CC.appTextFieldColors()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -207,7 +207,7 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CommonComponents.extraColor1(), contentColor = CommonComponents.secondary()
+                        containerColor = CC.extraColor1(), contentColor = CC.secondary()
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -218,12 +218,12 @@ fun RatingAndFeedbackScreen(user: UserEntity, context: Context) {
                     ) {
                         if (loading) {
                             CircularProgressIndicator(
-                                color = CommonComponents.primary(),
-                                trackColor = CommonComponents.tertiary(),
+                                color = CC.primary(),
+                                trackColor = CC.tertiary(),
                                 modifier = Modifier.size(20.dp)
                             )
                         } else {
-                            Text("Submit Feedback", style = CommonComponents.descriptionTextStyle())
+                            Text("Submit Feedback", style = CC.descriptionTextStyle())
                         }
                     }
                 }
