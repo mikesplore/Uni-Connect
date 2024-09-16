@@ -143,7 +143,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "Modules",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp, color = CC.textColor().copy(alpha = 0.7f)),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
@@ -171,7 +171,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "Module Resources",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 22.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp, color = CC.textColor().copy(0.7f)),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
@@ -198,7 +198,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "Latest Announcement",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp, color = CC.textColor().copy(0.7f)),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
@@ -226,7 +226,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     Text(
                         "My Next Class",
                         style = CC.titleTextStyle()
-                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+                            .copy(fontWeight = FontWeight.Bold, fontSize = 20.sp, color = CC.textColor().copy(0.7f)),
                         modifier = Modifier.padding(start = 15.dp)
                     )
                 }
@@ -242,6 +242,7 @@ fun Dashboard(navController: NavController, context: Context) {
                     }
                 } else {
                     ModuleTimetableCard(todayTimetable!!)
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
             PullRefreshIndicator(
