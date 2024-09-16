@@ -175,7 +175,7 @@ fun ModuleCard(
                     Text(
                         "View",
                         style = CC.descriptionTextStyle()
-                            .copy(fontSize = 11.sp, color = CC.surfaceContainer())
+                            .copy(fontSize = 13.sp, color = CC.extraColor2())
                     )
                 }
             }
