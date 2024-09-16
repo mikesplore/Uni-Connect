@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.storage.StorageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -79,7 +80,10 @@ import java.io.IOException
 import java.util.UUID
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.graphics.Color
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -407,7 +411,6 @@ fun switchColors(): SwitchColors {
 
 @Composable
 fun AppSize(context: Context, navController: NavController) {
-    var appSize by remember { mutableStateOf(getAppStorageSize(context)) }
     val userViewModel = getUserViewModel(context)
 
     var showDialog by remember { mutableStateOf(false) }
@@ -419,17 +422,13 @@ fun AppSize(context: Context, navController: NavController) {
     fun clearSelectedData() {
         if (deleteDatabase) userViewModel.deleteAllTables()
         if (deletePreferencesOption) {
+            CourseManager.clearCourseManagerData()
             UniConnectPreferences.clearAllData()
             navController.navigate("splashScreen")
         }
         if (deleteCacheOption) clearCache(context)
         Toast.makeText(context, "Selected Data Cleared", Toast.LENGTH_SHORT).show()
-        appSize = getAppStorageSize(context) // Refresh app size after clearing
     }
-
-    // Convert app size to a human-readable format (MB)
-    val appSizeInMb = appSize / (1024 * 1024 * 1024)/2
-
     // Layout
     Card(
         modifier = Modifier
@@ -437,7 +436,7 @@ fun AppSize(context: Context, navController: NavController) {
             .padding(16.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = CC.primary())
+        colors = CardDefaults.cardColors(containerColor = CC.surfaceContainer())
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -449,15 +448,9 @@ fun AppSize(context: Context, navController: NavController) {
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Storage,
-                    contentDescription = "App Size",
-                    tint = CC.textColor(),
-                    modifier = Modifier.size(40.dp)
-                )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Total App Size: $appSizeInMb MB",
+                    text = "Is the app crashing🤔? You can try clearing the app data.",
                     style = CC.descriptionTextStyle(),
                     color = CC.textColor()
                 )
@@ -478,7 +471,7 @@ fun AppSize(context: Context, navController: NavController) {
                     tint = CC.extraColor1()
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Clear App Cache and Database", style = CC.descriptionTextStyle())
+                Text("Clear App Database and Cache", style = CC.descriptionTextStyle())
             }
         }
     }
@@ -540,18 +533,6 @@ fun AppSize(context: Context, navController: NavController) {
                 }
             }
         )
-    }
-}
-
-
-// Function to get app storage size
-fun getAppStorageSize(context: Context): Long {
-    val storageStatsManager = context.getSystemService(StorageStatsManager::class.java)
-    val appSpecificInternalDirUuid: UUID = StorageManager.UUID_DEFAULT
-    return try {
-        storageStatsManager.getTotalBytes(appSpecificInternalDirUuid)
-    } catch (e: IOException) {
-        0L // Return 0 if an error occurs
     }
 }
 
