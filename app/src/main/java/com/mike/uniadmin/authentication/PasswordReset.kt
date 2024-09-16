@@ -95,7 +95,7 @@ fun PasswordReset(navController: NavController, context: Context) {
                     }
                 }
             }
-            CC.SingleLinedTextField(
+            CC.CustomTextField(
                 value = email, onValueChange = { eM ->
                     email = eM
                 }, label = "Email", singleLine = true
