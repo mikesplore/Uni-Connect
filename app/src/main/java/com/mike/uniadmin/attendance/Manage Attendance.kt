@@ -193,14 +193,14 @@ fun AddModule(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Add Module", style = CC.titleTextStyle())
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             value = moduleCode.value,
             onValueChange = { moduleCode.value = it },
             label = "Module Code",
             singleLine = true
         )
         Spacer(modifier = Modifier.height(10.dp))
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             value = moduleName.value,
             onValueChange = { moduleName.value = it },
             label = "Module Name",
@@ -208,7 +208,7 @@ fun AddModule(
         )
         Spacer(modifier = Modifier.height(10.dp))
 
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             value = moduleImageLink.value,
             onValueChange = { moduleImageLink.value = it },
             label = "Module Image Link",
