@@ -20,13 +20,6 @@ class CourseViewModel(
     private val _academicYears = MutableLiveData<List<AcademicYear>>()
     val academicYears: LiveData<List<AcademicYear>> = _academicYears
 
-    // LiveData to observe the user's enrolled course
-    private val _userEnrolledCourse = MutableLiveData<CourseWithEnrollment?>()
-    val userEnrolledCourse: LiveData<CourseWithEnrollment?> = _userEnrolledCourse
-
-    // LiveData for enrollments
-    private val _enrollments = MutableLiveData<List<Enrollment>>()
-    val enrollments: LiveData<List<Enrollment>> = _enrollments
 
     // Load all courses
     fun loadCourses() {
@@ -34,14 +27,6 @@ class CourseViewModel(
             val courseList = repository.getAllCourses()
             _courses.postValue(courseList)
             Log.d("CourseViewModel", "Loaded courses: $courseList")
-        }
-    }
-
-    // Get user's enrolled course
-    fun getUserEnrolledCourse(userId: String) {
-        viewModelScope.launch {
-            val enrolledCourse = repository.getUserEnrolledCourse(userId)
-            _userEnrolledCourse.postValue(enrolledCourse)
         }
     }
 
@@ -53,34 +38,17 @@ class CourseViewModel(
         }
     }
 
-    // Enroll a user into a course
-    fun enrollUser(enrollment: Enrollment) {
-        viewModelScope.launch {
-            repository.enrollUser(enrollment)
-            getUserEnrolledCourse(enrollment.userId) // Refresh enrollment data after enrolling
-        }
-    }
-
-    // Restore enrollments from Firebase into Room
-    fun restoreEnrollmentsFromFirebase() {
-        viewModelScope.launch {
-            repository.restoreEnrollmentsFromFirebase()
-            loadEnrollments() // Reload enrollments after restoration
-        }
-    }
-
-    // Load all enrollments
-    private fun loadEnrollments() {
-        viewModelScope.launch {
-            val enrollmentList = repository.getAllEnrollments()
-            _enrollments.postValue(enrollmentList)
-        }
-    }
-
     //Add Academic Year
     fun addAcademicYear(academicYear: AcademicYear) {
         viewModelScope.launch {
             repository.addAcademicYear(academicYear)
+        }
+    }
+
+    //Add Course
+    fun addCourse(course: Course) {
+        viewModelScope.launch {
+            repository.insertCourse(course)
         }
     }
 }
