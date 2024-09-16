@@ -57,20 +57,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mike.uniadmin.CourseManager
+import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.getCourseViewModel
-import com.mike.uniadmin.getUserViewModel
-import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.model.courses.AcademicYear
 import com.mike.uniadmin.model.courses.Course
 import com.mike.uniadmin.model.courses.CourseViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectYourCourse(context: Context, navController: NavController) {
-    val userViewModel = getUserViewModel(context)
-    val currentUser by userViewModel.user.observeAsState()
+    val userType = UniConnectPreferences.userType.value
 
     var selectedCourse by remember { mutableStateOf<Course?>(null) }
     var selectedYear by remember { mutableStateOf<AcademicYear?>(null) }
@@ -116,15 +113,17 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                             tint = CC.tertiary()
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = {
-                        showAddCourse = !showAddCourse
-                    }) {
-                        Icon(
-                            if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
-                            contentDescription = "Add Course",
-                            tint = CC.tertiary()
-                        )
+                    if (userType == "admin") {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(onClick = {
+                            showAddCourse = !showAddCourse
+                        }) {
+                            Icon(
+                                if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
+                                contentDescription = "Add Course",
+                                tint = CC.tertiary()
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
@@ -155,7 +154,7 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 shape = RoundedCornerShape(10.dp)
             )
             AnimatedVisibility(showAddCourse) {
-                AddCourse(courseViewModel){
+                AddCourse(courseViewModel) {
                     showAddCourse = false
                 }
             }
@@ -254,7 +253,13 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                             showConfirmDialog = false
                             val selectedCourseCode =
                                 "${selectedCourse!!.courseCode}-${selectedYear!!.year}-$selectedSemester"
+
+                            // Update CourseManager
                             CourseManager.updateCourseCode(selectedCourseCode)
+                            CourseManager.updateCourseName(selectedCourse!!.courseName)
+                            CourseManager.updateAcademicYear(selectedYear!!.year)
+                            CourseManager.updateSemester(selectedSemester!!)
+
                             navController.navigate("homeScreen") {
                                 popUpTo("courseSelection") {
                                     inclusive = true
@@ -378,7 +383,7 @@ fun CourseSelectionCard(
 
 
 @Composable
-fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded:() -> Unit) {
+fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded: () -> Unit) {
     var courseName by remember { mutableStateOf("") }
     var courseCode by remember { mutableStateOf("") }
     var academicYear by remember { mutableStateOf("") }
