@@ -135,9 +135,17 @@ interface DatabaseDao {
     @Query("DELETE FROM attendance")
     suspend fun deleteAllAttendance()
 
+    @Query("Delete FROM academicYears")
+    suspend fun deleteAllAcademicYears()
+
+    @Query("Delete FROM courses")
+    suspend fun deleteAllCourses()
+
 
     @Transaction
     suspend fun deleteAllTables() {
+        deleteAllCourses()
+        deleteAllAcademicYears()
         deleteAllAttendance()
         deleteAllUserStates()
         deleteAllUserPreferences()
@@ -169,7 +177,7 @@ interface DatabaseDao {
         deleteUserStates()
     }
 
-    suspend fun loadCrucialData(){
+    suspend fun loadCrucialData() {
         getUsers()
         getMessages()
         getChats()
