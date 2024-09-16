@@ -33,8 +33,6 @@ import com.mike.uniadmin.model.groupchat.GroupEntity
 import com.mike.uniadmin.model.notifications.NotificationDao
 import com.mike.uniadmin.model.notifications.NotificationEntity
 import com.mike.uniadmin.model.courses.CourseDao
-import com.mike.uniadmin.model.courses.Enrollment
-import com.mike.uniadmin.model.courses.EnrollmentDao
 import com.mike.uniadmin.model.userchat.UserChatDAO
 import com.mike.uniadmin.model.userchat.UserChatEntity
 import com.mike.uniadmin.model.users.AccountDeletionDao
@@ -64,7 +62,6 @@ import com.mike.uniadmin.model.users.UserStateEntity
         AttendanceState::class,
         Course::class,
         AttendanceEntity::class,
-        Enrollment::class,
         AcademicYear::class,
                ],
     version = 2,
@@ -89,7 +86,6 @@ abstract class UniConnectDatabase : RoomDatabase() {
     abstract fun databaseDao(): DatabaseDao
     abstract fun courseDao(): CourseDao
     abstract fun attendanceDao(): AttendanceDao
-    abstract fun enrollmentDao(): EnrollmentDao
     abstract fun academicYearDao(): AcademicYearDao
 
     companion object {
@@ -101,7 +97,7 @@ abstract class UniConnectDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     UniConnectDatabase::class.java,
-                    "UniConnectDatabase"
+                    "UniConnect"
                 )
                     .addMigrations(MIGRATION_1_2)
                     .build()
