@@ -7,32 +7,47 @@ import androidx.room.Query
 
 @Dao
 interface CourseDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCourse(course: Course)
 
     @Query("SELECT * FROM courses")
-    suspend fun getCourses(): List<CourseEntity>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourses(courses: List<CourseEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourse(course: CourseEntity)
+    suspend fun getAllCourses(): List<Course>
 
     @Query("DELETE FROM courses WHERE courseCode = :courseCode")
     suspend fun deleteCourse(courseCode: String)
-
-    @Query("SELECT * FROM courses WHERE courseCode = :courseCode")
-    suspend fun getCourse(courseCode: String): CourseEntity?
-
 }
 
 @Dao
-interface  CourseStateDao{
-    @Query("SELECT * FROM courseStates")
-    suspend fun getCourseStates(): List<CourseState>
-
+interface EnrollmentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourseStates(courseStates: List<CourseState>)
+    suspend fun insertEnrollment(enrollment: Enrollment)
 
+    @Query("SELECT * FROM enrollments WHERE userId = :userId")
+    suspend fun getUserEnrollment(userId: String): Enrollment?
+
+    @Query("DELETE FROM enrollments WHERE userId = :userId")
+    suspend fun deleteEnrollment(userId: String)
+
+    @Query("""
+        SELECT c.courseCode, c.courseName, e.enrollmentYear
+        FROM courses c
+        INNER JOIN enrollments e ON c.courseCode = e.courseCode
+        WHERE e.userId = :userId
+    """)
+    suspend fun getUserEnrolledCourse(userId: String): CourseWithEnrollment?
+
+    @Query("SELECT * FROM enrollments")
+    suspend fun getAllEnrollments(): List<Enrollment>
+}
+
+
+
+@Dao
+interface AcademicYearDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourseState(courseState: CourseState)
+    suspend fun insertAcademicYear(academicYear: AcademicYear)
+
+    @Query("SELECT * FROM academicYears")
+    suspend fun getAllAcademicYears(): List<AcademicYear>
+
 }
