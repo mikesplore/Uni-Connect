@@ -24,13 +24,13 @@ import com.mike.uniadmin.model.courses.CourseViewModelFactory
 import com.mike.uniadmin.model.userchat.UserChatViewModel
 import com.mike.uniadmin.model.users.UserViewModel
 import com.mike.uniadmin.model.users.UserViewModelFactory
-import com.mike.uniadmin.model.localDatabase.UniAdmin
+import com.mike.uniadmin.model.localDatabase.UniConnect
 import com.mike.uniadmin.model.attendance.AttendanceViewModel.AttendanceViewModelFactory
 
 //messageViewModel
 @Composable
 fun getUserChatViewModel(context: Context): UserChatViewModel {
-    val application = context.applicationContext as UniAdmin
+    val application = context.applicationContext as UniConnect
     val userChatRepository = application.userChatRepository
     return viewModel(factory = UserChatViewModel.UserChatViewModelFactory(userChatRepository))
 }
@@ -38,7 +38,7 @@ fun getUserChatViewModel(context: Context): UserChatViewModel {
 //chatViewModel
 @Composable
 fun getGroupChatViewModel(context: Context): GroupChatViewModel {
-    val application = context.applicationContext as UniAdmin
+    val application = context.applicationContext as UniConnect
     val chatRepository = application.groupChatRepository
     return viewModel(factory = GroupChatViewModel.GroupChatViewModelFactory(chatRepository))
 }
@@ -46,7 +46,7 @@ fun getGroupChatViewModel(context: Context): GroupChatViewModel {
 //userViewModel
 @Composable
 fun getUserViewModel(context: Context): UserViewModel {
-    val application = context.applicationContext as UniAdmin
+    val application = context.applicationContext as UniConnect
     val userRepository = application.userRepository
     return viewModel(factory = UserViewModelFactory(userRepository))
 }
@@ -55,7 +55,7 @@ fun getUserViewModel(context: Context): UserViewModel {
 //ModuleViewModel
 @Composable
 fun getModuleViewModel(context: Context): ModuleViewModel {
-    val moduleResource = context.applicationContext as UniAdmin
+    val moduleResource = context.applicationContext as UniConnect
     val moduleRepository = remember { moduleResource.moduleRepository }
     return viewModel(factory = ModuleViewModelFactory(moduleRepository))
 }
@@ -63,7 +63,7 @@ fun getModuleViewModel(context: Context): ModuleViewModel {
 //ModuleAnnouncementViewModel
 @Composable
 fun getModuleAnnouncementViewModel(context: Context): ModuleAnnouncementViewModel {
-    val moduleResource = context.applicationContext as UniAdmin
+    val moduleResource = context.applicationContext as UniConnect
     val moduleAnnouncementRepository = remember { moduleResource.moduleAnnouncementRepository }
     return viewModel(factory = ModuleAnnouncementViewModelFactory(moduleAnnouncementRepository))
 }
@@ -71,7 +71,7 @@ fun getModuleAnnouncementViewModel(context: Context): ModuleAnnouncementViewMode
 //ModuleAssignmentViewModel
 @Composable
 fun getModuleAssignmentViewModel(context: Context): ModuleAssignmentViewModel {
-    val moduleResource = context.applicationContext as UniAdmin
+    val moduleResource = context.applicationContext as UniConnect
     val moduleAssignmentRepository = remember { moduleResource.moduleAssignmentRepository }
     return viewModel(factory = ModuleAssignmentViewModelFactory(moduleAssignmentRepository))
 }
@@ -79,7 +79,7 @@ fun getModuleAssignmentViewModel(context: Context): ModuleAssignmentViewModel {
 //ModuleDetailViewModel
 @Composable
 fun getModuleDetailViewModel(context: Context): ModuleDetailViewModel {
-    val moduleResource = context.applicationContext as UniAdmin
+    val moduleResource = context.applicationContext as UniConnect
     val moduleDetailRepository = remember { moduleResource.moduleDetailRepository }
     return viewModel(factory = ModuleDetailViewModelFactory(moduleDetailRepository))
 }
@@ -87,7 +87,7 @@ fun getModuleDetailViewModel(context: Context): ModuleDetailViewModel {
 //ModuleTimetableViewModel
 @Composable
 fun getModuleTimetableViewModel(context: Context): ModuleTimetableViewModel {
-    val moduleResource = context.applicationContext as UniAdmin
+    val moduleResource = context.applicationContext as UniConnect
     val moduleTimetableRepository = remember { moduleResource.moduleTimetableRepository }
     return viewModel(factory = ModuleTimetableViewModelFactory(moduleTimetableRepository))
 }
@@ -95,7 +95,7 @@ fun getModuleTimetableViewModel(context: Context): ModuleTimetableViewModel {
 //AnnouncementViewModel
 @Composable
 fun getAnnouncementViewModel(context: Context): AnnouncementViewModel {
-    val announcementResource = context.applicationContext as UniAdmin
+    val announcementResource = context.applicationContext as UniConnect
     val announcementRepository = remember { announcementResource.announcementRepository }
     return viewModel(factory = AnnouncementViewModelFactory(announcementRepository))
 }
@@ -103,7 +103,7 @@ fun getAnnouncementViewModel(context: Context): AnnouncementViewModel {
 //Notification ViewModel
 @Composable
 fun getNotificationViewModel(context: Context): NotificationViewModel {
-    val notificationResource = context.applicationContext as UniAdmin
+    val notificationResource = context.applicationContext as UniConnect
     val notificationRepository = remember { notificationResource.notificationRepository }
     return viewModel(factory = NotificationViewModel.NotificationViewModelFactory(notificationRepository))
 }
@@ -111,7 +111,7 @@ fun getNotificationViewModel(context: Context): NotificationViewModel {
 //CourseViewModel
 @Composable
 fun getCourseViewModel(context: Context): CourseViewModel {
-    val courseResource = context.applicationContext as UniAdmin
+    val courseResource = context.applicationContext as UniConnect
     val courseRepository = remember { courseResource.courseRepository }
     return viewModel(factory = CourseViewModelFactory(courseRepository))
 }
@@ -119,7 +119,7 @@ fun getCourseViewModel(context: Context): CourseViewModel {
 //AttendanceViewModel
 @Composable
 fun getAttendanceViewModel(context: Context): AttendanceViewModel {
-    val attendanceResource = context.applicationContext as UniAdmin
+    val attendanceResource = context.applicationContext as UniConnect
     val attendanceRepository = remember { attendanceResource.attendanceRepository }
     return viewModel(factory = AttendanceViewModelFactory(attendanceRepository))
 }
