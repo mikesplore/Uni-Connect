@@ -56,7 +56,7 @@ val Caveat = FontFamily(
 )
 
 @Composable
-fun UniAdminTheme(
+fun UniConnectTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
