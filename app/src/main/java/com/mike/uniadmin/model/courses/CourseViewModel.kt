@@ -16,6 +16,8 @@ class CourseViewModel(
     private val _courses = MutableLiveData<List<Course>>()
     val courses: LiveData<List<Course>> = _courses
 
+
+
     // LiveData to observe the list of academic years
     private val _academicYears = MutableLiveData<List<AcademicYear>>()
     val academicYears: LiveData<List<AcademicYear>> = _academicYears
