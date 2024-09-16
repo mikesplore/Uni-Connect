@@ -272,7 +272,7 @@ fun Settings(navController: NavController, context: Context, mainActivity: MainA
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                AppSize(context)
+                AppSize(context, navController)
                 Spacer(modifier = Modifier.height(20.dp))
                 Row {
                     Text("We care about your feedback", style = CC.titleTextStyle())
@@ -406,7 +406,7 @@ fun switchColors(): SwitchColors {
 }
 
 @Composable
-fun AppSize(context: Context) {
+fun AppSize(context: Context, navController: NavController) {
     var appSize by remember { mutableStateOf(getAppStorageSize(context)) }
     val userViewModel = getUserViewModel(context)
 
@@ -418,7 +418,10 @@ fun AppSize(context: Context) {
     // Function to clear data based on selected options
     fun clearSelectedData() {
         if (deleteDatabase) userViewModel.deleteAllTables()
-        if (deletePreferencesOption) UniConnectPreferences.clearAllData()
+        if (deletePreferencesOption) {
+            UniConnectPreferences.clearAllData()
+            navController.navigate("splashScreen")
+        }
         if (deleteCacheOption) clearCache(context)
         Toast.makeText(context, "Selected Data Cleared", Toast.LENGTH_SHORT).show()
         appSize = getAppStorageSize(context) // Refresh app size after clearing
