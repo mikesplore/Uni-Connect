@@ -27,7 +27,7 @@ class UniConnect : Application() {
     val moduleAssignmentRepository by lazy { ModuleAssignmentRepository(database.moduleAssignmentDao()) }
     val moduleDetailRepository by lazy { ModuleDetailRepository(database.moduleDetailsDao()) }
     val moduleTimetableRepository by lazy { ModuleTimetableRepository(database.moduleTimetableDao()) }
-    val courseRepository by lazy { CourseRepository(database.courseDao(), database.enrollmentDao(), database.academicYearDao()) }
+    val courseRepository by lazy { CourseRepository(database.courseDao(), database.academicYearDao()) }
     val attendanceRepository by lazy { AttendanceRepository(database.attendanceDao()) }
 
 
