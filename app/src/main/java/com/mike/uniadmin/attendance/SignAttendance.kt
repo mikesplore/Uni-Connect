@@ -212,7 +212,7 @@ fun saveDataToPreferences(
     modules: List<ModuleEntity>,
     attendance: List<AttendanceEntity>
 ) {
-    val sharedPreferences = context.getSharedPreferences("UniAdminPrefs", Context.MODE_PRIVATE)
+    val sharedPreferences = context.getSharedPreferences("UniConnectPrefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
 
     val modulesJson = Gson().toJson(modules)
@@ -399,7 +399,7 @@ fun Tabs(
 
 // Load data from JSON
 fun loadDataFromPreferences(context: Context): Pair<List<ModuleEntity>, List<AttendanceEntity>> {
-    val sharedPreferences = context.getSharedPreferences("UniAdminPrefs", Context.MODE_PRIVATE)
+    val sharedPreferences = context.getSharedPreferences("UniConnectPrefs", Context.MODE_PRIVATE)
     val modulesJson = sharedPreferences.getString("modules", "[]")
     val attendanceJson = sharedPreferences.getString("attendanceRecords", "[]")
 
@@ -410,7 +410,7 @@ fun loadDataFromPreferences(context: Context): Pair<List<ModuleEntity>, List<Att
 }
 
 fun deleteDataFromPreferences(context: Context) {
-    val sharedPreferences = context.getSharedPreferences("UniAdminPrefs", Context.MODE_PRIVATE)
+    val sharedPreferences = context.getSharedPreferences("UniConnectPrefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
     editor.remove("modules") // Remove modules data
     editor.remove("attendanceRecords") // Remove attendance data
