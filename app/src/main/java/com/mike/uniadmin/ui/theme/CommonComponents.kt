@@ -105,7 +105,7 @@ object CommonComponents {
     }
 
     @Composable
-    fun SingleLinedTextField(
+    fun CustomTextField(
         modifier: Modifier = Modifier,
         value: String,
         onValueChange: (String) -> Unit,
