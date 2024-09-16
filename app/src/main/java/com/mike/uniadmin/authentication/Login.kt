@@ -191,13 +191,13 @@ fun LoginScreen(navController: NavController, context: Context) {
                     ) {
                         if (targetState) {
                             Spacer(modifier = Modifier.height(20.dp))
-                            CC.SingleLinedTextField(
+                            CC.CustomTextField(
                                 value = firstName, onValueChange = { newValue ->
                                     firstName = newValue
                                 }, label = "First Name", singleLine = true
                             )
                             Spacer(modifier = Modifier.height(20.dp))
-                            CC.SingleLinedTextField(
+                            CC.CustomTextField(
                                 value = lastName, onValueChange = { newValue ->
                                     lastName = newValue
                                 }, label = "Last Name", singleLine = true
@@ -205,7 +205,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
-                        CC.SingleLinedTextField(
+                        CC.CustomTextField(
                             value = email, onValueChange = { newValue ->
                                 email = newValue
                             }, label = "Email", singleLine = true

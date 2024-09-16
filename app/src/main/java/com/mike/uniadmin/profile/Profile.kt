@@ -246,7 +246,7 @@ fun DisplayImage(
             .fillMaxWidth(0.9f),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CC.SingleLinedTextField(
+        CC.CustomTextField(
             value = link,
             onValueChange = { link = it },
             label = "Image Link",
