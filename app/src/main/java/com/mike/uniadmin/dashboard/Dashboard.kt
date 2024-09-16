@@ -69,15 +69,20 @@ fun Dashboard(navController: NavController, context: Context) {
     val loggedInUserEmail = UniConnectPreferences.userEmail.value
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+
+    fun refreshData(){
+        moduleViewModel.fetchModules()
+        moduleTimetableViewModel.getAllModuleTimetables()
+        userViewModel.checkAllUserStatuses()
+        userViewModel.findUserByEmail(loggedInUserEmail) {}
+        announcementViewModel.fetchAnnouncements()
+    }
+
     val state = rememberPullRefreshState(refreshing = isRefreshing,
         onRefresh = {
             isRefreshing = true
-            moduleViewModel.fetchModules()
-            moduleTimetableViewModel.getAllModuleTimetables()
-            userViewModel.checkAllUserStatuses()
-            userViewModel.findUserByEmail(loggedInUserEmail) {}
-            announcementViewModel.fetchAnnouncements()
-            notificationViewModel.fetchNotifications()
+            refreshData()
             scope.launch {
                 delay(3000)
                 if (isRefreshing) {
@@ -86,8 +91,8 @@ fun Dashboard(navController: NavController, context: Context) {
             }
         })
 
-
     LaunchedEffect(key1 = 1) {
+        refreshData()
         while (true) {
             isOnline.value = isDeviceOnline(context)
             delay(10000L) // Check every 10 seconds
