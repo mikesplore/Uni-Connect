@@ -30,7 +30,7 @@ import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.helperFunctions.MyDatabase.writeUserActivity
 import com.mike.uniadmin.notification.createNotificationChannel
 import com.mike.uniadmin.settings.BiometricPromptManager
-import com.mike.uniadmin.ui.theme.UniAdminTheme
+import com.mike.uniadmin.ui.theme.UniConnectTheme
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -47,18 +47,18 @@ class MainActivity : AppCompatActivity() {
             val userEmail = user.email ?: "" // Handle potential null email
             fetchUserDataByEmail(userEmail) { fetchedUser ->
                 if (fetchedUser == null) {
-                    Log.e("UniAdminMainActivity", "User not found for email: $userEmail")
+                    Log.e("UniConnectMainActivity", "User not found for email: $userEmail")
                     Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
                     return@fetchUserDataByEmail
                 } else {
-                    Log.d("UniAdminMainActivity", "User found: ${fetchedUser.id}")
+                    Log.d("UniConnectMainActivity", "User found: ${fetchedUser.id}")
                     currentUser = fetchedUser
                     setupLifecycleObservers(currentUser.id)
                 }
             }
         } else {
             lifecycle.removeObserver(lifecycleObserver)
-            Log.d("UniAdminMainActivity", "No user logged in")
+            Log.d("UniConnectMainActivity", "No user logged in")
             Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show()
         }
     }
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         CourseManager.initialize(this)
         createNotificationChannel(this)
 
-        setTheme(R.style.Theme_UniAdmin)
+        setTheme(R.style.Theme_UniConnect)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
                     darkIcons = true
                 )
             }
-            UniAdminTheme(dynamicColor = false, darkTheme = UniConnectPreferences.darkMode.value) {
+            UniConnectTheme(dynamicColor = false, darkTheme = UniConnectPreferences.darkMode.value) {
                 NavigationGraph(this, this)
             }
         }
