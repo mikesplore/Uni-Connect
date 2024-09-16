@@ -1,6 +1,7 @@
 package com.mike.uniadmin.courses
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -152,6 +154,11 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 colors = CC.appTextFieldColors(),
                 shape = RoundedCornerShape(10.dp)
             )
+            AnimatedVisibility(showAddCourse) {
+                AddCourse(courseViewModel){
+                    showAddCourse = false
+                }
+            }
 
             // Show loading indicator while data is being loaded
             if (loading) {
@@ -371,38 +378,155 @@ fun CourseSelectionCard(
 
 
 @Composable
-fun AddCourse(courseViewModel: CourseViewModel){
+fun AddCourse(courseViewModel: CourseViewModel, onCourseAdded:() -> Unit) {
     var courseName by remember { mutableStateOf("") }
     var courseCode by remember { mutableStateOf("") }
-    Column(
-        modifier = Modifier.fillMaxWidth(0.9f)
-    ) {
-        Text("Add Course", style = CC.titleTextStyle())
-        Spacer(modifier = Modifier.height(10.dp))
-        CC.SingleLinedTextField(
-            value = courseName,
-            onValueChange = { newValue -> courseName = newValue},
-            label = "Course Name",
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        CC.SingleLinedTextField(
-            value = courseCode,
-            onValueChange = { newValue -> courseCode = newValue},
-            label = "Course Code",
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Button(onClick = {
-            MyDatabase.generateCourseID { id ->
-                val newCourse = Course(id, courseName, emptyList())
-                courseViewModel.addCourse(newCourse)
-            }
+    var academicYear by remember { mutableStateOf("") }
+    var semesters by remember { mutableStateOf(listOf<String>()) }
+    var semesterInput by remember { mutableStateOf("") }
+    var academicYearsList by remember { mutableStateOf(mutableListOf<AcademicYear>()) }
 
-        },
-            colors = ButtonDefaults.buttonColors(containerColor = CC.secondary())) {
-            Text("Add Course", style = CC.descriptionTextStyle())
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .padding(16.dp),
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(containerColor = CC.surfaceContainer()),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .imePadding()
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Title
+                Text(
+                    text = "Add Course",
+                    style = CC.titleTextStyle(),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Course Name
+                CC.SingleLinedTextField(
+                    value = courseName,
+                    onValueChange = { newValue -> courseName = newValue },
+                    label = "Course Name",
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Course Code
+                CC.SingleLinedTextField(
+                    value = courseCode,
+                    onValueChange = { newValue -> courseCode = newValue },
+                    label = "Course Code",
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Academic Year
+                CC.SingleLinedTextField(
+                    value = academicYear,
+                    onValueChange = { newValue -> academicYear = newValue },
+                    label = "Academic Year (e.g. 2023-2024)",
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Semester Input
+                CC.SingleLinedTextField(
+                    value = semesterInput,
+                    onValueChange = { newValue -> semesterInput = newValue },
+                    label = "Add Semester (e.g. Sem1)",
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                // Button to add semester
+                Button(
+                    onClick = {
+                        if (semesterInput.isNotEmpty()) {
+                            semesters = semesters + semesterInput
+                            semesterInput = ""
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Add Semester", style = CC.descriptionTextStyle())
+                }
+
+                // Display added semesters
+                if (semesters.isNotEmpty()) {
+                    Text(
+                        text = "Semesters: ${semesters.joinToString(", ")}",
+                        style = CC.descriptionTextStyle(),
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    )
+                }
+
+                // Button to add academic year
+                Button(
+                    onClick = {
+                        if (academicYear.isNotEmpty() && semesters.isNotEmpty()) {
+                            academicYearsList.add(AcademicYear(academicYear, semesters))
+                            academicYear = ""
+                            semesters = emptyList()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Add Academic Year", style = CC.descriptionTextStyle())
+                }
+
+                // Display added academic years
+                if (academicYearsList.isNotEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp)
+                    ) {
+                        Text("Academic Years:", style = CC.descriptionTextStyle())
+                        academicYearsList.forEach { year ->
+                            Text(
+                                text = "${year.year}: ${year.semesters.joinToString(", ")}",
+                                style = CC.descriptionTextStyle()
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Add Course Button
+                Button(
+                    onClick = {
+                        if (courseName.isNotEmpty() && courseCode.isNotEmpty()) {
+                            val newCourse = Course(courseCode, courseName, academicYearsList)
+                            courseViewModel.addCourse(newCourse)
+                            onCourseAdded()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = CC.secondary())
+                ) {
+                    Text("Add Course", style = CC.descriptionTextStyle())
+                }
+            }
         }
     }
-
 }
+
