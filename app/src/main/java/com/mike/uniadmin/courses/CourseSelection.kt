@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -49,13 +52,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mike.uniadmin.CourseManager
-import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.getCourseViewModel
 import com.mike.uniadmin.getUserViewModel
+import com.mike.uniadmin.helperFunctions.MyDatabase
 import com.mike.uniadmin.model.courses.AcademicYear
 import com.mike.uniadmin.model.courses.Course
+import com.mike.uniadmin.model.courses.CourseViewModel
 import com.mike.uniadmin.ui.theme.CommonComponents as CC
 
 
@@ -73,8 +78,8 @@ fun SelectYourCourse(context: Context, navController: NavController) {
     val courseViewModel = getCourseViewModel(context)
     val courses by courseViewModel.courses.observeAsState(emptyList())
     val academicYears by courseViewModel.academicYears.observeAsState(emptyList())
-
     var loading by remember { mutableStateOf(true) }
+    var showAddCourse by remember { mutableStateOf(false) }
 
     // Effect to load data
     LaunchedEffect(Unit, loading) {
@@ -98,12 +103,26 @@ fun SelectYourCourse(context: Context, navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Select Your Course", color = CC.tertiary()) },
+                title = { Text("Select Your Course", style = CC.titleTextStyle()) },
                 actions = {
                     IconButton(onClick = {
                         loading = true // Trigger reload
                     }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = CC.tertiary())
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = CC.tertiary()
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = {
+                        showAddCourse = !showAddCourse
+                    }) {
+                        Icon(
+                            if (showAddCourse) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = "Add Course",
+                            tint = CC.tertiary()
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = CC.primary())
@@ -122,7 +141,13 @@ fun SelectYourCourse(context: Context, navController: NavController) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Search Course") },
+                placeholder = {
+                    Text(
+                        "Search Course by name or code",
+                        style = CC.descriptionTextStyle()
+                            .copy(color = CC.tertiary(), fontSize = 13.sp)
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = CC.appTextFieldColors(),
                 shape = RoundedCornerShape(10.dp)
@@ -194,9 +219,13 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     disabledContainerColor = CC.surfaceContainer(),
-                    containerColor = CC.secondary())
+                    containerColor = CC.secondary()
+                )
             ) {
-                Text("Confirm Selection", style = CC.descriptionTextStyle())
+                Text(
+                    "Confirm Selection",
+                    style = CC.descriptionTextStyle().copy(color = CC.tertiary())
+                )
             }
         }
 
@@ -207,21 +236,24 @@ fun SelectYourCourse(context: Context, navController: NavController) {
                 onDismissRequest = { showConfirmDialog = false },
                 title = { Text("Confirm Selection") },
                 text = {
-                    Text("Selected Course Code: ${selectedCourse!!.courseCode}-${selectedYear!!.year}-$selectedSemester",
-                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold))
+                    Text(
+                        "Selected Course Code: ${selectedCourse!!.courseCode}-${selectedYear!!.year}-$selectedSemester",
+                        style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold)
+                    )
                 },
                 confirmButton = {
-                    TextButton(onClick = {
-                        showConfirmDialog = false
-                        val selectedCourseCode =
-                            "${selectedCourse!!.courseCode}-${selectedYear!!.year}-$selectedSemester"
-                        CourseManager.updateCourseCode(selectedCourseCode)
-                        navController.navigate("homeScreen"){
-                            popUpTo("courseSelection"){
-                                inclusive = true
+                    TextButton(
+                        onClick = {
+                            showConfirmDialog = false
+                            val selectedCourseCode =
+                                "${selectedCourse!!.courseCode}-${selectedYear!!.year}-$selectedSemester"
+                            CourseManager.updateCourseCode(selectedCourseCode)
+                            navController.navigate("homeScreen") {
+                                popUpTo("courseSelection") {
+                                    inclusive = true
+                                }
                             }
-                        }
-                    },
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = CC.extraColor2())
                     ) {
                         Text("Confirm", style = CC.descriptionTextStyle())
@@ -249,6 +281,7 @@ fun CourseItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable(onClick = onSelect),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) CC.secondary() else CC.surfaceContainer()
         )
@@ -262,13 +295,13 @@ fun CourseItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = course.courseName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (isSelected) CC.primary() else CC.textColor()
+                    style = CC.descriptionTextStyle().copy(fontWeight = FontWeight.Bold),
+                    color = if (isSelected) CC.primary() else CC.textColor().copy(0.8f)
                 )
                 Text(
                     text = course.courseCode,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isSelected) CC.primary() else CC.surfaceContainer()
+                    style = CC.descriptionTextStyle(),
+                    color = if (isSelected) CC.textColor() else CC.textColor().copy(0.8f)
                 )
             }
             if (isSelected) {
@@ -337,3 +370,39 @@ fun CourseSelectionCard(
 }
 
 
+@Composable
+fun AddCourse(courseViewModel: CourseViewModel){
+    var courseName by remember { mutableStateOf("") }
+    var courseCode by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier.fillMaxWidth(0.9f)
+    ) {
+        Text("Add Course", style = CC.titleTextStyle())
+        Spacer(modifier = Modifier.height(10.dp))
+        CC.SingleLinedTextField(
+            value = courseName,
+            onValueChange = { newValue -> courseName = newValue},
+            label = "Course Name",
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        CC.SingleLinedTextField(
+            value = courseCode,
+            onValueChange = { newValue -> courseCode = newValue},
+            label = "Course Code",
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Button(onClick = {
+            MyDatabase.generateCourseID { id ->
+                val newCourse = Course(id, courseName, emptyList())
+                courseViewModel.addCourse(newCourse)
+            }
+
+        },
+            colors = ButtonDefaults.buttonColors(containerColor = CC.secondary())) {
+            Text("Add Course", style = CC.descriptionTextStyle())
+        }
+    }
+
+}
