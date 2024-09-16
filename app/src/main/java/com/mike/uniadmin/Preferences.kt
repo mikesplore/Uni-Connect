@@ -136,18 +136,58 @@ object UniConnectPreferences {
 object CourseManager {
     private const val PREFS_NAME = "course_prefs"
     private const val KEY_COURSE_CODE = "course_code"
+    private const val KEY_COURSE_NAME = "course_name"
+    private const val KEY_ACADEMIC_YEAR = "academic_year"
+    private const val KEY_SEMESTER = "semester"
+
     private lateinit var sharedPreferences: SharedPreferences
 
     private val _courseCode = MutableStateFlow("")
+    private val _courseName = MutableStateFlow("")
+    private val _academicYear = MutableStateFlow("")
+    private val _semester = MutableStateFlow("")
+
     val courseCode: StateFlow<String> = _courseCode.asStateFlow()
+    val courseName: StateFlow<String> = _courseName.asStateFlow()
+    val academicYear: StateFlow<String> = _academicYear.asStateFlow()
+    val semester: StateFlow<String> = _semester.asStateFlow()
 
     fun initialize(context: Context) {
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         _courseCode.value = sharedPreferences.getString(KEY_COURSE_CODE, "") ?: ""
+        _courseName.value = sharedPreferences.getString(KEY_COURSE_NAME, "") ?: ""
+        _academicYear.value = sharedPreferences.getString(KEY_ACADEMIC_YEAR, "") ?: ""
+        _semester.value = sharedPreferences.getString(KEY_SEMESTER, "") ?: ""
     }
 
     fun updateCourseCode(newCode: String) {
         _courseCode.value = newCode
         sharedPreferences.edit().putString(KEY_COURSE_CODE, newCode).apply()
     }
+
+    fun updateCourseName(newName: String) {
+        _courseName.value = newName
+        sharedPreferences.edit().putString(KEY_COURSE_NAME, newName).apply()
+    }
+
+    fun updateAcademicYear(newYear: String) {
+        _academicYear.value = newYear
+        sharedPreferences.edit().putString(KEY_ACADEMIC_YEAR, newYear).apply()
+    }
+
+    fun updateSemester(newSemester: String) {
+        _semester.value = newSemester
+        sharedPreferences.edit().putString(KEY_SEMESTER, newSemester).apply()
+    }
+
+    //function for clearing the data
+    fun clearCourseManagerData() {
+        _courseCode.value = ""
+        _courseName.value = ""
+        _academicYear.value = ""
+        _semester.value = ""
+        sharedPreferences.edit().clear().apply()
+    }
+
+
 }
