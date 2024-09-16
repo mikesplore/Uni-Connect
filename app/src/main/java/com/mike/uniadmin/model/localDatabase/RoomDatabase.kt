@@ -97,7 +97,7 @@ abstract class UniConnectDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     UniConnectDatabase::class.java,
-                    "UniConnect"
+                    "UniConnectV2"
                 )
                     .addMigrations(MIGRATION_1_2)
                     .build()
