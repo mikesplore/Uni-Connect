@@ -1,6 +1,7 @@
 package com.mike.uniadmin.homeScreen
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.mike.uniadmin.CourseManager
 import com.mike.uniadmin.MainActivity
 import com.mike.uniadmin.UniConnectPreferences
 import com.mike.uniadmin.announcements.AnnouncementsScreen
@@ -84,8 +90,6 @@ fun HomeScreen(
     LaunchedEffect(fetchedUserDetails) {
         //MyDatabase.setUpdate(update = Update(version = "1.0.0", updateLink = ""))
         userViewModel.findUserByEmail(email) {}
-
-
         launch {
             getUpdate { fetched ->
                 if (fetched != null) {
@@ -181,28 +185,28 @@ fun HomeScreen(
     }
 }
 
-//fun renameAdminsToUsers() {
-//    val oldRef = FirebaseDatabase.getInstance().reference.child("Admins")
-//    val newRef = FirebaseDatabase.getInstance().reference.child("Users")
-//
-//    oldRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//        override fun onDataChange(snapshot: DataSnapshot) {
-//            if (snapshot.exists()) {
-//                newRef.setValue(snapshot.value)
-//                    .addOnSuccessListener {
-//                        oldRef.removeValue()
-//                            .addOnSuccessListener {
-//                            }
-//                            .addOnFailureListener {
-//                            }
-//                    }
-//                    .addOnFailureListener {
-//                    }
-//            } else {
-//            }
-//        }
-//
-//        override fun onCancelled(error: DatabaseError) {
-//        }
-//    })
-//}
+fun renameFirebaseNode() {
+    val oldRef = FirebaseDatabase.getInstance().reference.child("Courses").child("CR12024")
+    val newRef = FirebaseDatabase.getInstance().reference.child("Courses").child(CourseManager.courseCode.value)
+
+    oldRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            if (snapshot.exists()) {
+                newRef.setValue(snapshot.value)
+                    .addOnSuccessListener {
+                        oldRef.removeValue()
+                            .addOnSuccessListener {
+                            }
+                            .addOnFailureListener {
+                            }
+                    }
+                    .addOnFailureListener {
+                    }
+            } else {
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+        }
+    })
+}
