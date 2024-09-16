@@ -80,7 +80,6 @@ fun Biometrics(mainActivity: MainActivity) {
             Text(
                 "Biometrics (${if (isBiometricsEnabled.value) "Enabled" else "Disabled"})",
                 style = CommonComponents.descriptionTextStyle(),
-                fontSize = 20.sp
             )
             Switch(
                 onCheckedChange = { isChecked ->
